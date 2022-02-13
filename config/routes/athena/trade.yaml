@@ -35,7 +35,12 @@ cancel_offer:
     controller: App\Modules\Athena\Infrastructure\Controller\Trade\Offer\Cancel
     methods: 'GET'
 
+give_ships:
+    path: /give-ships
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\GiveShips
+    methods: 'POST'
+
 give_resources:
-    path: /bases/{baseId}/give-resources
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+    path: /give-resources
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\GiveResources
     methods: 'POST'

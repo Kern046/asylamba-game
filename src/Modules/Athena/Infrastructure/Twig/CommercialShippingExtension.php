@@ -35,11 +35,13 @@ class CommercialShippingExtension extends AbstractExtension
 				Transaction::TYP_RESOURCE => 'resources',
 				Transaction::TYP_COMMANDER => 'commander',
 				Transaction::TYP_SHIP => 'ship',
+				default => null,
 			}),
 			new TwigFunction('get_transaction_type', fn (Transaction $transaction) => match ($transaction->type) {
 				Transaction::TYP_RESOURCE => 'resources',
 				Transaction::TYP_COMMANDER => 'commander',
 				Transaction::TYP_SHIP => 'ship',
+				default => null,
 			}),
 			new TwigFunction('get_cancellation_price', fn (CommercialShipping $commercialShipping) => Format::number(floor($commercialShipping->price * Transaction::PERCENTAGE_TO_CANCEL / 100))),
 			new TwigFunction('get_transaction_data', fn (Transaction $transaction, OrbitalBase $orbitalBase, float $currentRate) => $this->transactionManager->getTransactionData($transaction, $orbitalBase, $currentRate)),
