@@ -106,4 +106,19 @@ class Transaction {
 			return 1;
 		}	
 	}
+
+	public function hasResources(): bool
+	{
+		return self::TYP_RESOURCE === $this->type;
+	}
+
+	public function hasShips(): bool
+	{
+		return self::TYP_SHIP === $this->type;
+	}
+
+	public function hasCommander(): bool
+	{
+		return self::TYP_COMMANDER === $this->type;
+	}
 }

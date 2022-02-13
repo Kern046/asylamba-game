@@ -1,37 +1,80 @@
-<div class="component transaction">
-	<div class="head skin-2">
-		<h2>Transactions</h2>
+{% set transaction_data = get_transaction_data(transaction, current_base, current_rate) %}
+{% set transaction_type = get_transaction_type(transaction) %}
+
+<div class="transaction {{ transaction_type }}"
+	 data-sort-quantity="{{ transaction.quantity }}"
+	 data-sort-price="{{ transaction_data.total_price }}"
+	 data-sort-xp="{{ transaction.commanderExperience }}"
+	 data-sort-far="{{ transaction_data.time }}"
+	 data-sort-cr="{{ transaction_data.rate }}">
+	<div class="product sh" data-target="transaction-{{ transaction_type }}-{{ transaction.id }}">
+		{% if transaction.hasResources %}
+			<img src="{{ asset('media/market/resources-pack-' ~ transaction|transaction_picto ~ '.png') }}" alt="" class="picto" />
+			<span class="rate">{{ transaction_data.rate }} %</span>
+
+			<div class="offer">
+				{{ transaction.quantity|number }} <img src="{{ asset('media/resources/resource.png') }}" alt="" class="icon-color" />
+			</div>
+		{% elseif transaction.hasCommander %}
+			<img src="{{ asset('media/commander/small/' ~ transaction.commanderAvatar ~ '.png') }}" alt="" class="picto" />
+			<span class="rate">{{ transaction_data.rate }} %</span>
+
+			<div class="offer">
+				<strong>{{ get_commander_rank(transaction.commanderLevel) }} {{ transaction.commanderName }}</strong>
+				<em>{{ transaction.commanderExperience }} xp | {{ transaction.commanderVictory }} victoire{{ transaction.commanderVictory|plural }}</em>
+			</div>
+		{% elseif transaction.hasShips %}
+			<img src="{{ asset('media/ship/picto/ship' ~ transaction.identifier ~ '.png') }}" alt="" class="picto" />
+			<span class="rate">{{ transaction_data.rate }} %</span>
+
+			<div class="offer">
+				<strong>{{ transaction.quantity }} {{ get_ship_info(transaction.identifier, 'codeName') ~ transaction.quantity|plural }}</strong>
+				<em>{{ get_ship_info(transaction.identifier, 'name') }} / {{ get_ship_info(transaction.identifier, 'pev') }} pev</em>
+			</div>
+		{% endif %}
+		<div class="for">
+			<span>pour</span>
+			</div>
+		<div class="price">
+			{{ transaction_data.total_price|number }} <img src="{{ asset('media/resources/credit.png') }}" alt="" class="icon-color" />
+			</div>
 		</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="number-box">
-				<span class="label">Vaisseaux de commerce disponibles</span>
-				<span class="value">
-					{{ (max_ships - used_ships)|number }}
-					<img class="icon-color" alt="vaisseaux" src="{{ asset('media/resources/transport.png') }}"> /
-					{{ max_ships|number }}
-					<img class="icon-color" alt="vaisseaux" src="{{ asset('media/resources/transport.png') }}">
-				</span>
 
-				<span class="progress-bar">
-					<span style="width: {{ (max_ships - used_ships)|percent(max_ships) }}%;" class="content"></span>
-				</span>
+	<div class="hidden" id="transaction-{{ transaction_type }}-{{ transaction.id }}">
+		<div class="info">
+			<div class="seller">
+				<p>vendu par<br /> <a href="{{ path('embassy', {'player': transaction.rPlayer}) }}" class="color{{ transaction.playerColor }}">{{ transaction.playerName }}</a></p>
+				<p>depuis<br /> <a href="{{ path('map', {'place': transaction.rPlace}) }}">{{ transaction.placeName }}</a> <span class="color{{ transaction.sectorColor }}">[{{ transaction.sector }}]</span></p>
+				</div>
+			<div class="price-detail">
+				<p>
+					{{ transaction.price|number }}
+					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" />
+				</p>
+				<p class="hb lt" title="taxe de vente de {{ get_faction_info(transaction_data.export_faction, 'popularName') }} sur les produits vendus à {{ get_faction_info(transaction_data.import_faction, 'popularName') }}">
+					<span>+ taxe ({{ transaction_data.export_tax }}%) </span>
+					{{ transaction_data.export_price|number }}
+					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" />
+				</p>
+				<p class="hb lt" title="taxe d'achat de {{ get_faction_info(transaction_data.import_faction, 'popularName') }} sur les produits {{ get_faction_info(transaction_data.export_faction, 'demonym') }}">
+					<span>+ taxe ({{ transaction_data.import_tax }}%) </span>
+					{{ transaction_data.import_price|number }}
+					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" /></p>
+				<hr />
+				<p><span>=</span>
+					{{ transaction_data.total_price|number }}
+					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" />
+				</p>
 			</div>
+		</div>
 
-			<h4>Convoi en route</h4>
-			{% for commercial_shipping in commercial_shippings['outgoing'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_GOING')] %}
-				{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
-			{% endfor %}
-			<hr />
-			<h4>Retour de convoi</h4>
-			{% for commercial_shipping in commercial_shippings['outgoing'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_MOVING_BACK')] %}
-				{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
-			{% endfor %}
-			<hr />
-			<h4>Convoi à quai</h4>
-			{% for commercial_shipping in commercial_shippings['outgoing'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_WAITING')] %}
-				{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
-			{% endfor %}
-			</div>
+		<div class="button">
+			<a href="{{ path('accept_offer', {'id': transaction.id}) }}">
+				acheter pour {{ transaction_data.total_price|number }}
+				<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}"><br />
+				durée du transit {{ transaction_data.time|lite_seconds }}
+				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+			</a>
 		</div>
 	</div>
+</div>

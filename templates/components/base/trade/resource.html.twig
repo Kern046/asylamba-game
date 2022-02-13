@@ -6,9 +6,9 @@
 	</div>
 	<div class="fix-body">
 		<div class="body">
-			<form action="{{ path('give_resources', {'baseId': current_base.id}) }}" method="post">
+			<form action="{{ path('give_resources') }}" method="post">
 				<p><label for="send-resources-target">Base destinataire</label></p>
-				<input class="autocomplete-hidden" type="hidden" name="otherbaseid" />
+				<input class="autocomplete-hidden" type="hidden" name="baseId" />
 				<p class="input input-text"><input type="text" id="send-resources-target" class="autocomplete-orbitalbase" name="name" autocomplete="off" /></p>
 
 				<div class="sell-form"
@@ -55,9 +55,9 @@
 	</div>
 	<div class="fix-body">
 		<div class="body">
-			<form action="{{ path('give_ships', { 'baseId': current_base.id }) }}" method="post">
+			<form action="{{ path('give_ships') }}" method="post">
 				<p><label for="send-ships-target">Base destinataire</label></p>
-				<input class="autocomplete-hidden" type="hidden" name="otherbaseid" />
+				<input class="autocomplete-hidden" type="hidden" name="baseId" />
 				<p class="input input-text"><input type="text" id="send-ships-target" class="autocomplete-orbitalbase" name="name" autocomplete="off" /></p>
 
 				{% for ship_number in current_base.shipStorage|keys %}

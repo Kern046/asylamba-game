@@ -22,11 +22,8 @@ class TradeMarketController extends AbstractController
 		TransactionManager $transactionManager,
 		string $mode,
 	): Response {
-		$usedShips = 0;
-
 		return $this->render('pages/athena/trade_market.html.twig', [
 			'mode' => $mode,
-			'used_ships' => $usedShips,
 			'max_ships' => $orbitalBaseHelper->getInfo(
 				OrbitalBaseResource::COMMERCIAL_PLATEFORME,
 				'level',
@@ -39,7 +36,7 @@ class TradeMarketController extends AbstractController
 			'commander_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_COMMANDER),
 			'ship_current_rate' => $transactionManager->getLastCompletedTransaction(Transaction::TYP_SHIP)->currentRate,
 			'ship_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_SHIP),
-			'commercial_shippings' => $this->getCommercialShippingsData($currentBase, $usedShips),
+			'commercial_shippings' => $this->getCommercialShippingsData($currentBase),
 			'base_commanders' => $commanderManager->getBaseCommanders(
 				$currentBase->getId(),
 				[Commander::INSCHOOL, Commander::RESERVE],
@@ -48,9 +45,10 @@ class TradeMarketController extends AbstractController
 		]);
 	}
 
-	protected function getCommercialShippingsData(OrbitalBase $currentBase, int &$usedShips): array
+	protected function getCommercialShippingsData(OrbitalBase $currentBase): array
 	{
 		$commercialShippings = [
+			'used_ships' => 0,
 			'incoming' => [
 				CommercialShipping::ST_WAITING => [],
 				CommercialShipping::ST_GOING => [],
@@ -65,11 +63,11 @@ class TradeMarketController extends AbstractController
 		/** @var CommercialShipping $commercialShipping */
 		foreach ($currentBase->commercialShippings as $commercialShipping) {
 			if ($commercialShipping->rBase === $currentBase->getId()) {
-				$usedShips += $commercialShipping->shipQuantity;
-				$commercialShippings['outgoing'][$commercialShipping->statement] = $commercialShipping;
+				$commercialShippings['used_ships'] += $commercialShipping->shipQuantity;
+				$commercialShippings['outgoing'][$commercialShipping->statement][] = $commercialShipping;
 			}
 			if ($commercialShipping->rBaseDestination === $currentBase->getId()) {
-				$commercialShippings['incoming'][$commercialShipping->statement] = $commercialShipping;
+				$commercialShippings['incoming'][$commercialShipping->statement][] = $commercialShipping;
 			}
 		}
 		return $commercialShippings;

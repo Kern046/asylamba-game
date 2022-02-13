@@ -11,7 +11,10 @@
  */
 namespace App\Modules\Athena\Model;
 
-class CommercialShipping {
+use App\Shared\Domain\Model\TravellerInterface;
+
+class CommercialShipping implements TravellerInterface
+{
 	# statement
 	const ST_WAITING = 0;		# pret au départ, statique
 	const ST_GOING = 1;			# aller
@@ -572,5 +575,10 @@ class CommercialShipping {
 	public function getCommanderExperience()
 	{
 		return $this->commanderExperience;
+	}
+
+	public function isMoving(): bool
+	{
+		return self::ST_GOING === $this->statement;
 	}
 }

@@ -13,7 +13,7 @@
 				  data-max-quantity="{{ current_base.resourcesStorage }}"
 				  data-rate="{{ resources_current_rate }}"
 				  data-min-price="{{ constant('App\\Modules\\Athena\\Model\\Transaction::MIN_RATE_RESOURCE')  }}"
-				  action="{{ path('propose_transaction', { 'baseId': current_base.id, 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_RESOURCE')  }) }}"
+				  action="{{ path('propose_offer', { 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_RESOURCE')  }) }}"
 				  method="post">
 				<div class="label-box">
 					<span class="label">Ressources</span>
@@ -74,7 +74,7 @@
 						</div>
 					</div>
 
-					<form class="sell-form" id="sell-commander-{{ loop.index }}" action="{{ path('propose_transaction', {'baseId': current_base.id, 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_COMMANDER'), 'identifier': commander.id}) }}" method="post" style="display:none;">
+					<form class="sell-form" id="sell-commander-{{ loop.index }}" action="{{ path('propose_offer', { 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_COMMANDER'), 'identifier': commander.id }) }}" method="post" style="display:none;">
 
 						<div class="label-box">
 							<span class="label">Prix minimum</span>
@@ -145,7 +145,7 @@
 								  1,
 								  ship_number
 							  	) }}"
-							  action="{{ path('propose_transaction', {'baseId': current_base.id, 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_SHIP'), 'identifier': ship_number }) }}"
+							  action="{{ path('propose_offer', { 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_SHIP'), 'identifier': ship_number }) }}"
 							  method="post"
 							  style="display:none;"
 						>
