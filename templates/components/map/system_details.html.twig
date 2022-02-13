@@ -1,7 +1,7 @@
 {% apply spaceless %}
 <div class="header"
 	 data-sector-color="{{ places[0].sectorColor }}"
-	 data-distance="{{ get_place_distance(default_base, places[0])|number }}">
+	 data-distance="{{ get_place_distance(current_base, places[0])|number }}">
 	<ul>
 		<li>Système #{{ system.id }}</li>
 		<li>Cordonnées {{ system|coords }}</li>
@@ -161,7 +161,7 @@
 						<p>
 							<span class="label">Distance</span>
 							<span class="value">
-								{{ get_place_distance(default_base, place)|number }} Al.
+								{{ get_place_distance(current_base, place)|number }} Al.
 							</span>
 						</p>
 

@@ -16,7 +16,6 @@
 		<div id="action-box" style="bottom: 0px;">
 			{{ include('components/map/system_details.html.twig', {
 				places,
-				default_base,
 				no_ajax,
 				moving_commanders,
 				recycling_missions,
@@ -32,7 +31,6 @@
 	<div id="map"
 		data-begin-x-position="{{ default_position.x }}"
 		data-begin-y-position="{{ default_position.y }}"
-		data-related-place="{{ default_base.id }}"
 		data-map-size="{{ map_size }}"
 		data-map-ratio="{{ galaxy_configuration.scale }}"
 		style="width: {{ map_size }}px; height: {{ map_size }}px;"

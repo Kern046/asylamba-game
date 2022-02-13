@@ -76,7 +76,6 @@ class MapController extends AbstractController
 			'sectors' => $sectorManager->getAll(),
 			'systems' => $systemManager->getAll(),
 			'player_bases' => $orbitalBaseManager->getPlayerBases($currentPlayer->getId()),
-			'default_base' => $defaultBase,
 			'default_position' => $defaultPosition,
 			'default_map_parameters' => Params::$params,
 			'galaxy_configuration' => $galaxyConfiguration,

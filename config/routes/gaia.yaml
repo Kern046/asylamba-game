@@ -1,0 +1,3 @@
+load_system:
+    path: /systems/{id}
+    controller: App\Modules\Gaia\Ui\Http\LoadSystem
