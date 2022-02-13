@@ -5,6 +5,7 @@ namespace App\Modules\Athena\Infrastructure\Twig;
 use App\Classes\Library\Game;
 use App\Classes\Library\Utils;
 use App\Modules\Artemis\Model\SpyReport;
+use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
@@ -61,6 +62,11 @@ class OrbitalBaseExtension extends AbstractExtension
 			new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff)),
 			// @TODO move to a rightful place
 			new TwigFunction('get_ship_transaction_cost', fn (Transaction $transaction) => ShipResource::getInfo($transaction->identifier, 'cost') * ShipResource::COST_REDUCTION * $transaction->quantity),
+			new TwigFunction('can_leave_orbital_base', function (OrbitalBase $orbitalBase) {
+				$canLeaveBase = new CanLeaveOrbitalBase();
+
+				return $canLeaveBase->isSatisfiedBy($orbitalBase);
+			}),
 		];
 	}
 }

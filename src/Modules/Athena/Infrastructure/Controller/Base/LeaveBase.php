@@ -6,6 +6,7 @@ use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Utils;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -42,7 +43,8 @@ class LeaveBase extends AbstractController
 			throw new ConflictHttpException('toute les flottes de cette base doivent être immobiles');
 		}
 
-		if (Utils::interval(Utils::now(), $currentBase->dCreation, 'h') < OrbitalBase::COOL_DOWN) {
+		$canLeaveBase = new CanLeaveOrbitalBase();
+		if (!$canLeaveBase->isSatisfiedBy($currentBase)) {
 			throw new ConflictHttpException('Vous ne pouvez pas abandonner de base dans les ' . OrbitalBase::COOL_DOWN . ' premières relèves.');
 		}
 
