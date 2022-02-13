@@ -640,7 +640,6 @@ jQuery(document).ready(function($) {
 // ################################# //
 	actionbox = {
 		obj: $('#action-box'),
-		relatedPlace: $('#map').data('related-place'),
 		opened: true,
 
 		applyCommander: function() {
@@ -690,7 +689,7 @@ jQuery(document).ready(function($) {
 		// masque la box, charge le contenu et affiche la box
 		load: function(systemid) {
 			actionbox.close();
-			$.get(game.path + 'ajax/a-loadsystem/systemid-' + systemid + '/relatedplace-' + actionbox.relatedPlace)
+			$.get(game.path + 'systems/' + systemid)
 			 .done(function(data) {
 				actionbox.obj.html(data);
 				actionbox.open();

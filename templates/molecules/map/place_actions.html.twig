@@ -1,4 +1,4 @@
-{% set travel_time = get_travel_time(default_base, place)|lite_seconds %}
+{% set travel_time = get_travel_time(current_base, place)|lite_seconds %}
 
 {% apply spaceless %}
 <div class="column act">
@@ -11,11 +11,11 @@
 				<img src="{{ asset('media/map/action/colo.png') }}" alt="" />
 			</a>
 
-			<a href="#" class="actionbox-sh {% if can_player_move_to_place(current_player, place, default_base) == false %}grey{% endif %}" data-target="3">
+			<a href="#" class="actionbox-sh {% if can_player_move_to_place(current_player, place, current_base) == false %}grey{% endif %}" data-target="3">
 				<img src="{{ asset('media/map/action/move.png') }}" alt="" />
 			</a>
 
-			<a href="#" class="actionbox-sh {% if can_orbital_base_trade_with_place(default_base, place) == false %}grey{% endif %}" data-target="4">
+			<a href="#" class="actionbox-sh {% if can_orbital_base_trade_with_place(current_base, place) == false %}grey{% endif %}" data-target="4">
 				<img src="{{ asset('media/map/action/rc.png') }}" alt="" />
 			</a>
 
@@ -111,11 +111,11 @@
 
 			<div class="box" data-id="3">
 				<h2>
-					{{ place.rPlayer == default_base.rPlayer ? 'Déplacer une flotte' : 'Donner votre flotte' }}
+					{{ place.rPlayer == current_base.rPlayer ? 'Déplacer une flotte' : 'Donner votre flotte' }}
 				</h2>
 
 				<div class="box-content">
-					{% if place.id == default_base.id %}
+					{% if place.id == current_base.id %}
 						Vous ne pouvez pas déplacer une flotte sur votre planète de départ
 					{% elseif place.playerColor != current_player.rColor %}
 						Vous ne pouvez donner une de vos flotte qu\'a un membre de votre faction
@@ -131,8 +131,7 @@
 							<div class="item move">
 								<strong class="name"></strong><br />
 								Temps du déplacement : {{ travel_time}} <img src="{{ asset('media/resources/time.png') }}" class="icon-color" alt="" /><br />
-								{# @TODO default_base.rPlayer could probably be replaced with current_player.id #}
-								{% if place.rPlayer != default_base.rPlayer %}
+								{% if place.rPlayer != current_player.id %}
 									Attention, vous perdrez votre flotte !<br />
 								{% endif %}
 								<a class="button" href="#" data-url="{{ path('move_fleet', {'commanderId': '{id}', 'placeId': place.id}) }}">Lancer la mission</a>
@@ -147,18 +146,18 @@
 				<div class="box-content">
 					{% if place.rPlayer == 0 %}
 						Vous ne pouvez proposer une route commerciale qu\'à des joueurs.
-					{% elseif place.id == default_base.id %}
+					{% elseif place.id == current_base.id %}
 						Vous ne pouvez pas proposer une route commerciale sur votre propre base.
-					{% elseif default_base.levelSpatioport == 0 %}
+					{% elseif current_base.levelSpatioport == 0 %}
 						Il vous faut un spatioport pour proposer une route commerciale.
 					{% elseif place.levelSpatioport == 0 %}
 						Le joueur ne dispose pas d'un spatioport.
 					{% else %}
-						{% set commercial_route_data = get_commercial_route_data(default_base, place) %}
-						{% set distance = get_place_distance(default_base, place) %}
+						{% set commercial_route_data = get_commercial_route_data(current_base, place) %}
+						{% set distance = get_place_distance(current_base, place) %}
 
 						{% set price = get_route_price(distance) %}
-						{% set income = get_route_income(default_base, place, distance, route_sector_bonus, route_color_bonus) %}
+						{% set income = get_route_income(current_base, place, distance, route_sector_bonus, route_color_bonus) %}
 
 						<div class="rc">
 							<img src="{{ asset('media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" alt="" class="planet" />
@@ -189,7 +188,7 @@
 								{% if price > current_player.credit %}
 									<span class="button">Vous n\'avez pas assez de crédits.</span>
 								{% elseif commercial_route_data.slots < get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'), 'level', current_base.levelSpatioport, 'nbRoutesMax') %}
-									<a href="{{ path('propose_route', {'sourceBase': default_base.id, 'destinationBase': place.id }) }}" class="button">
+									<a href="{{ path('propose_route', {'sourceBase': current_base.id, 'destinationBase': place.id }) }}" class="button">
 										Proposer une route commerciale
 									</a>
 								{% else %}
@@ -245,15 +244,15 @@
 						Vous devez disposer d'un centre de recyclage.
 					{% else %}
 						{% set total_ships = get_building_info(
-							constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::EMPTYZONE'),
+							constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING'),
 							'level',
-							default_base.levelRecycling,
+							current_base.levelRecycling,
 							'nbRecyclers',
 						) %}
 						{# @TODO move this logic to a dedicated service #}
-						{% set active_ship = recycling_missions|reduce((carry, rm) => carry + rm.recyclerQuantity + rm.addToNextMission) %}
+						{% set active_ships = recycling_missions|reduce((carry, rm) => carry + rm.recyclerQuantity + rm.addToNextMission) %}
 						{% set available_recyclers = total_ships - active_ships %}
-						{% set recyclers_travel_time = (2 * get_travel_time(default_base, place)) + constant('App\\Modules\\Athena\\Model\\RecyclingMission::RECYCLING_TIME')|lite_seconds  %}
+						{% set recyclers_travel_time = (2 * get_travel_time(current_base, place) + constant('App\\Modules\\Athena\\Model\\RecyclingMission::RECYCLING_TIME'))|lite_seconds  %}
 
 						<span class="label-box">
 								<span class="key">Recycleurs libres</span>
@@ -265,7 +264,7 @@
 								<span class="val">{{ recyclers_travel_time }}</span>
 							</span>
 
-						<form class="spy-form" method="post" action="{{ path('create_recycling_mission', {'baseId': default_base.id, 'placeId': place.id}) }}">
+						<form class="spy-form" method="post" action="{{ path('create_recycling_mission', {'baseId': current_base.id, 'placeId': place.id}) }}">
 							<input type="text" name="quantity" value="{{ available_recyclers }}" />
 							<button type="submit">Envoyer</button>
 						</form>
