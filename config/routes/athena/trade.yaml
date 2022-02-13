@@ -1,19 +1,41 @@
+# Routes
 propose_route:
     path: /routes/propose
-    controller: App\Modules\Athena\Infrastructure\Controller\Trade\ProposeRoute
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Propose
 
 cancel_route:
     path: /bases/{baseId}/routes/{id}/cancel
-    controller: App\Modules\Athena\Infrastructure\Controller\Trade\CancelRoute
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Cancel
 
 delete_route:
     path: /bases/{baseId}/routes/{id}/cancel
-    controller: App\Modules\Athena\Infrastructure\Controller\Trade\DeleteRoute
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Delete
 
 accept_commercial_route:
     path: /bases/{baseId}/routes/{id}/accept
-    controller: App\Modules\Athena\Infrastructure\Controller\Trade\AcceptRoute
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Accept
 
 refuse_commercial_route:
     path: /bases/{baseId}/routes/{id}/refuse
-    controller: App\Modules\Athena\Infrastructure\Controller\Trade\RefuseRoute
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Refuse
+
+# Offers
+propose_offer:
+    path: /offers/
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Offer\Propose
+    methods: 'POST'
+
+accept_offer:
+    path: /offers/{id}/accept
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Offer\Accept
+    methods: 'GET'
+
+cancel_offer:
+    path: /offers/{id}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Offer\Cancel
+    methods: 'GET'
+
+give_resources:
+    path: /bases/{baseId}/give-resources
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+    methods: 'POST'

@@ -25,16 +25,6 @@ refinery:
     path: /refinery
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
 
-propose_transaction:
-    path: /bases/{baseId}/transactions/
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
-    methods: 'POST'
-
-give_resources:
-    path: /bases/{baseId}/give-resources
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
-    methods: 'POST'
-
 give_ships:
     path: /bases/{baseId}/give-ships
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController

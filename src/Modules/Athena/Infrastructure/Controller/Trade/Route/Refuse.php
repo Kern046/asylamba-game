@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Modules\Athena\Infrastructure\Controller\Trade;
+namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
-use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Format;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
@@ -17,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-class RefuseRoute extends AbstractController
+class Refuse extends AbstractController
 {
 	public function __invoke(
 		Request $request,

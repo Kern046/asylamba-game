@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Athena\Infrastructure\Controller\Trade;
+namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
 use App\Classes\Entity\EntityManager;
 use App\Modules\Athena\Manager\CommercialRouteManager;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-class CancelRoute extends AbstractController
+class Cancel extends AbstractController
 {
 	public function __invoke(
 		Request $request,

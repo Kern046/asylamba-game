@@ -32,8 +32,8 @@
 
 			<div class="sort-content">
 				{% for transaction in resource_transactions %}
-					{% if app.session.get('playerId') == transaction.rPlayer %}
-						{{ include('molecules/base/trade/transaction.html.twig', { transaction, resources_current_rate }) }}
+					{% if current_player.id != transaction.rPlayer %}
+						{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': resources_current_rate }) }}
 					{% endif %}
 				{% endfor %}
 				</div>
@@ -60,8 +60,8 @@
 
 			<div class="sort-content">
 				{% for transaction in commander_transactions %}
-					{% if app.session.get('playerId') == transaction.rPlayer %}
-						{{ include('molecules/base/trade/transaction.html.twig', { transaction, commander_current_rate }) }}
+					{% if current_player.id != transaction.rPlayer %}
+						{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': commander_current_rate }) }}
 					{% endif %}
 				{% endfor %}
 				</div>
@@ -88,8 +88,8 @@
 
 			<div class="sort-content">
 				{% for transaction in ship_transactions %}
-					{% if app.session.get('playerId') == transaction.rPlayer %}
-						{{ include('molecules/base/trade/transaction.html.twig', { transaction, ship_current_rate }) }}
+					{% if current_player.id != transaction.rPlayer %}
+						{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': ship_current_rate }) }}
 					{% endif %}
 				{% endfor %}
 				</div>

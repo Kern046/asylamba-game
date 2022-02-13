@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Athena\Infrastructure\Controller\Trade;
+namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
 use App\Classes\Entity\EntityManager;
 use App\Classes\Exception\ErrorException;
@@ -23,7 +23,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AcceptRoute extends AbstractController
+class Accept extends AbstractController
 {
 	public function __invoke(
 		Request $request,
