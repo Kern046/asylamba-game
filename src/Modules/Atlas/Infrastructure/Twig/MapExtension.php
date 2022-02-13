@@ -3,11 +3,11 @@
 namespace App\Modules\Atlas\Infrastructure\Twig;
 
 use App\Classes\Library\Game;
-use App\Modules\Ares\Domain\Specification\Player\CanOrbitalBaseTradeWithPlace;
 use App\Modules\Ares\Domain\Specification\Player\CanPlayerAttackPlace;
 use App\Modules\Ares\Domain\Specification\Player\CanPlayerMoveToPlace;
 use App\Modules\Ares\Domain\Specification\Player\CanRecycle;
 use App\Modules\Ares\Domain\Specification\Player\CanSpyPlace;
+use App\Modules\Athena\Domain\Specification\CanOrbitalBaseTradeWithPlace;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;

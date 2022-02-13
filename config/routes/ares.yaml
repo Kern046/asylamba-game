@@ -38,6 +38,10 @@ loot:
     path: /loot
     controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
 
+move_fleet:
+    path: /move
+    controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
+
 colonize:
     path: /colonize
     controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial

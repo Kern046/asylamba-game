@@ -9,8 +9,9 @@ class Utils {
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
 	);
 
-	public static function isAdmin($bindkey) {
-		$bindkeys = array(
+	public static function isAdmin($bindkey): bool
+	{
+		return (in_array($bindkey, [
 			'player1', 'player2', 'gil', 'noe', 'jacky',
 			'YNbrdEaJpDw8mLZ2u6jYqgt6a',
 			'jq2Bjf0uKzzE0aMErO6rpBxcg',
@@ -20,12 +21,7 @@ class Utils {
 			'nEYzsAcZYv',
 			'xQTjMBnqbk6rO4ysglCJxLL63',
 			'Dcc8VXaEeG6nQ49ZdkD2HusQi'
-		);
-		if (in_array($bindkey, $bindkeys)) {
-			return TRUE;
-		} else {
-			return FALSE;
-		}
+		]));
 	}
 
 	public static function now() {
