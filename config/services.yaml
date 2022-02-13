@@ -138,6 +138,8 @@ parameters:
     database_admin_user: '%env(DATABASE_ADMIN_USER)%'
     database_admin_password: '%env(DATABASE_PASSWORD)%'
 
+    env(MESSENGER_TRANSPORT_DSN): '%env(RABBITMQ_DSN)%'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -181,14 +183,6 @@ services:
             $name: "%database_name%"
             $user: "%database_admin_user%"
             $password: "%database_admin_password%"
-
-    App\Classes\EventListener\MessengerInitListener:
-        tags:
-            - { name: 'kernel.event_listener', event: 'app.server_init', method: 'onServerInit', priority: 10 }
-
-    App\Classes\EventListener\SchedulerInitListener:
-        tags:
-            - { name: 'kernel.event_listener', event: 'app.server_init', method: 'onServerInit', priority: 5 }
 
     Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection:
         factory: ['Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection', 'fromDsn']

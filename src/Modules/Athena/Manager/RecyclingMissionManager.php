@@ -16,9 +16,10 @@ use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
 use App\Modules\Athena\Message\RecyclingMissionMessage;
 use App\Modules\Athena\Model\RecyclingMission;
+use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class RecyclingMissionManager
+class RecyclingMissionManager implements SchedulerInterface
 {
 	public function __construct(
 		protected EntityManager $entityManager,
@@ -26,7 +27,7 @@ class RecyclingMissionManager
 	) {
 	}
 	
-	public function scheduleMissions(): void
+	public function schedule(): void
 	{
 		$missions = $this->entityManager->getRepository(RecyclingMission::class)->getAll();
 

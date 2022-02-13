@@ -46,6 +46,7 @@ use App\Classes\Exception\ErrorException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Service\Attribute\Required;
 
+// @TODO Remove bounds to sessions
 class PlayerManager
 {
 	protected SectorManager $sectorManager;
@@ -83,16 +84,20 @@ class PlayerManager
 		$this->researchManager = $researchManager;
 	}
 
-	public function get(int $playerId): ?Player
+	public function get(int $playerId): Player|null
 	{
-		$session = $this->requestStack->getSession();
+		if(null === ($player = $this->entityManager->getRepository(Player::class)->get($playerId))) {
+			return null;
+		}
+		if (null !== $this->requestStack->getCurrentRequest()) {
+			$session = $this->requestStack->getSession();
 
-		if(($player = $this->entityManager->getRepository(Player::class)->get($playerId)) !== null) {
 			if ($session->get('playerId') === $player->id) {
 				$player->synchronized = true;
 			}
 			$this->fill($player);
 		}
+
 		return $player;
 	}
 	
@@ -621,14 +626,15 @@ class PlayerManager
 	{
 		$exp = round($exp);
 		$player->experience += $exp;
-		$session = $this->requestStack->getSession();
 		if ($player->isSynchronized()) {
+			$session = $this->requestStack->getSession();
 			$session->get('playerInfo')->add('experience', $player->experience);
 		}
-		$nextLevel =  $this->playerBaseLevel * pow(2, ($player->level - 1));
+		$nextLevel = $this->playerBaseLevel * pow(2, ($player->level - 1));
 		if ($player->experience >= $nextLevel) {
 			$player->level++;
 			if ($player->isSynchronized()) {
+				$session = $this->requestStack->getSession();
 				$session->get('playerInfo')->add('level', $player->level);
 			}
 			$n = new Notification();

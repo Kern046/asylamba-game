@@ -18,6 +18,10 @@ services:
         autowire: true
         autoconfigure: true
 
+    _instanceof:
+        App\Shared\Application\SchedulerInterface:
+            tags: ['app.scheduler']
+
     App\Modules\Ares\:
         resource: '%kernel.project_dir%/src/Modules/Ares/'
         exclude:

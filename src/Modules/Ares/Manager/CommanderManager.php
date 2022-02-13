@@ -31,10 +31,11 @@ use App\Modules\Ares\Model\LiveReport;
 use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Gaia\Resource\SquadronResource;
+use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
-class CommanderManager
+class CommanderManager implements SchedulerInterface
 {
 	protected FightManager $fightManager;
 	protected PlayerManager $playerManager;
@@ -130,7 +131,7 @@ class CommanderManager
 		return $this->entityManager->getRepository(Commander::class)->getIncomingCommanders($place);
 	}
 	
-	public function scheduleMovements(): void
+	public function schedule(): void
 	{
 		$commanders = $this->getMovingCommanders();
 

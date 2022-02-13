@@ -14,9 +14,10 @@ use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
 use App\Modules\Promethee\Message\TechnologyQueueMessage;
 use App\Modules\Promethee\Model\TechnologyQueue;
+use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class TechnologyQueueManager
+class TechnologyQueueManager implements SchedulerInterface
 {
 	public function __construct(
 		protected EntityManager $entityManager,
@@ -24,7 +25,7 @@ class TechnologyQueueManager
 	) {
 	}
 	
-	public function scheduleQueues()
+	public function schedule(): void
 	{
 		$queues = $this->entityManager->getRepository(TechnologyQueue::class)->getAll();
 

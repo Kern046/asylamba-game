@@ -32,7 +32,7 @@ class LootManager
 	{
 		$place = $this->placeManager->get($commander->rDestinationPlace);
 		$place->commanders = $this->commanderManager->getBaseCommanders($place->id);
-		$placePlayer = $this->playerManager->get($place->rPlayer);
+		$placePlayer = $place->rPlayer ? $this->playerManager->get($place->rPlayer) : null;
 		$placeBase = $this->orbitalBaseManager->get($place->id);
 		$commanderPlace = $this->placeManager->get($commander->rBase);
 		$commanderPlayer = $this->playerManager->get($commander->rPlayer);
