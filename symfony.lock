@@ -105,6 +105,9 @@
     "symfony/http-kernel": {
         "version": "v6.0.2"
     },
+    "symfony/intl": {
+        "version": "v6.0.3"
+    },
     "symfony/messenger": {
         "version": "6.0",
         "recipe": {
@@ -192,5 +195,11 @@
     },
     "symfony/yaml": {
         "version": "v6.0.2"
+    },
+    "twig/extra-bundle": {
+        "version": "v3.3.8"
+    },
+    "twig/intl-extra": {
+        "version": "v3.3.5"
     }
 }
