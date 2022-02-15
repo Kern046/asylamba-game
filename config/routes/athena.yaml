@@ -35,7 +35,7 @@ storage:
 
 dock1:
     path: /dock1
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewDock1
 
 dock2:
     path: /dock2
@@ -74,6 +74,14 @@ school:
 
 create_recycling_mission:
     path: /recycling-missions/create
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
+
+recycle_ships:
+    path: /recycle-ships
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
+
+build_ships:
+    path: /ships/build
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
 
 autocomplete_base:

@@ -1,0 +1,175 @@
+{% extends 'layouts/athena/current_base.html.twig' %}
+
+{% block content %}
+	{% set building_number = constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK1') %}
+
+	<div class="component">
+		<div class="head skin-1">
+			<img src="{{ asset('media/orbitalbase/dock1.png') }}" alt="" />
+			<h2>{{ get_building_info(building_number, 'frenchName') }}</h2>
+			<em>niveau {{ current_base.levelDock1 }}</em>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				<div class="number-box {% if dock_speed_bonus == 0 %}grey{% endif %}">
+					<span class="label">bonus de vitesse de production</span>
+					<span class="value">
+						{{ dock_speed_bonus|number }} %
+					</span>
+				</div>
+
+				<h4>File de construction</h4>
+				<div class="queue">
+					{% set real_size_queue = 0 %}
+
+					{% for i in range(0, nb_dock_queues - 1) %}
+						{% if ship_queues[i] is defined %}
+							{% set queue = ship_queues[i] %}
+							{% set real_size_queue = real_size_queue + 1 %}
+							{% set total_time_ships = queue.quantity * get_ship_info(queue.shipNumber, 'time') %}
+							{% set remaining_time = queue|queue_duration %}
+
+							<div class="item {% if real_size_queue <= 1 %}active progress" data-progress-output="lite" data-progress-current-time="'{{ remaining_time }}" data-progress-total-time="{{ total_time_ships }}{% endif %}">
+								<a href="{{ path('cancel_ship_queue', { 'id': queue.id }) }}"
+								   class="button hb lt"
+								   title="annuler la commande (attention, vous ne récupérerez que {{ ship_resource_refund * 100 }}% du montant investi)">×</a>
+								<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(queue.shipNumber, 'imageLink') ~ '.png') }}" alt="" />
+								<strong>{{ queue.quantity }} {{ get_ship_info(queue.shipNumber, 'codeName') ~ base.quantity|plural }}</strong>
+
+								<em><span class="progress-text">{{ remaining_time|lite_seconds }}</span></em>
+								<span class="progress-container">
+									{% if real_size_queue <= 1 %}
+										<span style="width: {{ (total_time_ships - remaining_time)|percent(total_time_ships) }}%;" class="progress-bar">
+										</span>
+									{% endif %}
+								</span>
+							</div>
+						{% else %}
+							<div class="item empty">
+								<span class="picto"></span>
+								<strong>Emplacement libre</strong>
+								<span class="progress-container"></span>
+							</div>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="component dock1">
+		<div class="head skin-5">
+			<h2>Chasseurs</h2>
+			</div>
+		<div class="fix-body">
+			<div class="body">
+				{% for ship_number in range(0, 2) %}
+					{{ include('components/base/ship_card.html.twig', { ship_number, 'ship_data': ships_data[ship_number] }) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	<div class="component dock1">
+		<div class="head skin-5">
+			<h2>Corvettes</h2>
+			</div>
+		<div class="fix-body">
+			<div class="body">
+				{% for ship_number in range(3, 5) %}
+					{{ include('components/base/ship_card.html.twig', { ship_number, 'ship_data': ships_data[ship_number] }) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	<div class="component">
+			<div class="head skin-2">
+				<h2>Hangars</h2>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					<div class="tool">
+						{# @TODO check the original destination of this link #}
+						<span><a href="{{ path('fleet_overview') }}">intégrer à vos armées</a></span>
+						<span><a href="#" class="sh hb lt" title="information" data-target="info-dock1">?</a></span>
+					</div>
+
+					<p class="info" id="info-dock1" style="display:none;">Le hangar de votre chantier vous sert à stocker des vaisseaux. Les vaisseaux
+						sont stockés directement après leur construction. Si vous ne disposez pas suffisamment de place, vous ne pourrez plus en construire. Faites
+						donc bien attention de vider votre hangar régulièrement.<br />
+						Chaque vaisseau prend une place différente dans votre hangar. Cette place correspond au point équivalent vaisseau (PEV). Le hangar dispose
+						d’un certain nombre de PEV qui augmente en fonction du niveau de votre chantier.<br />
+						Le bouton intégration vous renverra à l’amirauté, ce qui vous permettra de vider votre hangar et de répartir vos vaisseaux dans vos flottes
+						en orbite autour de la planète sur laquelle vous avez construit votre chantier.</p>
+
+					<div class="component market-sell">
+						{% for i in range (0, 5) %}
+							<div class="queue sh" data-target="sell-ships-{{ i }}">
+								<div class="item">
+									<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
+									<strong>
+										<span class="big">{{ storage[i] }}</span>
+										{{ get_ship_info(i, 'codeName') ~ storage[i]|plural }}
+									</strong>
+									<em>{{ storage[i] * get_ship_info(i, 'pev') }} PEV</em>
+								</div>
+							</div>
+
+							{% if storage[i] != 0 %}
+								<form id="sell-ships-{{ i }}"
+									  class="sell-form"
+									  data-max-quantity="{{ storage[i] }}"
+									  data-min-price="{{ get_ship_info(i, 'resourcePrice') / 2 }}"
+									  action="{{ path('recycle_ships', {'ship_identifier': i}) }}"
+									  method="post"
+									  style="display:none;">
+
+								<h4>recycler des vaisseaux</h4>
+								<hr />
+								<div class="label-box sf-quantity">
+									<label for="sell-market-quantity-ship" class="label">Quantité</label>
+									<input id="sell-market-quantity-ship" class="value" type="text" name="quantity" autocomplete="off" />
+									</div>
+
+								<div class="label-box sf-min-price">
+									<span class="label">Ressources</span>
+									<span class="value"></span>
+									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/resource.png') }}">
+									</div>
+
+								<hr />
+								<p><input type="submit" value="Recycler" /></p>
+								</form>
+							{% endif %}
+						{% endfor %}
+						<div class="number-box">
+							<span class="label">capacité du hangar</span>
+							<span class="value">
+								{{ in_storage }} <img class="icon-color" alt="" src="{{ asset('media/resources/pev.png') }}">
+								/
+								{{ total_space}} <img class="icon-color" alt="" src="{{ asset('media/resources/pev.png') }}">
+							</span>
+							{% set percent = in_storage|percent(total_space) %}
+							<span class="progress-bar hb bl" title="remplissage : {{ percent|number }}%">
+							<span style="width:{{ percent }}%;" class="content"></span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="component">
+		<div class="head skin-2">
+			<h2>À propos</h2>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				<p class="long-info">
+					{{ get_building_info(building_number, 'description')|raw }}
+				</p>
+			</div>
+		</div>
+	</div>
+{% endblock content %}
