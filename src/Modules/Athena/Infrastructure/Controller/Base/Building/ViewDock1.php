@@ -53,10 +53,12 @@ class ViewDock1 extends AbstractController
 		return $this->render('pages/athena/dock1.html.twig', [
 			'technology' => $technology,
 			'total_space' => $totalSpace,
+			'ship_queues' => $shipQueues,
 			'nb_ship_queues' => $nbShipQueues,
 			'nb_dock_queues' => $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK1, 'level', $currentBase->levelDock1, 'nbQueues'),
 			'in_storage' => $inStorage,
 			'in_queue' => $inQueue,
+			'ship_resource_refund' => $this->getParameter('athena.building.ship_queue_resource_refund'),
 			'dock_speed_bonus' => $session->get('playerBonus')->get(PlayerBonus::DOCK1_SPEED),
 			'storage' => $storage,
 			'ships_data' => $this->getShipsData(

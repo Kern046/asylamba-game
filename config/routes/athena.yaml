@@ -77,12 +77,16 @@ create_recycling_mission:
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
 
 recycle_ships:
-    path: /recycle-ships
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
+    path: /ships/recycle
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\Recycle
 
 build_ships:
     path: /ships/build
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\BuildShips
+
+cancel_ship_queue:
+    path: /ship-queues/{id}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\CancelQueue
 
 autocomplete_base:
     path: /api/bases/{search}

@@ -19,6 +19,7 @@ use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Classes\Library\Session\SessionWrapper;
 
 use App\Modules\Demeter\Resource\ColorResource;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -30,6 +31,7 @@ class PlayerBonusManager
 
 	public function __construct(
 		protected LawManager $lawManager,
+		protected RequestStack $requestStack,
 	) {
 	}
 
@@ -81,7 +83,7 @@ class PlayerBonusManager
 		if ($playerBonus->synchronized) {
 			// chargement de l'objet avec le contrôleur
 			for ($i = 0; $i < PlayerBonus::BONUS_QUANTITY; $i++) { 
-				$playerBonus->bonus->add($i, $this->sessionWrapper->get('playerBonus')->get($i));
+				$playerBonus->bonus->add($i, $this->requestStack->getSession()->get('playerBonus')->get($i));
 			}
 		} else {				
 			// remplissage de l'objet normalement
@@ -223,7 +225,7 @@ class PlayerBonusManager
 			if ($increment > 0) {
 				$playerBonus->bonus->add($bonusId, $playerBonus->bonus->get($bonusId) + $increment);
 				if ($playerBonus->synchronized) {
-					$this->sessionWrapper->get('playerBonus')->add($bonusId, $playerBonus->bonus->get($bonusId));
+					$this->requestStack->getSession()->get('playerBonus')->add($bonusId, $playerBonus->bonus->get($bonusId));
 				}
 			} else {
 				throw new ErrorException('incrémentation de bonus impossible - l\'incrément doit être positif');
@@ -239,7 +241,7 @@ class PlayerBonusManager
 				if ($increment <= $playerBonus->bonus->get($bonusId)) {
 					$playerBonus->bonus->add($bonusId, $playerBonus->bonus->get($bonusId) - $decrement);
 					if ($playerBonus->synchronized) {
-						$this->sessionWrapper->get('playerBonus')->add($bonusId, $playerBonus->bonus->get($bonusId));
+						$this->requestStack->getSession()->get('playerBonus')->add($bonusId, $playerBonus->bonus->get($bonusId));
 					}
 				} else {
 					throw new ErrorException('décrémentation de bonus impossible - le décrément est plus grand que le bonus');
@@ -292,7 +294,7 @@ class PlayerBonusManager
 			for ($i = 0; $i <= $playerBonus->technology->getTechnology($techno); $i++) { 
 				$totalBonus += $this->technologyHelper->getImprovementPercentage($techno, $i);
 			}
-			$this->sessionWrapper->get('playerBonus')->add($bonusId, $totalBonus);
+			$this->requestStack->getSession()->get('playerBonus')->add($bonusId, $totalBonus);
 		}
 	}
 }

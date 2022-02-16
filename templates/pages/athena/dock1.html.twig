@@ -22,36 +22,38 @@
 				<div class="queue">
 					{% set real_size_queue = 0 %}
 
-					{% for i in range(0, nb_dock_queues - 1) %}
-						{% if ship_queues[i] is defined %}
-							{% set queue = ship_queues[i] %}
-							{% set real_size_queue = real_size_queue + 1 %}
-							{% set total_time_ships = queue.quantity * get_ship_info(queue.shipNumber, 'time') %}
-							{% set remaining_time = queue|queue_duration %}
+					{% apply spaceless %}
+						{% for i in range(0, nb_dock_queues - 1) %}
+							{% if ship_queues[i] is defined %}
+								{% set queue = ship_queues[i] %}
+								{% set real_size_queue = real_size_queue + 1 %}
+								{% set total_time_ships = queue.quantity * get_ship_info(queue.shipNumber, 'time') %}
+								{% set remaining_time = queue|queue_duration %}
 
-							<div class="item {% if real_size_queue <= 1 %}active progress" data-progress-output="lite" data-progress-current-time="'{{ remaining_time }}" data-progress-total-time="{{ total_time_ships }}{% endif %}">
-								<a href="{{ path('cancel_ship_queue', { 'id': queue.id }) }}"
-								   class="button hb lt"
-								   title="annuler la commande (attention, vous ne récupérerez que {{ ship_resource_refund * 100 }}% du montant investi)">×</a>
-								<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(queue.shipNumber, 'imageLink') ~ '.png') }}" alt="" />
-								<strong>{{ queue.quantity }} {{ get_ship_info(queue.shipNumber, 'codeName') ~ base.quantity|plural }}</strong>
+								<div class="item {% if real_size_queue <= 1 %}active progress" data-progress-output="lite" data-progress-current-time="'{{ remaining_time }}" data-progress-total-time="{{ total_time_ships }}{% endif %}">
+									<a href="{{ path('cancel_ship_queue', { 'id': queue.id, 'dock': 1 }) }}"
+									   class="button hb lt"
+									   title="annuler la commande (attention, vous ne récupérerez que {{ ship_resource_refund * 100 }}% du montant investi)">×</a>
+									<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(queue.shipNumber, 'imageLink') ~ '.png') }}" alt="" />
+									<strong>{{ queue.quantity }} {{ get_ship_info(queue.shipNumber, 'codeName') ~ queue.quantity|plural }}</strong>
 
-								<em><span class="progress-text">{{ remaining_time|lite_seconds }}</span></em>
-								<span class="progress-container">
-									{% if real_size_queue <= 1 %}
-										<span style="width: {{ (total_time_ships - remaining_time)|percent(total_time_ships) }}%;" class="progress-bar">
-										</span>
-									{% endif %}
-								</span>
-							</div>
-						{% else %}
-							<div class="item empty">
-								<span class="picto"></span>
-								<strong>Emplacement libre</strong>
-								<span class="progress-container"></span>
-							</div>
-						{% endif %}
-					{% endfor %}
+									<em><span class="progress-text">{{ remaining_time|lite_seconds }}</span></em>
+									<span class="progress-container">
+										{% if real_size_queue <= 1 %}
+											<span style="width: {{ (total_time_ships - remaining_time)|percent(total_time_ships) }}%;" class="progress-bar">
+											</span>
+										{% endif %}
+									</span>
+								</div>
+							{% else %}
+								<div class="item empty">
+									<span class="picto"></span>
+									<strong>Emplacement libre</strong>
+									<span class="progress-container"></span>
+								</div>
+							{% endif %}
+						{% endfor %}
+					{% endapply %}
 				</div>
 			</div>
 		</div>

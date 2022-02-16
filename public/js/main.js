@@ -763,29 +763,29 @@ jQuery(document).ready(function($) {
 		var cost     	= container.data('ship-cost');
 		var duration    = container.data('ship-second');
 		var target		= '';
+		const button = container.find('.button');
 
-		link = container.find('.button').attr('href').split('/');
-		for (var i = 0; i < link.length - 1; i++) {
-			target += link[i] + '/';
-		};
-		target += 'quantity-' + input;
+		link = new URL(button.attr('href'));
+		link.searchParams.set('quantity', input);
+
+		target = link.href;
 
 		cost = cost * input;
 		duration = time.secondToFormat((duration * input), 'lite');
 
-		if (input > maxShip || input == 0) {
-			container.find('.button').addClass('disable');
+		if (input > maxShip || input === 0) {
+			button.addClass('disable');
 		} else {
-			container.find('.button').removeClass('disable');
+			button.removeClass('disable');
 		}
 
 		// format number
 		cost = cost.toString();
-		var arrayCost = new Array();
+		var arrayCost = [];
 		var formatCost = '';
 		for (var i = cost.length - 1; i >= 0; i--) {
 			arrayCost.push(cost[i]);
-			if ((i - cost.length) % 3 == 0) {
+			if ((i - cost.length) % 3 === 0) {
 				arrayCost.push(' ');
 		}}
 		arrayCost = arrayCost.reverse();
