@@ -33,13 +33,9 @@ storage:
     path: /storage
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\StorageController
 
-dock1:
-    path: /dock1
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewDock1
-
-dock2:
-    path: /dock2
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+docks:
+    path: /docks/{dockType}
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewDocks
 
 change_base_type:
     path: /change-base-type

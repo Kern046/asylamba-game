@@ -1,13 +1,11 @@
 {% extends 'layouts/athena/current_base.html.twig' %}
 
 {% block content %}
-	{% set building_number = constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK1') %}
-
 	<div class="component">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/dock1.png') }}" alt="" />
+			<img src="{{ asset('media/orbitalbase/dock' ~ dock_type ~ '.png') }}" alt="" />
 			<h2>{{ get_building_info(building_number, 'frenchName') }}</h2>
-			<em>niveau {{ current_base.levelDock1 }}</em>
+			<em>niveau {{ dock_level }}</em>
 		</div>
 		<div class="fix-body">
 			<div class="body">
@@ -31,7 +29,7 @@
 								{% set remaining_time = queue|queue_duration %}
 
 								<div class="item {% if real_size_queue <= 1 %}active progress" data-progress-output="lite" data-progress-current-time="'{{ remaining_time }}" data-progress-total-time="{{ total_time_ships }}{% endif %}">
-									<a href="{{ path('cancel_ship_queue', { 'id': queue.id, 'dock': 1 }) }}"
+									<a href="{{ path('cancel_ship_queue', { 'id': queue.id, 'dock': dock_type }) }}"
 									   class="button hb lt"
 									   title="annuler la commande (attention, vous ne récupérerez que {{ ship_resource_refund * 100 }}% du montant investi)">×</a>
 									<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(queue.shipNumber, 'imageLink') ~ '.png') }}" alt="" />
@@ -59,26 +57,28 @@
 		</div>
 	</div>
 
-	<div class="component dock1">
+	{% set batches = ships_range|batch(3, 0) %}
+
+	<div class="component dock{{ dock_type }}">
 		<div class="head skin-5">
-			<h2>Chasseurs</h2>
-			</div>
+			<h2>{{ dock_type == 1 ? 'Chasseurs' : 'Frégates' }}</h2>
+		</div>
 		<div class="fix-body">
 			<div class="body">
-				{% for ship_number in range(0, 2) %}
+				{% for ship_number in batches[0] %}
 					{{ include('components/base/ship_card.html.twig', { ship_number, 'ship_data': ships_data[ship_number] }) }}
 				{% endfor %}
 			</div>
 		</div>
 	</div>
 
-	<div class="component dock1">
+	<div class="component dock{{ dock_type }}">
 		<div class="head skin-5">
-			<h2>Corvettes</h2>
-			</div>
+			<h2>{{ dock_type == 1 ? 'Corvettes' : 'Destroyers / Croiseurs' }}</h2>
+		</div>
 		<div class="fix-body">
 			<div class="body">
-				{% for ship_number in range(3, 5) %}
+				{% for ship_number in batches[1] %}
 					{{ include('components/base/ship_card.html.twig', { ship_number, 'ship_data': ships_data[ship_number] }) }}
 				{% endfor %}
 			</div>
@@ -94,10 +94,10 @@
 					<div class="tool">
 						{# @TODO check the original destination of this link #}
 						<span><a href="{{ path('fleet_overview') }}">intégrer à vos armées</a></span>
-						<span><a href="#" class="sh hb lt" title="information" data-target="info-dock1">?</a></span>
+						<span><a href="#" class="sh hb lt" title="information" data-target="info-dock{{ dock_type }}">?</a></span>
 					</div>
 
-					<p class="info" id="info-dock1" style="display:none;">Le hangar de votre chantier vous sert à stocker des vaisseaux. Les vaisseaux
+					<p class="info" id="info-dock{{ dock_type }}" style="display:none;">Le hangar de votre chantier vous sert à stocker des vaisseaux. Les vaisseaux
 						sont stockés directement après leur construction. Si vous ne disposez pas suffisamment de place, vous ne pourrez plus en construire. Faites
 						donc bien attention de vider votre hangar régulièrement.<br />
 						Chaque vaisseau prend une place différente dans votre hangar. Cette place correspond au point équivalent vaisseau (PEV). Le hangar dispose
@@ -106,7 +106,7 @@
 						en orbite autour de la planète sur laquelle vous avez construit votre chantier.</p>
 
 					<div class="component market-sell">
-						{% for i in range (0, 5) %}
+						{% for i in ships_range %}
 							<div class="queue sh" data-target="sell-ships-{{ i }}">
 								<div class="item">
 									<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
@@ -132,13 +132,13 @@
 								<div class="label-box sf-quantity">
 									<label for="sell-market-quantity-ship" class="label">Quantité</label>
 									<input id="sell-market-quantity-ship" class="value" type="text" name="quantity" autocomplete="off" />
-									</div>
+								</div>
 
 								<div class="label-box sf-min-price">
 									<span class="label">Ressources</span>
 									<span class="value"></span>
 									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/resource.png') }}">
-									</div>
+								</div>
 
 								<hr />
 								<p><input type="submit" value="Recycler" /></p>

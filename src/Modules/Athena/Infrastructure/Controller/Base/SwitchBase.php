@@ -40,8 +40,7 @@ class SwitchBase extends AbstractController
 		return $this->redirectToRoute(match ($page) {
 			'generator' => 'generator',
 			'refinery' => 'refinery',
-			'dock1' => 'dock1',
-			'dock2' => 'dock2',
+			'docks' => 'docks',
 			'technosphere' => 'technosphere',
 			'commercialroute' => 'trade_market',
 			'sell' => 'trade_market',

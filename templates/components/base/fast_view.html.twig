@@ -112,7 +112,7 @@
 						</div>
 					{% endfor %}
 					{% if orbital_base|base_max_dock1_ship_queues > orbital_base.dock1ShipQueues|length %}
-						<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'dock1'}) }}" class="item link">
+						<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'docks', 'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="item link">
 							Lancer la production
 						</a>
 					{% endif %}
@@ -155,7 +155,7 @@
 						</div>
 					{% endfor %}
 					{% if orbital_base|base_max_dock2_ship_queues > orbital_base.dock2ShipQueues|length %}
-						<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'dock2'}) }}" class="item link">
+						<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'docks', 'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="item link">
 							Lancer la production
 						</a>
 					{% endif %}

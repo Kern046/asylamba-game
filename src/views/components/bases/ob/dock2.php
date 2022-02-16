@@ -44,7 +44,7 @@ for ($m = 6; $m < ShipResource::SHIP_QUANTITY; $m++) {
 
 $inQueue = 0;
 
-foreach ($shipQueues as $shipQueue) {
+foreach ($shipQueues as $shipQueue) { ,
 	$inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * $shipQueue->quantity;
 }
 

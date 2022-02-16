@@ -8,6 +8,7 @@ use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Model\Technology;
 use App\Modules\Zeus\Model\Player;
@@ -15,8 +16,9 @@ use App\Modules\Zeus\Model\PlayerBonus;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class ViewDock1 extends AbstractController
+class ViewDocks extends AbstractController
 {
 	public function __invoke(
 		Request $request,
@@ -26,19 +28,34 @@ class ViewDock1 extends AbstractController
 		TechnologyManager $technologyManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		ShipHelper $shipHelper,
+		string $dockType,
 	): Response {
 		$session = $request->getSession();
-		$shipQueues = $shipQueueManager->getByBaseAndDockType($currentBase->getRPlace(), 1);
+		if (OrbitalBase::DOCK_TYPE_MANUFACTURE === $dockType) {
+			$dockLevel = $currentBase->getLevelDock1();
+			$buildingNumber = OrbitalBaseResource::DOCK1;
+			$dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK1_SPEED);
+			$shipsRange = range(0, 5);
+			$dockType = 1;
+		} elseif (OrbitalBase::DOCK_TYPE_SHIPYARD === $dockType) {
+			$dockLevel = $currentBase->getLevelDock2();
+			$buildingNumber = OrbitalBaseResource::DOCK2;
+			$dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK2_SPEED);
+			$shipsRange = range(6, 11);
+			$dockType = 2;
+		} else {
+			throw new BadRequestHttpException('Invalid dock type');
+		}
+		$shipQueues = $shipQueueManager->getByBaseAndDockType($currentBase->getRPlace(), $dockType);
 		$nbShipQueues = count($shipQueues);
-		$s = array('', '', '', '', '', '');
 		$technology = $technologyManager->getPlayerTechnology($currentPlayer->getId());
 
 		#place dans le hangar
-		$totalSpace = $orbitalBaseHelper->getBuildingInfo(2, 'level', $currentBase->getLevelDock1(), 'storageSpace');
+		$totalSpace = $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'storageSpace');
 		$storage = $currentBase->getShipStorage();
 		$inStorage = 0;
 
-		for ($m = 0; $m < 6; $m++) {
+		foreach ($shipsRange as $m) {
 			$inStorage += ShipResource::getInfo($m, 'pev') * $storage[$m];
 		}
 
@@ -50,21 +67,27 @@ class ViewDock1 extends AbstractController
 
 		$maxShips = 0;
 
-		return $this->render('pages/athena/dock1.html.twig', [
+		return $this->render('pages/athena/docks.html.twig', [
+			'building_number' => $buildingNumber,
 			'technology' => $technology,
+			'dock_type' => $dockType,
+			'dock_level' => $dockLevel,
+			'ships_range' => $shipsRange,
 			'total_space' => $totalSpace,
 			'ship_queues' => $shipQueues,
 			'nb_ship_queues' => $nbShipQueues,
-			'nb_dock_queues' => $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK1, 'level', $currentBase->levelDock1, 'nbQueues'),
+			'nb_dock_queues' => $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'nbQueues'),
 			'in_storage' => $inStorage,
 			'in_queue' => $inQueue,
 			'ship_resource_refund' => $this->getParameter('athena.building.ship_queue_resource_refund'),
-			'dock_speed_bonus' => $session->get('playerBonus')->get(PlayerBonus::DOCK1_SPEED),
+			'dock_speed_bonus' => $dockSpeedBonus,
 			'storage' => $storage,
 			'ships_data' => $this->getShipsData(
 				$shipHelper,
+				$currentPlayer,
 				$currentBase,
 				$technology,
+				$shipsRange,
 				$maxShips,
 				$nbShipQueues,
 				$totalSpace,
@@ -77,8 +100,10 @@ class ViewDock1 extends AbstractController
 
 	private function getShipsData(
 		ShipHelper $shipHelper,
+		Player $currentPlayer,
 		OrbitalBase $currentBase,
 		Technology $technology,
+		array $range,
 		int &$maxShips,
 		int $nbShipQueues,
 		int $totalSpace,
@@ -87,9 +112,15 @@ class ViewDock1 extends AbstractController
 	): array {
 		$data = [];
 
-		for ($i = 0; $i < 6; $i++) {
+		foreach ($range as $i) {
 			# calcul du nombre de vaisseaux max
 			$maxShipResource = floor($currentBase->getResourcesStorage() / ShipResource::getInfo($i, 'resourcePrice'));
+			if ($currentPlayer->getRColor() === ColorResource::EMPIRE && in_array($i, [ShipResource::CERBERE, ShipResource::PHENIX])) {
+				# bonus if the player is from the Empire
+				$resourcePrice = ShipResource::getInfo($i, 'resourcePrice');
+				$resourcePrice -= round($resourcePrice * ColorResource::BONUS_EMPIRE_CRUISER / 100);
+				$maxShipResource = floor($currentBase->getResourcesStorage() / $resourcePrice);
+			}
 			$maxShipResource = ($maxShipResource < 100) ? $maxShipResource : 99;
 			$maxShipPev = $totalSpace - $inStorage - $inQueue;
 			$maxShipPev = floor($maxShipPev / ShipResource::getInfo($i, 'pev'));

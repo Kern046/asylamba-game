@@ -28,6 +28,9 @@ class OrbitalBase {
 
 	const MAXCOMMANDERINMESS = 20;
 
+	const DOCK_TYPE_MANUFACTURE = 'manufacture';
+	const DOCK_TYPE_SHIPYARD = 'shipyard';
+
 	//ATTRIBUTES : ORBITALBASE
 	public $rPlace;
 	public $rPlayer;
