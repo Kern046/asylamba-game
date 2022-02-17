@@ -1,4 +1,4 @@
-<div class="build-item {% if true != ship_data.has_technology_requirements or true != ship_data.has_ship_tree_requirements %}disable{% endif %} dynamic-ship-box"
+<div class="build-item {% if ship_number > 5 %}large{% endif %} {% if true != ship_data.has_technology_requirements or true != ship_data.has_ship_tree_requirements %}disable{% endif %} dynamic-ship-box"
 	 data-ship-second="{{ get_ship_info(ship_number, 'time') }}"
 	 data-ship-cost="{{ get_ship_info(ship_number, 'resourcePrice') }}"
 	 data-ship-identifier="{{ ship_number }}"
