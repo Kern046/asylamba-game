@@ -33,13 +33,9 @@ storage:
     path: /storage
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\StorageController
 
-dock1:
-    path: /dock1
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
-
-dock2:
-    path: /dock2
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+docks:
+    path: /docks/{dockType}
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewDocks
 
 change_base_type:
     path: /change-base-type
@@ -75,6 +71,22 @@ school:
 create_recycling_mission:
     path: /recycling-missions/create
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
+
+recycle_ships:
+    path: /ships/recycle
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\Recycle
+
+build_ships:
+    path: /ships/build
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\BuildShips
+
+load_ship_panel:
+    path: /ships/{shipNumber}/panel
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\ViewShipPanel
+
+cancel_ship_queue:
+    path: /ship-queues/{id}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\CancelQueue
 
 autocomplete_base:
     path: /api/bases/{search}

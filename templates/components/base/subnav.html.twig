@@ -25,7 +25,7 @@
 		{% endif %}
 
 		{% if current_base.levelDock1 > 0 %}
-			<a href="{{ path('dock1') }}" class="item {% if app.request.get('_route') == 'dock1' %}active{% endif %}">
+			<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="item {% if app.request.get('_route') == 'dock1' %}active{% endif %}">
 				<span class="picto">
 					<img src="{{ asset('media/orbitalbase/dock1.png') }}" alt="" />
 					<span class="number">{{ current_base.levelDock1 }}</span>
@@ -39,7 +39,7 @@
 		{% endif %}
 
 		{% if current_base.levelDock2 > 0 %}
-			<a href="{{ path('dock2') }}" class="item {% if app.request.get('_route') == 'dock2' %}active{% endif %}">
+			<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="item {% if app.request.get('_route') == 'dock2' %}active{% endif %}">
 				<span class="picto">
 					<img src="{{ asset('media/orbitalbase/dock2.png') }}" alt="" />
 					<span class="number">{{ current_base.levelDock2 }}</span>

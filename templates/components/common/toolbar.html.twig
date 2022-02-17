@@ -169,7 +169,7 @@
 					<p class="info">Aucun vaisseau en construction pour le moment.</p>
 				{% endif %}
 
-				<a href="{{ path('dock1') }}" class="more-link">vers le chantier alpha</a>
+				<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="more-link">vers le chantier alpha</a>
 			</div>
 		</div>
 
@@ -202,7 +202,7 @@
 					<p class="info">Aucun vaisseau en construction pour le moment.</p>
 				{% endif %}
 
-				<a href="{{ path('dock2') }}" class="more-link">vers le chantier de ligne</a>
+				<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="more-link">vers le chantier de ligne</a>
 			</div>
 		</div>
 

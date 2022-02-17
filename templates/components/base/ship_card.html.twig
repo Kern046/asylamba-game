@@ -1,0 +1,54 @@
+<div class="build-item {% if ship_number > 5 %}large{% endif %} {% if true != ship_data.has_technology_requirements or true != ship_data.has_ship_tree_requirements %}disable{% endif %} dynamic-ship-box"
+	 data-ship-second="{{ get_ship_info(ship_number, 'time') }}"
+	 data-ship-cost="{{ get_ship_info(ship_number, 'resourcePrice') }}"
+	 data-ship-identifier="{{ ship_number }}"
+	 data-maxship="{{ ship_data.max_ships }}">
+	<div class="name">
+		<img src="{{ asset('media/ship/picto/' ~ get_ship_info(ship_number, 'imageLink') ~ '.png') }}" alt="" />
+		<strong>{{ get_ship_info(ship_number, 'codeName') }}</strong>
+		<em>{{ get_ship_info(ship_number, 'name') }}</em>
+		<a href="#" class="addInfoPanel info hb lt" title="plus d'info" data-ship-id="{{ ship_number }}" data-info-type="ship">+</a>
+	</div>
+	<div class="ship-illu">
+		<img src="{{ asset('media/ship/img/' ~ (ship_number + 1)|format_number({min_integer_digit:'2'}) ~ '-' ~ current_player.rColor|format_number({min_integer_digit:'2'}) ~ '.png') }}" alt="" />
+	</div>
+
+	{% if not ship_data.has_technology_requirements %}
+		<span class="button disable">
+			{{ ship_data.missing_technology }}
+		</span>
+	{% elseif not ship_data.has_ship_tree_requirements %}
+		<span class="button disable">
+			il vous faut augmenter votre chantier alpha au niveau {{ ship_data.dock_needed_level }}
+		</span>
+	{% else %}
+		{# @TODO replace this and the JS management of the links update with a proper form #}
+		{% if not ship_data.has_ship_queue_requirements %}
+			<span class="button disable">
+				file de construction pleine<br />
+				<span class="final-cost">{{ get_ship_info(ship_number, 'resourcePrice')|number }}</span>
+				<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}"> et
+				<span class="final-time">{{ get_ship_info(ship_number, 'time')|lite_seconds }}</span>
+				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+			</span>
+		{% elseif ship_data.max_ships < 1 %}
+			<span class="button disable">
+				pas assez de ressources / hangar plein<br />
+				<span class="final-cost">{{ get_ship_info(ship_number, 'resourcePrice')|number }}</span>
+				<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}"> et
+				<span class="final-time">{{ get_ship_info(ship_number, 'time')|lite_seconds }}</span>
+				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+			</span>
+		{% else %}
+			<input class="ship-pack" type="text" maxlength="2" name="quantity" value="{{ ship_data.max_ships }}" data-max-ship="{{ ship_data.max_ships }}" />
+
+			<a href="{{ absolute_url(path('build_ships', { 'ship': ship_number, 'quantity': ship_data.max_ships })) }}" class="button">
+				construire <span class="final-number">{{ ship_data.max_ships }}</span> {{ get_ship_info(ship_number, 'codeName') }} pour<br />
+				<span class="final-cost">{{ (get_ship_info(ship_number, 'resourcePrice') * ship_data.max_ships)|number }}</span>
+				<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}"> et
+				<span class="final-time">{{ (get_ship_info(ship_number, 'time') * ship_data.max_ships)|lite_seconds }}</span>
+				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+			</a>
+		{% endif %}
+	{% endif %}
+</div>
