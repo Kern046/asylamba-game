@@ -26,9 +26,10 @@ use App\Modules\Hermes\Model\Notification;
 use App\Modules\Ares\Resource\CommanderResources;
 use App\Modules\Ares\Model\Commander;
 use App\Classes\Exception\ErrorException;
+use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class CommercialShippingManager
+class CommercialShippingManager implements SchedulerInterface
 {
 	public function __construct(
 		protected EntityManager $entityManager,
@@ -40,7 +41,7 @@ class CommercialShippingManager
 	) {
 	}
 	
-	public function scheduleShippings()
+	public function schedule(): void
 	{
 		$shippings = $this->entityManager->getRepository(CommercialShipping::class)->getMoving();
 

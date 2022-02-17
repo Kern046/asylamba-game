@@ -12,6 +12,10 @@ services:
         autowire: true
         autoconfigure: true
 
+    _instanceof:
+        App\Shared\Application\SchedulerInterface:
+            tags: ['app.scheduler']
+
     App\Modules\Promethee\:
         resource: '%kernel.project_dir%/src/Modules/Promethee/'
         exclude:

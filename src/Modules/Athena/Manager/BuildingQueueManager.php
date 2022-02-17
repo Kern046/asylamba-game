@@ -16,9 +16,10 @@ use App\Modules\Athena\Message\Building\BuildingQueueMessage;
 use App\Modules\Athena\Model\BuildingQueue;
 use App\Classes\Entity\EntityManager;
 
+use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class BuildingQueueManager
+class BuildingQueueManager implements SchedulerInterface
 {
 	public function __construct(
 		protected MessageBusInterface     $messenger,
@@ -36,7 +37,7 @@ class BuildingQueueManager
 		return $this->entityManager->getRepository(BuildingQueue::class)->getBaseQueues($baseId);
 	}
 	
-	public function scheduleActions(): void
+	public function schedule(): void
 	{
 		$buildingQueues = $this->entityManager->getRepository(BuildingQueue::class)->getAll();
 

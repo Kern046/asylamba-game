@@ -12,6 +12,10 @@ services:
             - '../../Repository'
             - '../../Resource'
 
+    App\Modules\Hephaistos\Ui\Cli\ScheduleActions:
+        arguments:
+            $schedulers: !tagged_iterator app.scheduler
+
     App\Modules\Hephaistos\Handler\DailyRoutineHandler:
         arguments:
             $apiMode: "%apimode%"

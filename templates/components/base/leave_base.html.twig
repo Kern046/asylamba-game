@@ -15,7 +15,7 @@
 			{% if are_commanders_in_mission %}
 				<span class="more-button">Action impossible</span>
 				<p>Certains de vos commandants sont en mission.</p>
-			{% elseif  %}
+			{% elseif not can_leave_orbital_base(current_base) %}
 				<span class="more-button">Action impossible</span>
 				<p>Vous possédez la planète depuis moins de {{ cooldown }} relèves.</p>
 				<p>Il reste {{ get_time_until_cooldown_end(current_base)|large_seconds }} avant que vous puissiez abandonner la planète.</p>

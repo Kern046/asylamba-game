@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Ares\Domain\Specification\Player;
+namespace App\Modules\Athena\Domain\Specification;
 
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Shared\Domain\Specification\Specification;

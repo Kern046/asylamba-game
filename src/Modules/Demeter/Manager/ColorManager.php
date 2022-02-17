@@ -41,10 +41,11 @@ use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Demeter\Resource\LawResources;
 use App\Modules\Zeus\Model\Player;
 use App\Classes\Library\Parser;
+use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
-class ColorManager
+class ColorManager implements SchedulerInterface
 {
 	protected PlayerManager $playerManager;
 
@@ -127,7 +128,15 @@ class ColorManager
 		$this->parser->parseBigTag = TRUE;
 		return $this->parser->parse($color->description);
 	}
-	
+
+	public function schedule(): void
+	{
+		$this->scheduleSenateUpdate();
+		$this->scheduleElections();
+		$this->scheduleCampaigns();
+		$this->scheduleBallot();
+	}
+
 	public function scheduleSenateUpdate()
 	{
 		$factions = $this->entityManager->getRepository(Color::class)->getByRegimeAndElectionStatement(
