@@ -80,6 +80,10 @@ build_ships:
     path: /ships/build
     controller: App\Modules\Athena\Infrastructure\Controller\Ship\BuildShips
 
+load_ship_panel:
+    path: /ships/{shipNumber}/panel
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\ViewShipPanel
+
 cancel_ship_queue:
     path: /ship-queues/{id}/cancel
     controller: App\Modules\Athena\Infrastructure\Controller\Ship\CancelQueue

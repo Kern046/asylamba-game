@@ -151,11 +151,11 @@ jQuery(document).ready(function($) {
 	$('.addInfoPanel').on('click', function() {
 		var that  = $(this);
 		var index = parseInt(that.parents('.component').index()) + 1;
-		var query = game.path + 'ajax/a-';
+		var query = game.path;
 
 		switch (that.data('info-type')) {
 			case 'building': query += 'buildingpanel/building-' + that.data('building-id') + '/lvl-' + that.data('building-current-level'); break;
-			case 'ship': query += 'shippanel/ship-' + that.data('ship-id'); break;
+			case 'ship': query += 'ships/' + that.data('ship-id') + '/panel'; break;
 			case 'techno': query += 'technopanel/techno-' + that.data('techno-id'); break;
 		}
 
