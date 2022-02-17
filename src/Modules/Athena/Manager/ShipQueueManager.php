@@ -17,9 +17,10 @@ use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
 use App\Modules\Athena\Message\Ship\ShipQueueMessage;
 use App\Modules\Athena\Model\ShipQueue;
+use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class ShipQueueManager
+class ShipQueueManager implements SchedulerInterface
 {
 	public function __construct(
 		protected EntityManager $entityManager,
@@ -50,7 +51,7 @@ class ShipQueueManager
 		$this->messageBus->dispatch(new ShipQueueMessage($shipQueue->getId()), [DateTimeConverter::to_delay_stamp($shipQueue->dEnd)]);
 	}
 	
-	public function scheduleActions(): void
+	public function schedule(): void
 	{
 		$queues = $this->entityManager->getRepository(ShipQueue::class)->getAll();
 		
