@@ -22,12 +22,12 @@ generator:
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewGenerator
 
 build:
-    path: /generator
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewGenerator
+    path: /buildings/{identifier}/build
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\Build
 
 cancel_building_queue:
-    path: /generator
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewGenerator
+    path: /building-queues/{identifier}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\Cancel
 
 refinery:
     path: /refinery

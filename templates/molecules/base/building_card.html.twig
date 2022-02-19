@@ -20,7 +20,7 @@
 		<img src="{{ asset('media/resources/time.png') }}" alt="relèves" class="icon-color" />
 	{% endset %}
 
-	{% if true != building_data.building_requirements %}
+	{% if building_data.building_requirements is not same as(true) %}
 		{% if 'niveau maximum atteint' == building_data.building_requirements %}
 			<span class="button disable">
 				<span class="text">
@@ -36,7 +36,7 @@
 				</span>
 			</span>
 		{% endif %}
-	{% elseif true != building_data.technology_requirements %}
+	{% elseif building_data.technology_requirements is not same as(true) %}
 		<span class="button disable hb lt" title="{{ building_data.technology_requirements }}">
 			<span class="text">
 				construction impossible<br/>

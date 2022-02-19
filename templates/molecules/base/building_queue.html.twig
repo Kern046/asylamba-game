@@ -4,7 +4,7 @@
 	 data-progress-output="lite"
 	 data-progress-current-time="{{ next_time }}"
 	 data-progress-total-time="{{ next_total_time }}">
-	<a href="{{ path('cancel_building_queue', { 'buildingNumber': building_queue.buildingNumber }) }}"
+	<a href="{{ path('cancel_building_queue', { 'identifier': building_queue.buildingNumber }) }}"
 	   class="button hb lt"
 	   title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">×</a>
 	<img class="picto" src="{{ asset('media/orbitalbase/' ~ get_building_info(building_queue.buildingNumber, 'imageLink') ~ '.png') }}" alt="" />
@@ -16,10 +16,11 @@
 		<em><span class="progress-text">{{ next_time|lite_seconds }}</span></em>
 		<span class="progress-container"></span>
 	{% else %}
-	<em><span class="progress-text">'{{ next_time|lite_seconds }}</span></em>
+		<em><span class="progress-text">'{{ next_time|lite_seconds }}</span></em>
 
-	<span class="progress-container">
-		<span style="width: {{ (next_total_time - next_time)|percent(next_total_time) }}%;" class="progress-bar">
+		<span class="progress-container">
+			<span style="width: {{ (next_total_time - next_time)|percent(next_total_time) }}%;" class="progress-bar">
+			</span>
 		</span>
-	</span>
+	{% endif %}
 </div>
