@@ -1,0 +1,25 @@
+{% set next_time = building_queue|queue_duration %}
+
+<div class="item {% if building_queues_count > 1 %}active{% endif %} progress"
+	 data-progress-output="lite"
+	 data-progress-current-time="{{ next_time }}"
+	 data-progress-total-time="{{ next_total_time }}">
+	<a href="{{ path('cancel_building_queue', { 'buildingNumber': building_queue.buildingNumber }) }}"
+	   class="button hb lt"
+	   title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">×</a>
+	<img class="picto" src="{{ asset('media/orbitalbase/' ~ get_building_info(building_queue.buildingNumber, 'imageLink') ~ '.png') }}" alt="" />
+	<strong>
+		{{ get_building_info(building_queue.buildingNumber, 'frenchName') }}
+		 <span class="level">niv. {{ building_queue.targetLevel }}</span>
+	</strong>
+	{% if building_queues_count > 1 %}
+		<em><span class="progress-text">{{ next_time|lite_seconds }}</span></em>
+		<span class="progress-container"></span>
+	{% else %}
+	<em><span class="progress-text">'{{ next_time|lite_seconds }}</span></em>
+
+	<span class="progress-container">
+		<span style="width: {{ (next_total_time - next_time)|percent(next_total_time) }}%;" class="progress-bar">
+		</span>
+	</span>
+</div>
