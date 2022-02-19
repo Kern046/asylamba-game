@@ -19,7 +19,15 @@ base_overview:
 
 generator:
     path: /generator
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewGenerator
+
+build:
+    path: /buildings/{identifier}/build
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\Build
+
+cancel_building_queue:
+    path: /building-queues/{identifier}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\Cancel
 
 refinery:
     path: /refinery
