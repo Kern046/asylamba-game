@@ -9,6 +9,7 @@
         "ext-redis": "*",
         "psr/log": "^3.0",
         "sentry/sdk": "^3.1",
+        "sentry/sentry-symfony": "^4.2",
         "symfony/amqp-messenger": "^6.0",
         "symfony/asset": "6.0.*",
         "symfony/config": "~6.0",
