@@ -33,3 +33,8 @@ fleet_archives:
 memorial:
     path: /memorial
     controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
+
+update_fleet_squadron:
+    path: /api/fleets/{id}/squadrons/{squadronId}
+    methods: 'PATCH'
+    controller: App\Modules\Ares\Infrastructure\Controller\Fleet\UpdateSquadron
