@@ -14,7 +14,7 @@ profile:
 
 tutorial_validatestep:
     path: /tutorial/validate-step
-    controller: App\Modules\Zeus\Infrastructure\Controller\Tutorial\StepValidationController
+    controller: App\Modules\Zeus\Infrastructure\Controller\Tutorial\ValidateStep
 
 sponsorship:
     path: /sponsorship
