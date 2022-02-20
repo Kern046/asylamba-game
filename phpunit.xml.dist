@@ -27,6 +27,10 @@
         <env name="APP_ENV" value="dev"/>
         <env name="APP_SECRET" value="f63cf78eb5afc884053c0cc7768679c9"/>
         <!-- ###- symfony/framework-bundle ### -->
+
+        <!-- ###+ sentry/sentry-symfony ### -->
+        <env name="SENTRY_DSN" value=""/>
+        <!-- ###- sentry/sentry-symfony ### -->
     </php>
 
     <testsuites>

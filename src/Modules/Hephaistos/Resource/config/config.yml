@@ -12,9 +12,16 @@ services:
             - '../../Repository'
             - '../../Resource'
 
+    App\Modules\Hephaistos\Ui\Cli\PopulateDatabase:
+        arguments:
+            $jeanMiId: '%id_jeanmi%'
+            $availableFactions: '%game.available_factions%'
+
     App\Modules\Hephaistos\Ui\Cli\ScheduleActions:
         arguments:
             $schedulers: !tagged_iterator app.scheduler
+
+
 
     App\Modules\Hephaistos\Handler\DailyRoutineHandler:
         arguments:

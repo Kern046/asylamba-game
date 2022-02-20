@@ -2,6 +2,18 @@
     "psr/cache": {
         "version": "3.0.0"
     },
+    "sentry/sentry-symfony": {
+        "version": "4.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "3.0",
+            "ref": "9746f0823302d7980e5273ef7a69ef3f5ac80914"
+        },
+        "files": [
+            "config/packages/sentry.yaml"
+        ]
+    },
     "symfony/asset": {
         "version": "v6.0.1"
     },
@@ -123,11 +135,17 @@
     "symfony/options-resolver": {
         "version": "v6.0.0"
     },
+    "symfony/password-hasher": {
+        "version": "v6.0.3"
+    },
     "symfony/polyfill-intl-grapheme": {
         "version": "v1.24.0"
     },
     "symfony/polyfill-intl-normalizer": {
         "version": "v1.24.0"
+    },
+    "symfony/psr-http-message-bridge": {
+        "version": "v2.1.2"
     },
     "symfony/routing": {
         "version": "6.0",
@@ -144,6 +162,9 @@
     },
     "symfony/runtime": {
         "version": "v6.0.0"
+    },
+    "symfony/security-core": {
+        "version": "v6.0.3"
     },
     "symfony/service-contracts": {
         "version": "v3.0.0"

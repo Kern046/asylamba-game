@@ -14,8 +14,6 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class CyclicActionScheduler
 {
-	protected ?int $lastExecutedDay = null;
-	protected ?int $lastExecutedHour = null;
 	/** @var array<string, list<class-string>> **/
 	protected array $queues = [
 		self::TYPE_DAILY => [
@@ -41,33 +39,14 @@ class CyclicActionScheduler
 	) {
 	}
 	
-	public function init(): void
-	{
-		$this->execute();
-	}
-	
-	public function execute()
-	{
-		if (($currentHour = intval(date('H'))) === $this->lastExecutedHour) {
-			return;
-		}
-		$this->executeHourly();
-		$this->executeDaily($currentHour);
-		$this->lastExecutedHour = $currentHour;
-	}
-	
-	protected function executeHourly(): void
+	public function executeHourlyTasks(): void
 	{
 		$this->processQueue(self::TYPE_HOURLY);
 	}
 	
-	protected function executeDaily(int $currentHour): void
+	public function executeDailyTasks(): void
 	{
-		if (($currentDay = intval(date('d'))) === $this->lastExecutedDay || ($currentHour < $this->dailyScriptHour)) {
-			return;
-		}
 		$this->processQueue(self::TYPE_DAILY);
-		$this->lastExecutedDay = $currentDay;
 	}
 
 	protected function processQueue(string $queue): void
