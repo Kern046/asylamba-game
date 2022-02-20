@@ -165,7 +165,7 @@
 						</span>
 						{{ tutorial_info(tutorial_step, 'title') }}
 					</h3>
-					<p>{{ tutorial_info(tutorial_step, 'description') }}</p>
+					<p>{{ tutorial_info(tutorial_step, 'description')|raw }}</p>
 
 					<p>
 						Récompense :<br />
@@ -192,7 +192,7 @@
 
 				<form action="{{ path('tutorial_validatestep') }}" method="post">
 					{% if true == app.session.get('playerInfo').get('stepDone') %}
-						<input class="outside-button" type="submit" value="valider l\'étape {{ tutorial_step }}" />
+						<input class="outside-button" type="submit" value="valider l'étape {{ tutorial_step }}" />
 					{% else %}
 						<input class="outside-button disabled" type="submit" value="étape en cours" disabled />
 					{% endif %}
