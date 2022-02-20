@@ -2,7 +2,6 @@
 *.psd
 
 /nbproject/
-/vendor/
 /node_modules/
 
 /var/logs
@@ -10,7 +9,9 @@
 
 .idea
 .phpunit.result.cache
-.env.local
+.env.prod
+
+supervisord.pid
 
 ###> symfony/framework-bundle ###
 /.env.local

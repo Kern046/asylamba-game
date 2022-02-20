@@ -1,0 +1,13 @@
+:443 {
+	tls internal {
+		on_demand
+	}
+	root * /srv/app/public
+	php_fastcgi /* kalaxia_app:9000
+	file_server
+
+    # Enable HTTP request logging
+    log {
+        output file /var/log/caddy/access.log
+    }
+}
