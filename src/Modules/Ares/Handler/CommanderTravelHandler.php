@@ -30,7 +30,7 @@ class CommanderTravelHandler implements MessageHandlerInterface
 	{
 		$commander = $this->commanderManager->get($commanderTravelMessage->getCommanderId());
 
-		dump($commander->getTravelType());
+		// dump($commander->getTravelType());
 
 		match($commander->getTravelType()) {
 			Commander::MOVE => $this->commanderManager->uChangeBase($commander),

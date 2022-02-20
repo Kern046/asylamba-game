@@ -38,13 +38,6 @@ class Build extends AbstractController
 
 			$currentLevel = call_user_func(array($currentBase, 'getReal' . ucfirst($orbitalBaseHelper->getBuildingInfo($identifier, 'name')) . 'Level'));
 			$technos = $technologyManager->getPlayerTechnology($currentPlayer->getId());
-			dump(
-				$identifier,
-				$orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'resource', $currentBase->getResourcesStorage()),
-				$orbitalBaseHelper->haveRights(OrbitalBaseResource::GENERATOR, $currentBase->getLevelGenerator(), 'queue', count($buildingQueues)),
-				$orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'buildingTree', $currentBase),
-				$orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'techno', $technos)
-			);
 
 			if ($orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'resource', $currentBase->getResourcesStorage())
 				AND $orbitalBaseHelper->haveRights(OrbitalBaseResource::GENERATOR, $currentBase->getLevelGenerator(), 'queue', count($buildingQueues))
