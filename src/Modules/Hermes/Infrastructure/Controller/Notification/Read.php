@@ -26,6 +26,8 @@ class Read extends AbstractController
 			throw new FormException('Cette notification ne vous appartient pas');
 		}
 
-		return $this->redirect($request->headers->get('referer'));
+		return ($request->isXmlHttpRequest())
+			? new Response('', 204)
+			: $this->redirect($request->headers->get('referer'));
 	}
 }

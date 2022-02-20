@@ -20,6 +20,8 @@ class Delete extends AbstractController
 		$entityManager->remove($notification);
 		$entityManager->flush($notification);
 
-		return $this->redirect($request->headers->get('referer'));
+		return ($request->isXmlHttpRequest())
+			? new Response('', 204)
+			: $this->redirect($request->headers->get('referer'));
 	}
 }

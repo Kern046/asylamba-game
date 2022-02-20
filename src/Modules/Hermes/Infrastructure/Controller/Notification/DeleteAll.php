@@ -25,6 +25,8 @@ class DeleteAll extends AbstractController
 			$this->addFlash('success', 'Toutes vos notifications ont déjà été supprimées.');
 		}
 
-		return $this->redirect($request->headers->get('referer'));
+		return ($request->isXmlHttpRequest())
+			? new Response('', 204)
+			: $this->redirect($request->headers->get('referer'));
 	}
 }

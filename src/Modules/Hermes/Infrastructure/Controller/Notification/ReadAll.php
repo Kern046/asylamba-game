@@ -35,6 +35,9 @@ class ReadAll extends AbstractController
 		} else {
 			$this->addFlash('success', 'Toutes vos notifications ont déjà été lues.');
 		}
-		return $this->redirect(($request->headers->get('referer')));
+
+		return ($request->isXmlHttpRequest())
+			? new Response('', 204)
+			: $this->redirect($request->headers->get('referer'));
 	}
 }

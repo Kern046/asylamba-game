@@ -20,6 +20,8 @@ class Archive extends AbstractController
 		$notification->setArchived(!$notification->getArchived());
 		$entityManager->flush($notification);
 
-		return $this->redirect($request->headers->get('referer'));
+		return ($request->isXmlHttpRequest())
+			? new Response('', 204)
+			: $this->redirect($request->headers->get('referer'));
 	}
 }

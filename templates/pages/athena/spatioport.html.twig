@@ -169,7 +169,7 @@
 									{% endif %}
 									<span><a href="{{ path('accept_commercial_route', {'baseId': route.rOrbitalBaseLinked, 'id': route.id}) }}">accepter pour {{ price|number }} crédits</a></span>
 								{% endif %}
-								<span><a href="{{ path('t', {'baseId': route.rOrbitalBaseLinked, 'id': route.id }) }}" class="hb lt" title="refuser l'offre">x</a></span>
+								<span><a href="{{ path('refuse_commercial_route', {'baseId': route.rOrbitalBaseLinked, 'id': route.id }) }}" class="hb lt" title="refuser l'offre">x</a></span>
 							</div>
 
 							<div class="number-box grey">

@@ -663,7 +663,11 @@ jQuery(document).ready(function($) {
 		if (count == 0) {
 			notifs.removeClass('active');
 		}
-		$.get(game.path + 'ajax/a-readnotif/notif-' + notif.data('notif-id'));
+		$.ajax({
+			type: 'PATCH',
+			url: game.path + 'notifications/' + notif.data('notif-id') + '/read',
+			headers: {'X-Requested-With': 'XMLHttpRequest'},
+		});
 	});
 
 	// STD AJAX ACTION LINK
