@@ -13,4 +13,7 @@ RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
     && docker-php-ext-enable amqp pdo_mysql redis \
     && apk del pcre-dev ${PHPIZE_DEPS}
 
+RUN curl -s https://getcomposer.org/installer | php
+RUN alias composer='php composer.phar'
+
 WORKDIR /srv/app
