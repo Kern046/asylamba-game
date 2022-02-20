@@ -1,6 +1,5 @@
 FROM php:8.1-fpm-alpine
 
-
 # Install SUPERVISOR and dependencies
 RUN apk update
 
@@ -16,6 +15,10 @@ RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
 
 RUN curl -s https://getcomposer.org/installer | php
 RUN alias composer="php composer.phar"
+
+COPY cron/ /etc/periodic/
+
+RUN chmod -R a+x /etc/periodic/
 
 COPY docker-entrypoint.sh /entrypoint.sh
 
