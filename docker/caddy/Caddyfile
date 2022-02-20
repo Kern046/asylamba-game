@@ -1,7 +1,4 @@
-:443 {
-	tls internal {
-		on_demand
-	}
+api.kalaxia.com {
 	root * /srv/app/public
 	php_fastcgi /* kalaxia_app:9000
 	file_server
