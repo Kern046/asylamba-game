@@ -51,7 +51,7 @@ class AffectCommander extends AbstractController
 
 				$this->addFlash('success', 'Votre officier ' . $commander->getName() . ' a bien été affecté en force de réserve');
 				$entityManager->flush();
-				return $this->redirectToRoute('fleet_details', ['id' => $commander->getId()]);
+				return $this->redirectToRoute('fleet_headquarters', ['commander' => $commander->getId()]);
 			} elseif ($nbrLine1 < PlaceResource::get($orbitalBase->typeOfBase, 'l-line')) {
 				$commander->dAffectation =Utils::now();
 				$commander->statement = Commander::AFFECTED;
@@ -64,7 +64,7 @@ class AffectCommander extends AbstractController
 
 				$this->addFlash('success', 'Votre officier ' . $commander->getName() . ' a bien été affecté en force active');
 				$entityManager->flush();
-				return $this->redirectToRoute('fleet_details', ['id' => $commander->getId()]);
+				return $this->redirectToRoute('fleet_headquarters', ['commander' => $commander->getId()]);
 			} else {
 				throw new \ErrorException('Votre base a dépassé la capacité limite de officiers en activité');
 			}

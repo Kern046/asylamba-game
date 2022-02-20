@@ -13,7 +13,7 @@
 				<hr />
 				{% if report.rPlayerAttacker == current_player.id %}
 					<div class="commander">
-						<a href="{{ path('fleet_details') }}">
+						<a href="{{ path('fleet_headquarters') }}">
 							<img src="{{ asset('media/commander/medium/' ~ report.avatarA ~ '.png') }}" alt="{{ report.nameA }}" />
 						</a>
 						{% set level = get_commander_level_up_from_report(report.levelA, report.experienceA + report.expCom) %}

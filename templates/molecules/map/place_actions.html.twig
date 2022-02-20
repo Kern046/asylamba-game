@@ -44,17 +44,17 @@
 						<div class="commander-tile">
 							<div class="item no-commander">
 								Aucun commandant selectionné. Sélectionnez-en un sur la barre latérale gauche.<br/><br />
-								Si aucun commandant n\'est visible, vous pouvez en affecter un depuis l\'école de commandement.
+								Si aucun commandant n'est visible, vous pouvez en affecter un depuis l'école de commandement.
 								</div>
 							<div class="item too-far">
 								Ce commandant est trop éloigné pour piller cette planète.
 								</div>
 							<div class="item move">
 								<strong class="name"></strong><br />
-								Temps de l\'attaque : {{ travel_time }} <img src="{{ asset('media/resources/time.png') }}" class="icon-color" alt="" /><br />
+								Temps de l'attaque : {{ travel_time }} <img src="{{ asset('media/resources/time.png') }}" class="icon-color" alt="" /><br />
 								Capacité de la soute : <span class="wedge"></span> <img src="{{ asset('media/resources/resource.png') }}" class="icon-color" alt="" /><br />
-								<a class="button" href="#" data-url="{{ path('loot', {'commanderId': '{id}', 'placeId': place.id}) }}">
-									Lancer l\'attaque
+								<a class="button" href="#" data-url="{{ path('loot', {'id': '{id}', 'placeId': place.id}) }}">
+									Lancer l'attaque
 								</a>
 							</div>
 						</div>
@@ -91,17 +91,17 @@
 								</div>
 							<div class="item move">
 								<strong class="name"></strong><br />
-								Temps de l\'attaque : {{ travel_time }}
+								Temps de l'attaque : {{ travel_time }}
 								<img src="{{ asset('media/resources/time.png') }}" class="icon-color" alt="" /><br />
 
 								{% if place.rPlayer == 0 %}
 									Coût : <span class="price">{{ colonization_cost|number }}</span>
 									<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="" /><br />
-									<a class="button" href="#" data-url="{{ path('colonize', {'commanderId': '{id}', 'placeId': place.id}) }}">Lancer la colonisation</a>
+									<a class="button" href="#" data-url="{{ path('colonize', {'id': '{id}', 'placeId': place.id}) }}">Lancer la colonisation</a>
 								{% else %}
 									Coût : <span class="price">{{ conquest_cost|number }}</span>
 									<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="" /><br />
-									<a class="button" href="#" data-url="{{ path('conquer', {'commanderId': '{id}', 'placeId': place.id}) }}">Lancer la conquête</a>
+									<a class="button" href="#" data-url="{{ path('conquer', {'id': '{id}', 'placeId': place.id}) }}">Lancer la conquête</a>
 								{% endif %}
 							</div>
 						</div>
@@ -134,7 +134,7 @@
 								{% if place.rPlayer != current_player.id %}
 									Attention, vous perdrez votre flotte !<br />
 								{% endif %}
-								<a class="button" href="#" data-url="{{ path('move_fleet', {'commanderId': '{id}', 'placeId': place.id}) }}">Lancer la mission</a>
+								<a class="button" href="#" data-url="{{ path('move_fleet', {'id': '{id}', 'placeId': place.id}) }}">Lancer la mission</a>
 							</div>
 						</div>
 					{% endif %}

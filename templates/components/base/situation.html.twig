@@ -19,7 +19,7 @@
 
 				{% for commander in commanders %}
 					<div class="commander position-{{ commander.line }}-{{ commander.line == 1 ? vanguard_positions[current_vanguard_position] : rear_positions[current_rear_position] }}">
-						<a href="{{ path('fleet_details', {'id': commander.id}) }}" class="commander full">
+						<a href="{{ path('fleet_headquarters', {'commander': commander.id}) }}" class="commander full">
 							<img src="{{ asset('media/map/fleet/' ~ (commander.isAffected ? 'army' : 'army-away') ~ '.png') }}" alt="plein" />
 							<span class="info">
 								{{ commander|commander_rank }} <strong>{{ commander.name }}</strong><br />

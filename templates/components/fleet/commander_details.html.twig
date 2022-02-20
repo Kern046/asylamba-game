@@ -4,7 +4,7 @@
 		<div class="body">
 			{% if commander.isAffected %}
 				<div class="tool">
-					<span><a href="{{ path('empty_commander', {'id': commander.id}) }}">Retirer tous les vaisseaux</a></span>
+					<span><a href="{{ path('disband_commander', {'id': commander.id}) }}">Retirer tous les vaisseaux</a></span>
 					<span><a href="{{ path('fire_commander', {'id': commander.id}) }}" class="hb lt" title="licencier l'officier">&#215;</a></span>
 					<span><a href="{{ path('affect_commander', {'id': commander.id}) }}" class="hb lt" title="remettre dans l'école">E</a></span>
 				</div>

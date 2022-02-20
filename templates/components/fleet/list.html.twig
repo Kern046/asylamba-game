@@ -70,7 +70,7 @@
 									{% endif %}
 
 									{% if commander.rPlayer == current_player.id and commander.isMoving and not commander.isComingBack %}
-										{{ '&#8195;'|raw }}<a class="confirm" href="{{ path('cancel_fleet_move', {'id': commander.id}) }}">annuler la mission</a>
+										{{ '&#8195;'|raw }}<a class="confirm" href="{{ path('cancel_fleet_movement', {'id': commander.id}) }}">annuler la mission</a>
 									{% endif %}
 								</span>
 							</div>

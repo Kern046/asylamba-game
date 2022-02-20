@@ -250,7 +250,7 @@ jQuery(document).ready(function($) {
 				// ref data
 				this.ref.commander = $('.baseTransfer').data('commander');
 				this.ref.base = $('.baseTransfer').data('base');
-
+				// @TODO Avoid an infinite setInterval call and stop it at some point
 				setInterval(function() {
 					squadronTransfer.sendRequest();
 				}, 500);
@@ -422,20 +422,23 @@ jQuery(document).ready(function($) {
 		},
 
 		isSquadronsDifferents: function() {
-			return (this.squadronShipsOld.join('-') != this.squadronShipsNew.join('-'))
-				? true : false;
+			console.debug(this);
+			return (this.squadronShipsOld.join('-') != this.squadronShipsNew.join('-'));
 		},
 
 		sendRequest: function() {
 			if (this.squadronSelected != undefined) {
 				if (Math.abs(Date.now() - squadronTransfer.lastClick) > 300) {
 					if (this.isSquadronsDifferents()) {
-						$.get(game.path 
-							+ 'ajax/a-updatesquadron/base-' + this.ref.base 
-							+ '/commander-' + this.ref.commander 
-							+ '/squadron-' + this.squadronSelected
-							+ '/army-' + this.squadronShipsNew.join('_')
-						);
+						// @TODO handle errors
+						$.ajax({
+							type: 'PATCH',
+							url: game.path + 'api/fleets/' + this.ref.commander + '/squadrons/' + this.squadronSelected,
+							data: JSON.stringify({
+								base_id: this.ref.base,
+								army: this.squadronShipsNew,
+							}),
+						});
 
 						for (var i = 0; i < this.squadronShipsOld.length; i++) {
 							this.squadronShipsOld[i] = this.squadronShipsNew[i];
