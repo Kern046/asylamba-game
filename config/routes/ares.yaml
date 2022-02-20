@@ -7,7 +7,7 @@ fleets:
     prefix: /fleets
 
 commanders:
-    resource: './zeus/commanders.yaml'
+    resource: './ares/commanders.yaml'
     prefix: /commanders
 
 fleet:

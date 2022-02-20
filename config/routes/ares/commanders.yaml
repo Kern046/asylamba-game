@@ -22,6 +22,18 @@ change_commander_position:
     path: /{id}/change-position
     controller: App\Modules\Ares\Infrastructure\Controller\AffectCommander
 
-cancel_fleet_move:
-    path: /{id}/cancel-mission
-    controller: App\Modules\Ares\Infrastructure\Controller\CancelMission
+update_commander_name:
+    path: /{id]/update-name
+    controller: App\Modules\Ares\Infrastructure\Controller\Commander\UpdateName
+
+disband_commander:
+    path: /{id]/disband
+    controller: App\Modules\Ares\Infrastructure\Controller\Commander\Disband
+
+fire_commander:
+    path: /{id]/fire
+    controller: App\Modules\Ares\Infrastructure\Controller\Commander\Fire
+
+change_commander_line:
+    path: /{id]/change-line
+    controller: App\Modules\Ares\Infrastructure\Controller\Commander\ChangeLine
