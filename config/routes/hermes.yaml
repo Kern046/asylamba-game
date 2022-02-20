@@ -1,11 +1,22 @@
 read_all_notifications:
     path: /notifications/read-all
+    controller: App\Modules\Hermes\Infrastructure\Controller\Notification\ReadAll
+
+delete_all_notifications:
+    path: /notifications/delete-all
+    controller: App\Modules\Hermes\Infrastructure\Controller\Notification\DeleteAll
+
+read_notification:
+    path: /notifications/{id}/read
+    controller: App\Modules\Hermes\Infrastructure\Controller\Notification\Read
 
 archive_notification:
     path: /notifications/{id}/archive
+    controller: App\Modules\Hermes\Infrastructure\Controller\Notification\Archive
 
 delete_notification:
     path: /notifications/{id}/delete
+    controller: App\Modules\Hermes\Infrastructure\Controller\Notification\Delete
 
 list_conversations:
     path: /messages
