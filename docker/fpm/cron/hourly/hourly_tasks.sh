@@ -1,3 +1,3 @@
 #!/bin/sh
 
-php bin/console app:hephaistos:execute-hourly-tasks
+php /srv/app/bin/console app:hephaistos:execute-hourly-tasks
