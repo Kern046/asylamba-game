@@ -1,24 +1,55 @@
 <?php
 
+namespace App\Modules\Hephaistos\Ui\Cli;
+
+
+
 use App\Classes\Database\Database;
+use App\Classes\Database\DatabaseAdmin;
 use App\Classes\Library\Utils;
+use App\Modules\Demeter\Manager\ColorManager;
+use App\Modules\Gaia\Helper\GalaxyGenerator;
+use App\Modules\Hermes\Manager\ConversationManager;
+use App\Modules\Hermes\Manager\ConversationUserManager;
+use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Hermes\Model\Conversation;
 use App\Modules\Hermes\Model\ConversationUser;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-$container = $this->getContainer();
-$availableFactions = $this->getContainer()->getParameter('game.available_factions');
-$db = $this->getContainer()->get(\App\Classes\Database\DatabaseAdmin::class);
-
-$db->query('SET FOREIGN_KEY_CHECKS = 0;');
+#[AsCommand(
+	name: 'app:hephaistos:populate-database',
+	description: 'fill the database and set it to ready state for a new game',
+)]
+class PopulateDatabase extends Command
+{
+	public function __construct(
+		private DatabaseAdmin $database,
+		private GalaxyGenerator $galaxyGenerator,
+		private PlayerManager $playerManager,
+		private ConversationManager $conversationManager,
+		private ConversationUserManager $conversationUserManager,
+		private ColorManager $colorManager,
+		private array $availableFactions,
+		private int $jeanMiId,
+	) {
+		parent::__construct();
+	}
+	
+	public function execute(InputInterface $input, OutputInterface $output): int
+	{
+		$this->database->query('SET FOREIGN_KEY_CHECKS = 0;');
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table color</h2>';
+		$output->writeln('Ajout de la table color');;
 
-$db->query("DROP TABLE IF EXISTS `color`");
-$db->query("CREATE TABLE IF NOT EXISTS `color` (
+		$this->database->query("DROP TABLE IF EXISTS `color`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `color` (
 	`id` INT unsigned NOT NULL,
 
 	`alive` TINYINT NOT NULL DEFAULT 0,
@@ -40,22 +71,22 @@ $db->query("CREATE TABLE IF NOT EXISTS `color` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-echo '<h3>Remplissage de la table color</h3>';
-$qr = $db->prepare("INSERT INTO `color` (`id`, `alive`, `credits`, `players`, `activePlayers`, `points`, `sectors`, `regime`, `electionStatement`, `isClosed`, `isInGame`, `description`, `dClaimVictory`, `dLastElection`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)");
-$date = Utils::addSecondsToDate(Utils::now(), - 500000);
+		$output->writeln('Remplissage de la table color');
+		$qr = $this->database->prepare("INSERT INTO `color` (`id`, `alive`, `credits`, `players`, `activePlayers`, `points`, `sectors`, `regime`, `electionStatement`, `isClosed`, `isInGame`, `description`, `dClaimVictory`, `dLastElection`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)");
+		$date = Utils::addSecondsToDate(Utils::now(), -500000);
 
 # génération de la faction zero
-$qr->execute(array(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, $date));
+		$qr->execute(array(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, $date));
 
 # génération des factions disponibles
-foreach ($availableFactions as $faction) {
-	$qr->execute(array($faction, 1, 0, 0, 0, 0, 0, ColorResource::getInfo($faction, 'regime'), 1, 0, 1, $date));
-}
+		foreach ($this->availableFactions as $faction) {
+			$qr->execute(array($faction, 1, 0, 0, 0, 0, 0, ColorResource::getInfo($faction, 'regime'), 1, 0, 1, $date));
+		}
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table factionNews</h2>';
+		$output->writeln('Ajout de la table factionNews');;
 
-$db->query("DROP TABLE IF EXISTS `factionNews`");
-$db->query("CREATE TABLE IF NOT EXISTS `factionNews` (
+		$this->database->query("DROP TABLE IF EXISTS `factionNews`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `factionNews` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rFaction` INT unsigned NOT NULL,
 
@@ -72,108 +103,106 @@ $db->query("CREATE TABLE IF NOT EXISTS `factionNews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table player</h2>';
+		$output->writeln('Ajout de la table player');;
 
-$db->query("DROP TABLE IF EXISTS `player`");
-$db->query("CREATE TABLE IF NOT EXISTS `player` (
-	`id` INT unsigned NOT NULL AUTO_INCREMENT,
-	`rColor` INT unsigned NOT NULL,
-	`rGodfather` INT unsigned NULL,
+		$this->database->query("DROP TABLE IF EXISTS `player`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `player` (
+			`id` INT unsigned NOT NULL AUTO_INCREMENT,
+			`rColor` INT unsigned NOT NULL,
+			`rGodfather` INT unsigned NULL,
+		
+			`bind` varchar(50) default NULL,
+			`name` varchar(25) NOT NULL,
+			`avatar` varchar(12) NOT NULL,
+			`sex` TINYINT NOT NULL DEFAULT 1,
+			`status` SMALLINT unsigned NOT NULL DEFAULT 1,
+			`credit` BIGINT unsigned NOT NULL DEFAULT 0,
+			`experience` INT unsigned NOT NULL DEFAULT 0,
+			`factionPoint` INT unsigned NOT NULL DEFAULT 0,
+			`level` TINYINT unsigned DEFAULT NULL DEFAULT 0,
+			`victory` INT unsigned DEFAULT NULL DEFAULT 0,
+			`defeat` INT unsigned DEFAULT NULL DEFAULT 0,
+			`premium` TINYINT NOT NULL DEFAULT 0,
+			`statement` TINYINT NOT NULL DEFAULT 0,
+			`description` text DEFAULT NULL,
+		
+			`stepTutorial` TINYINT unsigned DEFAULT NULL,
+			`stepDone` TINYINT unsigned NOT NULL DEFAULT 0,
+		
+			`iUniversity` INT unsigned NOT NULL DEFAULT 0,
+			`partNaturalSciences` TINYINT unsigned NOT NULL DEFAULT 0,
+			`partLifeSciences` TINYINT unsigned NOT NULL DEFAULT 0,
+			`partSocialPoliticalSciences` TINYINT unsigned NOT NULL DEFAULT 0,
+			`partInformaticEngineering` TINYINT unsigned NOT NULL DEFAULT 0,
+		
+			`dInscription` datetime DEFAULT NULL,
+			`dLastConnection` datetime DEFAULT NULL,
+			`dLastActivity` datetime DEFAULT NULL,
+			`uPlayer` datetime DEFAULT NULL,
+		
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `name_UNIQUE` (`name`),
+			CONSTRAINT fkPlayerColor FOREIGN KEY (rColor) REFERENCES color(id),
+			CONSTRAINT fkPlayerPlayer FOREIGN KEY (rGodfather) REFERENCES player(id)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT = 1;");
 
-	`bind` varchar(50) default NULL,
-	`name` varchar(25) NOT NULL,
-	`avatar` varchar(12) NOT NULL,
-	`sex` TINYINT NOT NULL DEFAULT 1,
-	`status` SMALLINT unsigned NOT NULL DEFAULT 1,
-	`credit` BIGINT unsigned NOT NULL DEFAULT 0,
-	`experience` INT unsigned NOT NULL DEFAULT 0,
-	`factionPoint` INT unsigned NOT NULL DEFAULT 0,
-	`level` TINYINT unsigned DEFAULT NULL DEFAULT 0,
-	`victory` INT unsigned DEFAULT NULL DEFAULT 0,
-	`defeat` INT unsigned DEFAULT NULL DEFAULT 0,
-	`premium` TINYINT NOT NULL DEFAULT 0,
-	`statement` TINYINT NOT NULL DEFAULT 0,
-	`description` text DEFAULT NULL,
+		#--------------------------------------------------------------------------------------------
+		$output->writeln('Ajout du Joueur Gaia');
 
-	`stepTutorial` TINYINT unsigned DEFAULT NULL,
-	`stepDone` TINYINT unsigned NOT NULL DEFAULT 0,
-
-	`iUniversity` INT unsigned NOT NULL DEFAULT 0,
-	`partNaturalSciences` TINYINT unsigned NOT NULL DEFAULT 0,
-	`partLifeSciences` TINYINT unsigned NOT NULL DEFAULT 0,
-	`partSocialPoliticalSciences` TINYINT unsigned NOT NULL DEFAULT 0,
-	`partInformaticEngineering` TINYINT unsigned NOT NULL DEFAULT 0,
-
-	`dInscription` datetime DEFAULT NULL,
-	`dLastConnection` datetime DEFAULT NULL,
-	`dLastActivity` datetime DEFAULT NULL,
-	`uPlayer` datetime DEFAULT NULL,
-
-	PRIMARY KEY (`id`),
-	UNIQUE KEY `name_UNIQUE` (`name`),
-	CONSTRAINT fkPlayerColor FOREIGN KEY (rColor) REFERENCES color(id),
-	CONSTRAINT fkPlayerPlayer FOREIGN KEY (rGodfather) REFERENCES player(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT = 1;");
-
-#--------------------------------------------------------------------------------------------
-echo '<h3>Ajout du Joueur Gaia</h3>';
-
-$playerManager = $this->getContainer()->get(\App\Modules\Zeus\Manager\PlayerManager::class);
-
-$p = new Player();
-$p->status = 1;
-$p->credit = 10000000;
-$p->uPlayer = Utils::now();
-$p->experience = 15000;
-$p->factionPoint = 0;
-$p->level = 5;
-$p->victory = 0;
-$p->defeat = 0;
-$p->stepTutorial = 0;
-$p->stepDone = 0;
-$p->iUniversity = 0;
-$p->partNaturalSciences = 25;
-$p->partLifeSciences = 25;
-$p->partSocialPoliticalSciences = 25;
-$p->partInformaticEngineering = 25;
-$p->dInscription = Utils::now();
-$p->dLastConnection = Utils::now();
-$p->dLastActivity = Utils::now();
-$p->premium = 0;
-$p->statement = Player::DEAD;
+		$p = new Player();
+		$p->status = 1;
+		$p->credit = 10000000;
+		$p->uPlayer = Utils::now();
+		$p->experience = 15000;
+		$p->factionPoint = 0;
+		$p->level = 5;
+		$p->victory = 0;
+		$p->defeat = 0;
+		$p->stepTutorial = 0;
+		$p->stepDone = 0;
+		$p->iUniversity = 0;
+		$p->partNaturalSciences = 25;
+		$p->partLifeSciences = 25;
+		$p->partSocialPoliticalSciences = 25;
+		$p->partInformaticEngineering = 25;
+		$p->dInscription = Utils::now();
+		$p->dLastConnection = Utils::now();
+		$p->dLastActivity = Utils::now();
+		$p->premium = 0;
+		$p->statement = Player::DEAD;
 
 # Joueur rebelle
-$p = clone($p);
-$p->bind = Utils::generateString(25);
-$p->name = 'Rebelle';
-$p->avatar = 'rebel';
-$p->rColor = 0;
-$playerManager->add($p);
+		$p = clone($p);
+		$p->bind = Utils::generateString(25);
+		$p->name = 'Rebelle';
+		$p->avatar = 'rebel';
+		$p->rColor = 0;
+		$this->playerManager->add($p);
 
 # Jean-Mi
-$p = clone($p);
-$p->bind = Utils::generateString(25);
-$p->name = 'Jean-Mi';
-$p->avatar = 'jm';
-$p->rColor = 0;
-$playerManager->add($p);
+		$p = clone($p);
+		$p->bind = Utils::generateString(25);
+		$p->name = 'Jean-Mi';
+		$p->avatar = 'jm';
+		$p->rColor = 0;
+		$this->playerManager->add($p);
 
 # Joueurs de factions
-foreach ($availableFactions as $faction) {
-	$p = clone($p);
-	$p->bind = Utils::generateString(25);
-	$p->name = ColorResource::getInfo($faction, 'officialName');
-	$p->avatar = ('color-' . $faction);
-	$p->rColor = $faction;
-	$p->status = 6;
-	$playerManager->add($p);
-}
+		foreach ($this->availableFactions as $faction) {
+			$p = clone($p);
+			$p->bind = Utils::generateString(25);
+			$p->name = ColorResource::getInfo($faction, 'officialName');
+			$p->avatar = ('color-' . $faction);
+			$p->rColor = $faction;
+			$p->status = 6;
+			$this->playerManager->add($p);
+		}
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table sector</h2>';
+		$output->writeln('Ajout de la table sector');;
 
-$db->query("DROP TABLE IF EXISTS `sector`");
-$db->query("CREATE TABLE IF NOT EXISTS `sector` (
+		$this->database->query("DROP TABLE IF EXISTS `sector`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `sector` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rColor` INT unsigned NOT NULL,
 	`rSurrender` INT unsigned DEFAULT NULL,
@@ -193,9 +222,9 @@ $db->query("CREATE TABLE IF NOT EXISTS `sector` (
 	CONSTRAINT fkSectorColor FOREIGN KEY (rColor) REFERENCES color(id)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
-echo '<h3>Ajout du trigger sector</h3>';
-$db->query("DROP TRIGGER IF EXISTS `saveSectorChange`;");
-$db->query("CREATE TRIGGER `saveSectorChange` BEFORE UPDATE ON `sector`
+		$output->writeln('Ajout du trigger sector');
+		$this->database->query("DROP TRIGGER IF EXISTS `saveSectorChange`;");
+		$this->database->query("CREATE TRIGGER `saveSectorChange` BEFORE UPDATE ON `sector`
  FOR EACH ROW BEGIN
 	IF NEW.rColor != OLD.rColor THEN
 	INSERT INTO changeColorSector(
@@ -212,10 +241,10 @@ $db->query("CREATE TRIGGER `saveSectorChange` BEFORE UPDATE ON `sector`
 END;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table system</h2>';
+		$output->writeln('Ajout de la table system');;
 
-$db->query("DROP TABLE IF EXISTS `system`");
-$db->query("CREATE TABLE IF NOT EXISTS `system` (
+		$this->database->query("DROP TABLE IF EXISTS `system`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `system` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rSector` INT unsigned NOT NULL,
 	`rColor` INT unsigned NOT NULL,
@@ -229,9 +258,9 @@ $db->query("CREATE TABLE IF NOT EXISTS `system` (
 	CONSTRAINT fkSystemColor FOREIGN KEY (rColor) REFERENCES color(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
-echo '<h3>Ajout du trigger system</h3>';
-$db->query("DROP TRIGGER IF EXISTS `saveSystemChange`;");
-$db->query("CREATE TRIGGER `saveSystemChange` BEFORE UPDATE ON `system`
+		$output->writeln('Ajout du trigger system');
+		$this->database->query("DROP TRIGGER IF EXISTS `saveSystemChange`;");
+		$this->database->query("CREATE TRIGGER `saveSystemChange` BEFORE UPDATE ON `system`
  FOR EACH ROW BEGIN
 	IF NEW.rColor != OLD.rColor THEN
 	INSERT INTO changeColorSystem(
@@ -248,10 +277,10 @@ $db->query("CREATE TRIGGER `saveSystemChange` BEFORE UPDATE ON `system`
 END;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table place</h2>';
+		$output->writeln('Ajout de la table place');;
 
-$db->query("DROP TABLE IF EXISTS `place`");
-$db->query("CREATE TABLE IF NOT EXISTS `place` (
+		$this->database->query("DROP TABLE IF EXISTS `place`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `place` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NULL,
 	`rSystem` INT unsigned NOT NULL,
@@ -274,10 +303,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `place` (
 	CONSTRAINT fkPlaceSystem FOREIGN KEY (rSystem) REFERENCES system(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
-echo '<h3>Ajout du trigger place</h3>';
+		$output->writeln('Ajout du trigger place');
 
-$db->query("DROP TRIGGER IF EXISTS `savePlaceChange`;");
-$db->query("CREATE TRIGGER `savePlaceChange` BEFORE UPDATE ON `place`
+		$this->database->query("DROP TRIGGER IF EXISTS `savePlaceChange`;");
+		$this->database->query("CREATE TRIGGER `savePlaceChange` BEFORE UPDATE ON `place`
  FOR EACH ROW BEGIN
 	IF NEW.rPlayer != OLD.rPlayer THEN
 	INSERT INTO changeColorPlace(
@@ -294,10 +323,10 @@ $db->query("CREATE TRIGGER `savePlaceChange` BEFORE UPDATE ON `place`
 END;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table changeColorPlace</h2>';
+		$output->writeln('Ajout de la table changeColorPlace');;
 
-$db->query("DROP TABLE IF EXISTS `changeColorPlace`");
-$db->query("CREATE TABLE IF NOT EXISTS `changeColorPlace` (
+		$this->database->query("DROP TABLE IF EXISTS `changeColorPlace`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `changeColorPlace` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlace` INT unsigned NOT NULL,
 	`oldPlayer` TINYINT unsigned NOT NULL,
@@ -307,10 +336,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `changeColorPlace` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table changeColorSector</h2>';
+		$output->writeln('Ajout de la table changeColorSector');;
 
-$db->query("DROP TABLE IF EXISTS `changeColorSector`");
-$db->query("CREATE TABLE IF NOT EXISTS `changeColorSector` (
+		$this->database->query("DROP TABLE IF EXISTS `changeColorSector`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `changeColorSector` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rSector` INT unsigned NOT NULL,
 	`oldColor` TINYINT unsigned NOT NULL,
@@ -320,10 +349,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `changeColorSector` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table changeColorSystem</h2>';
+		$output->writeln('Ajout de la table changeColorSystem');;
 
-$db->query("DROP TABLE IF EXISTS `changeColorSystem`");
-$db->query("CREATE TABLE IF NOT EXISTS `changeColorSystem` (
+		$this->database->query("DROP TABLE IF EXISTS `changeColorSystem`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `changeColorSystem` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rSystem` INT unsigned NOT NULL,
 	`oldColor` TINYINT unsigned NOT NULL,
@@ -333,22 +362,22 @@ $db->query("CREATE TABLE IF NOT EXISTS `changeColorSystem` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h3>Ajout des trois vues</h3>';
+		$output->writeln('Ajout des trois vues');
 
-$db->query("DROP VIEW IF EXISTS `vGalaxyDiary`;");
-$db->query("CREATE VIEW `vGalaxyDiary` AS select `h`.`id` AS `id`,`h`.`rSector` AS `sector`,`h`.`oldColor` AS `oldColor`,`h`.`newColor` AS `newColor`,`h`.`dChangement` AS `dChangement` from (`changeColorSector` `h` left join `system` `s` on((`h`.`rSector` = `s`.`id`))) order by `h`.`dChangement` desc limit 0,100;");
+		$this->database->query("DROP VIEW IF EXISTS `vGalaxyDiary`;");
+		$this->database->query("CREATE VIEW `vGalaxyDiary` AS select `h`.`id` AS `id`,`h`.`rSector` AS `sector`,`h`.`oldColor` AS `oldColor`,`h`.`newColor` AS `newColor`,`h`.`dChangement` AS `dChangement` from (`changeColorSector` `h` left join `system` `s` on((`h`.`rSector` = `s`.`id`))) order by `h`.`dChangement` desc limit 0,100;");
 
-$db->query("DROP VIEW IF EXISTS `vSectorDiary`;");
-$db->query("CREATE VIEW `vSectorDiary` AS select count(`h`.`id`) AS `occurency`,`h`.`id` AS `id`,`h`.`rSystem` AS `system`,`s`.`rSector` AS `sector`,`h`.`oldColor` AS `oldColor`,`h`.`newColor` AS `newColor`,`h`.`dChangement` AS `dChangement` from (((`changeColorSystem` `h` left join `system` `s` on((`h`.`rSystem` = `s`.`id`))) left join `color` `c1` on((`h`.`oldColor` = `c1`.`id`))) left join `color` `c2` on((`h`.`newColor` = `c2`.`id`))) group by `c1`.`id`,`c2`.`id`,hour(`h`.`dChangement`) order by `h`.`dChangement` desc limit 0,1000;");
+		$this->database->query("DROP VIEW IF EXISTS `vSectorDiary`;");
+		$this->database->query("CREATE VIEW `vSectorDiary` AS select count(`h`.`id`) AS `occurency`,`h`.`id` AS `id`,`h`.`rSystem` AS `system`,`s`.`rSector` AS `sector`,`h`.`oldColor` AS `oldColor`,`h`.`newColor` AS `newColor`,`h`.`dChangement` AS `dChangement` from (((`changeColorSystem` `h` left join `system` `s` on((`h`.`rSystem` = `s`.`id`))) left join `color` `c1` on((`h`.`oldColor` = `c1`.`id`))) left join `color` `c2` on((`h`.`newColor` = `c2`.`id`))) group by `c1`.`id`,`c2`.`id`,hour(`h`.`dChangement`) order by `h`.`dChangement` desc limit 0,1000;");
 
-$db->query("DROP VIEW IF EXISTS `vSystemDiary`;");
-$db->query("CREATE VIEW `vSystemDiary` AS select `h`.`id` AS `id`,`h`.`rPlace` AS `place`,`h`.`oldPlayer` AS `oldPlayer`,`p1`.`name` AS `oldName`,`c1`.`id` AS `oldColor`,`h`.`newPlayer` AS `newPlayer`,`p2`.`name` AS `newName`,`c2`.`id` AS `newColor`,`h`.`dChangement` AS `dChangement`,`p`.`position` AS `position`,`p`.`rSystem` AS `system` from (((((`changeColorPlace` `h` left join `place` `p` on((`p`.`id` = `h`.`rPlace`))) left join `player` `p1` on((`h`.`oldPlayer` = `p1`.`id`))) left join `color` `c1` on((`p1`.`rColor` = `c1`.`id`))) left join `player` `p2` on((`h`.`newPlayer` = `p2`.`id`))) left join `color` `c2` on((`p2`.`rColor` = `c2`.`id`))) order by `h`.`dChangement` desc limit 0,5000;");
+		$this->database->query("DROP VIEW IF EXISTS `vSystemDiary`;");
+		$this->database->query("CREATE VIEW `vSystemDiary` AS select `h`.`id` AS `id`,`h`.`rPlace` AS `place`,`h`.`oldPlayer` AS `oldPlayer`,`p1`.`name` AS `oldName`,`c1`.`id` AS `oldColor`,`h`.`newPlayer` AS `newPlayer`,`p2`.`name` AS `newName`,`c2`.`id` AS `newColor`,`h`.`dChangement` AS `dChangement`,`p`.`position` AS `position`,`p`.`rSystem` AS `system` from (((((`changeColorPlace` `h` left join `place` `p` on((`p`.`id` = `h`.`rPlace`))) left join `player` `p1` on((`h`.`oldPlayer` = `p1`.`id`))) left join `color` `c1` on((`p1`.`rColor` = `c1`.`id`))) left join `player` `p2` on((`h`.`newPlayer` = `p2`.`id`))) left join `color` `c2` on((`p2`.`rColor` = `c2`.`id`))) order by `h`.`dChangement` desc limit 0,5000;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table orbitalBase</h2>';
+		$output->writeln('Ajout de la table orbitalBase');;
 
-$db->query("DROP TABLE IF EXISTS `orbitalBase`");
-$db->query("CREATE TABLE IF NOT EXISTS `orbitalBase` (
+		$this->database->query("DROP TABLE IF EXISTS `orbitalBase`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `orbitalBase` (
 	`rPlace` INT unsigned NOT NULL,
 	`rPlayer` INT unsigned NOT NULL,
 
@@ -395,10 +424,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `orbitalBase` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table commercialRoute</h2>';
+		$output->writeln('Ajout de la table commercialRoute');;
 
-$db->query("DROP TABLE IF EXISTS `commercialRoute`");
-$db->query("CREATE TABLE IF NOT EXISTS `commercialRoute` (
+		$this->database->query("DROP TABLE IF EXISTS `commercialRoute`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `commercialRoute` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rOrbitalBase` INT unsigned NOT NULL,
 	`rOrbitalBaseLinked` INT unsigned NOT NULL,
@@ -418,10 +447,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `commercialRoute` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table orbitalBaseBuildingQueue</h2>';
+		$output->writeln('Ajout de la table orbitalBaseBuildingQueue');;
 
-$db->query("DROP TABLE IF EXISTS `orbitalBaseBuildingQueue`");
-$db->query("CREATE TABLE IF NOT EXISTS `orbitalBaseBuildingQueue` (
+		$this->database->query("DROP TABLE IF EXISTS `orbitalBaseBuildingQueue`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `orbitalBaseBuildingQueue` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rOrbitalBase` INT unsigned NOT NULL,
 
@@ -435,10 +464,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `orbitalBaseBuildingQueue` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table orbitalBaseShipQueue</h2>';
+		$output->writeln('Ajout de la table orbitalBaseShipQueue');;
 
-$db->query("DROP TABLE IF EXISTS `orbitalBaseShipQueue`");
-$db->query("CREATE TABLE IF NOT EXISTS `orbitalBaseShipQueue` (
+		$this->database->query("DROP TABLE IF EXISTS `orbitalBaseShipQueue`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `orbitalBaseShipQueue` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rOrbitalBase` INT unsigned NOT NULL,
 
@@ -454,10 +483,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `orbitalBaseShipQueue` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table transaction</h2>';
+		$output->writeln('Ajout de la table transaction');;
 
-$db->query("DROP TABLE IF EXISTS `transaction`");
-$db->query("CREATE TABLE IF NOT EXISTS `transaction` (
+		$this->database->query("DROP TABLE IF EXISTS `transaction`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `transaction` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`rPlace` INT unsigned NOT NULL,
@@ -477,21 +506,21 @@ $db->query("CREATE TABLE IF NOT EXISTS `transaction` (
 	CONSTRAINT fkTransactionPlayer FOREIGN KEY (rPlayer) REFERENCES player(id)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
-echo '<h3>Remplissage de la table transaction</h3>';
+		$output->writeln('Remplissage de la table transaction');
 
-$qr = $db->prepare("INSERT INTO `transaction` (`rPlayer`, `rPlace`, `type`, `quantity`, `identifier`, `price`, `commercialShipQuantity`, `statement`, `dPublication`, `dValidation`, `currentRate`) VALUES
+		$qr = $this->database->prepare("INSERT INTO `transaction` (`rPlayer`, `rPlace`, `type`, `quantity`, `identifier`, `price`, `commercialShipQuantity`, `statement`, `dPublication`, `dValidation`, `currentRate`) VALUES
 (1, 0, ?, 8, NULL, 10, 0, ?, ?, ?, ?),
 (1, 0, ?, 1, NULL, 12, 0, ?, ?, ?, ?),
 (1, 0, ?, 8, NULL, 15, 0, ?, ?, ?, ?);");
-$qr->execute(array(Transaction::TYP_RESOURCE, Transaction::ST_COMPLETED, Utils::now(), Utils::now(), 1.26,
-	Transaction::TYP_COMMANDER, Transaction::ST_COMPLETED, Utils::now(), Utils::now(), 12,
-	Transaction::TYP_SHIP, Transaction::ST_COMPLETED, Utils::now(), Utils::now(), 1.875));
+		$qr->execute(array(Transaction::TYP_RESOURCE, Transaction::ST_COMPLETED, Utils::now(), Utils::now(), 1.26,
+			Transaction::TYP_COMMANDER, Transaction::ST_COMPLETED, Utils::now(), Utils::now(), 12,
+			Transaction::TYP_SHIP, Transaction::ST_COMPLETED, Utils::now(), Utils::now(), 1.875));
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table commercialShipping</h2>';
+		$output->writeln('Ajout de la table commercialShipping');;
 
-$db->query("DROP TABLE IF EXISTS `commercialShipping`");
-$db->query("CREATE TABLE IF NOT EXISTS `commercialShipping` (
+		$this->database->query("DROP TABLE IF EXISTS `commercialShipping`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `commercialShipping` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`rBase` INT unsigned NOT NULL,
@@ -509,10 +538,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `commercialShipping` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table commercialTax</h2>';
+		$output->writeln('Ajout de la table commercialTax');;
 
-$db->query("DROP TABLE IF EXISTS `commercialTax`");
-$db->query("CREATE TABLE IF NOT EXISTS `commercialTax` (
+		$this->database->query("DROP TABLE IF EXISTS `commercialTax`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `commercialTax` (
 	`id` INT NOT NULL AUTO_INCREMENT,
 	`faction` SMALLINT NOT NULL,
 	`relatedFaction` SMALLINT NOT NULL,
@@ -521,21 +550,21 @@ $db->query("CREATE TABLE IF NOT EXISTS `commercialTax` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
-echo '<h3>Remplissage de la table commercialTax</h3>';
-$qr = $db->prepare("INSERT INTO `commercialTax` (`faction`, `relatedFaction`, `exportTax`, `importTax`) VALUES (?, ?, 5, 5)");
+		$output->writeln('Remplissage de la table commercialTax');
+		$qr = $this->database->prepare("INSERT INTO `commercialTax` (`faction`, `relatedFaction`, `exportTax`, `importTax`) VALUES (?, ?, 5, 5)");
 
 # génération des taxes
-foreach ($availableFactions as $faction) {
-	foreach ($availableFactions as $rfaction) {
-		$qr->execute(array($faction, $rfaction));
-	}
-}
+		foreach ($this->availableFactions as $faction) {
+			foreach ($this->availableFactions as $rfaction) {
+				$qr->execute(array($faction, $rfaction));
+			}
+		}
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table law</h2>';
+		$output->writeln('Ajout de la table law');;
 
-$db->query("DROP TABLE IF EXISTS `law`");
-$db->query("CREATE TABLE IF NOT EXISTS `law` (
+		$this->database->query("DROP TABLE IF EXISTS `law`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `law` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rColor` INT unsigned NOT NULL,
 
@@ -552,10 +581,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `law` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table voteLaw</h2>';
+		$output->writeln('Ajout de la table voteLaw');;
 
-$db->query("DROP TABLE IF EXISTS `voteLaw`");
-$db->query("CREATE TABLE IF NOT EXISTS `voteLaw` (
+		$this->database->query("DROP TABLE IF EXISTS `voteLaw`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `voteLaw` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 
 	`rLaw` INT unsigned NOT NULL,
@@ -570,10 +599,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `voteLaw` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table forumTopic</h2>';
+		$output->writeln('Ajout de la table forumTopic');;
 
-$db->query("DROP TABLE IF EXISTS `forumTopic`");
-$db->query("CREATE TABLE IF NOT EXISTS `forumTopic` (
+		$this->database->query("DROP TABLE IF EXISTS `forumTopic`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `forumTopic` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rColor` INT unsigned NOT NULL,
 	`rPlayer` INT unsigned NOT NULL,
@@ -593,10 +622,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `forumTopic` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table forumMessage</h2>';
+		$output->writeln('Ajout de la table forumMessage');;
 
-$db->query("DROP TABLE IF EXISTS `forumMessage`");
-$db->query("CREATE TABLE IF NOT EXISTS `forumMessage` (
+		$this->database->query("DROP TABLE IF EXISTS `forumMessage`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `forumMessage` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`rTopic` INT unsigned NOT NULL,
@@ -615,10 +644,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `forumMessage` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table forumLastView</h2>';
+		$output->writeln('Ajout de la table forumLastView');;
 
-$db->query("DROP TABLE IF EXISTS `forumLastView`");
-$db->query("CREATE TABLE IF NOT EXISTS `forumLastView` (
+		$this->database->query("DROP TABLE IF EXISTS `forumLastView`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `forumLastView` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`rTopic` INT unsigned NOT NULL,
@@ -631,10 +660,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `forumLastView` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table election</h2>';
+		$output->writeln('Ajout de la table election');;
 
-$db->query("DROP TABLE IF EXISTS `election`");
-$db->query("CREATE TABLE IF NOT EXISTS `election` (
+		$this->database->query("DROP TABLE IF EXISTS `election`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `election` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rColor` INT unsigned NOT NULL,
 
@@ -644,10 +673,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `election` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table candidate</h2>';
+		$output->writeln('Ajout de la table candidate');;
 
-$db->query("DROP TABLE IF EXISTS `candidate`");
-$db->query("CREATE TABLE IF NOT EXISTS `candidate` (
+		$this->database->query("DROP TABLE IF EXISTS `candidate`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `candidate` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rElection` INT unsigned NOT NULL,
 	`rPlayer` INT unsigned NOT NULL,
@@ -666,10 +695,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `candidate` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table vote</h2>';
+		$output->writeln('Ajout de la table vote');;
 
-$db->query("DROP TABLE IF EXISTS `vote`");
-$db->query("CREATE TABLE IF NOT EXISTS `vote` (
+		$this->database->query("DROP TABLE IF EXISTS `vote`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `vote` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rCandidate` INT unsigned NOT NULL,
 	`rPlayer` INT unsigned NOT NULL,
@@ -684,10 +713,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `vote` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table commander</h2>';
+		$output->writeln('Ajout de la table commander');;
 
-$db->query("DROP TABLE IF EXISTS `commander`");
-$db->query("CREATE TABLE IF NOT EXISTS `commander` (
+		$this->database->query("DROP TABLE IF EXISTS `commander`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `commander` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`rBase` INT unsigned NOT NULL,
@@ -721,10 +750,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `commander` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table squadron</h2>';
+		$output->writeln('Ajout de la table squadron');;
 
-$db->query("DROP TABLE IF EXISTS `squadron`");
-$db->query("CREATE TABLE IF NOT EXISTS `squadron` (
+		$this->database->query("DROP TABLE IF EXISTS `squadron`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `squadron` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rCommander` INT unsigned NOT NULL,
 
@@ -749,10 +778,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `squadron` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table report</h2>';
+		$output->writeln('Ajout de la table report');;
 
-$db->query("DROP TABLE IF EXISTS `report`");
-$db->query("CREATE TABLE IF NOT EXISTS `report` (
+		$this->database->query("DROP TABLE IF EXISTS `report`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `report` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayerAttacker` INT unsigned NOT NULL,
 	`rPlayerDefender` INT unsigned NOT NULL,
@@ -795,10 +824,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `report` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table squadronReport</h2>';
+		$output->writeln('Ajout de la table squadronReport');;
 
-$db->query("DROP TABLE IF EXISTS `squadronReport`");
-$db->query("CREATE TABLE IF NOT EXISTS `squadronReport` (
+		$this->database->query("DROP TABLE IF EXISTS `squadronReport`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `squadronReport` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rReport` INT unsigned NOT NULL,
 	`rCommander` INT unsigned NULL,
@@ -825,10 +854,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `squadronReport` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table spyReport</h2>';
+		$output->writeln('Ajout de la table spyReport');;
 
-$db->query("DROP TABLE IF EXISTS `spyReport`");
-$db->query("CREATE TABLE IF NOT EXISTS `spyReport` (
+		$this->database->query("DROP TABLE IF EXISTS `spyReport`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `spyReport` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`rPlace` INT unsigned NOT NULL,
@@ -859,24 +888,24 @@ $db->query("CREATE TABLE IF NOT EXISTS `spyReport` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table ranking</h2>';
+		$output->writeln('Ajout de la table ranking');;
 
-$qr = $db->prepare("DROP TABLE IF EXISTS `ranking`");
-$qr = $db->prepare("CREATE TABLE IF NOT EXISTS `ranking` (
+		$qr = $this->database->prepare("DROP TABLE IF EXISTS `ranking`");
+		$qr = $this->database->prepare("CREATE TABLE IF NOT EXISTS `ranking` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`dRanking` datetime NOT NULL,
 	`player` TINYINT unsigned NOT NULL DEFAULT 0,
 	`faction` TINYINT unsigned NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-$qr->execute();
+		$qr->execute();
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table playerRanking</h2>';
+		$output->writeln('Ajout de la table playerRanking');;
 
-$qr = $db->prepare("DROP TABLE IF EXISTS `playerRanking`");
-$qr->execute();
-$qr = $db->prepare("CREATE TABLE IF NOT EXISTS `playerRanking` (
+		$qr = $this->database->prepare("DROP TABLE IF EXISTS `playerRanking`");
+		$qr->execute();
+		$qr = $this->database->prepare("CREATE TABLE IF NOT EXISTS `playerRanking` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rRanking` INT unsigned NOT NULL,
 	`rPlayer` INT unsigned NOT NULL,
@@ -917,14 +946,14 @@ $qr = $db->prepare("CREATE TABLE IF NOT EXISTS `playerRanking` (
 	CONSTRAINT fkPlayerRankingRanking FOREIGN KEY (rRanking) REFERENCES ranking(id),
 	CONSTRAINT fkPlayerRankingPlayer FOREIGN KEY (rPlayer) REFERENCES player(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-$qr->execute();
+		$qr->execute();
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table factionRanking</h2>';
+		$output->writeln('Ajout de la table factionRanking');;
 
-$qr = $db->prepare("DROP TABLE IF EXISTS `factionRanking`");
-$qr->execute();
-$qr = $db->prepare("CREATE TABLE IF NOT EXISTS `factionRanking` (
+		$qr = $this->database->prepare("DROP TABLE IF EXISTS `factionRanking`");
+		$qr->execute();
+		$qr = $this->database->prepare("CREATE TABLE IF NOT EXISTS `factionRanking` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rRanking` INT unsigned NOT NULL,
 	`rFaction` INT unsigned NOT NULL,
@@ -950,16 +979,15 @@ $qr = $db->prepare("CREATE TABLE IF NOT EXISTS `factionRanking` (
 	CONSTRAINT fkFactionRankingRanking FOREIGN KEY (rRanking) REFERENCES ranking(id),
 	CONSTRAINT fkFactionRankingPlayer FOREIGN KEY (rFaction) REFERENCES color(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-$qr->execute();
+		$qr->execute();
 
 #--------------------------------------------------------------------------------------------
-echo '<h1>Ajout du module de Conversation</h1>';
+		$output->writeln('Ajout du module de Conversation');
 
-echo '<h2>Ajout de la table Conversation</h2>';
+		$output->writeln('Ajout de la table Conversation');;
 
-$db = $this->getContainer()->get(Database::class);
-$db->query("DROP TABLE IF EXISTS `conversation`");
-$qr = $db->prepare("CREATE TABLE IF NOT EXISTS `conversation` (
+		$this->database->query("DROP TABLE IF EXISTS `conversation`");
+		$qr = $this->database->prepare("CREATE TABLE IF NOT EXISTS `conversation` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`title` VARCHAR(255) NULL,
 	`messages` INT(5) NOT NULL DEFAULT 0,
@@ -968,12 +996,12 @@ $qr = $db->prepare("CREATE TABLE IF NOT EXISTS `conversation` (
 	`dLastMessage` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-$qr->execute();
+		$qr->execute();
 
-echo '<h2>Ajout de la table userConversation</h2>';
+		$output->writeln('Ajout de la table userConversation');;
 
-$db->query("DROP TABLE IF EXISTS `conversationUser`");
-$qr = $db->prepare("CREATE TABLE IF NOT EXISTS `conversationUser` (
+		$this->database->query("DROP TABLE IF EXISTS `conversationUser`");
+		$qr = $this->database->prepare("CREATE TABLE IF NOT EXISTS `conversationUser` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`rConversation` INT(11) NOT NULL,
 	`rPlayer` INT(11) NOT NULL,
@@ -982,12 +1010,12 @@ $qr = $db->prepare("CREATE TABLE IF NOT EXISTS `conversationUser` (
 	`dLastView` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-$qr->execute();
+		$qr->execute();
 
-echo '<h2>Ajout de la table messageConversation</h2>';
+		$output->writeln('Ajout de la table messageConversation');;
 
-$db->query("DROP TABLE IF EXISTS `conversationMessage`");
-$qr = $db->prepare("CREATE TABLE IF NOT EXISTS `conversationMessage` (
+		$this->database->query("DROP TABLE IF EXISTS `conversationMessage`");
+		$qr = $this->database->prepare("CREATE TABLE IF NOT EXISTS `conversationMessage` (
 	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`rConversation` INT(11) NOT NULL,
 	`rPlayer` INT(11) NOT NULL,
@@ -999,54 +1027,52 @@ $qr = $db->prepare("CREATE TABLE IF NOT EXISTS `conversationMessage` (
 	`dLastModification` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
-$qr->execute();
+		$qr->execute();
 
-echo '<h2>Remplissage des conversations</h2>';
+		$output->writeln('Remplissage des conversations');;
 
 # conv jeanmi
-$conv = new Conversation();
-$conv->messages = 0;
-$conv->type = Conversation::TY_SYSTEM;
-$conv->title = 'Jean-Mi, administrateur système';
-$conv->dCreation = Utils::now();
-$conv->dLastMessage = Utils::now();
-$conversationManager = $this->getContainer()->get(\App\Modules\Hermes\Manager\ConversationManager::class);
-$conversationManager->add($conv);
+		$conv = new Conversation();
+		$conv->messages = 0;
+		$conv->type = Conversation::TY_SYSTEM;
+		$conv->title = 'Jean-Mi, administrateur système';
+		$conv->dCreation = Utils::now();
+		$conv->dLastMessage = Utils::now();
+		$this->conversationManager->add($conv);
 
-$user = new ConversationUser();
-$user->rConversation = $conv->id;
-$user->rPlayer = $container->getParameter('id_jeanmi');
-$user->convPlayerStatement = ConversationUser::US_ADMIN;
-$user->convStatement = ConversationUser::CS_DISPLAY;
-$user->dLastView = Utils::now();
-$conversationUserManager = $this->getContainer()->get(\App\Modules\Hermes\Manager\ConversationUserManager::class);
-$conversationUserManager->add($user);
+		$user = new ConversationUser();
+		$user->rConversation = $conv->id;
+		$user->rPlayer = $this->jeanMiId;
+		$user->convPlayerStatement = ConversationUser::US_ADMIN;
+		$user->convStatement = ConversationUser::CS_DISPLAY;
+		$user->dLastView = Utils::now();
+		$this->conversationUserManager->add($user);
 
-foreach ($availableFactions as $faction) {
-	$player = $playerManager->getFactionAccount($faction);
+		foreach ($this->availableFactions as $faction) {
+			$player = $this->playerManager->getFactionAccount($faction);
 
-	$conv = new Conversation();
-	$conv->messages = 0;
-	$conv->type = Conversation::TY_SYSTEM;
-	$conv->title = 'Communication de ' . ColorResource::getInfo($player->rColor, 'popularName');
-	$conv->dCreation = Utils::now();
-	$conv->dLastMessage = Utils::now();
-	$conversationManager->add($conv);
+			$conv = new Conversation();
+			$conv->messages = 0;
+			$conv->type = Conversation::TY_SYSTEM;
+			$conv->title = 'Communication de ' . ColorResource::getInfo($player->rColor, 'popularName');
+			$conv->dCreation = Utils::now();
+			$conv->dLastMessage = Utils::now();
+			$this->conversationManager->add($conv);
 
-	$user = new ConversationUser();
-	$user->rConversation = $conv->id;
-	$user->rPlayer = $player->id;
-	$user->convPlayerStatement = ConversationUser::US_ADMIN;
-	$user->convStatement = ConversationUser::CS_DISPLAY;
-	$user->dLastView = Utils::now();
-	$conversationUserManager->add($user);
-}
+			$user = new ConversationUser();
+			$user->rConversation = $conv->id;
+			$user->rPlayer = $player->id;
+			$user->convPlayerStatement = ConversationUser::US_ADMIN;
+			$user->convStatement = ConversationUser::CS_DISPLAY;
+			$user->dLastView = Utils::now();
+			$this->conversationUserManager->add($user);
+		}
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table notification</h2>';
+		$output->writeln('Ajout de la table notification');;
 
-$db->query("DROP TABLE IF EXISTS `notification`");
-$db->query("CREATE TABLE IF NOT EXISTS `notification` (
+		$this->database->query("DROP TABLE IF EXISTS `notification`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `notification` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`title` varchar(100) NOT NULL,
@@ -1060,10 +1086,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `notification` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table roadMap</h2>';
+		$output->writeln('Ajout de la table roadMap');;
 
-$db->query("DROP TABLE IF EXISTS `roadMap`");
-$db->query("CREATE TABLE IF NOT EXISTS `roadMap` (
+		$this->database->query("DROP TABLE IF EXISTS `roadMap`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `roadMap` (
 	`id` INT NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT NOT NULL,
 	`oContent` text NOT NULL,
@@ -1074,10 +1100,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `roadMap` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table research</h2>';
+		$output->writeln('Ajout de la table research');;
 
-$db->query("DROP TABLE IF EXISTS `research`");
-$db->query("CREATE TABLE IF NOT EXISTS `research` (
+		$this->database->query("DROP TABLE IF EXISTS `research`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `research` (
 	`rPlayer` INT unsigned NOT NULL,
 
 	`mathLevel` TINYINT unsigned NOT NULL DEFAULT 0,
@@ -1104,10 +1130,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `research` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table technology</h2>';
+		$output->writeln('Ajout de la table technology');;
 
-$db->query("DROP TABLE IF EXISTS `technology`");
-$db->query("CREATE TABLE IF NOT EXISTS `technology` (
+		$this->database->query("DROP TABLE IF EXISTS `technology`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `technology` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 
@@ -1119,10 +1145,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `technology` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table technologyQueue</h2>';
+		$output->writeln('Ajout de la table technologyQueue');;
 
-$db->query("DROP TABLE IF EXISTS `technologyQueue`");
-$db->query("CREATE TABLE IF NOT EXISTS `technologyQueue` (
+		$this->database->query("DROP TABLE IF EXISTS `technologyQueue`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `technologyQueue` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`rPlace` INT unsigned NOT NULL,
@@ -1139,12 +1165,12 @@ $db->query("CREATE TABLE IF NOT EXISTS `technologyQueue` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-$db->query("DROP TABLE IF EXISTS `recyclingLog`");
-$db->query("DROP TABLE IF EXISTS `recyclingMission`");
+		$this->database->query("DROP TABLE IF EXISTS `recyclingLog`");
+		$this->database->query("DROP TABLE IF EXISTS `recyclingMission`");
 
-echo '<h2>Ajout de la table recyclingMission</h2>';
+		$output->writeln('Ajout de la table recyclingMission');;
 
-$db->query("CREATE TABLE IF NOT EXISTS `recyclingMission` (
+		$this->database->query("CREATE TABLE IF NOT EXISTS `recyclingMission` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rBase` INT unsigned NOT NULL,
 	`rTarget` INT unsigned NOT NULL,
@@ -1161,9 +1187,9 @@ $db->query("CREATE TABLE IF NOT EXISTS `recyclingMission` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table recyclingLog</h2>';
+		$output->writeln('Ajout de la table recyclingLog');;
 
-$db->query("CREATE TABLE IF NOT EXISTS `recyclingLog` (
+		$this->database->query("CREATE TABLE IF NOT EXISTS `recyclingLog` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rRecycling` INT unsigned NOT NULL,
 
@@ -1188,10 +1214,10 @@ $db->query("CREATE TABLE IF NOT EXISTS `recyclingLog` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
 #--------------------------------------------------------------------------------------------
-echo '<h2>Ajout de la table creditTransaction</h2>';
+		$output->writeln('Ajout de la table creditTransaction');;
 
-$db->query("DROP TABLE IF EXISTS `creditTransaction`");
-$db->query("CREATE TABLE IF NOT EXISTS `creditTransaction` (
+		$this->database->query("DROP TABLE IF EXISTS `creditTransaction`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `creditTransaction` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rSender` INT unsigned NOT NULL,
 	`rReceiver` INT unsigned NOT NULL,
@@ -1203,9 +1229,9 @@ $db->query("CREATE TABLE IF NOT EXISTS `creditTransaction` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;");
 
-echo '<h2>Ajout de la table colorLink</h2>';
-$db->query("DROP TABLE IF EXISTS `colorLink`");
-$db->query("CREATE TABLE IF NOT EXISTS `colorLink` (
+		$output->writeln('Ajout de la table colorLink');;
+		$this->database->query("DROP TABLE IF EXISTS `colorLink`");
+		$this->database->query("CREATE TABLE IF NOT EXISTS `colorLink` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 
 	`rColor` TINYINT NOT NULL DEFAULT 0,
@@ -1214,39 +1240,41 @@ $db->query("CREATE TABLE IF NOT EXISTS `colorLink` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-$values = '';
-$colorManager = $this->getContainer()->get(\App\Modules\Demeter\Manager\ColorManager::class);
-$factions = $colorManager->getAll();
-$nbFactions = count($factions);
-for ($i = 1; $i < $nbFactions; $i++) {
-	for ($j = 1; $j < $nbFactions; $j++) {
-		if (!(($i == $nbFactions - 1) && ($j == $nbFactions - 1))) {
-			$values .= '(' . $factions[$i]->id . ',' . $factions[$j]->id . ',' . 0 .'),';
+		$values = '';
+		$factions = $this->colorManager->getAll();
+		$nbFactions = count($factions);
+		for ($i = 1; $i < $nbFactions; $i++) {
+			for ($j = 1; $j < $nbFactions; $j++) {
+				if (!(($i == $nbFactions - 1) && ($j == $nbFactions - 1))) {
+					$values .= '(' . $factions[$i]->id . ',' . $factions[$j]->id . ',' . 0 . '),';
+				}
+			}
 		}
+
+		$values .= '(' . $factions[$nbFactions - 1]->id . ',' . $factions[$nbFactions - 1]->id . ',' . 0 . ');';
+
+		$output->writeln('Remplissage de la table colorLink');
+		$qr = $this->database->prepare("INSERT INTO `colorLink` (`rColor`, `rColorLinked`, `statement`) VALUES" . $values);
+		$qr->execute();
+
+		$this->database->query('SET FOREIGN_KEY_CHECKS = 1;');
+
+//		if ($container->getParameter('data_analysis')) {
+//			$output->writeln('Création des tables du module d\'analyse');
+//
+//			include 'data-analysis/player.php';
+//			include 'data-analysis/playerDaily.php';
+////	include 'data-analysis/fleetMovement.php';
+//			include 'data-analysis/commercialRelation.php';
+//			include 'data-analysis/socialRelation.php';
+//			include 'data-analysis/baseAction.php';
+//		}
+
+		$output->writeln('Génération de la galaxie');
+
+		$this->galaxyGenerator->generate();
+		// echo $galaxyGenerator->getLog();
+
+		return self::SUCCESS;
 	}
 }
-
-$values .= '(' . $factions[$nbFactions - 1]->id . ',' . $factions[$nbFactions - 1]->id . ',' . 0 .');';
-
-echo '<h3>Remplissage de la table colorLink</h3>';
-$qr = $db->prepare("INSERT INTO `colorLink` (`rColor`, `rColorLinked`, `statement`) VALUES" . $values);
-$qr->execute();
-
-$db->query('SET FOREIGN_KEY_CHECKS = 1;');
-
-if ($container->getParameter('data_analysis')) {
-	echo '<h1>Création des tables du module d\'analyse</h1>';
-
-	include 'data-analysis/player.php';
-	include 'data-analysis/playerDaily.php';
-//	include 'data-analysis/fleetMovement.php';
-	include 'data-analysis/commercialRelation.php';
-	include 'data-analysis/socialRelation.php';
-	include 'data-analysis/baseAction.php';
-}
-
-echo '<h1>Génération de la galaxie</h1>';
-
-$galaxyGenerator = $this->getContainer()->get(\App\Modules\Gaia\Helper\GalaxyGenerator::class);
-$galaxyGenerator->generate();
-echo $galaxyGenerator->getLog();
