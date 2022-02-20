@@ -130,7 +130,6 @@
 			</div>
 		{% endif %}
 	{% else %}
-		{% dump routes %}
 		{% for route in routes %}
 			{% if route.isProposed and route.playerId2 == current_player.id %}
 				{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
