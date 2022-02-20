@@ -2,6 +2,10 @@ combat_reports:
     resource: './ares/combat_reports.yaml'
     prefix: /combat-reports
 
+fleets:
+    resource: './ares/fleets.yaml'
+    prefix: /fleets
+
 commanders:
     resource: './zeus/commanders.yaml'
     prefix: /commanders
@@ -28,20 +32,4 @@ fleet_archives:
 
 memorial:
     path: /memorial
-    controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
-
-move_fleet:
-    path: /move-fleet
-    controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
-
-loot:
-    path: /loot
-    controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
-
-colonize:
-    path: /colonize
-    controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
-
-conquer:
-    path: /colonize
     controller: App\Modules\Ares\Infrastructure\Controller\ViewMemorial
