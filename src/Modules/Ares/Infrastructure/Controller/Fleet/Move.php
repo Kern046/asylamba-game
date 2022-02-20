@@ -24,12 +24,11 @@ class Move extends AbstractController
 		SectorManager $sectorManager,
 		EntityManager $entityManager,
 		int $id,
-		int $placeId,
 	): Response {
 		$session = $request->getSession();
 
 		if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
-			if (($place = $placeManager->get($placeId)) !== null) {
+			if (($place = $placeManager->get($request->query->getInt('placeId'))) !== null) {
 				if ($commander->playerColor == $place->playerColor) {
 					$home = $placeManager->get($commander->getRBase());
 

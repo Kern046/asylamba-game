@@ -34,7 +34,6 @@ class Colonize extends AbstractController
 		SectorManager $sectorManager,
 		EntityManager $entityManager,
 		int $id,
-		int $placeId,
 	): Response {
 		# load the technologies
 		$session = $request->getSession();
@@ -47,7 +46,7 @@ class Colonize extends AbstractController
 			$obQuantity = $session->get('playerBase')->get('ob')->size();
 
 			$coloQuantity = 0;
-			$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId() [Commander::MOVING]);
+			$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::MOVING]);
 			foreach ($commanders as $commander) {
 				if ($commander->travelType == Commander::COLO) {
 					$coloQuantity++;
@@ -56,7 +55,7 @@ class Colonize extends AbstractController
 			$totalBases = $obQuantity + $coloQuantity;
 			if ($totalBases < $maxBasesQuantity) {
 				if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer = $currentPlayer->getId()) {
-					if (($place = $placeManager->get($placeId)) !== null) {
+					if (($place = $placeManager->get($request->query->getInt('placeId'))) !== null) {
 						if ($place->typeOfPlace == Place::TERRESTRIAL) {
 
 							$home = $placeManager->get($commander->getRBase());

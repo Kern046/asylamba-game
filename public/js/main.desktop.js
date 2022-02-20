@@ -654,7 +654,7 @@ jQuery(document).ready(function($) {
 
 						items.find('a').each(function() {
 							var url = $(this).data('url');
-							$(this).attr('href', url.replace('{id}', mapController.commanders.id));
+							$(this).attr('href', url.replace(encodeURI('{id}'), mapController.commanders.id));
 						});
 
 						items.show();

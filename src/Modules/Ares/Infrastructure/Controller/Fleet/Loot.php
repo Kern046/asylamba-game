@@ -33,10 +33,9 @@ class Loot extends AbstractController
 		TutorialHelper $tutorialHelper,
 		EntityManager $entityManager,
 		int $id,
-		int $placeId,
 	): Response {
 		$session = $request->getSession();
-		$place = $placeManager->get($placeId);
+		$place = $placeManager->get($request->query->getInt('placeId'));
 		if (null === $place->rPlayer || ($player = $playerManager->get($place->rPlayer)) === null) {
 			if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
 				if ($place !== null) {
@@ -64,6 +63,7 @@ class Loot extends AbstractController
 											$session->get('playerInfo')->get('stepTutorial') === TutorialResource::LOOT_PLANET) {
 											$tutorialHelper->setStepDone();
 										}
+										$entityManager->flush();
 
 										if ($request->query->has('redirect')) {
 											return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);

@@ -36,11 +36,10 @@ class Conquer extends AbstractController
 		SectorManager $sectorManager,
 		EntityManager $entityManager,
 		int $id,
-		int $placeId
 	): Response {
 		$conquestCost = $this->getParameter('ares.coeff.conquest_cost');
 
-		$place = $placeManager->get($placeId);
+		$place = $placeManager->get($request->query->getInt('placeId'));
 
 		// load the technologies
 		$technologies = $technologyManager->getPlayerTechnology($currentPlayer->getId());
@@ -55,7 +54,7 @@ class Conquer extends AbstractController
 		$obQuantity = $session->get('playerBase')->get('ob')->size();
 		$msQuantity = $session->get('playerBase')->get('ms')->size();
 		$coloQuantity = 0;
-		$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId() [Commander::MOVING]);
+		$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::MOVING]);
 		foreach ($commanders as $commander) {
 			if ($commander->travelType == Commander::COLO) {
 				$coloQuantity++;
