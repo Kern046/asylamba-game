@@ -1,5 +1,6 @@
 FROM php:8.1-fpm-alpine
 
+
 # Install SUPERVISOR and dependencies
 RUN apk update
 
@@ -14,6 +15,12 @@ RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
     && apk del pcre-dev ${PHPIZE_DEPS}
 
 RUN curl -s https://getcomposer.org/installer | php
-RUN alias composer='php composer.phar'
+RUN alias composer="php composer.phar"
+
+COPY docker-entrypoint.sh /entrypoint.sh
+
+RUN chmod a+x /entrypoint.sh
 
 WORKDIR /srv/app
+
+ENTRYPOINT ["/entrypoint.sh"]
