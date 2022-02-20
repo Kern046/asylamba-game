@@ -6,6 +6,10 @@
 	php_fastcgi /* kalaxia_app:9000
 	file_server
 
+	basicauth /* {
+		kalaxia JDJhJDE0JDlWOXN6OEF1Q1NIbmdVU29ySEJTL3V1U2suY1JSb2xLL3lCRnlaVkNZOU9uanlKMTVmZnNt
+	}
+
     # Enable HTTP request logging
     log {
         output file /var/log/caddy/access.log
