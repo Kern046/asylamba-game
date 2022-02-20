@@ -10,6 +10,7 @@ use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Gaia\Resource\PlaceResource;
 use App\Modules\Zeus\Helper\TutorialHelper;
+use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +20,7 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 class AffectCommander extends AbstractController
 {
 	public function __invoke(
-		Request $request,
+		Player $currentPlayer,
 		CommanderManager $commanderManager,
 		OrbitalBaseManager $orbitalBaseManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
@@ -30,7 +31,6 @@ class AffectCommander extends AbstractController
 		if (($commander = $commanderManager->get($id)) === null) {
 			throw new \ErrorException('Cet officier n\'existe pas ou ne vous appartient pas');
 		}
-		$session = $request->getSession();
 
 		$orbitalBase = $orbitalBaseManager->get($commander->rBase);
 
@@ -45,8 +45,8 @@ class AffectCommander extends AbstractController
 				$commander->line = 2;
 
 				# tutorial
-				if ($session->get('playerInfo')->get('stepDone') == FALSE && $session->get('playerInfo')->get('stepTutorial') === TutorialResource::AFFECT_COMMANDER) {
-					$tutorialHelper->setStepDone();
+				if ($currentPlayer->stepDone == FALSE && $currentPlayer->getStepTutorial() === TutorialResource::AFFECT_COMMANDER) {
+					$tutorialHelper->setStepDone($currentPlayer);
 				}
 
 				$this->addFlash('success', 'Votre officier ' . $commander->getName() . ' a bien été affecté en force de réserve');
@@ -58,8 +58,8 @@ class AffectCommander extends AbstractController
 				$commander->line = 1;
 
 				# tutorial
-				if ($session->get('playerInfo')->get('stepDone') == FALSE && $session->get('playerInfo')->get('stepTutorial') === TutorialResource::AFFECT_COMMANDER) {
-					$tutorialHelper->setStepDone();
+				if ($currentPlayer->stepDone == FALSE && $currentPlayer->getStepTutorial() === TutorialResource::AFFECT_COMMANDER) {
+					$tutorialHelper->setStepDone($currentPlayer);
 				}
 
 				$this->addFlash('success', 'Votre officier ' . $commander->getName() . ' a bien été affecté en force active');

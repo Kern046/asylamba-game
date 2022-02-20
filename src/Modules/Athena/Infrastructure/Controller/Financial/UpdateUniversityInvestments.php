@@ -33,7 +33,7 @@ class UpdateUniversityInvestments extends AbstractController
 		// tutorial
 		if ($session->get('playerInfo')->get('stepDone') === false &&
 			$session->get('playerInfo')->get('stepTutorial') === TutorialResource::MODIFY_UNI_INVEST) {
-			$tutorialHelper->setStepDone();
+			$tutorialHelper->setStepDone($currentPlayer);
 		}
 
 		$this->addFlash('success', 'L\'investissement dans l\'université a été modifié');

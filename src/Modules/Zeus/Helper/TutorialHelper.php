@@ -19,6 +19,7 @@ use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Manager\BuildingQueueManager;
 use App\Modules\Promethee\Manager\TechnologyQueueManager;
 use App\Modules\Promethee\Manager\TechnologyManager;
+use App\Modules\Zeus\Model\Player;
 
 class TutorialHelper
 {
@@ -57,22 +58,16 @@ class TutorialHelper
 		}
 	}
 
-	public function setStepDone() {
-		$player = $this->playerManager->get($this->sessionWrapper->get('playerId'));
-		
-		$player->stepDone = TRUE;
-
-		$this->sessionWrapper->get('playerInfo')->add('stepDone', TRUE);
+	public function setStepDone(Player $player): void
+	{
+		$player->stepDone = true;
 		
 		$this->entityManager->flush($player);
 	}
 
-	public function clearStepDone() {
-		$player = $this->playerManager->get($this->sessionWrapper->get('playerId'));
-		
-		$player->stepDone = FALSE;
-
-		$this->sessionWrapper->get('playerInfo')->add('stepDone', FALSE);
+	public function clearStepDone(Player $player): void
+	{
+		$player->stepDone = true;
 
 		$this->entityManager->flush($player);
 	}

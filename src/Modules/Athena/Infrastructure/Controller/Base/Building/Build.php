@@ -49,67 +49,67 @@ class Build extends AbstractController
 					switch ($currentPlayer->getStepTutorial()) {
 						case TutorialResource::GENERATOR_LEVEL_2:
 							if ($identifier == OrbitalBaseResource::GENERATOR AND $currentLevel + 1 >= 2) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::REFINERY_LEVEL_3:
 							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 3) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::STORAGE_LEVEL_3:
 							if ($identifier == OrbitalBaseResource::STORAGE AND $currentLevel + 1 >= 3) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::DOCK1_LEVEL_1:
 							if ($identifier == OrbitalBaseResource::DOCK1 AND $currentLevel + 1 >= 1) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::TECHNOSPHERE_LEVEL_1:
 							if ($identifier == OrbitalBaseResource::TECHNOSPHERE AND $currentLevel + 1 >= 1) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::REFINERY_LEVEL_10:
 							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 10) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::STORAGE_LEVEL_8:
 							if ($identifier == OrbitalBaseResource::STORAGE AND $currentLevel + 1 >= 8) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::DOCK1_LEVEL_6:
 							if ($identifier == OrbitalBaseResource::DOCK1 AND $currentLevel + 1 >= 6) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::REFINERY_LEVEL_16:
 							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 16) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::STORAGE_LEVEL_12:
 							if ($identifier == OrbitalBaseResource::STORAGE AND $currentLevel + 1 >= 12) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::TECHNOSPHERE_LEVEL_6:
 							if ($identifier == OrbitalBaseResource::TECHNOSPHERE AND $currentLevel + 1 >= 6) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::DOCK1_LEVEL_15:
 							if ($identifier == OrbitalBaseResource::DOCK1 AND $currentLevel + 1 >= 15) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 						case TutorialResource::REFINERY_LEVEL_20:
 							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 20) {
-								$tutorialHelper->setStepDone();
+								$tutorialHelper->setStepDone($currentPlayer);
 							}
 							break;
 					}

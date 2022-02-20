@@ -59,9 +59,9 @@ class Loot extends AbstractController
 										$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration) ;
 										$this->addFlash('success', 'Flotte envoyée.');
 										# tutorial
-										if ($session->get('playerInfo')->get('stepDone') == FALSE &&
-											$session->get('playerInfo')->get('stepTutorial') === TutorialResource::LOOT_PLANET) {
-											$tutorialHelper->setStepDone();
+										if ($currentPlayer->stepDone == FALSE &&
+											$currentPlayer->getStepTutorial() === TutorialResource::LOOT_PLANET) {
+											$tutorialHelper->setStepDone($currentPlayer);
 										}
 										$entityManager->flush();
 

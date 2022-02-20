@@ -86,7 +86,7 @@ class UpdateSquadron extends AbstractController
 		}
 # tutorial
 		if ($currentPlayer->stepDone === false && $currentPlayer->getStepTutorial() === TutorialResource::FILL_SQUADRON) {
-			$tutorialHelper->setStepDone();
+			$tutorialHelper->setStepDone($currentPlayer);
 		}
 
 		$base->shipStorage = $baseSHIP;

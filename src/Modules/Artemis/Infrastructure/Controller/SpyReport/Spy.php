@@ -173,7 +173,7 @@ class Spy extends AbstractController
 					# tutorial
 					if ($currentPlayer->stepDone == FALSE &&
 						$currentPlayer->stepTutorial === TutorialResource::SPY_PLANET) {
-						$tutorialHelper->setStepDone();
+						$tutorialHelper->setStepDone($currentPlayer);
 					}
 
 					$this->addFlash('success', 'Espionnage effectué.');

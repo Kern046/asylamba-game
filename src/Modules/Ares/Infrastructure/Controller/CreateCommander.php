@@ -56,7 +56,7 @@ class CreateCommander extends AbstractController
 								# tutorial
 								if ($currentPlayer->stepDone == FALSE &&
 									$currentPlayer->stepTutorial === TutorialResource::CREATE_COMMANDER) {
-									$tutorialHelper->setStepDone();
+									$tutorialHelper->setStepDone($currentPlayer);
 								}
 
 								# débit des crédits au joueur

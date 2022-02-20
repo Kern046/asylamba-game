@@ -45,7 +45,7 @@ class ChangeLine extends AbstractController
 
 			# tutorial
 			if ($currentPlayer->stepDone !== true && $currentPlayer->getStepTutorial() === TutorialResource::MOVE_FLEET_LINE) {
-				$tutorialHelper->setStepDone();
+				$tutorialHelper->setStepDone($currentPlayer);
 			}
 
 			$commander->line = 1;

@@ -67,12 +67,12 @@ class BuildShips extends AbstractController
 						switch ($currentPlayer->stepTutorial) {
 							case TutorialResource::BUILD_SHIP0:
 								if ($ship == ShipResource::PEGASE) {
-									$tutorialHelper->setStepDone();
+									$tutorialHelper->setStepDone($currentPlayer);
 								}
 								break;
 							case TutorialResource::BUILD_SHIP1:
 								if ($ship == ShipResource::SATYRE) {
-									$tutorialHelper->setStepDone();
+									$tutorialHelper->setStepDone($currentPlayer);
 								}
 								break;
 						}
