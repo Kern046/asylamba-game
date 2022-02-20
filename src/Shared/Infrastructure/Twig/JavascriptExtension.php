@@ -3,15 +3,20 @@
 namespace App\Shared\Infrastructure\Twig;
 
 use App\Modules\Athena\Resource\ShipResource;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class JavascriptExtension extends AbstractExtension
 {
+	public function __construct(private RequestStack $requestStack)
+	{
+	}
+
 	public function getFunctions(): array
 	{
 		return [
-			new TwigFunction('get_api_endpoint', fn () => 'https://game.kalaxia.wip/'),
+			new TwigFunction('get_api_endpoint', fn () => $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost()),
 			new TwigFunction('get_ship_names', fn () => $this->getShipNames()),
 			new TwigFunction('get_ship_pevs', fn () => $this->getShipPevs()),
 		];
