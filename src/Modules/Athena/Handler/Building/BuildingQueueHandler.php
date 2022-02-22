@@ -30,12 +30,14 @@ class BuildingQueueHandler implements MessageHandlerInterface
 	) {
 	}
 
-	public function __invoke(BuildingQueueMessage $message)
+	public function __invoke(BuildingQueueMessage $message): void
 	{
 		$this->logger->info('Handle building completion for queue {queueId}', [
 			'queueId' => $message->getBuildingQueueId(),
 		]);
-		$queue = $this->buildingQueueManager->get($message->getBuildingQueueId());
+		if (null === ($queue = $this->buildingQueueManager->get($message->getBuildingQueueId()))) {
+			return;
+		}
 		$orbitalBase = $this->orbitalBaseManager->get($queue->rOrbitalBase);
 		$player = $this->playerManager->get($orbitalBase->rPlayer);
 		# update builded building
@@ -51,11 +53,11 @@ class BuildingQueueHandler implements MessageHandlerInterface
 		$experience = $this->orbitalBaseHelper->getBuildingInfo($queue->buildingNumber, 'level', $queue->targetLevel, 'points');
 		$this->playerManager->increaseExperience($player, $experience);
 
-		# alert
-		if (($session = $this->clientManager->getSessionByPlayerId($player->getId())) !== null) {
-			$session->addFlashbag('Construction de votre <strong>' . $this->orbitalBaseHelper->getBuildingInfo($queue->buildingNumber, 'frenchName') . ' niveau ' . $queue->targetLevel . '</strong> sur <strong>' . $orbitalBase->name . '</strong> terminée. Vous gagnez ' . $experience . ' point' . Format::addPlural($experience) . ' d\'expérience.', Flashbag::TYPE_GENERATOR_SUCCESS);
-			$this->sessionWrapper->save($session);
-		}
+		# alert @TODO replace with Mercure
+//		if (($session = $this->clientManager->getSessionByPlayerId($player->getId())) !== null) {
+//			$session->addFlashbag('Construction de votre <strong>' . $this->orbitalBaseHelper->getBuildingInfo($queue->buildingNumber, 'frenchName') . ' niveau ' . $queue->targetLevel . '</strong> sur <strong>' . $orbitalBase->name . '</strong> terminée. Vous gagnez ' . $experience . ' point' . Format::addPlural($experience) . ' d\'expérience.', Flashbag::TYPE_GENERATOR_SUCCESS);
+//			$this->sessionWrapper->save($session);
+//		}
 		# delete queue in database
 		$this->entityManager->remove($queue);
 		$this->entityManager->flush($queue);

@@ -29,10 +29,12 @@ class TechnologyQueueHandler implements MessageHandlerInterface
 
 	}
 
-	public function __invoke(TechnologyQueueMessage $message)
+	public function __invoke(TechnologyQueueMessage $message): void
 	{
-		$technologyQueue = $this->technologyQueueManager->get($message->getTechnologyQueueId());
-		$orbitalBase = $this->orbitalBaseManager->get($technologyQueue->getPlaceId());
+		if (null === ($technologyQueue = $this->technologyQueueManager->get($message->getTechnologyQueueId()))) {
+			return;
+		}
+		// $orbitalBase = $this->orbitalBaseManager->get($technologyQueue->getPlaceId());
 		$player = $this->playerManager->get($technologyQueue->getPlayerId());
 		# technologie construite
 		$technology = $this->technologyManager->getPlayerTechnology($player->getId());
@@ -41,16 +43,16 @@ class TechnologyQueueHandler implements MessageHandlerInterface
 		$experience = $this->technologyHelper->getInfo($technologyQueue->getTechnology(), 'points', $technologyQueue->getTargetLevel());
 		$this->playerManager->increaseExperience($player, $experience);
 
-		# alert
-		if (($session = $this->clientManager->getSessionByPlayerId($player->getId())) !== null) {
-			$alt = 'Développement de votre technologie ' . $this->technologyHelper->getInfo($technologyQueue->getTechnology(), 'name');
-			if ($technologyQueue->getTargetLevel() > 1) {
-				$alt .= ' niveau ' . $technologyQueue->getTargetLevel();
-			}
-			$alt .= ' terminée. Vous gagnez ' . $experience . ' d\'expérience.';
-			$session->addFlashbag($alt, Flashbag::TYPE_TECHNOLOGY_SUCCESS);
-			$this->sessionWrapper->save($session);
-		}
+		# alert @TODO replace with Mercure
+//		if (($session = $this->clientManager->getSessionByPlayerId($player->getId())) !== null) {
+//			$alt = 'Développement de votre technologie ' . $this->technologyHelper->getInfo($technologyQueue->getTechnology(), 'name');
+//			if ($technologyQueue->getTargetLevel() > 1) {
+//				$alt .= ' niveau ' . $technologyQueue->getTargetLevel();
+//			}
+//			$alt .= ' terminée. Vous gagnez ' . $experience . ' d\'expérience.';
+//			$session->addFlashbag($alt, Flashbag::TYPE_TECHNOLOGY_SUCCESS);
+//			$this->sessionWrapper->save($session);
+//		}
 		$this->entityManager->remove($technologyQueue);
 		$this->entityManager->flush($technologyQueue);
 	}

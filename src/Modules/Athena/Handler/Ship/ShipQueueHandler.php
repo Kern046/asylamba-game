@@ -30,7 +30,9 @@ class ShipQueueHandler implements MessageHandlerInterface
 
 	public function __invoke(ShipQueueMessage $message): void
 	{
-		$queue = $this->shipQueueManager->get($message->getShipQueueId());
+		if (null === ($queue = $this->shipQueueManager->get($message->getShipQueueId()))) {
+			return;
+		}
 		$orbitalBase = $this->orbitalBaseManager->get($queue->rOrbitalBase);
 		$player = $this->playerManager->get($orbitalBase->rPlayer);
 		# vaisseau construit
@@ -39,20 +41,20 @@ class ShipQueueHandler implements MessageHandlerInterface
 		$experience = $queue->quantity * ShipResource::getInfo($queue->shipNumber, 'points');
 		$this->playerManager->increaseExperience($player, $experience);
 
-		# alert
-		if (($session = $this->clientManager->getSessionByPlayerId($player->getId())) !== null) {
-			$shipName = ShipResource::getInfo($queue->shipNumber, 'codeName');
-			$session->addFlashbag(\sprintf(
-				'Construction de %s</strong> sur <strong>%s</strong> terminée. Vous gagnez %s point%s d\'expérience.',
-				($queue->quantity > 1)
-					? \sprintf('vos <strong>%s %ss', $queue->quantity, $shipName)
-					: \sprintf('votre %s<strong>', $shipName),
-				$orbitalBase->name,
-				$experience,
-				Format::addPlural($experience),
-			), 1 === $queue->dockType ? Flashbag::TYPE_DOCK1_SUCCESS : Flashbag::TYPE_DOCK2_SUCCESS);
-			$this->sessionWrapper->save($session);
-		}
+		# alert @TODO replace with Mercure
+//		if (($session = $this->clientManager->getSessionByPlayerId($player->getId())) !== null) {
+//			$shipName = ShipResource::getInfo($queue->shipNumber, 'codeName');
+//			$session->addFlashbag(\sprintf(
+//				'Construction de %s</strong> sur <strong>%s</strong> terminée. Vous gagnez %s point%s d\'expérience.',
+//				($queue->quantity > 1)
+//					? \sprintf('vos <strong>%s %ss', $queue->quantity, $shipName)
+//					: \sprintf('votre %s<strong>', $shipName),
+//				$orbitalBase->name,
+//				$experience,
+//				Format::addPlural($experience),
+//			), 1 === $queue->dockType ? Flashbag::TYPE_DOCK1_SUCCESS : Flashbag::TYPE_DOCK2_SUCCESS);
+//			$this->sessionWrapper->save($session);
+//		}
 		$this->entityManager->remove($queue);
 		$this->entityManager->flush();
 	}
