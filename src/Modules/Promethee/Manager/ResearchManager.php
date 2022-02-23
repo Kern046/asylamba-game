@@ -370,6 +370,8 @@ class ResearchManager extends Manager
 				$research->informaticToPay = $this->researchHelper->getInfo($research->informaticTech, 'level', $research->getLevel($research->informaticTech) + 1, 'price');
 			}
 		} while ($informaticInvest > 0);
+
+		$this->save();
 	}
 
 	public function getResearchList(Research $research) {
