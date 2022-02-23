@@ -20,7 +20,7 @@ class NotificationManager
     {
 	}
 	
-	public function get($id)
+	public function get($id): Notification|null
 	{
 		return $this->entityManager->getRepository(Notification::class)->get($id);
 	}
