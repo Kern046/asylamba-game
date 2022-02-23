@@ -1,3 +1,4 @@
-technology:
-    path: /technology
-    controller: App\Modules\Promethee\Infrastructure\Controller\TechnologyController
+university:
+    path: /university
+    controller: App\Modules\Promethee\Infrastructure\Controller\ViewUniversity
+
