@@ -31,7 +31,7 @@ echo '<div class="component">';
 
 			} elseif ($faction->isWinner == Color::WIN) {
 				echo '<h4>Vous avez gagné</h4>';
-				echo '<p>Vous avez atteint les ' . $pointsToWin . ', vous avez donc gagner la partie. Félicitations !</p>';
+				echo '<p>Vous avez atteint les ' . $pointsToWin . ', vous avez donc gagné la partie. Félicitations !</p>';
 			}
 
 		echo '</div>';
