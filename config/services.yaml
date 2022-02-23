@@ -93,7 +93,7 @@ parameters:
     publicr: '/public/'
     css: '%publicr%css/'
     js: '%publicr%js/'
-    media: '%publicr%media/'
+    media: '/media/'
     log: '%publicr%log/'
     # active les APIs de confirmation
     # active la création de personnage au niveau 5
