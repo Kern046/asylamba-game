@@ -46,7 +46,10 @@ class BallotHandler implements MessageHandlerInterface
 	public function __invoke(BallotMessage $message): void
 	{
 		$faction = $this->colorManager->get($message->getFactionId());
-		$election = $this->electionManager->getFactionLastElection($faction->id);
+		if (null === ($election = $this->electionManager->getFactionLastElection($faction->id))) {
+			return;
+		}
+
 		$chiefId = (($leader = $this->playerManager->getFactionLeader($faction->id)) !== null) ? $leader->getId() : false;
 
 		$votes = $this->voteManager->getElectionVotes($election);

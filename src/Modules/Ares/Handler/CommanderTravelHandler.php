@@ -28,9 +28,9 @@ class CommanderTravelHandler implements MessageHandlerInterface
 
 	public function __invoke(CommanderTravelMessage $commanderTravelMessage): void
 	{
-		$commander = $this->commanderManager->get($commanderTravelMessage->getCommanderId());
-
-		// dump($commander->getTravelType());
+		if (null === ($commander = $this->commanderManager->get($commanderTravelMessage->getCommanderId()))) {
+			return;
+		}
 
 		match($commander->getTravelType()) {
 			Commander::MOVE => $this->commanderManager->uChangeBase($commander),
