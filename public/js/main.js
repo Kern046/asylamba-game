@@ -173,8 +173,12 @@ jQuery(document).ready(function($) {
 				uniInvest.percent[type] -= quantity;
 				uniInvest.percent.rest  += quantity;
 
-				if (quantity != 0) {
-					$.get(game.path + 'ajax/a-decreaseinvestuni/category-' + type + '/quantity-' + quantity);
+				if (quantity !== 0) {
+					$.ajax({
+						type: 'PATCH',
+						url: game.path + 'api/university/' + type + '/decrease',
+						data: JSON.stringify({ quantity }),
+					});
 				}
 			} else {
 				if (uniInvest.percent[type] + quantity > 100) {
@@ -187,8 +191,12 @@ jQuery(document).ready(function($) {
 				uniInvest.percent[type] += quantity;
 				uniInvest.percent.rest  -= quantity;
 				
-				if (quantity != 0) {
-					$.get(game.path + 'ajax/a-increaseinvestuni/category-' + type + '/quantity-' + quantity);
+				if (quantity !== 0) {
+					$.ajax({
+						type: 'PATCH',
+						url: game.path + 'api/university/' + type + '/increase',
+						data: JSON.stringify({ quantity }),
+					});
 				}
 			}
 
