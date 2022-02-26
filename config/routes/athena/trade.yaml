@@ -17,7 +17,7 @@ accept_commercial_route:
 
 refuse_commercial_route:
     path: /bases/{baseId}/routes/{id}/refuse
-    controller: App\Modules\Athena\Infrastructure\Controller\Trade\RouteRefuse
+    controller: App\Modules\Athena\Infrastructure\Controller\Trade\Route\Refuse
 
 # Offers
 propose_offer:
