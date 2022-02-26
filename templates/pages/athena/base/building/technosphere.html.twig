@@ -1,6 +1,7 @@
 {% extends 'layouts/athena/current_base.html.twig' %}
 
 {% block content %}
+	{% dump technologies_data %}
 	{% set technosphere_building_number = constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::TECHNOSPHERE') %}
 
 	<div class="component techno">
@@ -31,7 +32,7 @@
 						 data-progress-output="lite"
 						 data-progress-current-time="{{ remaining_total_time }}"
 						 data-progress-total-time="{{ total_time_techno }}">
-						<a href="{{ path('cancel_technology_queue', {'id': queue.id}) }}"
+						<a href="{{ path('cancel_technology_queue', {'identifier': queue.technology }) }}"
 						   class="button hb lt"
 						   title="annuler la recherche (attention, vous ne récupérerez que {{ technology_resource_refund * 100 }}% du montant investi)">×</a>
 						<img class="picto" src="{{ asset('media/technology/picto/' ~ queue|queue_picture ~ '.png') }}" alt="" />
@@ -130,10 +131,10 @@
 		</div>
 		<div class="fix-body">
 			<div class="body">
-				{% for data in technologies_data[1]|filter(v => v.is_unblocking_technology and v.technology_level) %}
+				{% for data in technologies_data[1]|filter(v => v.is_over) %}
 					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
 				{% endfor %}
-				{% for data in technologies_data[1]|filter(v => not (v.is_unblocking_technology and v.technology_level)) %}
+				{% for data in technologies_data[1]|filter(v => not v.is_over) %}
 					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
 				{% endfor %}
 			</div>
@@ -146,10 +147,10 @@
 		</div>
 		<div class="fix-body">
 			<div class="body">
-				{% for data in technologies_data[2]|filter(v => v.is_unblocking_technology and v.technology_level) %}
+				{% for data in technologies_data[2]|filter(v => v.is_over) %}
 					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
 				{% endfor %}
-				{% for data in technologies_data[2]|filter(v => not (v.is_unblocking_technology and v.technology_level)) %}
+				{% for data in technologies_data[2]|filter(v => not v.is_over) %}
 					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
 				{% endfor %}
 			</div>
@@ -162,10 +163,10 @@
 		</div>
 		<div class="fix-body">
 			<div class="body">
-				{% for data in technologies_data[3]|filter(v => v.is_unblocking_technology and v.technology_level) %}
+				{% for data in technologies_data[3]|filter(v => v.is_over) %}
 					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
 				{% endfor %}
-				{% for data in technologies_data[3]|filter(v => not (v.is_unblocking_technology and v.technology_level)) %}
+				{% for data in technologies_data[3]|filter(v => not v.is_over) %}
 					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
 				{% endfor %}
 			</div>

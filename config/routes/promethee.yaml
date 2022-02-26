@@ -9,3 +9,8 @@ update_university_category_investments:
 
 search_technology:
     path: /technologies/{identifier}/search
+    controller: App\Modules\Promethee\Infrastructure\Controller\SearchTechnology
+
+cancel_technology_queue:
+    path: /technology-queues/{identifier}/cancel
+    controller: App\Modules\Promethee\Infrastructure\Controller\CancelTechnologyQueue
