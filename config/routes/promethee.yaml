@@ -6,3 +6,6 @@ update_university_category_investments:
     path: /api/university/{category<natural|life|social|informatic>}/{operation<increase|decrease>}
     methods: 'PATCH'
     controller: App\Modules\Promethee\Infrastructure\Controller\UpdateUniversityInvestments
+
+search_technology:
+    path: /technologies/{identifier}/search

@@ -16,6 +16,7 @@ use App\Modules\Promethee\Model\TechnologyQueue;
 use App\Shared\Domain\Model\QueueableInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 // @TODO implement the rest of the generic methods and migrate ship logic
 class QueueableExtension extends AbstractExtension
@@ -25,6 +26,13 @@ class QueueableExtension extends AbstractExtension
 		protected TechnologyHelper $technologyHelper,
 	) {
 
+	}
+
+	public function getFunctions(): array
+	{
+		return [
+			new TwigFunction('get_technology_info', fn (int $technology, string $info, int $level = 0) => $this->technologyHelper->getInfo($technology, $info, $level)),
+		];
 	}
 
 	public function getFilters(): array

@@ -159,7 +159,7 @@ class TechnologyHelper
 					if ($this->isAnUnblockingTechnology($techno)) {
 						return TRUE;
 					} else {
-						return ($arg1 <= $this->getInfo($techno, 'maxLevel')) ? TRUE : FALSE;
+						return ($arg1 <= $this->getInfo($techno, 'maxLevel'));
 					}
 					break;
 				// est-ce qu'on peut construire la techno en fonction du type de la base ?

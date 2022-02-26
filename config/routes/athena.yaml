@@ -60,7 +60,7 @@ rename_base:
 
 technosphere:
     path: /technosphere
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewTechnosphere
 
 trade_market:
     path: /trade-market/{mode<market|sell|resource>}

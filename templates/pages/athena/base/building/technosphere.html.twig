@@ -1,0 +1,186 @@
+{% extends 'layouts/athena/current_base.html.twig' %}
+
+{% block content %}
+	{% set technosphere_building_number = constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::TECHNOSPHERE') %}
+
+	<div class="component techno">
+		<div class="head skin-1">
+			<img src="{{ asset('media/orbitalbase/technosphere.png') }}" alt="" />
+			<h2>{{ get_building_info(technosphere_building_number, 'frenchName') }}</h2>
+			<em>niveau {{ current_base.levelTechnosphere }}</em>
+		</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="number-box {% if total_bonus == 0 %}grey{% endif %}">
+				<span class="label">bonus total de vitesse de recherche</span>
+				<span class="value">
+					{{ total_bonus }} %
+				</span>
+			</div>
+
+			<h4>File de construction</h4>
+			<div class="queue">
+				{% set total_time_techno = 0 %}
+				{% set base_queues_count = base_queues|length %}
+
+				{% for queue in base_queues %}
+					{% set total_time_techno = total_time_techno + queue|technology_queue_time %}
+					{% set remaining_total_time = queue|queue_duration %}
+
+					<div class="item active progress"
+						 data-progress-output="lite"
+						 data-progress-current-time="{{ remaining_total_time }}"
+						 data-progress-total-time="{{ total_time_techno }}">
+						<a href="{{ path('cancel_technology_queue', {'id': queue.id}) }}"
+						   class="button hb lt"
+						   title="annuler la recherche (attention, vous ne récupérerez que {{ technology_resource_refund * 100 }}% du montant investi)">×</a>
+						<img class="picto" src="{{ asset('media/technology/picto/' ~ queue|queue_picture ~ '.png') }}" alt="" />
+						<strong>{{ queue|queue_name }}
+							{% if queue|is_unblocking_technology %}
+							 	<span class="level">niv. {{ queue.targetLevel }}</span>
+							{% endif %}
+						</strong>
+
+						<em><span class="progress-text">{{ remaining_total_time|lite_seconds }}</span></em>
+
+						{% if base_queues_count > 1 %}
+							<span class="progress-container"></span>
+						{% else %}
+							<span class="progress-container">
+								<span style="width: {{ (total_time_techno - remaining_total_time)|percent(total_time_techno) }}%;" class="progress-bar">
+								</span>
+							</span>
+						{% endif %}
+					</div>
+				{% endfor %}
+
+				{% if base_queues_count < available_queues %}
+					{% for i in range(base_queues_count, available_queues - 1) %}
+						<div class="item empty">
+							<span class="picto"></span>
+							<strong>Emplacement libre</strong>
+							<span class="progress-container"></span>
+						</div>
+					{% endfor %}
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
+	{% if has_financial_technologies %}
+		<div class="component techno">
+			<div class="head skin-5">
+				<h2>Améliorations industrielles I</h2>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					{% for data in technologies_data[4] %}
+						{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+
+		<div class="component techno">
+			<div class="head skin-5">
+				<h2>Améliorations industrielles II</h2>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					{% for data in technologies_data[5] %}
+						{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+
+	{% if has_military_technologies %}
+		<div class="component techno">
+			<div class="head skin-5">
+				<h2>Améliorations militaires I</h2>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					{% for data in technologies_data[6] %}
+						{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+
+		<div class="component techno">
+			<div class="head skin-5">
+				<h2>Améliorations militaires II</h2>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					{% for data in technologies_data[7] %}
+						{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+
+	<div class="component techno">
+		<div class="head skin-5">
+			<h2>Nouvelles technologies</h2>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				{% for data in technologies_data[1]|filter(v => v.is_unblocking_technology and v.technology_level) %}
+					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+				{% endfor %}
+				{% for data in technologies_data[1]|filter(v => not (v.is_unblocking_technology and v.technology_level)) %}
+					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	<div class="component techno">
+		<div class="head skin-5">
+			<h2>Châssis I</h2>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				{% for data in technologies_data[2]|filter(v => v.is_unblocking_technology and v.technology_level) %}
+					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+				{% endfor %}
+				{% for data in technologies_data[2]|filter(v => not (v.is_unblocking_technology and v.technology_level)) %}
+					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	<div class="component techno">
+		<div class="head skin-5">
+			<h2>Châssis II</h2>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				{% for data in technologies_data[3]|filter(v => v.is_unblocking_technology and v.technology_level) %}
+					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+				{% endfor %}
+				{% for data in technologies_data[3]|filter(v => not (v.is_unblocking_technology and v.technology_level)) %}
+					{{ include('molecules/technology/technology_card.html.twig', { data }) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	<div class="component">
+		<div class="head skin-2">
+			<h2>À propos</h2>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				<p class="long-info">{{ get_building_info(technosphere_building_number, 'description')|raw }}</p>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
