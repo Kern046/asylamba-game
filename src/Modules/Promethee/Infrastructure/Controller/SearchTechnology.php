@@ -55,13 +55,13 @@ class SearchTechnology extends AbstractController
 				$researchManager->load(array('rPlayer' => $currentPlayer->getId()));
 
 				if ($technologyHelper->haveRights($identifier, 'resource', $targetLevel, $currentBase->getResourcesStorage())
-					AND $technologyHelper->haveRights($identifier, 'credit', $targetLevel, $currentPlayer->getCredit())
-					AND $technologyHelper->haveRights($identifier, 'queue', $currentBase, $nbTechnologyQueues)
-					AND $technologyHelper->haveRights($identifier, 'levelPermit', $targetLevel)
-					AND $technologyHelper->haveRights($identifier, 'technosphereLevel', $currentBase->getLevelTechnosphere())
-					AND ($technologyHelper->haveRights($identifier, 'research', $targetLevel, $researchManager->getResearchList($researchManager->get())) === TRUE)
-					AND $technologyHelper->haveRights($identifier, 'maxLevel', $targetLevel)
-					AND $technologyHelper->haveRights($identifier, 'baseType', $currentBase->typeOfBase)) {
+					&& $technologyHelper->haveRights($identifier, 'credit', $targetLevel, $currentPlayer->getCredit())
+					&& $technologyHelper->haveRights($identifier, 'queue', $currentBase, $nbTechnologyQueues)
+					&& $technologyHelper->haveRights($identifier, 'levelPermit', $targetLevel)
+					&& $technologyHelper->haveRights($identifier, 'technosphereLevel', $currentBase->getLevelTechnosphere())
+					&& ($technologyHelper->haveRights($identifier, 'research', $targetLevel, $researchManager->getResearchList($researchManager->get())) === TRUE)
+					&& $technologyHelper->haveRights($identifier, 'maxLevel', $targetLevel)
+					&& $technologyHelper->haveRights($identifier, 'baseType', $currentBase->typeOfBase)) {
 
 					# tutorial
 					if ($currentPlayer->stepDone == FALSE) {
@@ -124,7 +124,17 @@ class SearchTechnology extends AbstractController
 
 					return $this->redirect($request->headers->get('referer'));
 				} else {
-					throw new ErrorException('les conditions ne sont pas remplies pour développer une technologie');
+					throw new ErrorException(sprintf(
+						'les conditions ne sont pas remplies pour développer une technologie : ["%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"]',
+						$technologyHelper->haveRights($identifier, 'resource', $targetLevel, $currentBase->getResourcesStorage()),
+						$technologyHelper->haveRights($identifier, 'credit', $targetLevel, $currentPlayer->getCredit()),
+						$technologyHelper->haveRights($identifier, 'queue', $currentBase, $nbTechnologyQueues),
+						$technologyHelper->haveRights($identifier, 'levelPermit', $targetLevel),
+						$technologyHelper->haveRights($identifier, 'technosphereLevel', $currentBase->getLevelTechnosphere()),
+						$technologyHelper->haveRights($identifier, 'research', $targetLevel, $researchManager->getResearchList($researchManager->get())),
+						$technologyHelper->haveRights($identifier, 'maxLevel', $targetLevel),
+						$technologyHelper->haveRights($identifier, 'baseType', $currentBase->typeOfBase),
+					));
 				}
 			} else {
 				throw new ErrorException('Cette technologie est déjà en construction');
