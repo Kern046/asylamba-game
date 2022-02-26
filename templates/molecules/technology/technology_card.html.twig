@@ -1,0 +1,83 @@
+<div class="build-item {% if not data.technosphere_requirements or not data.research_requirements %}disable{% endif %} {% if data.is_over %}closed{% endif %}">
+	<div class="name">
+		<a href="#" class="addInfoPanel hb lt info" title="plus d'informations" data-techno-id="{{ data.identifier }}" data-info-type="techno">+</a>
+		<img src="{{ asset('media/technology/picto/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" alt="" />
+		<strong>
+			{{ get_technology_info(data.identifier, 'name') }}
+			{% if not data.is_unblocking_technology and data.technology_level != 0 %}
+				[{{ data.technology_level }}]
+			{% endif %}
+		</strong>
+		{% if data.is_over %}
+			<em>développement terminé</em>
+		{% endif %}
+	</div>
+	<div class="ship-illu">
+		<img class="illu" src="{{ asset('media/technology/img/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" />
+	</div>
+
+	{% if not data.technosphere_requirements %}
+		<span class="button disable">
+			il vous faut augmenter votre technosphère au niveau {{ get_technology_info(data.identifier, 'requiredTechnosphere') }}
+		</span>
+	{% elseif not data.research_requirements %}
+		<span class="button disable">
+			nécessite
+			{% for requirement in data.research_requirements.all %}
+				{{ requirement.get('techno') }} {{ requirement.get('level') }}
+				{% if not loop.last %},{% endif %}
+			{% endfor %}
+		</span>
+	{% else %}
+		{% if data.in_queue %}
+			<span class="button disable">
+				technologie en cours<br />de recherche
+				{% if data.is_unblocking_technology %}
+					vers le niveau {{ data.next_level }}
+				{% endif %}
+				{% if not data.in_local_queue %}
+					sur une autre de vos bases
+				{% endif %}
+			</span>
+		{% elseif data.is_over %}
+		{% elseif not data.is_unblocking_technology and not data.max_level_requirements %}
+			<span class="button disable">
+				niveau maximum atteint<br />
+			</span>
+		{% else %}
+			{% set card_content %}
+				<span class="final-cost">{{ get_technology_info(data.identifier, 'resource', data.next_level)|number }}</span>
+				<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}">,
+				<span class="final-cost">{{ get_technology_info(data.identifier, 'credit', data.next_level)|number }}</span>
+				<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}"> et
+				<span class="final-time">{{ data.time_to_build|lite_seconds }}</span>
+				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+			{% endset %}
+			{% if not data.queue_requirements %}
+				<span class="button disable">
+					file de recherche pleine<br />
+					{{ card_content }}
+				</span>
+			{% elseif not data.credit_requirements %}
+				<span class="button disable">
+					pas assez de crédits<br />
+					{{ card_content }}
+				</span>
+			{% elseif not data.resource_requirements %}
+				<span class="button disable">
+					pas assez de ressources<br />
+					{{ card_content }}
+				</span>
+			{% else %}
+				<a class="button" href="{{ path('search_technology', { 'identifier': data.identifier }) }}">
+					{% if data.is_unblocking_technology %}
+						rechercher la technologie<br />
+					{% else %}
+						rechercher le niveau {{ data.next_level }}<br />
+					{% endif %}
+					{{ card_content }}
+				</a>
+			{% endif %}
+		{% endif %}
+	{% endif %}
+</div>

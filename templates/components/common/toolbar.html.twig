@@ -228,7 +228,7 @@
 
 							<em><span class="progress-text">{{ queue|queue_duration|lite_seconds }}</span></em>
 							<span class="progress-container">
-								<span style="width: {{ (queue|technology_queue_time - queue_duration)|percent() }}%;" class="progress-bar">
+								<span style="width: {{ (queue|technology_queue_time - queue|queue_duration)|percent(queue|technology_queue_time) }}%;" class="progress-bar">
 								</span>
 							</span>
 						</div>
