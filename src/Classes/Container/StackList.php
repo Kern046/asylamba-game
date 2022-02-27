@@ -2,7 +2,8 @@
 
 namespace App\Classes\Container;
 
-class StackList {
+class StackList implements \Stringable
+{
 		/** @var array **/
 		private $elements = array();
 
