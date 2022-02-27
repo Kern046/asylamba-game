@@ -68,12 +68,12 @@ class SearchTechnology extends AbstractController
 						switch ($currentPlayer->getStepTutorial()) {
 							case TutorialResource::SHIP0_UNBLOCK:
 								if ($identifier == Technology::SHIP0_UNBLOCK) {
-									$tutorialHelper->setStepDone();
+									$tutorialHelper->setStepDone($currentPlayer);
 								}
 								break;
 							case TutorialResource::SHIP1_UNBLOCK:
 								if ($identifier == Technology::SHIP1_UNBLOCK) {
-									$tutorialHelper->setStepDone();
+									$tutorialHelper->setStepDone($currentPlayer);
 								}
 								break;
 						}
