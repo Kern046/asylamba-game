@@ -105,4 +105,9 @@ class StackList {
 		public function clear() {
 				$this->elements = array();
 		}
+
+		public function __toString(): string
+		{
+			return sprintf('[%s]', implode(',', array_values($this->elements)));
+		}
 }
