@@ -1,6 +1,6 @@
 embassy:
     path: /embassy
-    controller: App\Modules\Demeter\Infrastructure\Controller\EmbassyController
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewEmbassy
 
 faction:
     path: /faction

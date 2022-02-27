@@ -119,14 +119,13 @@ class ColorManager implements SchedulerInterface
 
 		return $faction->id;
 	}
-	
-	/**
-	 * @param Color $color
-	 * @return string
-	 */
-	public function getParsedDescription(Color $color) {
-		$this->parser->parseBigTag = TRUE;
-		return $this->parser->parse($color->description);
+
+	public function getParsedDescription(Color $color): string
+	{
+		// @TODO refactor usage of stateful service
+		$this->parser->parseBigTag = true;
+
+		return null !== $color->description ? $this->parser->parse($color->description) : '';
 	}
 
 	public function schedule(): void

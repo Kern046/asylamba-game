@@ -1,0 +1,23 @@
+<div id="subnav">
+	<button class="move-side-bar top" data-dir="up"> </button>
+	<div class="overflow">
+		<a href="{{ path('embassy', {'faction': current_player.rColor }) }}" class="item {% if app.request.query.has('faction') %}active{% endif %}">
+			<span class="picto">
+				<img src="{{ asset('media/rank/faction.png') }}" alt="" />
+			</span>
+			<span class="content skin-1">
+				<span>Ambassades</span>
+			</span>
+		</a>
+
+		<a href="{{ path('embassy', {'player': current_player.id}) }}" class="item {% if app.request.query.has('player') %}active{% endif %}">
+			<span class="picto">
+				<img src="{{ asset('media/profil/diary.png') }}" alt="" />
+			</span>
+			<span class="content skin-1">
+				<span>Journal</span>
+			</span>
+		</a>
+	</div>
+	<button class="move-side-bar bottom" data-dir="down"></button>
+</div>

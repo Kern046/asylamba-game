@@ -1,0 +1,16 @@
+<div class="component nav">
+	<div class="head skin-1">
+		<h1>Ambassades</h1>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for f in factions %}
+				<a href="{{ path('embassy', {'faction': f.id}) }}" class="nav-element {% if faction.id == f.id %}active{% endif %}">
+					<img src="{{ asset('media/avatar/small/color-' ~ f.id ~ '.png') }}" alt="" />
+					<strong>{{ get_faction_info(f.id, 'officialName') }}</strong>
+					<em>Ambassade des {{ get_faction_info(f.id, 'demonym')|capitalize }}</em>
+				</a>
+			{% endfor %}
+		</div>
+	</div>
+</div>
