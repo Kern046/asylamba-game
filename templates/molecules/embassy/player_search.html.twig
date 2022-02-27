@@ -1,0 +1,29 @@
+{% set faction_statuses = get_faction_info(player.rColor, 'status') %}
+
+<div class="component search-player size2 color{{ player.rColor }}">
+	<div class="box">
+		<div class="top">
+			<form action="{{ path('search_player') }}" method="post">
+				<label>
+					Recherchez un joueur
+					<input type="hidden" name="playerid" class="autocomplete-hidden" />
+					<input type="text" name="name" class="autocomplete-player ac_input" autocomplete="off" />
+					</label>
+				</form>
+			</div>
+		<div class="center">
+			<img src="{{ asset('media/avatar/big/' ~ player.avatar ~ '.png') }}" alt="avatar de {{ player.name }}" class="avatar" />
+
+			<div class="right">
+				<h1>{{ player.name }}</h1>
+				<p>{{ faction_statuses[player.status - 1] }} de {{ get_faction_info(player.rColor, 'popularName') }}</p>
+				<p>niveau {{ player.level }}</p>
+
+				{% if player.id != current_player.id %}
+					<hr />
+					<p><a href="{{ path('new_message', {'player': player.id}) }}" style="text-decoration: none; color: white; border-bottom: solid 1px #4f4f4f">Envoyer un message</a></p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>

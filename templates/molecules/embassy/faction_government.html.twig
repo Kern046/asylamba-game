@@ -1,0 +1,44 @@
+{% set statuses = get_faction_info(faction.id, 'status') %}
+
+<div class="component player rank">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Gouvernement</h4>
+			{% for minister in government_members %}
+				<div class="player color{{ faction.id }}">
+					<a href="{{ path('embassy', {'player': minister.id}) }}">
+						<img src="{{ asset('media/avatar/small/' ~ minister.avatar ~ '.png') }}" alt="{{ minister.name }}" class="picto" />
+					</a>
+					<span class="title">{{ statuses[minister.status - 1] }}</span>
+					<strong class="name">{{ minister.name }}</strong>
+				</div>
+			{% endfor %}
+
+			{% if government_members|length == 0 %}
+				<p>Aucun gouvernement formé</p>
+			{% endif %}
+
+			<h4>Informations</h4>
+			<div class="number-box grey">
+				<span class="label">Nombre de points de la faction</span>
+				<span class="value">{{ faction.points|number }}</span>
+			</div>
+			<div class="number-box grey">
+				<span class="label">Richesse de la faction</span>
+				<span class="value">
+					{{ faction.credits|number }}
+					<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+				</span>
+			</div>
+			<div class="number-box grey">
+				<span class="label">Nombre de points des territoires contrôlés</span>
+				<span class="value">{{ faction.sectors|number }}</span>
+			</div>
+			<div class="number-box grey">
+				<span class="label">Nombre de joueurs actifs</span>
+				<span class="value">{{ faction.activePlayers|number }}</span>
+			</div>
+		</div>
+	</div>
+</div>
