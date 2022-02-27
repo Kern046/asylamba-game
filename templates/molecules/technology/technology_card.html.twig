@@ -20,7 +20,7 @@
 		<span class="button disable">
 			il vous faut augmenter votre technosphère au niveau {{ get_technology_info(data.identifier, 'requiredTechnosphere') }}
 		</span>
-	{% elseif not data.research_requirements %}
+	{% elseif not data.research_requirements is same as (true) %}
 		<span class="button disable">
 			nécessite
 			{% for requirement in data.research_requirements.all %}
