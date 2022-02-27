@@ -14,7 +14,7 @@ class SearchPlayer extends AbstractController
 		Request $request,
 		PlayerManager $playerManager,
 	): Response {
-		$id = $request->request->get('playerid');
+		$id = $request->request->getInt('playerid');
 		if (($player = $playerManager->get($id)) !== null) {
 			return $this->redirectToRoute('embassy', ['player' => $player->getId()]);
 		} else {
