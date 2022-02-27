@@ -106,7 +106,7 @@ class ViewInvestments extends AbstractController
 		    'totalRouteIncome' => 0,
 		    'totalRouteIncomeBonus' => 0,
 		    'totalInvest' => 0,
-		    'totalInvestUni' => 0,
+		    'totalInvestUni' => $player->iUniversity,
 		    'totalFleetFees' => 0,
 		    'totalShipsFees' => 0,
 		    'totalTaxOut' => 0,
@@ -119,7 +119,6 @@ class ViewInvestments extends AbstractController
 			$data['totalTaxIn'] += $taxIn;
 			$data['totalTaxInBonus'] += $taxInBonus;
 			$data['totalTaxOut'] += ($taxIn + $taxInBonus) * $base->getTax() / 100;
-			$data['totalInvestUni'] += $player->iUniversity;
 			$data['totalInvest'] += $base->getISchool() + $base->getIAntiSpy();
 			$data['totalShipsFees'] += Game::getFleetCost($base->shipStorage, FALSE);
 
