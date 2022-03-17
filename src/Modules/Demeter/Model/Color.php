@@ -132,6 +132,11 @@ class Color {
 		return self::ELECTION === $this->getElectionStatement();
 	}
 
+	public function isInMandate(): bool
+	{
+		return self::MANDATE === $this->getElectionStatement();
+	}
+
 	public function hasElections(): bool
 	{
 		return in_array($this->getRegime(), [self::DEMOCRATIC, self::THEOCRATIC]);

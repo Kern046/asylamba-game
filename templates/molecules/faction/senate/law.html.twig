@@ -20,11 +20,11 @@
 						<span class="text">Vous avez déjà voté</span>
 					</span>
 				{% elseif current_player.isSenator %}
-					<a class="button" href="{{ path('vote_law', {'id': law.id, 'choice': 1}) }}" style="text-align: center; line-height: 35px; display: inline-block; width: 104px; margin-right: 0;">
+					<a class="button" href="{{ path('vote_for_law', {'id': law.id, 'choice': 1}) }}" style="text-align: center; line-height: 35px; display: inline-block; width: 104px; margin-right: 0;">
 						<span class="text">Pour</span>
 					</a>
 
-					<a class="button" href="{{ path('vote_law', {'id': law.id, 'choice': 0}) }}" style="text-align: center; line-height: 35px; display: inline-block; width: 104px;">
+					<a class="button" href="{{ path('vote_for_law', {'id': law.id, 'choice': 0}) }}" style="text-align: center; line-height: 35px; display: inline-block; width: 104px;">
 						<span class="text">Contre</span>
 					</a>
 				{% else %}

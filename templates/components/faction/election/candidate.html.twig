@@ -18,7 +18,7 @@
 								</span>
 							{% endif %}
 						{% else %}
-							<a class="button" href="{{ path('vote', {'id': election.id, 'candidateId': candidate.rPlayer }) }}" style="text-align: center;">
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.rPlayer }) }}" style="text-align: center;">
 								<span class="text" style="line-height: 35px;">Voter</span>
 							</a>
 						{% endif %}
@@ -36,10 +36,10 @@
 								</span>
 							{% endif %}
 						{% else %}
-							<a class="button" href="{{ path('vote', {'id': election.id, 'candidateId': candidate.id}) }}" style="text-align: center;">
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id}) }}" style="text-align: center;">
 								<span class="text" style="line-height: 35px;">Soutenir le coup d'état</span>
 							</a>
-							<a class="button" href="{{ path('vote', {'id': election.id, 'candidateId': 0}) }}" style="text-align: center;">
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': 0}) }}" style="text-align: center;">
 								<span class="text" style="line-height: 35px;">Rejeter le coup d'état</span>
 							</a>
 						{% endif %}

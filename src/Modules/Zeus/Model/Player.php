@@ -81,7 +81,7 @@ class Player {
 		return $this->synchronized;
 	}
 
-	public function isLeader(): bool
+	public function isRuler(): bool
 	{
 		return self::CHIEF === $this->getStatus();
 	}

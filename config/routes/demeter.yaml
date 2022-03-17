@@ -35,36 +35,60 @@ initiate_faction_coup:
 
 abdicate:
     path: /abdicate
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\Ruler\Abdicate
 
 resign:
     path: /resign
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\Resign
 
 write_faction_conversation:
     path: /faction/write-conversation
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\WriteToFaction
 
 create_law:
     path: /faction/law/create
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\CreateLaw
 
 send_credits_from_faction:
     path: /faction/send-credits
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\SendCredits
 
 update_faction_description:
     path: /faction/update-description
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\UpdateDescription
 
 pin_faction_news:
     path: /faction/news/{id}/pin
+    controller: App\Modules\Demeter\Infrastructure\Controller\News\Pin
 
 create_faction_news:
     path: /faction/news/create
+    controller: App\Modules\Demeter\Infrastructure\Controller\News\Create
 
 edit_faction_news:
     path: /faction/news/{id}/edit
+    controller: App\Modules\Demeter\Infrastructure\Controller\News\Edit
 
 delete_faction_news:
     path: /faction/news/{id}/delete
+    controller: App\Modules\Demeter\Infrastructure\Controller\News\Delete
 
 choose_minister:
     path: /faction/government/{department}/choose-minister
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\Ruler\ChooseMinister
 
 fire_minister:
     path: /faction/government/ministers/{id}/fire
+    controller: App\Modules\Demeter\Infrastructure\Controller\Government\Ruler\FireMinister
+
+postulate:
+    path: /faction/elections/{id}/postulate
+    controller: App\Modules\Demeter\Infrastructure\Controller\Postulate
+
+vote_for_candidate:
+    path: /faction/elections/{electionId}/candidates/{candidateId}/vote
+    controller: App\Modules\Demeter\Infrastructure\Controller\VoteForCandidate
+
+vote_for_law:
+    path: /faction/laws/{id}/vote
+    controller: App\Modules\Demeter\Infrastructure\Controller\VoteForLaw
