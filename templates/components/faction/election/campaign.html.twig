@@ -1,0 +1,17 @@
+<div class="component profil">
+	<div class="head skin-1">
+		<h1>Campagne</h1>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="number-box">
+				<span class="label">nombre de candidats</span>
+				<span class="value">{{ candidates|length }}</span>
+			</div>
+
+			<hr style="margin-top: 25px;" />
+
+			<p class="info">{{ get_faction_info(current_player.rColor, 'campaignDesc')|raw }}</p>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,18 @@
+<div class="component new-message">
+	<div class="head skin-2">
+		<h2>Edition d'une annonce</h2>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<form action="{{ path('edit_faction_news', {'id': news.id}) }}" method="POST">
+				<p>Titre de l'annonce</p>
+				<p class="input input-text"><input name="title" required value="{{ news.title }}"/></p>
+
+				<p>Contenu de l'annonce</p>
+				<p class="input input-area"><textarea name="content" required style="height: 400px;">{{ news.oContent }}</textarea></p>
+
+				<p class="button"><button type="submit">Modifier</button></p>
+			</form>
+		</div>
+	</div>
+</div>

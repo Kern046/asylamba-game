@@ -1,0 +1,35 @@
+{% set statuses = get_faction_info(faction.id, 'status') %}
+
+<div class="component player size3">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			{% for type in players_by_type|keys %}
+				{% set players = players_by_type[type] %}
+				<h4>{{ type }}</h4>
+
+
+				{% if players|length == 0 %}
+					<p>aucun joueur</p>
+				{% endif %}
+
+				{% for player in players %}
+					<div class="player">
+						<a href="{{ path('embassy', {'player': player.id}) }}">
+							<img src="{{ asset('media/avatar/small/' ~ player.avatar ~ '.png') }}" class="picto" alt="{{ player.name }}" />
+						</a>
+						<span class="title">{{ statuses[player.status - 1] }}</span>
+						<strong class="name">{{ player.name }}</strong>
+						<span class="experience">{{ player.factionPoint|number }} points</span>
+
+						{% if is_player_online(player) %}
+							<span class="online hb lt" title="est en ligne actuellement"></span>
+						{% elseif is_player_inactive(player) %}
+							<span class="inactive hb lt" title="ne s'est plus connecté depuis une semaine"></span>
+						{% endif %}
+					</div>
+				{% endfor %}
+			{% endfor %}
+		</div>
+	</div>
+</div>

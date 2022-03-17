@@ -1,0 +1,49 @@
+<div class="component uni">
+	<div class="head">
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Lois actives</h4>
+
+			{% for law in effective_laws %}
+				<div class="build-item">
+					<div class="name">
+						<img src="{{ asset('media/faction/law/common.png') }}" alt="">
+						<strong>{{ get_law_info(law.type, 'name') }}</strong>
+					</div>
+				</div>
+			{% endfor %}
+
+			{% if effective_laws|length == 0 %}
+				<p><em>Aucune loi active</em></p>
+			{% endif %}
+
+			<h4>Lois en cours de votation</h4>
+
+			{% for law in voting_laws %}
+				<div class="build-item">
+					<div class="name">
+						<img src="{{ asset('media/faction/law/common.png') }}" alt="">
+						<strong>{{ get_law_info(law.type, 'name') }}</strong>
+					</div>
+				</div>
+			{% endfor %}
+
+			{% if voting_laws|length == 0 %}
+				<p><em>Aucune loi en cours de votation</em></p>
+			{% endif %}
+
+			<h4>Bonus de faction</h4>
+
+			{% for bonus in faction.bonusText %}
+				<div class="build-item">
+					<div class="name">
+						<img src="{{ asset('media/' ~ bonus.path) }}" alt="" />
+						<strong>{{ bonus.title }}</strong>
+						<em>{{ bonus.desc|raw }}</em>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>

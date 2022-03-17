@@ -154,6 +154,7 @@ class PlayerManager
 		return $this->entityManager->getRepository(Player::class)->getFactionPlayers($factionId);
 	}
 
+	/** @return list<Player> */
 	public function getFactionPlayersByRanking(int $factionId): array
 	{
 		return $this->entityManager->getRepository(Player::class)->getFactionPlayersByRanking($factionId);

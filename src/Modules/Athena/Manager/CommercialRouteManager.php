@@ -88,6 +88,16 @@ class CommercialRouteManager
 		];
 	}
 
+	public function getCommercialRouteFactionData(int $factionId): array
+	{
+		return $this->entityManager->getRepository(CommercialRoute::class)->getCommercialRouteFactionData($factionId);
+	}
+
+	public function countCommercialRoutesBetweenFactions(int $factionId, int $otherFactionId): int
+	{
+		return $this->entityManager->getRepository(CommercialRoute::class)->countCommercialRoutesBetweenFactions($factionId, $otherFactionId);
+	}
+
 	public function searchCandidates(int $playerId, OrbitalBase $orbitalBase, array $factions, int $minDistance, int $maxDistance): array
 	{
 		return $this->entityManager->getRepository(CommercialRoute::class)->searchCandidates($playerId, $orbitalBase, $factions, $minDistance, $maxDistance);

@@ -1,0 +1,72 @@
+{% set statuses = get_faction_info(current_player.rColor, 'status') %}
+
+<div class="component player profil size1">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			{% if faction.isInElection %}
+				{% if faction.isRoyalistic %}
+					<div class="build-item">
+						{% if player_vote is not null %}
+							{% if player_vote.rCandidate == candidate.rPlayer %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">Vous avez voté pour lui</span>
+								</span>
+							{% else %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">---</span>
+								</span>
+							{% endif %}
+						{% else %}
+							<a class="button" href="{{ path('vote', {'id': election.id, 'candidateId': candidate.rPlayer }) }}" style="text-align: center;">
+								<span class="text" style="line-height: 35px;">Voter</span>
+							</a>
+						{% endif %}
+					</div>
+				{% else %}
+					<div class="build-item">
+						{% if player_vote is not null %}
+							{% if player_vote.candidate == candidate.rPlayer %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">Vous avez soutenu le coup d'état</span>
+								</span>
+							{% else %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">Vous n'avez pas soutenu le coup d'état</span>
+								</span>
+							{% endif %}
+						{% else %}
+							<a class="button" href="{{ path('vote', {'id': election.id, 'candidateId': candidate.id}) }}" style="text-align: center;">
+								<span class="text" style="line-height: 35px;">Soutenir le coup d'état</span>
+							</a>
+							<a class="button" href="{{ path('vote', {'id': election.id, 'candidateId': 0}) }}" style="text-align: center;">
+								<span class="text" style="line-height: 35px;">Rejeter le coup d'état</span>
+							</a>
+						{% endif %}
+					</div>
+				{% endif %}
+			{% endif %}
+
+			<div class="center-box">
+				<span class="label">
+					{{ statuses[candidate.status - 1] }}
+				</span>
+				<span class="value">{{ candidate.name }}</span>
+			</div>
+
+			<div class="profil-flag">
+				<img src="{{ asset('media/avatar/big/' ~ candidate.avatar ~ '.png') }}" alt="{{ candidate.name }}">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="component">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Son programme</h4>
+			<p>{{ candidate.program|parse }}</p>
+		</div>
+	</div>
+</div>

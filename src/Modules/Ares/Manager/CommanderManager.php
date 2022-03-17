@@ -130,6 +130,16 @@ class CommanderManager implements SchedulerInterface
 	{
 		return $this->entityManager->getRepository(Commander::class)->getIncomingCommanders($place);
 	}
+
+	public function getFactionCommanderStats(int $factionId): array
+	{
+		return $this->entityManager->getRepository(Commander::class)->getFactionCommanderStats($factionId);
+	}
+
+	public function getFactionFleetStats(int $factionId): array
+	{
+		return $this->entityManager->getRepository(Commander::class)->getFactionFleetStats($factionId);
+	}
 	
 	public function schedule(): void
 	{

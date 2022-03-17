@@ -2,6 +2,69 @@ embassy:
     path: /embassy
     controller: App\Modules\Demeter\Infrastructure\Controller\ViewEmbassy
 
-faction:
+faction_overview:
     path: /faction
-    controller: App\Modules\Demeter\Infrastructure\Controller\FactionController
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewOverview
+
+faction_members:
+    path: /faction/members
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewMembers
+
+faction_government:
+    path: /faction/government
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewGovernment
+
+faction_data:
+    path: /faction/data
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewData
+
+faction_forum:
+    path: /faction/forum
+
+faction_senate:
+    path: /faction/senate
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewSenate
+
+view_faction_election:
+    path: /faction/election
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewElection
+
+initiate_faction_coup:
+    path: /faction/coup
+    controller: App\Modules\Demeter\Infrastructure\Controller\MakeACoup
+
+abdicate:
+    path: /abdicate
+
+resign:
+    path: /resign
+
+write_faction_conversation:
+    path: /faction/write-conversation
+
+create_law:
+    path: /faction/law/create
+
+send_credits_from_faction:
+    path: /faction/send-credits
+
+update_faction_description:
+    path: /faction/update-description
+
+pin_faction_news:
+    path: /faction/news/{id}/pin
+
+create_faction_news:
+    path: /faction/news/create
+
+edit_faction_news:
+    path: /faction/news/{id}/edit
+
+delete_faction_news:
+    path: /faction/news/{id}/delete
+
+choose_minister:
+    path: /faction/government/{department}/choose-minister
+
+fire_minister:
+    path: /faction/government/ministers/{id}/fire

@@ -21,3 +21,6 @@ delete_notification:
 list_conversations:
     path: /messages
     controller: App\Modules\Hermes\Infrastructure\Controller\Conversation\ListController
+
+new_message:
+    path: /messages/new

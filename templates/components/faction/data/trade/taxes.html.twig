@@ -1,0 +1,18 @@
+<div class="component player rank">
+	<div class="head skin-2"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>{{ label }}</h4>
+			{% for tax in taxes %}
+				{% set faction_id = tax.relatedFaction %}
+				<div class="player faction color{{ faction_id }}">
+					<a href="{{ path('embassy', {'faction': faction_id}) }}">
+						<img src="{{ asset('media/faction/flag/flag-' ~ faction_id ~ '.png') }}" alt="" class="picto">
+					</a>
+					<span class="title">produits {{ get_faction_info(faction_id, 'demonym') }}</span>
+					<strong class="name">{{ tax.importTax }} %</strong>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>

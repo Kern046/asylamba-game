@@ -7,6 +7,7 @@ use App\Classes\Entity\AbstractRepository;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Zeus\Model\Player;
 
 class CommercialRouteRepository extends AbstractRepository {
@@ -136,6 +137,60 @@ class CommercialRouteRepository extends AbstractRepository {
 		$query->execute([$player->getId(), $player->getId()]);
 
 		return $query->fetchAll();
+	}
+
+	public function countCommercialRoutesBetweenFactions(int $factionId, $otherFactionId): int
+	{
+		$join = 'FROM commercialRoute AS cr
+		LEFT JOIN orbitalBase AS ob1
+		ON cr.rOrbitalBase = ob1.rPlace
+			LEFT JOIN player AS pl1
+			ON ob1.rPlayer = pl1.id
+		LEFT JOIN orbitalBase AS ob2
+		ON cr.rOrbitalBaseLinked = ob2.rPlace
+			LEFT JOIN player AS pl2
+			ON ob2.rPlayer = pl2.id';
+
+		$qr = $this->connection->prepare('SELECT
+				COUNT(cr.id) AS nb ' . $join . '
+				WHERE ((pl1.rColor = ? AND pl2.rColor = ?) OR (pl1.rColor = ? AND pl2.rColor = ?)) AND cr.statement = ?'
+		);
+		$qr->execute([$factionId, $otherFactionId, $otherFactionId, $factionId, CommercialRoute::ACTIVE]);
+		$aw3 = $qr->fetch();
+		$qr->closeCursor();
+
+		return $aw3['nb'] ?? 0;
+	}
+
+	public function getCommercialRouteFactionData(int $factionId): array
+	{
+		$join = 'FROM commercialRoute AS cr
+LEFT JOIN orbitalBase AS ob1
+ON cr.rOrbitalBase = ob1.rPlace
+	LEFT JOIN player AS pl1
+	ON ob1.rPlayer = pl1.id
+LEFT JOIN orbitalBase AS ob2
+ON cr.rOrbitalBaseLinked = ob2.rPlace
+	LEFT JOIN player AS pl2
+	ON ob2.rPlayer = pl2.id';
+		$qr = $this->connection->prepare('SELECT
+		COUNT(cr.id) AS nb,
+		SUM(cr.income) AS income
+		' . $join . '
+	WHERE (pl1.rColor = ? OR pl2.rColor = ?)
+		AND cr.statement = ?
+');
+		$qr->execute(array($factionId, $factionId, CommercialRoute::ACTIVE));
+		$aw1 = $qr->fetch(); $qr->closeCursor();
+
+		$qr = $this->connection->prepare('SELECT COUNT(cr.id) AS nb ' . $join . ' WHERE pl1.rColor = ? AND pl2.rColor = ? AND cr.statement = ?');
+		$qr->execute(array($factionId, $factionId, CommercialRoute::ACTIVE));
+		$aw2 = $qr->fetch(); $qr->closeCursor();
+
+		return [
+			'aw1' => $aw1,
+			'aw2' => $aw2,
+		];
 	}
 	
 	/**

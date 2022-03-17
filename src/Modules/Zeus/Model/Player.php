@@ -76,12 +76,34 @@ class Player {
 	public function getPremium()			{ return $this->premium; }
 	public function getStatement()			{ return $this->statement; }
 
-	/**
-	 * @return boolean
-	 */
-	public function isSynchronized()
+	public function isSynchronized(): bool
 	{
 		return $this->synchronized;
+	}
+
+	public function isLeader(): bool
+	{
+		return self::CHIEF === $this->getStatus();
+	}
+
+	public function isSenator(): bool
+	{
+		return self::PARLIAMENT === $this->getStatus();
+	}
+
+	public function isGovernmentMember(): bool
+	{
+		return in_array($this->getStatus(), [self::CHIEF, self::WARLORD, self::TREASURER, self::MINISTER]);
+	}
+
+	public function isParliamentMember(): bool
+	{
+		return $this->isSenator() || $this->isGovernmentMember();
+	}
+
+	public function isPeopleMember(): bool
+	{
+		return self::STANDARD === $this->getStatus();
 	}
 
 	public function setId($v) {

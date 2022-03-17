@@ -4,7 +4,6 @@ use App\Modules\Demeter\Model\Color;
 use App\Classes\Library\Format;
 
 $pointsToWin = $this->getContainer()->getParameter('points_to_win');
-$mode = isset($targetMode) ? $targetMode : FALSE;
 
 echo '<div class="component">';
 	echo '<div class="head skin-2">';

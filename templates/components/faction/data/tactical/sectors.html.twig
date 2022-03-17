@@ -1,0 +1,45 @@
+{% set displayed = 0 %}
+
+<div class="component">
+	<div class="head skin-2">
+		<h2>Territoires</h2>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for type in map_data_types|keys %}
+				{% set sectors = map_data_types[type] %}
+
+				<h4>{{ type }}</h4>
+				<ul class="list-type-1">
+					{% for sector in sectors %}
+						<li>
+							<a href="#" class="picto color{{ sector.rColor }}">{{ sector.id }}</a>
+							<span class="label">
+								{{ sector.name }}
+								({{ sector.points }} point{{ sector.points|plural }}
+							</span>
+							{% for faction_id in scores|filter((v, k) => v > 0)|keys %}
+								{% set points = scores[faction_id] %}
+								<span class="label color{{ faction_id }}">
+									{{ get_faction_info(faction_id, 'popularName') }} : {{ points }} point{{ points|plural }} de contrôle
+								 </span>
+							{% endfor %}
+							<span class="value">{{ percents['color' ~ faction.id] }} %</span>
+							<span class="progress-bar hb bl" title="partage des systèmes entre les factions">
+								{% for faction_id in percents|keys %}
+									{% set percent = percents[faction_id] %}
+									<span style="width:{{ percent }}%;" class="content {{ faction_id }}"></span>
+								{% endfor %}
+							</span>
+						</li>
+						{% set displayed = displayed + 1 %}
+					{% endfor %}
+				</ul>
+			{% endfor %}
+
+			{% if displayed == 0 %}
+				<p>Aucun secteur</p>
+			{% endif %}
+		</div>
+	</div>
+</div>

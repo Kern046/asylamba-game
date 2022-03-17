@@ -117,6 +117,41 @@ class Color {
 
 	public $chiefId					= 0;
 
+	public function hasOngoingElectionCampagin(): bool
+	{
+		return in_array($this->getElectionStatement(), [self::CAMPAIGN, self::ELECTION]);
+	}
+
+	public function isInCampaign(): bool
+	{
+		return self::CAMPAIGN === $this->getElectionStatement();
+	}
+
+	public function isInElection(): bool
+	{
+		return self::ELECTION === $this->getElectionStatement();
+	}
+
+	public function hasElections(): bool
+	{
+		return in_array($this->getRegime(), [self::DEMOCRATIC, self::THEOCRATIC]);
+	}
+
+	public function isDemocratic(): bool
+	{
+		return self::DEMOCRATIC === $this->getRegime();
+	}
+
+	public function isRoyalistic(): bool
+	{
+		return self::ROYALISTIC === $this->getRegime();
+	}
+
+	public function isTheocratic(): bool
+	{
+		return self::THEOCRATIC === $this->getRegime();
+	}
+
 	/**
 	 * @return int
 	 */
@@ -189,56 +224,6 @@ class Color {
 	public function setCredits($credits)
 	{
 	  $this->credits = $credits;
-
-	  return $this;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getPlayers()
-	{
-	  return $this->players;
-	}
-
-	/**
-	 * @param array $players
-	 * @return $this
-	 */
-	public function setPlayers($players)
-	{
-	  $this->players = $players;
-
-	  return $this;
-	}
-	/**
-	 * @param int $idPlayer
-	 * @return $this
-	 */
-	public function addPlayer($idPlayer)
-	{
-		//Kern je sais pas s'il le faut, et je sais pas comment l'écrire mais j'hésite avec le setPplayers je sais pas si on set tout d'un coup ou si c'est plutot par ajout
-		$this->players = players;
-
-		return $this;
-	}
-
-//Kern je connais pas le type non plus, je suppose que c'est un tableau d'int avec les id
-	/**
-	 * @return array
-	 */
-	public function getActivePlayers()
-	{
-	  return $this->activePlayers;
-	}
-
-	/**
-	 * @param array $activePlayers
-	 * @return $this
-	 */
-	public function setActivePlayers($activePlayers)
-	{
-	  $this->activePlayers = $activePlayers;
 
 	  return $this;
 	}

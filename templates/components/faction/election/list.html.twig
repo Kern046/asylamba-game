@@ -1,0 +1,47 @@
+{% set statuses = get_faction_info(current_player.rColor, 'status') %}
+
+<div class="component">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Candidat{{ candidates|length|plural }} à l'élection</h4>
+
+			<div class="set-item">
+				{% if faction.isInCampaign and not is_candidate %}
+					<a class="{% if app.request.query.get('action') == 'postulate' %}active{% endif %} item" href="{{ path('view_faction_election', {'action': 'postulate'}) }}">
+						<div class="left">
+							<span>+</span>
+						</div>
+
+						<div class="center">
+							Proposer sa candidature
+						</div>
+					</a>
+				{% endif %}
+
+				{% for candidate in candidates %}
+					<div class="item">
+						<div class="left">
+							<img src="{{ asset('media/avatar/small/' ~ candidate.avatar ~ '.png') }}" alt="{{ candidate.name }}" />
+							</div>
+
+						<div class="center">
+							<strong>{{ candidate.name }}</strong>
+							{{ statuses[candidate.status - 1] }}
+						</div>
+
+						<div class="right">
+							<a {% if app.request.query.get('candidate') == candidate.id %}class="active"{% endif %}
+						   	href="{{ path('view_faction_election', {'candidate': candidate.id}) }}"></a>
+						</div>
+					</div>
+				{% endfor %}
+
+				</div>
+				{% if candidates == [] %}
+					<p>Il n'y a aucun candidat pour l'instant.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
