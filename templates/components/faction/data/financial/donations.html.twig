@@ -1,0 +1,52 @@
+<div class="component player rank">
+	<div class="head skin-2">
+		<h2>Donations</h2>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for transaction in members_donations %}
+				<div class="player color{{ transaction.senderColor }}">
+					<a href="{{ path('embassy', {'player': transaction.rSender}) }}">
+						<img src="{{ asset('media/avatar/small/' ~ transaction.senderAvatar ~ '.png') }}" class="picto" alt="{{ transaction.senderName }}">
+					</a>
+
+					{% set statuses = get_faction_info(transaction.senderColor, 'status') %}
+					<span class="title">{{ statuses[transaction.senderStatus - 1] }}</span>
+					<strong class="name">{{ transaction.senderName }}</strong>
+					<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
+				</div>
+			{% endfor %}
+
+			{% if members_donations == [] %}
+				<p>Aucune donation n'a encore été faite.</p>
+			{% endif %}
+		</div>
+	</div>
+</div>
+
+
+<div class="component player rank">
+	<div class="head skin-2">
+		<h2>Transferts à des membres</h2>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for transaction in faction_donations %}
+					<div class="player color{{ transaction.receiverColor }}">
+						<a href="{{ path('embassy', {'player': transaction.rReceiver}) }}">
+						<img src="{{ asset('media/avatar/small/' ~ transaction.receiverAvatar ~ '.png') }}" class="picto" alt="{{ transaction.receiverName }}">
+					</a>
+
+					{% set statuses = get_faction_info(transaction.receiverColor, 'status') %}
+					<span class="title">{{ statuses[transaction.receiverStatus - 1] }}</span>
+					<strong class="name">{{ transaction.receiverName }}</strong>
+					<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
+				</div>
+			{% endfor %}
+
+			{% if faction_donations == [] %}
+				<p>Aucune transaction n'a encore été effectuée.</p>
+			{% endif %}
+		</div>
+	</div>
+</div>

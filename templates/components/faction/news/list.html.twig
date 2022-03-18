@@ -1,0 +1,18 @@
+<div class="component">
+	<div class="head skin-2">
+		<h2>Liste des annonces</h2>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for news in faction_news %}
+				<div class="number-box text">
+					<span class="label"><a href="{{ path('faction_government', {'mode': 'news', 'news': news.id}) }}">{{ news.title }}</a></span>
+					<span class="group-link">
+						<a href="{{ path('pin_faction_news', {'id': news.id}) }}" title="mettre en avant l'annonce" class="hb lt">{{ (news.pinned ? '&#9930;' : '&#9929;') }}</a>
+						<a href="{{ path('delete_faction_news', {'id': news.id}) }}" title="supprimer l'annonce" class="hb lt">&#215;</a>
+					</span>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>

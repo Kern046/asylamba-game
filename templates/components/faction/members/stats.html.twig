@@ -1,0 +1,40 @@
+{% set statuses = get_faction_info(faction.id, 'status') %}
+
+<div class="component player rank">
+	<div class="head skin-1">
+		<h1>Membres</h1>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="number-box">
+				<span class="label">Joueurs actifs dans la faction</span>
+				<span class="value">{{ players_count }}</span>
+			</div>
+
+			<div class="number-box grey">
+				<span class="label">Joueurs en ligne actuellement</span>
+				<span class="value">{{ online_players_count }}</span>
+			</div>
+
+			<h4>Nouveaux membres</h4>
+
+			{% for player in last_faction_players %}
+				<div class="player">
+					<a href="{{ path('embassy', {'player': player.id}) }}">
+						<img src="{{ asset('media/avatar/small/' ~ player.avatar ~ '.png') }}" class="picto" alt="{{ player.name }}" />
+					</a>
+					<span class="title">{{ statuses[player.status - 1] }}</span>
+					<strong class="name">{{ player.name }}</strong>
+
+					{% if player.id != current_player.id %}
+						<span class="experience"><a href="{{ path('new_message', {'to': player.id}) }}">Souhaiter la bienvenue</a></span>
+					{% endif %}
+				</div>
+			{% endfor %}
+
+			{% if last_faction_players|length == 0 %}
+				<p>Aucun nouveau membre ces 3 derniers jours</p>
+			{% endif %}
+		</div>
+	</div>
+</div>

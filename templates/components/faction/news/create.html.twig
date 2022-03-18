@@ -1,0 +1,18 @@
+<div class="component new-message">
+	<div class="head skin-2">
+		<h2>Créer une annonce</h2>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<form action="{{ path('create_faction_news') }}" method="POST" >
+				<p>Titre de l'annonce</p>
+				<p class="input input-text"><input name="title" required /></p>
+
+				<p>Contenu de l'annonce</p>
+				<p class="input input-area"><textarea name="content" required style="height: 400px;"></textarea></p>
+
+				<p class="button"><button type="submit">Publier</button></p>
+			</form>
+		</div>
+	</div>
+</div>

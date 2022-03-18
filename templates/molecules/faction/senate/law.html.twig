@@ -1,0 +1,72 @@
+{% set law_duration = get_law_duration(law) %}
+
+<div class="component">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Object de la votation</h4>
+
+			<div class="build-item base-type">
+				<div class="name">
+					<img src="{{ asset('media/faction/law/common.png') }}" alt="">
+					<strong>{{ get_law_info(law.type, 'name') }}</strong>
+				</div>
+
+				<p class="desc">{{ get_law_info(law.type, 'shortDescription')|raw }}</p>
+
+
+				{% if has_voted_law(law, current_player) %}
+					<span class="button disable" style="text-align: center; line-height: 35px;">
+						<span class="text">Vous avez déjà voté</span>
+					</span>
+				{% elseif current_player.isSenator %}
+					<a class="button" href="{{ path('vote_for_law', {'id': law.id, 'choice': 1}) }}" style="text-align: center; line-height: 35px; display: inline-block; width: 104px; margin-right: 0;">
+						<span class="text">Pour</span>
+					</a>
+
+					<a class="button" href="{{ path('vote_for_law', {'id': law.id, 'choice': 0}) }}" style="text-align: center; line-height: 35px; display: inline-block; width: 104px;">
+						<span class="text">Contre</span>
+					</a>
+				{% else %}
+					<span class="button disable" style="text-align: center; line-height: 35px;">
+						<span class="text">Seuls les sénateurs peuvent voter</span>
+					</span>
+				{% endif %}
+			</div>
+
+			<h4>Modalités d'application</h4>
+
+			<ul class="list-type-1">
+				<li>
+					<span class="label">Coût</span>
+					<span class="value">
+						{% if get_law_info(law.type, 'bonusLaw') %}
+							{{ (get_law_info(law.type, 'price') * faction.activePlayers * law_duration)|number }}
+						{% else %}
+							{{ get_law_info(law.type, 'price')|number }}
+						{% endif %}
+					<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits"></span>
+				</li>
+
+				{% if get_law_info(law.type, 'bonusLaw') %}
+					<li>
+						<span class="label">Durée d'application</span>
+						<span class="value">{{ law_duration|number }} relève{{ law_duration|plural }}</span>
+					</li>
+				{% elseif law.options.display is defined %}
+					{% for label in law.options.display|keys %}
+						{% set value = law.options.display[label] %}
+
+						<li>
+							<span class="label">{{ label }}</span>
+							<span class="value">{{ value }}</span>
+						</li>
+					{% endfor %}
+				{% endif %}
+			</ul>
+
+			<h4>Date application</h4>
+			<p>Mise en application {{ law.dEndVotation|date }}</p>
+		</div>
+	</div>
+</div>

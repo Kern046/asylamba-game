@@ -335,6 +335,52 @@ class CommanderRepository extends AbstractRepository {
 		$statement->execute(['orbital_base_id' => $orbitalBaseId, 'line' => $line]);
 		return (int) $statement->fetch()['nb_commanders'];
 	}
+
+	public function getFactionCommanderStats(int $factionId): array
+	{
+		$qr = $this->connection->prepare('SELECT
+				COUNT(c.id) AS nb,
+				AVG(c.level) AS avgLevel
+			FROM commander AS c
+				LEFT JOIN player AS p
+				ON c.rPlayer = p.id
+			WHERE p.rColor = ? AND (c.statement = ? OR c.statement = ?)
+		');
+		$qr->execute(array($factionId, Commander::AFFECTED, Commander::MOVING));
+		$aw1 = $qr->fetch();
+		$qr->closeCursor();
+
+		return $aw1;
+	}
+
+	public function getFactionFleetStats(int $factionId): array
+	{
+		$qr = $this->connection->prepare('SELECT
+				SUM(s.ship0) AS nbs0,
+				SUM(s.ship1) AS nbs1,
+				SUM(s.ship2) AS nbs2,
+				SUM(s.ship3) AS nbs3,
+				SUM(s.ship4) AS nbs4,
+				SUM(s.ship5) AS nbs5,
+				SUM(s.ship6) AS nbs6,
+				SUM(s.ship7) AS nbs7,
+				SUM(s.ship8) AS nbs8,
+				SUM(s.ship9) AS nbs9,
+				SUM(s.ship10) AS nbs10,
+				SUM(s.ship11) AS nbs11
+			FROM squadron AS s
+				LEFT JOIN commander AS c
+				ON s.rCommander = c.id
+				LEFT JOIN player AS p
+				ON c.rPlayer = p.id
+			WHERE p.rColor = ? AND (c.statement = ? OR c.statement = ?)
+		');
+		$qr->execute(array($factionId, Commander::AFFECTED, Commander::MOVING));
+		$aw2 = $qr->fetch();
+		$qr->closeCursor();
+
+		return $aw2;
+	}
 	
 	public function insert($commander)
 	{

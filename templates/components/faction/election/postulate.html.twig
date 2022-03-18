@@ -1,0 +1,31 @@
+<div class="component new-message">
+	<div class="head skin-2">
+		<h2>Présentez-vous</h2>
+		</div>
+	<div class="fix-body">
+		<div class="body">
+			{% if current_player.isParliamentMember %}
+				<form action="{{ path('postulate', {'id': election.id}) }}" method="post">
+					<p><label for="program">Votre message politique</label></p>
+					<p class="input input-area">
+						<textarea id="program" name="program" required style="height: 300px;"></textarea>
+					</p>
+
+					<p class="button"><button type="submit">Se présenter</button></p>
+				</form>
+			{% else %}
+				<form action="#" method="post">
+					<p><label for="program">Votre message politique</label></p>
+					<p class="input input-area">
+						<textarea id="program" name="program" disabled style="height: 300px;">
+							Vous ne pouvez pas vous présenter, vous n'avez pas assez de prestige.
+						</textarea>
+					</p>
+					<p class="button">
+						<button type="submit" disabled>Se présenter</button>
+					</p>
+				</form>
+			{% endif %}
+		</div>
+	</div>
+</div>

@@ -44,6 +44,21 @@ class Law {
 	public $forVote 			= 0;
 	public $againstVote			= 0;
 
+	public function isEffective(): bool
+	{
+		return Law::EFFECTIVE === $this->getStatement();
+	}
+
+	public function isObsolete(): bool
+	{
+		return Law::OBSOLETE === $this->getStatement();
+	}
+
+	public function isRefused(): bool
+	{
+		return Law::REFUSED === $this->getStatement();
+	}
+
 	/**
 	 * @param int $id
 	 * @return Law

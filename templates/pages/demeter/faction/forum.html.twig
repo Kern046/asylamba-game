@@ -1,0 +1,135 @@
+if (!$request->query->has('forum')) {
+# page d'accueil des forums
+# charge les x premiers sujets de chaque forum
+
+$S_TOM1 = $forumTopicManager->getCurrentSession();
+
+$archivedMode = FALSE;
+
+for ($i = 1; $i <= ForumResources::size(); $i++) {
+$forum_topics = ForumResources::getInfo($i, 'id');
+
+if ($forum_topics < 10 || ($forum_topics >= 10 && $forum_topics < 20 && $session->get('playerInfo')->get('status') > 2) || ($forum_topics >= 20 && $forum_topics < 30 && $session->get('playerInfo')->get('status') == Player::CHIEF)) {
+
+$where = [
+'rForum' => $forum_topics,
+'isArchived' => $archivedMode
+];
+
+if ($forum_topics < 20) {
+$where['rColor'] = $session->get('playerInfo')->get('color');
+}
+
+$forumTopicManager->newSession();
+$forumTopicManager->load(
+$where,
+['isUp', 'DESC', 'dLastMessage', 'DESC'],
+[0, 10],
+$session->get('playerId')
+);
+
+$topic_topics = [];
+
+for ($j = 0; $j < $forumTopicManager->size(); $j++) {
+$topic_topics[$j] = $forumTopicManager->get($j);
+}
+
+$isStandard_topics = FALSE;
+$idColum_topics = $i;
+
+include $componentPath . 'faction/forum/topics.php
+}
+}
+
+$forumTopicManager->changeSession($S_TOM1);
+} else {
+$forumId = !$request->query->has('forum') ? 1 : $request->query->get('forum');
+$archivedMode = $request->query->get('mode') === 'archived' && in_array($session->get('playerInfo')->get('status'), [Player::CHIEF, Player::WARLORD, Player::TREASURER, Player::MINISTER])
+? TRUE : FALSE;
+
+if ($forumId < 10 || ($forumId >= 10 && $forumId < 20 && $session->get('playerInfo')->get('status') > 2) || ($forumId >= 20 && $forumId < 30 && $session->get('playerInfo')->get('status') == Player::CHIEF)) {
+# forum component
+include $componentPath . 'faction/forum/forum.php
+
+$where = [
+'rForum' => $forumId,
+'isArchived' => $archivedMode
+];
+
+if ($forumId < 20) {
+$where['rColor'] = $session->get('playerInfo')->get('color');
+}
+
+$S_TOM1 = $forumTopicManager->getCurrentSession();
+$forumTopicManager->newSession();
+$forumTopicManager->load(
+$where,
+['isUp', 'DESC', 'dLastMessage', 'DESC'],
+[0, 10],
+$session->get('playerId')
+);
+
+$topic_topics = array();
+for ($i = 0; $i < $forumTopicManager->size(); $i++) {
+$topic_topics[$i] = $forumTopicManager->get($i);
+}
+
+$isStandard_topics = TRUE;
+$forum_topics = $forumId;
+
+include $componentPath . 'faction/forum/topics.php
+
+$forumTopicManager->changeSession($S_TOM1);
+} else {
+$response->redirect('faction/view-forum');
+}
+
+if ($request->query->has('topic')) {
+# topic component
+$S_TOM2 = $forumTopicManager->getCurrentSession();
+$forumTopicManager->newSession();
+
+if ($forumId < 10 || ($forumId >= 10 && $forumId < 20 && $session->get('playerInfo')->get('status') > 2)) {
+$forumTopicManager->load(
+['id' => $request->query->get('topic'), 'rColor' => $session->get('playerInfo')->get('color'), 'rForum' => $forumId],
+[], [],
+$session->get('playerId')
+);
+} else if ($forumId >= 20 && $forumId < 30 && $session->get('playerInfo')->get('status') == Player::CHIEF) {
+$forumTopicManager->load(
+['id' => $request->query->get('topic'), 'rForum' => $forumId],
+[], [],
+$session->get('playerId')
+);
+}
+
+if ($forumTopicManager->size() == 0) {
+throw new ErrorException('Les données sont illisibles, les messages doivent sûrement être cryptés !');
+} else {
+$topic_topic = $forumTopicManager->get(0);
+$forumTopicManager->updateLastView($topic_topic, $session->get('playerId'));
+
+$S_FMM1 = $forumMessageManager->getCurrentSession();
+$forumMessageManager->newSession();
+$forumMessageManager->load(array('rTopic' => $topic_topic->id), array('dCreation', 'DESC', 'id', 'DESC'));
+
+$message_topic = array();
+for ($i = 0; $i < $forumMessageManager->size(); $i++) {
+$message_topic[$i] = $forumMessageManager->get($i);
+}
+
+include $componentPath . 'faction/forum/topic.php
+
+if (in_array($session->get('playerInfo')->get('status'), [Player::CHIEF, Player::WARLORD, Player::TREASURER, Player::MINISTER])) {
+include $componentPath . 'faction/forum/manage-topic.php
+}
+$forumMessageManager->changeSession($S_FMM1);
+}
+$forumTopicManager->changeSession($S_TOM2);
+} elseif ($request->query->has('mode') && $request->query->get('mode') == 'create') {
+# créer un topic
+include $componentPath . 'faction/forum/createTopic.php
+} else {
+include $componentPath . 'default.php
+}
+}

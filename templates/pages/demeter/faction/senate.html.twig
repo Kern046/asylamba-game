@@ -1,0 +1,13 @@
+{% extends 'layouts/demeter/faction.html.twig' %}
+
+{% block content %}
+	{{ include('components/faction/senate/stats.html.twig') }}
+	{% for law in voting_laws %}
+		{{ include('molecules/faction/senate/law.html.twig', { law }) }}
+	{% endfor %}
+	{% if voting_laws|length == 0 %}
+		{{ include('molecules/common/default.html.twig') }}
+	{% endif %}
+
+	{{ include('components/faction/senate/historic.html.twig') }}
+{% endblock %}

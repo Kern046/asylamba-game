@@ -34,3 +34,8 @@ services:
             $playerTaxCoeff: "%zeus.player.tax_coeff%"
             $serverId: "%server_id%"
             $gaiaId: '%id_gaia%'
+
+    App\Modules\Zeus\Infrastructure\Twig\PlayerExtension:
+        arguments:
+            $timeEventUpdate: '%time_event_update%'
+            $allyInactiveTime: '%zeus.player.ally_inactive_time%'

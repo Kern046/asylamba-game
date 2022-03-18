@@ -1,0 +1,44 @@
+<div class="component">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Historique des votations</h4>
+
+			{% for law in voted_laws %}
+			<div class="build-item base-type">
+				<div class="name">
+					<img src="{{ asset('media/faction/law/common.png') }}" alt="">
+					<strong>{{ get_law_info(law.type, 'name') }}</strong>
+				</div>
+
+				<p class="desc">
+					{% if get_law_info(law.type, 'department') == 6 %}
+						<strong>Statut</strong> : appliquée<br>
+					{% else %}
+						<strong>Statut</strong> :
+						{% if law.isEffective %}
+							application en cours
+						{% elseif law.isObsolete %}
+							application terminée
+						{% elseif law.isRefused %}
+							refusée
+						{% else %}
+							inconnu
+						{% endif %}
+						<br>
+						<strong>Votes pour</strong> : {{ law.forVote }}<br>
+						<strong>Votes contre</strong> : {{ law.againstVote }}
+					{% endif %}
+				</p>
+				<p>
+					{{ law.dCreation|date }}<br>
+				</p>
+			</div>
+			{% endfor %}
+
+			{% if voted_laws|length == 0 %}
+				<p><em>Aucune loi n'a été votée pour le moment.</em></p>
+			{% endif %}
+		</div>
+	</div>
+</div>
