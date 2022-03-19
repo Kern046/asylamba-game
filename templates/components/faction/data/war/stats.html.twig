@@ -15,7 +15,7 @@
 
 			<div class="number-box grey">
 				<span class="label">grade moyen des officiers actifs</span>
-				<span class="value">{{ commander_stats.avgLevel is defined and commander_stats.avgLevel is not null ? get_commander_rank(commander_stats.avgLevel) : 'Inconnu' }}</span>
+				<span class="value">{{ commander_stats.avgLevel is defined and commander_stats.avgLevel is not null ? get_commander_rank(commander_stats.avgLevel|round) : 'Inconnu' }}</span>
 			</div>
 
 			<div class="number-box grey">
