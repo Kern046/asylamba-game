@@ -12,7 +12,7 @@ class ShipExtension extends AbstractExtension
 	{
 		return [
 			new TwigFunction('get_ship_info', fn (int $shipNumber, string $info) => ShipResource::getInfo($shipNumber, $info)),
-			new TwigFunction('get_ship_price', fn (int $shipNumber, int $shipCurrentRate) => $shipCurrentRate * ShipResource::getInfo($shipNumber, 'resourcePrice')),
+			new TwigFunction('get_ship_price', fn (int $shipNumber, int|float $shipCurrentRate) => $shipCurrentRate * ShipResource::getInfo($shipNumber, 'resourcePrice')),
 		];
 	}
 }
