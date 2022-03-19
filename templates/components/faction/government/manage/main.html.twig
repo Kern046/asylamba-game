@@ -29,7 +29,7 @@
 
 					<a href="{{ path('fire_minister', {'id': minister.id}) }}" class="more-button">Démettre de ses fonctions</a>
 
-				{% elseif current_player.isLeader %}
+				{% elseif current_player.isRuler %}
 					<form action="{{ path('choose_minister', {'department': type}) }}" method="post" class="choose-government">
 						<select name="rplayer">
 							<option value="-1">Choisissez un joueur</option>

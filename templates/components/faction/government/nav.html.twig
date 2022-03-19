@@ -37,7 +37,7 @@
 				<em>Envoi de crédits aux membres de la faction</em>
 			</a>
 
-			{% if current_player.isLeader %}
+			{% if current_player.isRuler %}
 				<a href="{{ path('faction_government', {'mode': 'manage'}) }}" class="nav-element {% if 'manage' == mode %}active{% endif %}">
 					<img src="{{ asset('media/faction/law/common.png') }}" alt="" />
 					<strong>Gouvernement</strong>
@@ -48,7 +48,7 @@
 			<hr />
 			<h4>Abandonner ses fonctions</h4>
 
-			{% if current_player.isLeader %}
+			{% if current_player.isRuler %}
 				{% if faction.isDemocratic %}
 					<a href="{{ path('abdicate') }}" class="more-button confirm" data-confirm-label="Cette action est définitive.">
 						Organiser des élections anticipées
