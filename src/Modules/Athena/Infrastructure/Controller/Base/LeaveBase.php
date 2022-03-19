@@ -67,7 +67,7 @@ class LeaveBase extends AbstractController
 			$currentBase->typeOfBase = $newType;
 		}
 		$place = $placeManager->get($currentBase->getId());
-		$gaiaId = $this->getParameter('gaia_id');
+		$gaiaId = $this->getParameter('id_gaia');
 
 		$orbitalBaseManager->changeOwnerById($currentBase->getId(), $currentBase, $gaiaId, $baseCommanders);
 		$place->rPlayer = $gaiaId;
