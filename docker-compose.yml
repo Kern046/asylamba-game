@@ -45,8 +45,6 @@ services:
         image: redis
         networks:
             - asylamba
-        volumes:
-            - redis-data:/data
         ports:
             - "6379:6379"
 
