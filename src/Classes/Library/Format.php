@@ -74,7 +74,8 @@ class Format {
 		}
 	}
 
-	public static function percent($number, $base, $ceil = TRUE) {
+	public static function percent(int|float $number, int|float $base, bool $ceil = true): float
+	{
 		return min(100, ($base == 0)
 			? 0
 			: ($ceil

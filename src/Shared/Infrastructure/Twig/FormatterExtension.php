@@ -24,7 +24,7 @@ class FormatterExtension extends AbstractExtension
 			new TwigFilter('ranking', fn (int|float $number) => Format::rankingFormat($number)),
 			new TwigFilter('ordinal_number', fn (int|float $number) => Format::ordinalNumber($number)),
 			new TwigFilter('plural', fn (int|float $number) => Format::plural($number)),
-			new TwigFilter('percent', fn (int $number, int $base) => Format::percent($number, $base)),
+			new TwigFilter('percent', fn (int|float $number, int|float $base) => Format::percent($number, $base)),
 			new TwigFilter('lite_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'lite')),
 			new TwigFilter('large_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'large')),
 			new TwigFilter('date', fn (string $date) => Chronos::transform($date)),
