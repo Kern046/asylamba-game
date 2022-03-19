@@ -38,7 +38,8 @@ class Game {
 		}
 	}
 
-	public static function getSizeOfPlanet($population) {
+	public static function getSizeOfPlanet(int|float $population): int
+	{
 		if ($population < 100) {
 			return 1;
 		} elseif ($population < 200) {
