@@ -33,7 +33,7 @@ class LeaveBase extends AbstractController
 	): Response {
 		$session = $request->getSession();
 
-		if (\count($session->get('playerBase')->get('ob')->size()) === 1) {
+		if ($session->get('playerBase')->get('ob')->size() === 1) {
 			throw new ConflictHttpException('vous ne pouvez pas abandonner votre unique planète');
 		}
 		$baseCommanders = $commanderManager->getBaseCommanders($currentBase->getId());
