@@ -17,7 +17,6 @@
 
 				{% set department_minister = government_members|filter(minister => minister.status == type)|first %}
 				{% if department_minister is not same as(false) %}
-					{% dump department_minister %}
 					<div class="player">
 						<a href="{{ path('embassy', {'player': minister.id}) }}">
 							<img src="{{ asset('media/avatar/small/' ~ minister.avatar ~ '.png') }}" alt="{{ minister.name }}"  class="picto" />
