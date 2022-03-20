@@ -9,6 +9,7 @@ use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Athena\Manager\ShipQueueManager;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class ShipHelper
@@ -16,7 +17,7 @@ class ShipHelper
 	protected OrbitalBaseHelper $orbitalBaseHelper;
 
 	public function __construct(
-		protected SessionWrapper $sessionWrapper,
+		protected RequestStack $requestStack,
 		protected TechnologyHelper $technologyHelper,
 		protected ShipQueueManager $shipQueueManager
 	) {
@@ -28,7 +29,7 @@ class ShipHelper
 		$this->orbitalBaseHelper = $orbitalBaseHelper;
 	}
 
-	public function haveRights($shipId, $type, $sup, $quantity = 1): bool
+	public function haveRights($shipId, $type, $sup, $quantity = 1): bool|string
 	{
 		if (ShipResource::isAShip($shipId)) {
 			switch ($type) {
@@ -36,7 +37,7 @@ class ShipHelper
 				case 'resource' : 
 					$price = ShipResource::getInfo($shipId, 'resourcePrice') * $quantity;
 					if ($shipId == ShipResource::CERBERE || $shipId == ShipResource::PHENIX) {
-						if ($this->sessionWrapper->get('playerInfo')->get('color') == ColorResource::EMPIRE) {
+						if ($this->requestStack->getSession()->get('playerInfo')->get('color') == ColorResource::EMPIRE) {
 							# bonus if the player is from the Empire
 							$price -= round($price * ColorResource::BONUS_EMPIRE_CRUISER / 100);
 						}

@@ -1,6 +1,6 @@
 {% set is_heavy_shipyard = ship_number > 5 %}
 
-<div class="build-item {% if is_heavy_shipyard %}large{% endif %} {% if not ship_data.has_technology_requirements or not ship_data.has_ship_tree_requirements %}disable{% endif %} dynamic-ship-box"
+<div class="build-item {% if is_heavy_shipyard %}large{% endif %} {% if ship_data.has_technology_requirements is not same as(true) or ship_data.has_ship_tree_requirements is not same as(true) %}disable{% endif %} dynamic-ship-box"
 	 data-ship-second="{{ get_ship_info(ship_number, 'time') }}"
 	 data-ship-cost="{{ get_ship_info(ship_number, 'resourcePrice') }}"
 	 data-ship-identifier="{{ ship_number }}"
@@ -15,11 +15,11 @@
 		<img src="{{ asset('media/ship/img/' ~ (ship_number + 1)|format_number({min_integer_digit:'2'}) ~ '-' ~ current_player.rColor|format_number({min_integer_digit:'2'}) ~ '.png') }}" alt="" />
 	</div>
 
-	{% if not ship_data.has_technology_requirements %}
+	{% if ship_data.has_technology_requirements is not same as(true) %}
 		<span class="button disable">
 			{{ ship_data.missing_technology }}
 		</span>
-	{% elseif not ship_data.has_ship_tree_requirements %}
+	{% elseif ship_data.has_ship_tree_requirements is not same as(true) %}
 		<span class="button disable">
 			il vous faut augmenter votre chantier {% if is_heavy_shipyard %}de ligne{% else %}alpha{% endif %} au niveau {{ ship_data.dock_needed_level }}
 		</span>
