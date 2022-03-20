@@ -1,4 +1,6 @@
-<div class="build-item {% if ship_number > 5 %}large{% endif %} {% if true != ship_data.has_technology_requirements or true != ship_data.has_ship_tree_requirements %}disable{% endif %} dynamic-ship-box"
+{% set is_heavy_shipyard = ship_number > 5 %}
+
+<div class="build-item {% if is_heavy_shipyard %}large{% endif %} {% if not ship_data.has_technology_requirements or not ship_data.has_ship_tree_requirements %}disable{% endif %} dynamic-ship-box"
 	 data-ship-second="{{ get_ship_info(ship_number, 'time') }}"
 	 data-ship-cost="{{ get_ship_info(ship_number, 'resourcePrice') }}"
 	 data-ship-identifier="{{ ship_number }}"
@@ -19,7 +21,7 @@
 		</span>
 	{% elseif not ship_data.has_ship_tree_requirements %}
 		<span class="button disable">
-			il vous faut augmenter votre chantier alpha au niveau {{ ship_data.dock_needed_level }}
+			il vous faut augmenter votre chantier {% if is_heavy_shipyard %}de ligne{% else %}alpha{% endif %} au niveau {{ ship_data.dock_needed_level }}
 		</span>
 	{% else %}
 		{# @TODO replace this and the JS management of the links update with a proper form #}
@@ -40,10 +42,12 @@
 				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
 			</span>
 		{% else %}
-			<input class="ship-pack" type="text" maxlength="2" name="quantity" value="{{ ship_data.max_ships }}" data-max-ship="{{ ship_data.max_ships }}" />
+			{% if not is_heavy_shipyard %}
+				<input class="ship-pack" type="text" maxlength="2" name="quantity" value="{{ ship_data.max_ships }}" data-max-ship="{{ ship_data.max_ships }}" />
+			{% endif %}
 
 			<a href="{{ absolute_url(path('build_ships', { 'ship': ship_number, 'quantity': ship_data.max_ships })) }}" class="button">
-				construire <span class="final-number">{{ ship_data.max_ships }}</span> {{ get_ship_info(ship_number, 'codeName') }} pour<br />
+				construire {% if is_heavy_shipyard %}1{% else %}<span class="final-number">{{ ship_data.max_ships }}</span>{% endif %} {{ get_ship_info(ship_number, 'codeName') }} pour<br />
 				<span class="final-cost">{{ (get_ship_info(ship_number, 'resourcePrice') * ship_data.max_ships)|number }}</span>
 				<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}"> et
 				<span class="final-time">{{ (get_ship_info(ship_number, 'time') * ship_data.max_ships)|lite_seconds }}</span>
