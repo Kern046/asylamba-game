@@ -21,11 +21,11 @@ class ChooseMinister extends AbstractController
 		EntityManager $entityManager,
 		PlayerManager $playerManager,
 		NotificationManager $notificationManager,
+		int $department,
 	): Response {
 		$rPlayer = $request->request->get('rplayer');
-		$department = $request->query->get('department');
 
-		if ($rPlayer !== FALSE && $department !== FALSE) {
+		if ($rPlayer !== null) {
 			if (($minister = $playerManager->getGovernmentMember($currentPlayer->getRColor(), $department)) === null) {
 				if ($currentPlayer->isRuler()) {
 					if (($appointee = $playerManager->get($rPlayer)) !== null) {

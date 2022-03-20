@@ -21,41 +21,36 @@ class FireMinister extends AbstractController
 		EntityManager $entityManager,
 		PlayerManager $playerManager,
 		NotificationManager $notificationManager,
+		int $id,
 	): Response {
-		$rPlayer = $request->query->get('rplayer');
+		if ($currentPlayer->isRuler()) {
+			if (($minister = $playerManager->get($id)) !== null) {
+				if ($minister->rColor == $currentPlayer->getRColor()) {
+					if ($minister->isGovernmentMember()) {
+						$statusArray = ColorResource::getInfo($minister->rColor, 'status');
+						$notif = new Notification();
+						$notif->setRPlayer($id);
+						$notif->setTitle('Eviction du gouvernement');
+						$notif->addBeg()
+							->addTxt('Vous avez été renvoyé du poste de ' . $statusArray[$minister->status - 1] . ' de votre faction.');
+						$notificationManager->add($notif);
 
-		if ($rPlayer !== FALSE) {
-			if ($currentPlayer->isRuler()) {
-				if (($minister = $playerManager->get($rPlayer)) !== null) {
-					if ($minister->rColor == $currentPlayer->getRColor()) {
-						if ($minister->isGovernmentMember()) {
-							$statusArray = ColorResource::getInfo($minister->rColor, 'status');
-							$notif = new Notification();
-							$notif->setRPlayer($rPlayer);
-							$notif->setTitle('Eviction du gouvernement');
-							$notif->addBeg()
-								->addTxt('Vous avez été renvoyé du poste de ' . $statusArray[$minister->status - 1] . ' de votre faction.');
-							$notificationManager->add($notif);
+						$minister->status = Player::PARLIAMENT;
 
-							$minister->status = Player::PARLIAMENT;
+						$entityManager->flush($minister);
 
-							$entityManager->flush($minister);
-
-							return $this->redirect($request->headers->get('referer'));
-						} else {
-							throw new ErrorException('Vous ne pouvez choisir qu\'un membre du gouvernement.');
-						}
+						return $this->redirect($request->headers->get('referer'));
 					} else {
-						throw new ErrorException('Vous ne pouvez pas virer un joueur d\'une autre faction.');
+						throw new ErrorException('Vous ne pouvez choisir qu\'un membre du gouvernement.');
 					}
 				} else {
-					throw new ErrorException('Ce joueur n\'existe pas.');
+					throw new ErrorException('Vous ne pouvez pas virer un joueur d\'une autre faction.');
 				}
 			} else {
-				throw new ErrorException('Vous n\'êtes pas le chef de votre faction.');
+				throw new ErrorException('Ce joueur n\'existe pas.');
 			}
 		} else {
-			throw new ErrorException('Informations manquantes.');
+			throw new ErrorException('Vous n\'êtes pas le chef de votre faction.');
 		}
 	}
 }

@@ -278,13 +278,8 @@ class PlayerRepository extends AbstractRepository {
 		}
 		return $data;
 	}
-	
-	/**
-	 * @param int $factionId
-	 * @param int $status
-	 * @return Player
-	 */
-	public function getGovernmentMember($factionId, $status)
+
+	public function getGovernmentMember(int $factionId, int $status): Player|null
 	{
 		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND status = :status AND statement != :dead_statement');
 		$query->execute(['faction_id' => $factionId, 'status' => $status, 'dead_statement' => Player::DEAD]);

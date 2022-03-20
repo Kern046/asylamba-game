@@ -18,15 +18,15 @@
 				{% set department_minister = government_members|filter(minister => minister.status == type)|first %}
 				{% if department_minister is not same as(false) %}
 					<div class="player">
-						<a href="{{ path('embassy', {'player': minister.id}) }}">
-							<img src="{{ asset('media/avatar/small/' ~ minister.avatar ~ '.png') }}" alt="{{ minister.name }}"  class="picto" />
+						<a href="{{ path('embassy', {'player': department_minister.id}) }}">
+							<img src="{{ asset('media/avatar/small/' ~ department_minister.avatar ~ '.png') }}" alt="{{ department_minister.name }}"  class="picto" />
 						</a>
-						<span class="title">{{ statuses[minister.status - 1] }}</span>
-						<strong class="name">{{ minister.name }}</strong>
-						<span class="experience">{{ minister.factionPoint|number }} de prestige</span>
+						<span class="title">{{ statuses[department_minister.status - 1] }}</span>
+						<strong class="name">{{ department_minister.name }}</strong>
+						<span class="experience">{{ department_minister.factionPoint|number }} de prestige</span>
 					</div>
 
-					<a href="{{ path('fire_minister', {'id': minister.id}) }}" class="more-button">Démettre de ses fonctions</a>
+					<a href="{{ path('fire_minister', {'id': department_minister.id}) }}" class="more-button">Démettre de ses fonctions</a>
 
 				{% elseif current_player.isRuler %}
 					<form action="{{ path('choose_minister', {'department': type}) }}" method="post" class="choose-government">

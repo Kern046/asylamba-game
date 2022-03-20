@@ -180,7 +180,7 @@ class PlayerManager
 		return $this->entityManager->getRepository(Player::class)->getParliamentMembers($factionId);
 	}
 	
-	public function getGovernmentMember(int $factionId, int $status): array
+	public function getGovernmentMember(int $factionId, int $status): Player|null
 	{
 		return $this->entityManager->getRepository(Player::class)->getGovernmentMember($factionId, $status);
 	}
