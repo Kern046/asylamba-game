@@ -96,6 +96,11 @@ class Player {
 		return in_array($this->getStatus(), [self::CHIEF, self::WARLORD, self::TREASURER, self::MINISTER]);
 	}
 
+	public function isTreasurer(): bool
+	{
+		return $this->getStatus() === self::TREASURER;
+	}
+
 	public function isParliamentMember(): bool
 	{
 		return $this->isSenator() || $this->isGovernmentMember();

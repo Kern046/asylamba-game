@@ -17,7 +17,7 @@
 				<p><label for="send-credit-message">Votre message (* facultatif)</label></p>
 				<p class="input input-area"><textarea id="send-credit-message" name="text"></textarea></p>
 	
-				<p class="button"><button type="submit">Envoyer</button></p>
+				<p class="button"><button type="submit" {% if not current_player.isTreasurer %}disabled{% endif %}>Envoyer</button></p>
 			</form>
 		</div>
 	</div>
