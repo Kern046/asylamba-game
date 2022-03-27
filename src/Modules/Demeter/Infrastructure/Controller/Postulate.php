@@ -41,7 +41,7 @@ class Postulate extends AbstractController
 		$ministerChoice		 = $request->request->get('ministerchoice');
 
 		if ($program !== FALSE) {
-			if (($election = $electionManager->get($electionId)) !== null) {
+			if (($election = $electionManager->get($id)) !== null) {
 				if ($election->rColor == $currentPlayer->getRColor()) {
 					$chiefChoice = 1;
 					$treasurerChoice = 1;
@@ -56,7 +56,7 @@ class Postulate extends AbstractController
 								if (($candidate = $candidateManager->getByElectionAndPlayer($election, $currentPlayer)) === null) {
 									$candidate = new Candidate();
 
-									$candidate->rElection = $electionId;
+									$candidate->rElection = $id;
 									$candidate->rPlayer = $currentPlayer->getId();
 									$candidate->chiefChoice = $chiefChoice;
 									$candidate->treasurerChoice = $treasurerChoice;

@@ -38,7 +38,7 @@ class ViewElection extends AbstractController
 
 		$data = [
 			'faction' => $faction,
-			'last_election' => $election,
+			'election' => $election,
 		];
 
 		if (null !== $election) {
