@@ -23,7 +23,7 @@ class UpdateBaseInvestments extends AbstractController
 		int $baseId,
 		string $category,
 	): Response	{
-		$credit = $request->request->get('credit');
+		$credit = $request->request->getInt('credit');
 
 		if (null === ($base = $orbitalBaseManager->get($baseId))) {
 			throw new NotFoundHttpException('Base inexistante');
