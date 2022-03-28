@@ -6,10 +6,9 @@ use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Manager\ShipQueueManager;
-use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -24,7 +23,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
 		protected Environment $twig,
 		protected ConversationRepositoryInterface $conversationRepository,
 		protected NotificationManager $notificationManager,
-		protected PlayerManager $playerManager,
+		protected CurrentPlayerRegistry $currentPlayerRegistry,
 		protected CommanderManager $commanderManager,
 		protected ShipQueueManager $shipQueueManager,
 		protected OrbitalBaseManager $orbitalBaseManager,
@@ -97,12 +96,15 @@ class TwigEventSubscriber implements EventSubscriberInterface
 
 	public function setCurrentPlayer(): void
 	{
-		if (null === ($playerId = $this->session->get('playerId'))) {
+		if (!$this->currentPlayerRegistry->has()) {
 			return;
 		}
-		$this->twig->addGlobal('current_player', $this->playerManager->get($playerId));
+		$currentPlayer = $this->currentPlayerRegistry->get();
+
+		$this->twig->addGlobal('current_player', $currentPlayer);
+		// @TODO handle registration to avoid accessing the session for this value
 		$this->twig->addGlobal('current_player_faction_id', $this->session->get('playerInfo')->get('color'));
-		$this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerConversations($playerId));
-		$this->twig->addGlobal('current_player_notifications', $this->notificationManager->getUnreadNotifications($playerId));
+		$this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerConversations($currentPlayer->getId()));
+		$this->twig->addGlobal('current_player_notifications', $this->notificationManager->getUnreadNotifications($currentPlayer->getId()));
 	}
 }

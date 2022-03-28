@@ -2,7 +2,7 @@
 
 namespace App\Modules\Zeus\Infrastructure\ArgumentResolver;
 
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
 class CurrentPlayerValueResolver implements ArgumentValueResolverInterface
 {
-	public function __construct(protected PlayerManager $playerManager)
+	public function __construct(protected CurrentPlayerRegistry $currentPlayerRegistry)
 	{
 
 	}
@@ -20,14 +20,12 @@ class CurrentPlayerValueResolver implements ArgumentValueResolverInterface
 		if (Player::class !== $argument->getType()) {
 			return false;
 		}
-		if (null === $request->getSession()->get('playerId')) {
-			return false;
-		}
-		return true;
+
+		return $this->currentPlayerRegistry->has();
 	}
 
 	public function resolve(Request $request, ArgumentMetadata $argument): iterable
 	{
-		yield $this->playerManager->get($request->getSession()->get('playerId'));
+		yield $this->currentPlayerRegistry->get();
 	}
 }
