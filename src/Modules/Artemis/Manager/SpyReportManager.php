@@ -16,14 +16,19 @@ use App\Classes\Library\Utils;
 use App\Classes\Worker\Manager;
 use App\Classes\Database\Database;
 
+use App\Modules\Artemis\Domain\Event\SpyEvent;
 use App\Modules\Artemis\Model\SpyReport;
+use App\Modules\Zeus\Model\Player;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class SpyReportManager extends Manager
 {
 	protected $managerType = '_SpyReport';
 
-	public function __construct(Database $database)
-	{
+	public function __construct(
+		Database $database,
+		private EventDispatcherInterface $eventDispatcher,
+	) {
 		parent::__construct($database);
 	}
 	
@@ -107,7 +112,8 @@ class SpyReportManager extends Manager
 		}
 	}
 
-	public function add(SpyReport $sr) {
+	public function add(SpyReport $sr, Player $player): void
+	{
 		$qr = $this->database->prepare('INSERT INTO
 			spyReport(rPlayer, price, rPlace, placeColor, typeOfBase, typeOfOrbitalBase, placeName, points, rEnemy, enemyName, enemyAvatar, enemyLevel, resources, shipsInStorage, antiSpyInvest, commercialRouteIncome, commanders, success, type, dSpying)
 			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
@@ -135,6 +141,8 @@ class SpyReportManager extends Manager
 		));
 
 		$sr->id = $this->database->lastInsertId();
+
+		$this->eventDispatcher->dispatch(new SpyEvent($sr, $player));
 
 		$this->_Add($sr);
 	}

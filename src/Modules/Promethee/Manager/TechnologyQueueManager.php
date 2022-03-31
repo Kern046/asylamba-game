@@ -12,14 +12,18 @@ namespace App\Modules\Promethee\Manager;
 
 use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
+use App\Modules\Promethee\Domain\Event\NewTechnologyQueueEvent;
 use App\Modules\Promethee\Message\TechnologyQueueMessage;
 use App\Modules\Promethee\Model\TechnologyQueue;
+use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\SchedulerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class TechnologyQueueManager implements SchedulerInterface
 {
 	public function __construct(
+		protected EventDispatcherInterface $eventDispatcher,
 		protected EntityManager $entityManager,
 		protected MessageBusInterface $messageBus
 	) {
@@ -67,7 +71,7 @@ class TechnologyQueueManager implements SchedulerInterface
 		return $this->entityManager->getRepository(TechnologyQueue::class)->getPlayerQueues($playerId);
 	}
 
-	public function add(TechnologyQueue $technologyQueue): void
+	public function add(TechnologyQueue $technologyQueue, Player $player): void
 	{
 		$this->entityManager->persist($technologyQueue);
 		$this->entityManager->flush($technologyQueue);
@@ -76,6 +80,8 @@ class TechnologyQueueManager implements SchedulerInterface
 			new TechnologyQueueMessage($technologyQueue->getId()),
 			[DateTimeConverter::to_delay_stamp($technologyQueue->getEndedAt())]
 		);
+
+		$this->eventDispatcher->dispatch(new NewTechnologyQueueEvent($technologyQueue, $player));
 	}
 	
 	public function remove(TechnologyQueue $queue): void

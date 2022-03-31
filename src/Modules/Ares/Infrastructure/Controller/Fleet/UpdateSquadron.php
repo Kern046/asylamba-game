@@ -5,13 +5,13 @@ namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Exception\ErrorException;
 use App\Classes\Exception\FormException;
+use App\Modules\Ares\Domain\Event\Fleet\SquadronUpdateEvent;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Resource\TutorialResource;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +23,7 @@ class UpdateSquadron extends AbstractController
 		Player $currentPlayer,
 		OrbitalBaseManager $orbitalBaseManager,
 		CommanderManager $commanderManager,
-		TutorialHelper $tutorialHelper,
+		EventDispatcherInterface $eventDispatcher,
 		EntityManager $entityManager,
 		int $id,
 		int $squadronId,
@@ -84,15 +84,13 @@ class UpdateSquadron extends AbstractController
 		if (!$baseOK || !$squadronOK || $totalPEV > 100) {
 			throw new ErrorException('Erreur dans la répartition des vaisseaux.');
 		}
-# tutorial
-		if ($currentPlayer->stepDone === false && $currentPlayer->getStepTutorial() === TutorialResource::FILL_SQUADRON) {
-			$tutorialHelper->setStepDone($currentPlayer);
-		}
 
 		$base->shipStorage = $baseSHIP;
 		$commander->getSquadron($squadronId)->arrayOfShips = $squadronSHIP;
 
 		$entityManager->flush();
+
+		$eventDispatcher->dispatch(new SquadronUpdateEvent($commander, $commander->getSquadron($squadronId), $currentPlayer));
 
 		return new Response('', Response::HTTP_NO_CONTENT);
 	}

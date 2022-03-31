@@ -17,10 +17,8 @@ use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,7 +35,6 @@ class Spy extends AbstractController
 		NotificationManager $notificationManager,
 		OrbitalBaseManager $orbitalBaseManager,
 		SpyReportManager $spyReportManager,
-		TutorialHelper $tutorialHelper,
 	): Response {
 		$rPlace = $request->query->get('baseId');
 		$price 	= $request->query->has('price') ? $request->query->get('price') : $request->request->get('price');
@@ -169,12 +166,6 @@ class Spy extends AbstractController
 					}
 
 					$spyReportManager->add($sr);
-
-					# tutorial
-					if ($currentPlayer->stepDone == FALSE &&
-						$currentPlayer->stepTutorial === TutorialResource::SPY_PLANET) {
-						$tutorialHelper->setStepDone($currentPlayer);
-					}
 
 					$this->addFlash('success', 'Espionnage effectué.');
 					return $this->redirectToRoute('spy_reports', ['report' => $sr->id]);

@@ -68,10 +68,10 @@
 				<img src="{{ asset('media/common/nav-chat.png') }}" alt="" />
 			</a>
 
-			{% if app.session.get('playerInfo').get('stepTutorial') > 0 %}
-				<a href="#" class="hide-slpash square sh {% if app.session.get('playerInfo').get('stepDone') %}active flashy{% endif %}" data-target="tutorial">
+			{% if current_player.stepTutorial > 0 %}
+				<a href="#" class="hide-slpash square sh {% if current_player.stepDone is same as(true) %}active flashy{% endif %}" data-target="tutorial">
 					<img src="{{ asset('media/common/tool-star.png') }}" alt="tutoriel" />
-					<span class="number">{{ app.session.get('playerInfo').get('stepTutorial') }}</span>
+					<span class="number">{{ current_player.stepTutorial }}</span>
 				</a>
 			{% endif %}
 			<a href="#" class="square sh" data-target="bug-tracker">
@@ -152,7 +152,7 @@
 		#}
 
 		{# TUTORIAL #}
-		{% set tutorial_step = app.session.get('playerInfo').get('stepTutorial') %}
+		{% set tutorial_step = current_player.stepTutorial %}
 
 		{% if tutorial_step > 0 %}
 			<div class="overbox" id="tutorial">
@@ -191,7 +191,7 @@
 				</div>
 
 				<form action="{{ path('tutorial_validatestep') }}" method="post">
-					{% if true == app.session.get('playerInfo').get('stepDone') %}
+					{% if current_player.stepDone is same as(true) %}
 						<input class="outside-button" type="submit" value="valider l'étape {{ tutorial_step }}" />
 					{% else %}
 						<input class="outside-button disabled" type="submit" value="étape en cours" disabled />

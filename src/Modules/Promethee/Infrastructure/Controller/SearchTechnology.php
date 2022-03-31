@@ -12,13 +12,10 @@ use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Promethee\Manager\ResearchManager;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Manager\TechnologyQueueManager;
-use App\Modules\Promethee\Model\Technology;
 use App\Modules\Promethee\Model\TechnologyQueue;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
-use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,7 +31,6 @@ class SearchTechnology extends AbstractController
 		TechnologyQueueManager $technologyQueueManager,
 		OrbitalBaseManager $orbitalBaseManager,
 		PlayerManager $playerManager,
-		TutorialHelper $tutorialHelper,
 		ResearchManager $researchManager,
 		string $identifier,
 	): Response {
@@ -63,22 +59,6 @@ class SearchTechnology extends AbstractController
 					&& $technologyHelper->haveRights($identifier, 'maxLevel', $targetLevel)
 					&& $technologyHelper->haveRights($identifier, 'baseType', $currentBase->typeOfBase)) {
 
-					# tutorial
-					if ($currentPlayer->stepDone == FALSE) {
-						switch ($currentPlayer->getStepTutorial()) {
-							case TutorialResource::SHIP0_UNBLOCK:
-								if ($identifier == Technology::SHIP0_UNBLOCK) {
-									$tutorialHelper->setStepDone($currentPlayer);
-								}
-								break;
-							case TutorialResource::SHIP1_UNBLOCK:
-								if ($identifier == Technology::SHIP1_UNBLOCK) {
-									$tutorialHelper->setStepDone($currentPlayer);
-								}
-								break;
-						}
-					}
-
 					// construit la nouvelle techno
 					$time = $technologyHelper->getInfo($identifier, 'time', $targetLevel);
 					$bonusPercent = $session->get('playerBonus')->get(PlayerBonus::TECHNOSPHERE_SPEED);
@@ -105,7 +85,7 @@ class SearchTechnology extends AbstractController
 							->setCreatedAt($createdAt)
 							->setEndedAt(Utils::addSecondsToDate($createdAt, round($time - $bonus)))
 					;
-					$technologyQueueManager->add($tq);
+					$technologyQueueManager->add($tq, $currentPlayer);
 
 					$orbitalBaseManager->decreaseResources($currentBase, $technologyHelper->getInfo($identifier, 'resource', $targetLevel));
 

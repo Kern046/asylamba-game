@@ -5,6 +5,7 @@ namespace App\Modules\Ares\Infrastructure\Controller;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Format;
 use App\Classes\Library\Utils;
+use App\Modules\Ares\Domain\Event\Commander\NewCommanderEvent;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
@@ -12,10 +13,9 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\SchoolClassResource;
 use App\Modules\Gaia\Resource\PlaceResource;
 use App\Modules\Zeus\Helper\CheckName;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Resource\TutorialResource;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,8 +32,8 @@ class CreateCommander extends AbstractController
 		OrbitalBaseManager $orbitalBaseManager,
 		CommanderManager $commanderManager,
 		PlayerManager $playerManager,
-		TutorialHelper $tutorialHelper,
 		EntityManager $entityManager,
+		EventDispatcherInterface $eventDispatcher,
 	): Response {
 		$school = 0;
 		$name = $request->request->get('name');
@@ -53,12 +53,6 @@ class CreateCommander extends AbstractController
 
 						if ($cn->checkLength($name) && $cn->checkChar($name)) {
 							if (SchoolClassResource::getInfo($school, 'credit') <= $currentPlayer->getCredit()) {
-								# tutorial
-								if ($currentPlayer->stepDone == FALSE &&
-									$currentPlayer->stepTutorial === TutorialResource::CREATE_COMMANDER) {
-									$tutorialHelper->setStepDone($currentPlayer);
-								}
-
 								# débit des crédits au joueur
 								$playerManager->decreaseCredit($currentPlayer, SchoolClassResource::getInfo($school, 'credit'));
 
@@ -77,6 +71,8 @@ class CreateCommander extends AbstractController
 									$newCommander->setAge(rand(40, 70));
 									$entityManager->persist($newCommander);
 									$entityManager->flush($newCommander);
+
+									$eventDispatcher->dispatch(new NewCommanderEvent($newCommander, $currentPlayer));
 								}
 								$this->addFlash('success', $nbrCommandersToCreate . ' commandant' . Format::addPlural($nbrCommandersToCreate) . ' inscrit' . Format::addPlural($nbrCommandersToCreate) . ' au programme d\'entraînement.');
 							} else {

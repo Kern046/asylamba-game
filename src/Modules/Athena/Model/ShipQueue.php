@@ -15,16 +15,16 @@ use App\Shared\Domain\Model\QueueableInterface;
 
 class ShipQueue implements QueueableInterface
 {
-	// ATTRIBUTES
-	public $id;
-	public $rOrbitalBase;
-	public $dockType = 0;
-	public $shipNumber	= 0;
-	public $quantity = 1;
+	public int|null $id = null;
+	public int $rOrbitalBase;
+	public int $dockType = 0;
+	public int $shipNumber = 0;
+	public int $quantity = 1;
 	public $dStart;
 	public $dEnd;
 
-	public function getId() { 
+	public function getId(): int|null
+	{
 		return $this->id; 
 	}
 
