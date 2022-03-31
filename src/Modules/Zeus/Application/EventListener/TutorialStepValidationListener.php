@@ -57,6 +57,7 @@ class TutorialStepValidationListener
 				TutorialResource::TECHNOSPHERE_LEVEL_1 => 1,
 				TutorialResource::TECHNOSPHERE_LEVEL_6 => 6,
 			],
+			default => [],
 		};
 
 		foreach ($data as $tutorialStep => $buildingNeededLevel) {

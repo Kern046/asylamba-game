@@ -23,7 +23,7 @@ class LootEvent implements TutorialEvent
 		return $this->attacker;
 	}
 
-	public function getTutorialStep(): int
+	public function getTutorialStep(): int|null
 	{
 		return TutorialResource::LOOT_PLANET;
 	}

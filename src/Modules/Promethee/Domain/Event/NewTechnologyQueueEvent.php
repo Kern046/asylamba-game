@@ -22,11 +22,12 @@ class NewTechnologyQueueEvent implements TutorialEvent
 		return $this->player;
 	}
 
-	public function getTutorialStep(): int
+	public function getTutorialStep(): int|null
 	{
 		return match ($this->technologyQueue->technology) {
 			Technology::SHIP0_UNBLOCK => TutorialResource::SHIP0_UNBLOCK,
 			Technology::SHIP1_UNBLOCK => TutorialResource::SHIP1_UNBLOCK,
+			default => null,
 		};
 	}
 }

@@ -8,5 +8,5 @@ interface TutorialEvent
 {
 	public function getTutorialPlayer(): Player;
 
-	public function getTutorialStep(): int;
+	public function getTutorialStep(): int|null;
 }

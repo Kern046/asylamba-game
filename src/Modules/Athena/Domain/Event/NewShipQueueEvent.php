@@ -22,11 +22,12 @@ class NewShipQueueEvent implements TutorialEvent
 		return $this->player;
 	}
 
-	public function getTutorialStep(): int
+	public function getTutorialStep(): int|null
 	{
 		return match ($this->shipQueue->shipNumber) {
 			ShipResource::PEGASE => TutorialResource::BUILD_SHIP0,
 			ShipResource::SATYRE => TutorialResource::BUILD_SHIP1,
+			default => null,
 		};
 	}
 }
