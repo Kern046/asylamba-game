@@ -18,7 +18,7 @@
 
 		{% if laws_count < 2 %}
 			{% for i in laws_count..1 %}
-				{{ include('components/common/default.html.twig') }}
+				{{ include('molecules/common/default.html.twig') }}
 			{% endfor %}
 		{% endif %}
 	{% elseif 'news' == mode %}
