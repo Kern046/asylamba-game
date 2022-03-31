@@ -13,10 +13,6 @@ put_commander_in_school:
     controller: App\Modules\Ares\Infrastructure\Controller\PutCommanderInSchool
     methods: 'GET'
 
-change_commander_position:
-    path: /{id}/change-position
-    controller: App\Modules\Ares\Infrastructure\Controller\AffectCommander
-
 update_commander_name:
     path: /{id}/update-name
     controller: App\Modules\Ares\Infrastructure\Controller\Commander\UpdateName

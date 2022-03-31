@@ -31,7 +31,7 @@
 								{% endif %}
 							</span>
 						</a>
-						<a class="link hb {{ commander.line == 1 ? 'to-right' : 'to-left' }}" title="changer de ligne" href="{{ path('change_commander_position', {'id': commander.id}) }}"></a>
+						<a class="link hb {{ commander.line == 1 ? 'to-right' : 'to-left' }}" title="changer de ligne" href="{{ path('change_commander_line', {'id': commander.id}) }}"></a>
 					</div>
 
 					{% if commander.line == 1 %}
