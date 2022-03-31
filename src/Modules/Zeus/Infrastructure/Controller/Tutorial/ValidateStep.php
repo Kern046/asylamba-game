@@ -7,6 +7,7 @@ use App\Classes\Exception\FormException;
 use App\Classes\Library\Format;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Manager\ShipQueueManager;
+use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Promethee\Model\Technology;
@@ -23,6 +24,7 @@ class ValidateStep extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		OrbitalBase $currentBase,
 		OrbitalBaseManager $orbitalBaseManager,
 		PlayerManager $playerManager,
 		TutorialHelper $tutorialHelper,
@@ -59,7 +61,7 @@ class ValidateStep extends AbstractController
 			}
 
 			if ($resource > 0 || $ship != array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) {
-				$ob = $playerBases[0];
+				$ob = $currentBase;
 
 				if ($resource > 0) {
 					if ($firstReward) {
