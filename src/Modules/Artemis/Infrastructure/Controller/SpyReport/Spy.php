@@ -165,9 +165,10 @@ class Spy extends AbstractController
 							throw new \LogicException('espionnage pour vaisseau-mère pas encore implémenté');
 					}
 
-					$spyReportManager->add($sr);
+					$spyReportManager->add($sr, $currentPlayer);
 
 					$this->addFlash('success', 'Espionnage effectué.');
+					
 					return $this->redirectToRoute('spy_reports', ['report' => $sr->id]);
 				} else {
 					throw new ErrorException('Impossible de lancer un espionnage');
