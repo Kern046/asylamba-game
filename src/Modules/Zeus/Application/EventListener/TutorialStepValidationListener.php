@@ -71,7 +71,6 @@ class TutorialStepValidationListener
 	#[AsEventListener(AffectationEvent::class)]
 	#[AsEventListener(LineChangeEvent::class)]
 	#[AsEventListener(LootEvent::class)]
-	#[AsEventListener(NewBuildingQueueEvent::class)]
 	#[AsEventListener(NewCommanderEvent::class)]
 	#[AsEventListener(NewShipQueueEvent::class)]
 	#[AsEventListener(NewTechnologyQueueEvent::class)]
