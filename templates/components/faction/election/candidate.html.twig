@@ -5,7 +5,7 @@
 	<div class="fix-body">
 		<div class="body">
 			{% if faction.isInElection %}
-				{% if faction.isRoyalistic %}
+				{% if faction.isDemocratic %}
 					<div class="build-item">
 						{% if player_vote is not null %}
 							{% if player_vote.rCandidate == candidate.rPlayer %}
