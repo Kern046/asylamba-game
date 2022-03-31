@@ -20,7 +20,7 @@
 			{% if candidate is not null %}
 				{{ include('components/faction/election/candidate.html.twig') }}
 				{% if topic is defined %}
-					{{ include('components/faction/forum/topic.html.twig') }}
+					{# {{ include('components/faction/forum/topic.html.twig') }} #}
 				{% endif %}
 			{% else %}
 				{{ include('molecules/common/default.html.twig') }}
