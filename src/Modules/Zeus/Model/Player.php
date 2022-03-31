@@ -12,37 +12,38 @@
 
 namespace App\Modules\Zeus\Model;
 
-class Player {
-	public $id = 0;
-	public $bind = 0;
-	public $rColor = 0;
-	public $rGodfather = NULL;
+class Player
+{
+	public int|null $id = 0;
+	public string|null $bind = null;
+	public int $rColor = 0;
+	public int|null $rGodfather = null;
 	public $name = '';
-	public $sex = 0;
+	public int $sex = 0;
 	public $description = '';
 	public $avatar = '';
-	public $status = 1;
-	public $credit = 0;
+	public int $status = 1;
+	public int $credit = 0;
 	public $uPlayer = '';
-	public $experience = 0;
-	public $factionPoint = 0;
-	public $level = 0;
-	public $victory = 0;
-	public $defeat = 0;
-	public $stepTutorial = 1;
-	public $stepDone = FALSE;
-	public $iUniversity = 5000;
-	public $partNaturalSciences = 25;
-	public $partLifeSciences = 25;
-	public $partSocialPoliticalSciences = 25;
-	public $partInformaticEngineering = 25;
+	public int $experience = 0;
+	public int $factionPoint = 0;
+	public int $level = 0;
+	public int $victory = 0;
+	public int $defeat = 0;
+	public int $stepTutorial = 1;
+	public bool $stepDone = false;
+	public int $iUniversity = 5000;
+	public int $partNaturalSciences = 25;
+	public int $partLifeSciences = 25;
+	public int $partSocialPoliticalSciences = 25;
+	public int $partInformaticEngineering = 25;
 	public $dInscription = '';
 	public $dLastConnection = '';
 	public $dLastActivity = '';
 	public $premium = 0; 	# 0 = publicité, 1 = pas de publicité
 	public $statement = 0;
 
-	public $synchronized = FALSE;
+	public bool $synchronized = false;
 
 	const ACTIVE = 1;
     const INACTIVE =  2;
