@@ -17,7 +17,7 @@ use Twig\Environment;
 
 class TwigEventSubscriber implements EventSubscriberInterface
 {
-	protected ?SessionInterface $session;
+	protected SessionInterface|null $session;
 	
 	public function __construct(
 		protected Environment $twig,
@@ -29,7 +29,9 @@ class TwigEventSubscriber implements EventSubscriberInterface
 		protected OrbitalBaseManager $orbitalBaseManager,
 		RequestStack $requestStack,
 	) {
-		$this->session = $requestStack->getSession();
+		if (null !== $requestStack->getMainRequest()) {
+			$this->session = $requestStack->getSession();
+		}
 	}
 
 	public static function getSubscribedEvents(): array
