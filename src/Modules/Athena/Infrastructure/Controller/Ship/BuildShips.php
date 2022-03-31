@@ -16,10 +16,8 @@ use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
-use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,7 +34,6 @@ class BuildShips extends AbstractController
 		ShipQueueManager $shipQueueManager,
 		ShipHelper $shipHelper,
 		TechnologyManager $technologyManager,
-		TutorialHelper $tutorialHelper,
 	): Response {
 		$session = $request->getSession();
 		$ship = $request->query->get('ship');
@@ -62,22 +59,6 @@ class BuildShips extends AbstractController
 					AND $shipHelper->haveRights($ship, 'pev', $currentBase, $quantity)
 					AND $shipHelper->haveRights($ship, 'techno', $technos)) {
 
-					# tutorial
-					if ($currentPlayer->stepDone == FALSE) {
-						switch ($currentPlayer->stepTutorial) {
-							case TutorialResource::BUILD_SHIP0:
-								if ($ship == ShipResource::PEGASE) {
-									$tutorialHelper->setStepDone($currentPlayer);
-								}
-								break;
-							case TutorialResource::BUILD_SHIP1:
-								if ($ship == ShipResource::SATYRE) {
-									$tutorialHelper->setStepDone($currentPlayer);
-								}
-								break;
-						}
-					}
-
 					// construit le(s) nouveau(x) vaisseau(x)
 					$sq = new ShipQueue();
 					$sq->rOrbitalBase = $currentBase->getId();
@@ -102,7 +83,7 @@ class BuildShips extends AbstractController
 					$sq->dStart = ($nbShipQueues === 0) ? Utils::now() : $shipQueues[$nbShipQueues - 1]->dEnd;
 					$sq->dEnd = Utils::addSecondsToDate($sq->dStart, round($time - $bonus));
 
-					$shipQueueManager->add($sq);
+					$shipQueueManager->add($sq, $currentPlayer);
 
 					// débit des ressources au joueur
 					$resourcePrice = ShipResource::getInfo($ship, 'resourcePrice') * $quantity;

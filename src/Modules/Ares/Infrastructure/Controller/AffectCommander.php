@@ -4,16 +4,15 @@ namespace App\Modules\Ares\Infrastructure\Controller;
 
 use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Utils;
+use App\Modules\Ares\Domain\Event\Commander\AffectationEvent;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Gaia\Resource\PlaceResource;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Resource\TutorialResource;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
@@ -24,7 +23,7 @@ class AffectCommander extends AbstractController
 		CommanderManager $commanderManager,
 		OrbitalBaseManager $orbitalBaseManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
-		TutorialHelper $tutorialHelper,
+		EventDispatcherInterface $eventDispatcher,
 		EntityManager $entityManager,
 		int $id,
 	): Response {
@@ -40,34 +39,24 @@ class AffectCommander extends AbstractController
 
 		if ($commander->statement == Commander::INSCHOOL || $commander->statement == Commander::RESERVE) {
 			if ($nbrLine2 < PlaceResource::get($orbitalBase->typeOfBase, 'r-line')) {
-				$commander->dAffectation = Utils::now();
-				$commander->statement = Commander::AFFECTED;
 				$commander->line = 2;
-
-				# tutorial
-				if ($currentPlayer->stepDone == FALSE && $currentPlayer->getStepTutorial() === TutorialResource::AFFECT_COMMANDER) {
-					$tutorialHelper->setStepDone($currentPlayer);
-				}
-
-				$this->addFlash('success', 'Votre officier ' . $commander->getName() . ' a bien été affecté en force de réserve');
-				$entityManager->flush();
-				return $this->redirectToRoute('fleet_headquarters', ['commander' => $commander->getId()]);
+				$statement = 'de réserve';
 			} elseif ($nbrLine1 < PlaceResource::get($orbitalBase->typeOfBase, 'l-line')) {
-				$commander->dAffectation =Utils::now();
-				$commander->statement = Commander::AFFECTED;
 				$commander->line = 1;
-
-				# tutorial
-				if ($currentPlayer->stepDone == FALSE && $currentPlayer->getStepTutorial() === TutorialResource::AFFECT_COMMANDER) {
-					$tutorialHelper->setStepDone($currentPlayer);
-				}
-
-				$this->addFlash('success', 'Votre officier ' . $commander->getName() . ' a bien été affecté en force active');
-				$entityManager->flush();
-				return $this->redirectToRoute('fleet_headquarters', ['commander' => $commander->getId()]);
+				$statement = 'active';
 			} else {
 				throw new \ErrorException('Votre base a dépassé la capacité limite de officiers en activité');
 			}
+			$commander->dAffectation = Utils::now();
+			$commander->statement = Commander::AFFECTED;
+
+			$entityManager->flush();
+
+			$eventDispatcher->dispatch(new AffectationEvent($commander, $currentPlayer));
+
+			$this->addFlash('success', sprintf('Votre officier %s a bien été affecté en force %s', $commander->getName(), $statement));
+
+			return $this->redirectToRoute('fleet_headquarters', ['commander' => $commander->getId()]);
 		} elseif ($commander->statement == Commander::AFFECTED) {
 			$baseCommanders = $commanderManager->getBaseCommanders($commander->rBase, [Commander::INSCHOOL]);
 

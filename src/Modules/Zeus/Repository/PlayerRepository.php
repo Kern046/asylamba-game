@@ -460,7 +460,7 @@ class PlayerRepository extends AbstractRepository {
 			'nb_victories' => $player->getVictory(),
 			'nb_defeats' => $player->getDefeat(),
 			'tutorial_step' => $player->getStepTutorial(),
-			'tutorial_step_is_done' => $player->stepDone,
+			'tutorial_step_is_done' => (int) $player->stepDone,
 			'natural_science_investment' => $player->partNaturalSciences,
 			'life_science_investment' => $player->partLifeSciences,
 			'social_political_investment' => $player->partSocialPoliticalSciences,
@@ -525,7 +525,7 @@ class PlayerRepository extends AbstractRepository {
 		$player->setVictory((int) $data['victory']);
 		$player->setDefeat((int) $data['defeat']);
 		$player->setStepTutorial((int) $data['stepTutorial']);
-		$player->stepDone = (int) $data['stepDone'];
+		$player->stepDone = (bool) $data['stepDone'];
 		$player->iUniversity = (int) $data['iUniversity'];
 		$player->partNaturalSciences = (int) $data['partNaturalSciences'];
 		$player->partLifeSciences = (int) $data['partLifeSciences'];

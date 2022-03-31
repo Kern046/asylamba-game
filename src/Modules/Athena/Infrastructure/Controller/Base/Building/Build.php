@@ -10,10 +10,8 @@ use App\Modules\Athena\Model\BuildingQueue;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
-use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +28,6 @@ class Build extends AbstractController
 		OrbitalBaseManager $orbitalBaseManager,
 		TechnologyManager $technologyManager,
 		BuildingQueueManager $buildingQueueManager,
-		TutorialHelper $tutorialHelper,
 		int $identifier,
 	): Response {
 		if ($orbitalBaseHelper->isABuilding($identifier)) {
@@ -43,77 +40,6 @@ class Build extends AbstractController
 				AND $orbitalBaseHelper->haveRights(OrbitalBaseResource::GENERATOR, $currentBase->getLevelGenerator(), 'queue', count($buildingQueues))
 				AND ($orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'buildingTree', $currentBase) === TRUE)
 				AND $orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'techno', $technos)) {
-
-				# tutorial
-				if ($currentPlayer->stepDone == FALSE) {
-					switch ($currentPlayer->getStepTutorial()) {
-						case TutorialResource::GENERATOR_LEVEL_2:
-							if ($identifier == OrbitalBaseResource::GENERATOR AND $currentLevel + 1 >= 2) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::REFINERY_LEVEL_3:
-							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 3) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::STORAGE_LEVEL_3:
-							if ($identifier == OrbitalBaseResource::STORAGE AND $currentLevel + 1 >= 3) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::DOCK1_LEVEL_1:
-							if ($identifier == OrbitalBaseResource::DOCK1 AND $currentLevel + 1 >= 1) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::TECHNOSPHERE_LEVEL_1:
-							if ($identifier == OrbitalBaseResource::TECHNOSPHERE AND $currentLevel + 1 >= 1) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::REFINERY_LEVEL_10:
-							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 10) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::STORAGE_LEVEL_8:
-							if ($identifier == OrbitalBaseResource::STORAGE AND $currentLevel + 1 >= 8) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::DOCK1_LEVEL_6:
-							if ($identifier == OrbitalBaseResource::DOCK1 AND $currentLevel + 1 >= 6) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::REFINERY_LEVEL_16:
-							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 16) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::STORAGE_LEVEL_12:
-							if ($identifier == OrbitalBaseResource::STORAGE AND $currentLevel + 1 >= 12) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::TECHNOSPHERE_LEVEL_6:
-							if ($identifier == OrbitalBaseResource::TECHNOSPHERE AND $currentLevel + 1 >= 6) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::DOCK1_LEVEL_15:
-							if ($identifier == OrbitalBaseResource::DOCK1 AND $currentLevel + 1 >= 15) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-						case TutorialResource::REFINERY_LEVEL_20:
-							if ($identifier == OrbitalBaseResource::REFINERY AND $currentLevel + 1 >= 20) {
-								$tutorialHelper->setStepDone($currentPlayer);
-							}
-							break;
-					}
-				}
 
 				$session = $request->getSession();
 
@@ -131,7 +57,7 @@ class Build extends AbstractController
 					$bq->dStart = $buildingQueues[$nbBuildingQueues - 1]->dEnd;
 				}
 				$bq->dEnd = Utils::addSecondsToDate($bq->dStart, round($time - $bonus));
-				$buildingQueueManager->add($bq);
+				$buildingQueueManager->add($bq, $currentPlayer);
 
 				# debit resources
 				$orbitalBaseManager->decreaseResources($currentBase, $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $currentLevel + 1, 'resourcePrice'));

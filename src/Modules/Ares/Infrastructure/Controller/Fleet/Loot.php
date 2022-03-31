@@ -5,6 +5,7 @@ namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Game;
+use App\Modules\Ares\Domain\Event\Fleet\LootEvent;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Demeter\Manager\ColorManager;
@@ -12,10 +13,9 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Manager\SectorManager;
 use App\Modules\Gaia\Model\Place;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Resource\TutorialResource;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,10 +30,11 @@ class Loot extends AbstractController
 		PlaceManager $placeManager,
 		PlayerManager $playerManager,
 		SectorManager $sectorManager,
-		TutorialHelper $tutorialHelper,
 		EntityManager $entityManager,
+		EventDispatcherInterface $eventDispatcher,
 		int $id,
 	): Response {
+		// @TODO simplify this hell
 		$session = $request->getSession();
 		$place = $placeManager->get($request->query->getInt('placeId'));
 		if (null === $place->rPlayer || ($player = $playerManager->get($place->rPlayer)) === null) {
@@ -59,11 +60,9 @@ class Loot extends AbstractController
 										$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration) ;
 										$this->addFlash('success', 'Flotte envoyée.');
 										# tutorial
-										if ($currentPlayer->stepDone == FALSE &&
-											$currentPlayer->getStepTutorial() === TutorialResource::LOOT_PLANET) {
-											$tutorialHelper->setStepDone($currentPlayer);
-										}
 										$entityManager->flush();
+
+										$eventDispatcher->dispatch(new LootEvent($place, $commander, $currentPlayer));
 
 										if ($request->query->has('redirect')) {
 											return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
@@ -114,6 +113,8 @@ class Loot extends AbstractController
 								$this->addFlash('success', 'Flotte envoyée.');
 
 								$entityManager->flush();
+
+								$eventDispatcher->dispatch(new LootEvent($place, $commander, $currentPlayer));
 
 								if ($request->query->has('redirect')) {
 									return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);

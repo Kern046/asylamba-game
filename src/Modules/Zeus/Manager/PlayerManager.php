@@ -15,6 +15,7 @@ use App\Classes\Library\Utils;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Session\SessionWrapper;
 
+use App\Modules\Zeus\Domain\Event\UniversityInvestmentsUpdateEvent;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Promethee\Model\Technology;
@@ -43,6 +44,7 @@ use App\Classes\Library\Game;
 use App\Classes\Container\ArrayList;
 
 use App\Classes\Exception\ErrorException;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -54,6 +56,7 @@ class PlayerManager
 
 	public function __construct(
 		protected RequestStack $requestStack,
+		protected EventDispatcherInterface $eventDispatcher,
 		protected EntityManager $entityManager,
 		protected GalaxyColorManager $galaxyColorManager,
 		protected NotificationManager $notificationManager,
@@ -677,13 +680,11 @@ class PlayerManager
 		}
 		$this->entityManager->flush($player);
 	}
-	
-	/**
-	 * @param int $playerId
-	 * @param int $investment
-	 */
-	public function updateUniversityInvestment($playerId, $investment)
+
+	public function updateUniversityInvestment(Player $player, int $investment): void
 	{
-		$this->entityManager->getRepository(Player::class)->updateUniversityInvestment($playerId, $investment);
+		$this->entityManager->getRepository(Player::class)->updateUniversityInvestment($player->getId(), $investment);
+
+		$this->eventDispatcher->dispatch(new UniversityInvestmentsUpdateEvent($player, $investment));
 	}
 }

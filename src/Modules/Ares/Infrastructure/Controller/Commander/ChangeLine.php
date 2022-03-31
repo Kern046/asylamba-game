@@ -7,7 +7,6 @@ use App\Classes\Exception\ErrorException;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Gaia\Resource\PlaceResource;
-use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,7 +20,6 @@ class ChangeLine extends AbstractController
 		Player $currentPlayer,
 		CommanderManager $commanderManager,
 		OrbitalBaseManager $orbitalBaseManager,
-		TutorialHelper $tutorialHelper,
 		EntityManager $entityManager,
 		int $id,
 	): Response {
