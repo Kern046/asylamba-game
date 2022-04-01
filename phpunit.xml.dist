@@ -31,6 +31,10 @@
         <!-- ###+ sentry/sentry-symfony ### -->
         <env name="SENTRY_DSN" value=""/>
         <!-- ###- sentry/sentry-symfony ### -->
+
+        <!-- ###+ mixpanel/mixpanel-php ### -->
+        <env name="MIXPANEL_PROJECT_TOKEN" value=""/>
+        <!-- ###- mixpanel/mixpanel-php ### -->
     </php>
 
     <testsuites>
