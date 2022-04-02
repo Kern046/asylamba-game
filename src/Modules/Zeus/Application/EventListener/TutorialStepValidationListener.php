@@ -5,7 +5,7 @@ namespace App\Modules\Zeus\Application\EventListener;
 use App\Modules\Ares\Domain\Event\Commander\AffectationEvent;
 use App\Modules\Ares\Domain\Event\Commander\LineChangeEvent;
 use App\Modules\Ares\Domain\Event\Commander\NewCommanderEvent;
-use App\Modules\Ares\Domain\Event\Fleet\LootEvent;
+use App\Modules\Ares\Domain\Event\Fleet\PlannedLootEvent;
 use App\Modules\Ares\Domain\Event\Fleet\SquadronUpdateEvent;
 use App\Modules\Artemis\Domain\Event\SpyEvent;
 use App\Modules\Athena\Domain\Event\NewBuildingQueueEvent;
@@ -71,7 +71,7 @@ class TutorialStepValidationListener
 
 	#[AsEventListener(AffectationEvent::class)]
 	#[AsEventListener(LineChangeEvent::class)]
-	#[AsEventListener(LootEvent::class)]
+	#[AsEventListener(PlannedLootEvent::class)]
 	#[AsEventListener(NewCommanderEvent::class)]
 	#[AsEventListener(NewShipQueueEvent::class)]
 	#[AsEventListener(NewTechnologyQueueEvent::class)]

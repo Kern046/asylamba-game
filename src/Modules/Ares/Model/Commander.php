@@ -469,6 +469,11 @@ class Commander implements TravellerInterface
 		return self::BACK === $this->travelType;
 	}
 
+	public function isVictorious(): bool
+	{
+		return self::DEAD !== $this->statement;
+	}
+
 	/**
 	 * @param int $startPlaceId
 	 * @return Commander

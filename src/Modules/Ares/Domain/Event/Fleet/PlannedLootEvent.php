@@ -1,47 +1,50 @@
 <?php
 
-namespace App\Modules\Ares\Domain\Event\Commander;
+namespace App\Modules\Ares\Domain\Event\Fleet;
 
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Gaia\Model\Place;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Resource\TutorialResource;
 use App\Shared\Domain\Event\TrackingEvent;
 use App\Shared\Domain\Event\TutorialEvent;
 
-class NewCommanderEvent implements TutorialEvent, TrackingEvent
+class PlannedLootEvent implements TutorialEvent, TrackingEvent
 {
 	public function __construct(
+		public readonly Place $place,
 		public readonly Commander $commander,
-		public readonly Player $player,
+		public readonly Player $attacker,
 	) {
 
 	}
 
 	public function getTutorialPlayer(): Player
 	{
-		return $this->player;
+		return $this->attacker;
 	}
 
 	public function getTutorialStep(): int|null
 	{
-		return TutorialResource::CREATE_COMMANDER;
+		return TutorialResource::LOOT_PLANET;
 	}
 
 	public function getTrackingPeopleId(): int
 	{
-		return $this->commander->rPlayer;
+		return $this->attacker->id;
 	}
 
 	public function getTrackingEventName(): string
 	{
-		return 'Commander Recruited';
+		return 'Planned Loot Mission';
 	}
 
 	public function getTrackingData(): array
 	{
 		return [
+			'start_place_id' => $this->commander->rStartPlace,
+			'destination_place_id' => $this->commander->rDestinationPlace,
 			'commander_id' => $this->commander->id,
-			'place_id' => $this->commander->rBase,
 		];
 	}
 }

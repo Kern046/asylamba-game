@@ -3,6 +3,7 @@
 namespace App\Modules\Ares\Manager;
 
 use App\Classes\Entity\EntityManager;
+use App\Modules\Ares\Domain\Event\Fleet\LootEvent;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Model\LiveReport;
 use App\Modules\Ares\Model\Report;
@@ -13,11 +14,13 @@ use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Manager\PlayerManager;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class LootManager
 {
 	public function __construct(
 		protected EntityManager $entityManager,
+		protected EventDispatcherInterface $eventDispatcher,
 		protected CommanderManager $commanderManager,
 		protected PlayerManager $playerManager,
 		protected OrbitalBaseManager $orbitalBaseManager,
@@ -160,6 +163,8 @@ class LootManager
 				}
 			}
 		}
+		$this->eventDispatcher->dispatch(new LootEvent($commander, $placePlayer));
+
 		$this->entityManager->flush();
 	}
 }
