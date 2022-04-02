@@ -178,6 +178,7 @@
 						<div class="item active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTotalTime }}" data-progress-total-time="{{ totalTimeTechno }}">
 							<img class="picto" src="{{ asset('media/technology/picto/' ~ technology_queue|queue_picture ~ '.png') }}" alt="" />
 							<strong>
+								{{ get_technology_info(technology_queue.technology, 'name') }}
 								{% if technology_queue|is_unblocking_technology %}
 								 	<span class="level">niv. {{ technology_queue.targetLevel }}</span>
 								{% endif %}

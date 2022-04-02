@@ -7,6 +7,7 @@ use App\Classes\Library\Game;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Manager\CommercialRouteManager;
+use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Gaia\Resource\PlaceResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,10 +22,17 @@ class ViewOverview extends AbstractController
 		OrbitalBase $orbitalBase,
 		CommanderManager $commanderManager,
 		CommercialRouteManager $commercialRouteManager,
+		ShipQueueManager $shipQueueManager,
 	): Response {
 		// @TODO: move it to the using part of the code and remove useless data
 		if ($orbitalBase->getLevelSpatioport() > 0) {
 			$orbitalBase->commercialRoutesData = $commercialRouteManager->getBaseCommercialData($orbitalBase);
+		}
+		if ($orbitalBase->getLevelDock1() > 0) {
+			$orbitalBase->dock1ShipQueues = $shipQueueManager->getByBaseAndDockType($orbitalBase->getId(), 1);
+		}
+		if ($orbitalBase->getLevelDock2() > 0) {
+			$orbitalBase->dock2ShipQueues = $shipQueueManager->getByBaseAndDockType($orbitalBase->getId(), 2);
 		}
 		return $this->render('pages/athena/overview.html.twig', [
 			'commanders' => $commanderManager->getBaseCommanders($orbitalBase->getId(), [Commander::AFFECTED, Commander::MOVING]),
