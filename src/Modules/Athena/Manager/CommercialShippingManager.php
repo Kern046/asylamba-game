@@ -14,6 +14,7 @@ namespace App\Modules\Athena\Manager;
 use App\Classes\Library\DateTimeConverter;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Message\Trade\CommercialShippingMessage;
+use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Classes\Library\Utils;
 use App\Classes\Entity\EntityManager;
@@ -82,7 +83,12 @@ class CommercialShippingManager implements SchedulerInterface
 		}
 	}
 
-	public function deliver(CommercialShipping $commercialShipping, $transaction, $destOB, $commander) {
+	public function deliver(
+		CommercialShipping $commercialShipping,
+		Transaction|null $transaction,
+		OrbitalBase $destOB,
+		Commander|null $commander
+	): void {
 		if ($transaction !== NULL AND $transaction->statement == Transaction::ST_COMPLETED) {
 
 			switch ($transaction->type) {

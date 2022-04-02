@@ -55,8 +55,6 @@ jQuery(document).ready(function($) {
 			var title = (alertController.resources[type] != undefined) ? alertController.resources[type][0] : 'alerte inconnue';
 			var img   = (alertController.resources[type] != undefined) ? alertController.resources[type][1] : '7';
 
-			console.debug(type, title, img, alertController.resources);
-
 			ctn += '<li data-title="' + title + '" data-content="' + content + '">';
 			ctn += '<img src="' + alertController.imgPath + img + '" alt="' + title + '" />'
 			ctn += '</li>';
@@ -432,7 +430,6 @@ jQuery(document).ready(function($) {
 		},
 
 		isSquadronsDifferents: function() {
-			console.debug(this);
 			return (this.squadronShipsOld.join('-') != this.squadronShipsNew.join('-'));
 		},
 

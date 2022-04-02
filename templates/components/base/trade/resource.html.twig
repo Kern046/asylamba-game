@@ -74,9 +74,9 @@
 
 						<div id="sell-ships-{{ ship_number }}"
 							 class="sell-form"
-							 data-shipcom-size="' . CommercialShipping::WEDGE . '"
+							 data-shipcom-size="{{ constant('App\\Modules\\Athena\\Model\\CommercialShipping::WEDGE') }}"
 							 data-resource-rate="{{ get_ship_info(ship_number, 'pev') * 1000 }}"
-							 data-max-quantity="{{ ship_number }}"
+							 data-max-quantity="{{ ship_quantity }}"
 							 data-rate="1"
 							 data-min-price="1"
 							 style="display:none;"
