@@ -28,7 +28,7 @@
 								{% set total_time_ships = queue.quantity * get_ship_info(queue.shipNumber, 'time') %}
 								{% set remaining_time = queue|queue_duration %}
 
-								<div class="item {% if real_size_queue <= 1 %}active progress" data-progress-output="lite" data-progress-current-time="'{{ remaining_time }}" data-progress-total-time="{{ total_time_ships }}{% endif %}">
+								<div class="item {% if real_size_queue <= 1 %}active progress" data-progress-output="lite" data-progress-current-time="{{ remaining_time }}" data-progress-total-time="{{ total_time_ships }}{% endif %}">
 									<a href="{{ path('cancel_ship_queue', { 'id': queue.id, 'dock': dock_type }) }}"
 									   class="button hb lt"
 									   title="annuler la commande (attention, vous ne récupérerez que {{ ship_resource_refund * 100 }}% du montant investi)">×</a>
