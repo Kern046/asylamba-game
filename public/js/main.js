@@ -10,11 +10,11 @@ jQuery(document).ready(function($) {
 		speed: 300,
 
 		// ressources du modules
-		imgPath: game.path + 'public/media/alert/',
+		imgPath: game.path + 'media/alert/',
 		resources: {
 			'100': ['information', 'info.png'],
-			'101': ['erreur', 'error.png'],
-			'102': ['réussite', 'success.png'],
+			'error': ['erreur', 'error.png'],
+			'success': ['réussite', 'success.png'],
 			'103': ['erreur utilisateur', 'fillform.png'],
 
 			'200': ['information', 'bug.png'],
@@ -34,7 +34,7 @@ jQuery(document).ready(function($) {
 			'310': ['messagerie', 'message.png'],
 			'311': ['contre-espionnage', 'antispy.png'],
 			'312': ['combat', 'fight.png'],
-			'313': ['transaction effectuée', 'market.png']
+			'market_success': ['transaction effectuée', 'market.png']
 		},
 
 		// initialisation : parse et lance le runtime
@@ -54,6 +54,8 @@ jQuery(document).ready(function($) {
 			var ctn   = new String();
 			var title = (alertController.resources[type] != undefined) ? alertController.resources[type][0] : 'alerte inconnue';
 			var img   = (alertController.resources[type] != undefined) ? alertController.resources[type][1] : '7';
+
+			console.debug(type, title, img, alertController.resources);
 
 			ctn += '<li data-title="' + title + '" data-content="' + content + '">';
 			ctn += '<img src="' + alertController.imgPath + img + '" alt="' + title + '" />'
