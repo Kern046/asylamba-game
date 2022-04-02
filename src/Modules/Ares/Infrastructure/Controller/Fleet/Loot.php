@@ -5,7 +5,7 @@ namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Game;
-use App\Modules\Ares\Domain\Event\Fleet\LootEvent;
+use App\Modules\Ares\Domain\Event\Fleet\PlannedLootEvent;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Demeter\Manager\ColorManager;
@@ -62,7 +62,7 @@ class Loot extends AbstractController
 										# tutorial
 										$entityManager->flush();
 
-										$eventDispatcher->dispatch(new LootEvent($place, $commander, $currentPlayer));
+										$eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
 
 										if ($request->query->has('redirect')) {
 											return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
@@ -114,7 +114,7 @@ class Loot extends AbstractController
 
 								$entityManager->flush();
 
-								$eventDispatcher->dispatch(new LootEvent($place, $commander, $currentPlayer));
+								$eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
 
 								if ($request->query->has('redirect')) {
 									return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);

@@ -1,0 +1,7 @@
+services:
+    Mixpanel:
+        class: \Mixpanel
+        factory: ['Mixpanel', 'getInstance']
+        arguments:
+            - '%env(MIXPANEL_PROJECT_TOKEN)%'
+            - { 'host': 'api-eu.mixpanel.com' }

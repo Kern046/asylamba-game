@@ -11,9 +11,11 @@ use App\Classes\Library\Security;
 use App\Classes\Library\Utils;
 use App\Classes\Worker\API;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Zeus\Domain\Event\PlayerConnectionEvent;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,6 +31,7 @@ class ConnectController extends AbstractController
 		API $api,
 		OrbitalBaseManager $orbitalBaseManager,
 		EntityManager $entityManager,
+		EventDispatcherInterface $eventDispatcher,
 		string $bindKey
 	): Response {
 		$session = $request->getSession();
@@ -64,6 +67,8 @@ class ConnectController extends AbstractController
 			$api->confirmConnection($bindKey);
 		}
 		$entityManager->flush($player);
+
+		$eventDispatcher->dispatch(new PlayerConnectionEvent($player));
 		// redirection vers page de départ
 		return $this->redirectToRoute('profile', [
 			'mode' => ($request->query->get('mode') === 'splash')

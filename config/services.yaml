@@ -284,3 +284,7 @@ services:
         arguments:
             $templatePath: '%template%'
         tags: ['kernel.event_subscriber']
+
+    App\Shared\Infrastructure\EventListener\MixpanelListener:
+        arguments:
+            $environment: '%kernel.environment%'
