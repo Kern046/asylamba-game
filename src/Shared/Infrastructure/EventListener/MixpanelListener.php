@@ -2,7 +2,9 @@
 
 namespace App\Shared\Infrastructure\EventListener;
 
+use App\Modules\Ares\Domain\Event\Commander\NewCommanderEvent;
 use App\Modules\Ares\Domain\Event\Fleet\LootEvent;
+use App\Modules\Artemis\Domain\Event\SpyEvent;
 use App\Modules\Athena\Domain\Event\NewBuildingQueueEvent;
 use App\Modules\Athena\Domain\Event\NewShipQueueEvent;
 use App\Modules\Promethee\Domain\Event\NewTechnologyQueueEvent;
@@ -17,7 +19,7 @@ class MixpanelListener
 		$this->mixpanel->register('environment', $environment);
 	}
 
-	#[AsEventListener]
+	#[AsEventListener(priority: 10)]
 	public function onPlayerConnection(PlayerConnectionEvent $event): void
 	{
 		$player = $event->player;
@@ -30,7 +32,10 @@ class MixpanelListener
 	#[AsEventListener(NewBuildingQueueEvent::class)]
 	#[AsEventListener(NewShipQueueEvent::class)]
 	#[AsEventListener(NewTechnologyQueueEvent::class)]
+	#[AsEventListener(NewCommanderEvent::class)]
 	#[AsEventListener(LootEvent::class)]
+	#[AsEventListener(PlayerConnectionEvent::class)]
+	#[AsEventListener(SpyEvent::class)]
 	public function onTrackingEvent(TrackingEvent $event): void
 	{
 		$this->mixpanel->identify($event->getTrackingPeopleId());
