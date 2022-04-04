@@ -24,6 +24,7 @@ class Color
 	public const ALLY = 2;
 	public const ENEMY = 3;
 
+	// @TODO Inquire these constants and replace them with configurations
 	// constantes de prestiges
 	public const TWO_POINTS_PER_LEVEL = 2;
 	public const FOUR_POINTS_PER_LEVEL = 4;
@@ -60,6 +61,7 @@ class Color
 	// const
 	public const NBRGOVERNMENT = 6;
 
+	// @TODO make those configurable
 	public const CAMPAIGNTIME = 345600;
 	public const ELECTIONTIME = 172800;
 	public const PUTSCHTIME = 25200;
@@ -78,19 +80,27 @@ class Color
 
 	// attributs issus de la db
 	public $id = 0;
+	// @TODO convert to boolean
 	public $alive = 0;
 	public $isWinner = 0;
 	public $credits = 0;
+	// @TODO Replace with Aggregate of Player table
 	public $players = 0;
+	// @TODO Replace with Aggregate of Player table
 	public $activePlayers = 0;
 	public $rankingPoints = 0;
 	public $points = 0;
+	// @TODO Replace with Aggregate of Sector table
 	public $sectors = 0;
 	public $electionStatement = 0;
+	// @TODO convert to boolean
 	public $isClosed = 0;
 	public $description = 0;
+	// @TODO move that field to the future Server entity
 	public $dClaimVictory = '';
+	// @TODO get that field from the Election table
 	public $dLastElection = '';
+	// @TODO convert to boolean
 	public $isInGame = 0;
 
 	// attributs issus des resources

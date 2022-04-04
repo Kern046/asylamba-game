@@ -438,7 +438,7 @@ class PlayerRepository extends AbstractRepository
 			'nb_victories' => $player->getVictory(),
 			'nb_defeats' => $player->getDefeat(),
 			'tutorial_step' => $player->getStepTutorial(),
-			'tutorial_step_is_done' => $player->stepDone,
+			'tutorial_step_is_done' => (int) $player->stepDone,
 			'university_investment' => $player->iUniversity,
 			'natural_science_investment' => $player->partNaturalSciences,
 			'life_science_investment' => $player->partLifeSciences,

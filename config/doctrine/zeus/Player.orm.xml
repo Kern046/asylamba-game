@@ -1,0 +1,129 @@
+<doctrine-mapping xmlns="https://doctrine-project.org/schemas/orm/doctrine-mapping"
+				  xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+				  xsi:schemaLocation="https://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+	<entity name="App\Modules\Zeus\Model\Player" table="player">
+		<id name="id" type="integer" column="id">
+			<generator strategy="AUTO" />
+			<options>
+				<option name="unsigned">true</option>
+			</options>
+		</id>
+
+		<field name="bind" type="string" column="bind" length="50" nullable="true" />
+		<field name="name" type="string" column="name" length="25" unique="true" />
+		<field name="avatar" type="string" column="avatar" length="12" />
+		<field name="sex" type="smallint">
+			<options>
+				<option name="default">1</option>
+			</options>
+		</field>
+		<field name="status" type="smallint" column="status">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">1</option>
+			</options>
+		</field>
+		<field name="credit" type="bigint" column="credit">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="experience" column="experience" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="factionPoint" column="factionPoint" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="level" column="level" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="victory" column="victory" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="defeat" column="defeat" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="premium" column="premium" type="boolean">
+			<options>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="statement" column="statement" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="description" column="description" type="text" length="65535" nullable="true" />
+		<field name="iUniversity" column="iUniversity" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="stepTutorial" column="stepTutorial" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+			</options>
+		</field>
+		<field name="stepDone" column="stepDone" type="boolean">
+			<options>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="partNaturalSciences" column="partNaturalSciences" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="partLifeSciences" column="partLifeSciences" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="partSocialPoliticalSciences" column="partSocialPoliticalSciences" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="partInformaticEngineering" column="partInformaticEngineering" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="dInscription" column="dInscription" type="datetime" nullable="true" />
+		<field name="dLastConnection" column="dLastConnection" type="datetime" nullable="true" />
+		<field name="dLastActivity" column="dLastActivity" type="datetime" nullable="true" />
+		<field name="uPlayer" column="uPlayer" type="datetime" nullable="true" />
+
+		<many-to-one field="rColor" target-entity="App\Modules\Demeter\Model\Color">
+			<join-column name="rColor" nullable="false" />
+		</many-to-one>
+
+		<many-to-one field="rGodfather" target-entity="App\Modules\Zeus\Model\Player">
+			<join-column name="rGodfather" nullable="true" />
+		</many-to-one>
+	</entity>
+</doctrine-mapping>

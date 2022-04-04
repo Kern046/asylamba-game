@@ -375,6 +375,8 @@ class CreateCharacter extends AbstractController
 			$player->partLifeSciences = 25;
 			$player->partSocialPoliticalSciences = 25;
 			$player->partInformaticEngineering = 25;
+			// @TODO adapt this vlaue depending on the chosen avatar or player's choice
+			$player->sex = 1;
 
 			$player->setDInscription(Utils::now());
 			$player->setDLastConnection(Utils::now());
