@@ -24,7 +24,7 @@ class SectorNameResultHandler implements MessageHandlerInterface
 	public function __invoke(SectorNameResultMessage $message): void
 	{
 		$law = $this->lawManager->get($message->getLawId());
-		$color = $this->colorManager->get($law->getId());
+		$color = $this->colorManager->get($law->getFactionId());
 		$sector = $this->sectorManager->get($law->options['rSector']);
 
 		if ($sector->rColor == $color->id) {
