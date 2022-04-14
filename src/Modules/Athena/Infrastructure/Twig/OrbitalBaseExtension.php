@@ -60,6 +60,8 @@ class OrbitalBaseExtension extends AbstractExtension
 			)),
 			new TwigFunction('get_base_fleet_cost', fn (OrbitalBase $base) => Game::getFleetCost($base->shipStorage, false)),
 			new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff)),
+			// @TODO Improve that part
+			new TwigFunction('get_base_image', fn (OrbitalBase $base) => '1-' . Game::getSizeOfPlanet($base->getPlanetPopulation())),
 			// @TODO move to a rightful place
 			new TwigFunction('get_ship_transaction_cost', fn (Transaction $transaction) => ShipResource::getInfo($transaction->identifier, 'cost') * ShipResource::COST_REDUCTION * $transaction->quantity),
 			new TwigFunction('can_leave_orbital_base', function (OrbitalBase $orbitalBase) {
