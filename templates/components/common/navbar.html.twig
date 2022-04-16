@@ -5,10 +5,10 @@
 				<img src="{{ asset('media/common/nav-base.png') }}" alt="" />
 			</a>
 			<a href="{{ path('base_overview') }}" class="current-base {% if app.request.get('_route') == 'bases' %}active{% endif %}">
-				<img src="{{ asset('media/map/place/place' ~ current_base_image ~ '.png') }}" alt="{{ current_base_name }}" />
-				{{ current_base_name }}
+				<img src="{{ asset('media/map/place/place' ~ get_base_image(current_base) ~ '.png') }}" alt="{{ current_base.name }}" />
+				{{ current_base.name }}
 			</a>
-			<a href="{{ path('switchbase', {'baseId': next_base_id}) }}" class="square">
+			<a href="{{ path('switchbase', {'baseId': next_base is not null ? next_base.id : 0}) }}" class="square">
 				<img src="{{ asset('media/common/next-base.png') }}" alt="base suivante" />
 			</a>
 		</div>
@@ -88,16 +88,14 @@
 		{# Display OVERBOX NAV #}
 
 		{# Changement de base #}
-		{% set orbital_bases = app.session.get('playerBase').get('ob') %}
 		<div class="overbox" id="change-bases">
 			<h2>Changer de bases</h2>
 			<div class="overflow">
-				{% for i in range(0, orbital_bases.size() - 1) %}
-					{% set orbital_base = orbital_bases.get(i) %}
-					<a href="{{ path('switchbase', {'baseId': orbital_base.get('id')}) }}"
-					   {% if orbital_base.get('id') == app.session.get('playerParams').get('base') %}class="active"{% endif %}>
-						<em>{{ orbital_base.get('type')|scalar_base_type }}</em>
-						<strong>{{ orbital_base.get('name') }}</strong>
+				{% for orbital_base in current_player_bases %}
+					<a href="{{ path('switchbase', {'baseId': orbital_base.id}) }}"
+					   {% if orbital_base.id == current_base.id %}class="active"{% endif %}>
+						<em>{{ orbital_base.typeOfBase|scalar_base_type }}</em>
+						<strong>{{ orbital_base.name }}</strong>
 					</a>
 				{% endfor %}
 				</div>

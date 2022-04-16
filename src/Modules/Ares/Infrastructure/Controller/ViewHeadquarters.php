@@ -5,6 +5,7 @@ namespace App\Modules\Ares\Infrastructure\Controller;
 use App\Classes\Container\Params;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +17,7 @@ class ViewHeadquarters extends AbstractController
 {
 	public function __invoke(
 		Request $request,
+		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		Player $currentPlayer,
 		CommanderManager $commanderManager,
 		OrbitalBaseManager $orbitalBaseManager,
@@ -29,7 +31,7 @@ class ViewHeadquarters extends AbstractController
 			}
 		}
 
-		[$obsets, $commandersIds] = $this->getObsetsAndCommandersIds($request, $commanderManager);
+		[$obsets, $commandersIds] = $this->getObsetsAndCommandersIds($request, $currentPlayer, $currentPlayerBasesRegistry, $commanderManager);
 
 		return $this->render('pages/ares/fleet/headquarters.html.twig', [
 			'commander' => $commander ?? null,
@@ -40,23 +42,25 @@ class ViewHeadquarters extends AbstractController
 		]);
 	}
 
-	private function getObsetsAndCommandersIds(Request $request, CommanderManager $commanderManager): array
-	{
+	private function getObsetsAndCommandersIds(
+		Request $request,
+	   	Player $currentPlayer,
+	   	CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+	   	CommanderManager $commanderManager,
+	): array {
 		$session = $request->getSession();
-		$obsets = array(); $j = 0;
-		for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-			if ($request->cookies->get('p' . Params::LIST_ALL_FLEET, Params::$params[Params::LIST_ALL_FLEET]) || $session->get('playerBase')->get('ob')->get($i)->get('id') == $session->get('playerParams')->get('base')) {
-				$obsets[$j] = array();
-
-				$obsets[$j]['info'] = array();
-				$obsets[$j]['fleets'] = array();
-
-				$obsets[$j]['info']['id'] = $session->get('playerBase')->get('ob')->get($i)->get('id');
-				$obsets[$j]['info']['name'] = $session->get('playerBase')->get('ob')->get($i)->get('name');
-				$obsets[$j]['info']['type'] = $session->get('playerBase')->get('ob')->get($i)->get('type');
-				$obsets[$j]['info']['img'] = $session->get('playerBase')->get('ob')->get($i)->get('img');
-
-				$j++;
+		$obsets = [];
+		foreach ($currentPlayerBasesRegistry->all() as $orbitalBase) {
+			if ($request->cookies->get('p' . Params::LIST_ALL_FLEET, Params::$params[Params::LIST_ALL_FLEET]) || $orbitalBase->getId() == $currentPlayerBasesRegistry->current()->getId()) {
+				$obsets[] = [
+					'info' => [
+						'id' => $orbitalBase->getId(),
+						'name' => $orbitalBase->name,
+						'type' => $orbitalBase->typeOfBase,
+						'img' => $orbitalBase->img,
+					],
+					'fleets' => [],
+				];
 			}
 		}
 
@@ -70,7 +74,7 @@ class ViewHeadquarters extends AbstractController
 			}
 		}
 
-		$attackingCommanders =  $commanderManager->getVisibleIncomingAttacks($session->get('playerId'));
+		$attackingCommanders =  $commanderManager->getVisibleIncomingAttacks($currentPlayer->id);
 		for ($i = 0; $i < count($obsets); $i++) {
 			foreach ($attackingCommanders as $commander) {
 				if ($commander->rDestinationPlace == $obsets[$i]['info']['id']) {
@@ -78,7 +82,7 @@ class ViewHeadquarters extends AbstractController
 				}
 			}
 		}
-		$commanders = $commanderManager->getPlayerCommanders($session->get('playerId'), [Commander::AFFECTED, Commander::MOVING], ['c.rBase' => 'DESC']);
+		$commanders = $commanderManager->getPlayerCommanders($currentPlayer->id, [Commander::AFFECTED, Commander::MOVING], ['c.rBase' => 'DESC']);
 
 		for ($i = 0; $i < count($obsets); $i++) {
 			foreach ($commanders as $commander) {

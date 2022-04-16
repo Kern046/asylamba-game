@@ -27,15 +27,7 @@ class SwitchBase extends AbstractController
 			throw new AccessDeniedHttpException('This base does not belong to you');
 		}
 
-		$session = $request->getSession();
-
-		for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-			$b = $session->get('playerBase')->get('ob')->get($i);
-			if ($b->get('id') === $base->getId()) {
-				$session->get('playerParams')->add('base', $base->getId());
-				break;
-			}
-		}
+		$request->getSession()->get('playerParams')->add('base', $base->getId());
 
 		return $this->redirectToRoute(match ($page) {
 			'generator' => 'generator',

@@ -2,6 +2,8 @@
 
 namespace App\Modules\Zeus\Infrastructure\EventListener;
 
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
+use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -12,7 +14,9 @@ class CurrentPlayerListener
 {
 	public function __construct(
 		private PlayerManager $playerManager,
-		private CurrentPlayerRegistry $currentPlayerRegistry
+		private OrbitalBaseManager $orbitalBaseManager,
+		private CurrentPlayerRegistry $currentPlayerRegistry,
+		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 	) {
 
 	}
@@ -21,10 +25,12 @@ class CurrentPlayerListener
 	{
 		$request = $event->getRequest();
 
-		if (null === ($playerId = $request->getSession()->get('playerId'))) {
+		if (!$request->hasPreviousSession() || null === ($playerId = $request->getSession()->get('playerId'))) {
 			return;
 		}
 
 		$this->currentPlayerRegistry->set($this->playerManager->get($playerId));
+		$this->currentPlayerBasesRegistry->setBases($this->orbitalBaseManager->getPlayerBases($playerId));
+		$this->currentPlayerBasesRegistry->setCurrentBase($request->getSession()->get('playerParams')->get('base'));
 	}
 }

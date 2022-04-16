@@ -4,6 +4,7 @@ namespace App\Shared\Infrastructure\EventSubscriber;
 
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
@@ -24,6 +25,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
 		protected ConversationRepositoryInterface $conversationRepository,
 		protected NotificationManager $notificationManager,
 		protected CurrentPlayerRegistry $currentPlayerRegistry,
+		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		protected CommanderManager $commanderManager,
 		protected ShipQueueManager $shipQueueManager,
 		protected OrbitalBaseManager $orbitalBaseManager,
@@ -38,7 +40,6 @@ class TwigEventSubscriber implements EventSubscriberInterface
 	{
 		return [
 			ControllerEvent::class => [
-				['setCurrentPlayerBases'],
 				['setCurrentPlayer'],
 				['setCurrentBase'],
 			],
@@ -50,50 +51,14 @@ class TwigEventSubscriber implements EventSubscriberInterface
 		if (null === ($playerId = $this->session->get('playerId'))) {
 			return;
 		}
-		$currentBase = $this->orbitalBaseManager->get($this->session->get('playerParams')->get('base'));
+		$currentBase = $this->currentPlayerBasesRegistry->current();
 		$this->twig->addGlobal('current_base', $currentBase);
+		$this->twig->addGlobal('current_player_bases', $this->currentPlayerBasesRegistry->all());
+		$this->twig->addGlobal('next_base', $this->currentPlayerBasesRegistry->next());
 		$this->twig->addGlobal('incoming_commanders', $this->commanderManager->getVisibleIncomingAttacks($playerId));
 		$this->twig->addGlobal('outgoing_commanders', $this->commanderManager->getPlayerCommanders($playerId, [Commander::MOVING]));
 		$this->twig->addGlobal('current_dock1_ship_queues',  $this->shipQueueManager->getByBaseAndDockType($currentBase->rPlace, 1));
 		$this->twig->addGlobal('current_dock2_ship_queues',  $this->shipQueueManager->getByBaseAndDockType($currentBase->rPlace, 2));
-	}
-	
-	public function setCurrentPlayerBases(): void
-	{
-		if (null === ($playerParams = $this->session->get('playerParams'))) {
-			return;
-		}
-		$currentBaseName = NULL;
-		$currentBaseImg  = NULL;
-		$ob = $this->session->get('playerBase')->get('ob');
-		for ($i = 0; $i < $ob->size(); $i++) {
-			if ($playerParams->get('base') == $ob->get($i)->get('id')) {
-				$currentBaseName = $ob->get($i)->get('name');
-				$currentBaseImg  = $ob->get($i)->get('img');
-				break;
-			}
-		}
-
-		if ($ob->get(0)) {
-			$nextBaseId = $ob->get(0)->get('id');
-			$isFound = false;
-			for ($i = 0; $i < $ob->size(); $i++) {
-				if ($isFound) {
-					$nextBaseId = $ob->get($i)->get('id');
-					break;
-				}
-				if ($playerParams->get('base') == $ob->get($i)->get('id')) {
-					$isFound = true;
-				}
-			}
-		} else {
-			$nextBaseId = 0;
-			$currentBaseName = 'Reconnectez-vous';
-			$currentBaseImg = '1-1';
-		}
-		$this->twig->addGlobal('next_base_id', $nextBaseId);
-		$this->twig->addGlobal('current_base_name', $currentBaseName);
-		$this->twig->addGlobal('current_base_image', $currentBaseImg);
 	}
 
 	public function setCurrentPlayer(): void
