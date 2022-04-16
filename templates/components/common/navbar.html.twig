@@ -8,7 +8,7 @@
 				<img src="{{ asset('media/map/place/place' ~ get_base_image(current_base) ~ '.png') }}" alt="{{ current_base.name }}" />
 				{{ current_base.name }}
 			</a>
-			<a href="{{ path('switchbase', {'baseId': next_base is not null ? next_base.id : 0}) }}" class="square">
+			<a href="{{ path('switchbase', {'baseId': next_base is not null ? next_base.id : first_base.id }) }}" class="square">
 				<img src="{{ asset('media/common/next-base.png') }}" alt="base suivante" />
 			</a>
 		</div>

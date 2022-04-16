@@ -32,6 +32,11 @@ class CurrentPlayerBasesRegistry
 		return $this->bases[$this->currentBaseId];
 	}
 
+	public function first(): OrbitalBase
+	{
+		return array_values($this->bases)[0];
+	}
+
 	public function next(): OrbitalBase|null
 	{
 		$currentIndex = array_search($this->currentBaseId, array_keys($this->bases));

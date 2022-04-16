@@ -10,7 +10,7 @@
 	{{ include('components/base/situation.html.twig') }}
 	{{ include('components/base/type.html.twig') }}
 
-	{% if app.session.get('playerBase').get('ob').size() > 1 %}
+	{% if current_player_bases|length > 1 %}
 		{{ include('components/base/leave_base.html.twig') }}
 	{% endif %}
 {% endblock %}
