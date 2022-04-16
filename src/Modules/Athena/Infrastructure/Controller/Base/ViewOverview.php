@@ -6,6 +6,7 @@ use App\Classes\Container\ArrayList;
 use App\Classes\Library\Game;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -20,6 +21,7 @@ class ViewOverview extends AbstractController
 	public function __invoke(
 		Request $request,
 		OrbitalBase $orbitalBase,
+		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		CommanderManager $commanderManager,
 		CommercialRouteManager $commercialRouteManager,
 		ShipQueueManager $shipQueueManager,
@@ -43,16 +45,16 @@ class ViewOverview extends AbstractController
 			'science_coeff' => Game::getImprovementFromScientificCoef($orbitalBase->getPlanetHistory()),
 			'minimal_change_level' => $this->getParameter('athena.obm.change_type_min_level'),
 			'capital_change_level' => $this->getParameter('athena.obm.capital_min_level'),
-			'capitals_count' => $this->getCapitalsCount($request->getSession()),
+			'capitals_count' => $this->getCapitalsCount($currentPlayerBasesRegistry->all()),
 			'building_resource_refund' => $this->getParameter('athena.building.building_queue_resource_refund'),
 		]);
 	}
 
-	private function getCapitalsCount(SessionInterface $session): int
+	private function getCapitalsCount(array $bases): int
 	{
 		return \count(\array_filter(
-			$session->get('playerBase')->get('ob')->all(),
-			fn (ArrayList $baseData) => $baseData->get('type') === OrbitalBase::TYP_CAPITAL,
+			$bases,
+			fn (OrbitalBase $base) => $base->isCapital(),
 		));
 	}
 }

@@ -11,6 +11,7 @@ use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\CommercialRoute;
+use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
@@ -22,12 +23,14 @@ use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class Accept extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		OrbitalBase $currentBase,
 		CommercialRouteManager $commercialRouteManager,
 		ColorManager $colorManager,
 		OrbitalBaseManager $orbitalBaseManager,
@@ -35,63 +38,67 @@ class Accept extends AbstractController
 		PlayerManager $playerManager,
 		NotificationManager $notificationManager,
 		EntityManager $entityManager,
-		int $baseId,
 		int $id,
 	): Response {
-		$session = $request->getSession();
-		for ($i=0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-			$verif[] = $session->get('playerBase')->get('ob')->get($i)->get('id');
-		}
 		$routeExperienceCoeff = $this->getParameter('athena.trade.experience_coeff');
 
-		if (in_array($baseId, $verif)) {
-			$cr = $commercialRouteManager->getByIdAndDistantBase($id, $baseId);
+		if (null === ($cr = $commercialRouteManager->getByIdAndDistantBase($id, $currentBase->getId()))) {
+			throw $this->createNotFoundException('Commercial route not found');
+		}
 
-			if ($cr !== null && $cr->getStatement() == CommercialRoute::PROPOSED) {
-				$proposerFaction = $colorManager->get($cr->playerColor1);
-				$acceptorFaction = $colorManager->get($cr->playerColor2);
+		if (!$cr->isProposed()) {
+			throw new ConflictHttpException('Commercial route has already been established');
+		}
 
-				if ($proposerFaction->colorLink[$cr->playerColor2] != Color::ENEMY && $acceptorFaction->colorLink[$cr->playerColor1] != Color::ENEMY) {
-					$proposerBase = $orbitalBaseManager->get($cr->getROrbitalBase());
-					$acceptorBase = $orbitalBaseManager->get($cr->getROrbitalBaseLinked());
+		$proposerFaction = $colorManager->get($cr->playerColor1);
+		$acceptorFaction = $colorManager->get($cr->playerColor2);
 
-					$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::SPATIOPORT, 'level', $acceptorBase->getLevelSpatioport(), 'nbRoutesMax');
+		if ($proposerFaction->colorLink[$cr->playerColor2] === Color::ENEMY || $acceptorFaction->colorLink[$cr->playerColor1] === Color::ENEMY) {
+			throw new ConflictHttpException('You cannot accept this route: your two factions are at war');
+		}
+		$proposerBase = $orbitalBaseManager->get($cr->getROrbitalBase());
+		$acceptorBase = $orbitalBaseManager->get($cr->getROrbitalBaseLinked());
 
-					if ($commercialRouteManager->countBaseActiveAndStandbyRoutes($acceptorBase->getId()) <= $nbrMaxCommercialRoute) {
-						# compute bonus if the player is from Negore
-						if ($session->get('playerInfo')->get('color') == ColorResource::NEGORA) {
-							$price = round($cr->getPrice() - ($cr->getPrice() * ColorResource::BONUS_NEGORA_ROUTE / 100));
-						} else {
-							$price = $cr->getPrice();
-						}
+		$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::SPATIOPORT, 'level', $acceptorBase->getLevelSpatioport(), 'nbRoutesMax');
 
-						if ($session->get('playerInfo')->get('credit') >= $price) {
-							# débit des crédits au joueur
-							$playerManager->decreaseCredit($currentPlayer, $price);
+		if ($commercialRouteManager->countBaseActiveAndStandbyRoutes($acceptorBase->getId()) > $nbrMaxCommercialRoute) {
+			throw new ConflictHttpException('You do not have any slot left for a new route');
+		}
+		# compute bonus if the player is from Negore
+		if ($currentPlayer->rColor == ColorResource::NEGORA) {
+			$price = round($cr->getPrice() - ($cr->getPrice() * ColorResource::BONUS_NEGORA_ROUTE / 100));
+		} else {
+			$price = $cr->getPrice();
+		}
 
-							# augmentation de l'expérience des deux joueurs
-							$exp = round($cr->getIncome() * $routeExperienceCoeff);
-							$playerManager->increaseExperience($currentPlayer, $exp);
-							$playerManager->increaseExperience($playerManager->get($proposerBase->getRPlayer()), $exp);
+		if ($currentPlayer->credit < $price) {
+			throw new ConflictHttpException('You do not have enough credits');
+		}
+		$playerManager->decreaseCredit($currentPlayer, $price);
 
-							# activation de la route
-							$cr->setStatement(CommercialRoute::ACTIVE);
-							$cr->setDCreation(Utils::now());
+		# augmentation de l'expérience des deux joueurs
+		$exp = round($cr->getIncome() * $routeExperienceCoeff);
+		$playerManager->increaseExperience($currentPlayer, $exp);
+		$playerManager->increaseExperience($playerManager->get($proposerBase->getRPlayer()), $exp);
 
-							$n = new Notification();
-							$n->setRPlayer($proposerBase->getRPlayer());
-							$n->setTitle('Route commerciale acceptée');
-							$n->addBeg();
-							$n->addLnk('embassy/player-' . $currentPlayer->getId(), $currentPlayer->getName())->addTxt(' a accepté la route commerciale proposée entre ');
-							$n->addLnk('map/place-' . $acceptorBase->getRPlace(), $acceptorBase->getName())->addTxt(' et ');
-							$n->addLnk('map/place-' . $proposerBase->getRPlace(), $proposerBase->getName());
-							$n->addSep()->addTxt('Cette route vous rapporte ' . Format::numberFormat($cr->getIncome()) . ' crédits par relève.');
-							$n->addBrk()->addBoxResource('xp', $exp, 'expérience gagnée', $this->getParameter('media'));
-							$n->addSep()->addLnk('action/a-switchbase/base-' . $proposerBase->getRPlace() . '/page-spatioport', 'En savoir plus ?');
-							$n->addEnd();
-							$notificationManager->add($n);
+		# activation de la route
+		$cr->setStatement(CommercialRoute::ACTIVE);
+		$cr->setDCreation(Utils::now());
 
-							$entityManager->flush();
+		$n = new Notification();
+		$n->setRPlayer($proposerBase->getRPlayer());
+		$n->setTitle('Route commerciale acceptée');
+		$n->addBeg();
+		$n->addLnk('embassy/player-' . $currentPlayer->getId(), $currentPlayer->getName())->addTxt(' a accepté la route commerciale proposée entre ');
+		$n->addLnk('map/place-' . $acceptorBase->getRPlace(), $acceptorBase->getName())->addTxt(' et ');
+		$n->addLnk('map/place-' . $proposerBase->getRPlace(), $proposerBase->getName());
+		$n->addSep()->addTxt('Cette route vous rapporte ' . Format::numberFormat($cr->getIncome()) . ' crédits par relève.');
+		$n->addBrk()->addBoxResource('xp', $exp, 'expérience gagnée', $this->getParameter('media'));
+		$n->addSep()->addLnk('action/a-switchbase/base-' . $proposerBase->getRPlace() . '/page-spatioport', 'En savoir plus ?');
+		$n->addEnd();
+		$notificationManager->add($n);
+
+		$entityManager->flush();
 //							if (true === $this->getContainer()->getParameter('data_analysis')) {
 //								$qr = $database->prepare('INSERT INTO
 //							DA_CommercialRelation(`from`, `to`, type, weight, dAction)
@@ -100,23 +107,8 @@ class Accept extends AbstractController
 //								$qr->execute([$cr->playerId1, $cr->playerId2, 6, DataAnalysis::creditToStdUnit($cr->price), Utils::now()]);
 //							}
 
-							$this->addFlash('success', 'Route commerciale acceptée, vous gagnez ' . $exp . ' points d\'expérience');
+		$this->addFlash('success', 'Route commerciale acceptée, vous gagnez ' . $exp . ' points d\'expérience');
 
-							return $this->redirect($request->headers->get('referer'));
-						} else {
-							throw new ErrorException('impossible d\'accepter une route commerciale');
-						}
-					} else {
-						throw new ErrorException('impossible d\'accepter une route commerciale');
-					}
-				} else {
-					throw new ErrorException('Vous ne pouvez pas accepter les routes de ce joueur, vos deux factions sont en guerre');
-				}
-			} else {
-				throw new ErrorException('impossible d\'accepter une route commerciale');
-			}
-		} else {
-			throw new FormException('pas assez d\'informations pour accepter une route commerciale');
-		}
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

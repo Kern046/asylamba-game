@@ -380,4 +380,24 @@ class OrbitalBase {
 	{
 		return $this->uOrbitalBase;
 	}
+
+	public function isCapital(): bool
+	{
+		return self::TYP_CAPITAL === $this->typeOfBase;
+	}
+
+	public function isMilitaryBase(): bool
+	{
+		return self::TYP_MILITARY === $this->typeOfBase;
+	}
+
+	public function isCommercialBase(): bool
+	{
+		return self::TYP_COMMERCIAL === $this->typeOfBase;
+	}
+
+	public function isColony(): bool
+	{
+		return self::TYP_NEUTRAL === $this->typeOfBase;
+	}
 }

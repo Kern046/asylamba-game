@@ -87,12 +87,6 @@ class ConnectController extends AbstractController
 		# création des tableaux de données dans le contrôler
 		$session->set('playerInfo', new ArrayList());
 
-		$a = new ArrayList();
-		$orbitalBases = new StackList();
-		$a->add('ob', $orbitalBases);
-		$a->add('ms', new StackList());
-
-		$session->set('playerBase', $a);
 		$session->set('playerBonus', new StackList());
 
 		# remplissage des données du joueur
@@ -112,17 +106,6 @@ class ConnectController extends AbstractController
 		$playerInfo->add('admin', Utils::isAdmin($player->getBind()));
 
 		$playerBases = $orbitalBaseManager->getPlayerBases($player->getId());
-		foreach ($playerBases as $base) {
-			$this->addBase(
-				$session,
-				'ob', $base->getId(),
-				$base->getName(),
-				$base->getSector(),
-				$base->getSystem(),
-				'1-' . Game::getSizeOfPlanet($base->getPlanetPopulation()),
-				$base->typeOfBase
-			);
-		}
 		// remplissage des bonus
 		$bonus = $playerBonusManager->getBonusByPlayer($player);
 		$playerBonusManager->initialize($session, $bonus);
@@ -131,40 +114,10 @@ class ConnectController extends AbstractController
 		$session->set('playerParams', new ArrayList());
 
 		// remplissage des paramètres utilisateur
-		$session->get('playerParams')->add('base', $session->get('playerBase')->get('ob')->get(0)->get('id'));
+		$session->get('playerParams')->add('base', $playerBases[0]->getId());
 
 		// création des tableaux de données dans le contrôleur
 
 		$session->set('playerEvent', new EventList());
-	}
-
-	public function addBase(
-		Session $session,
-		string $key,
-		int $id,
-		string $name,
-		string $sector,
-		string $system,
-		string $img,
-		string $type
-	): bool {
-		if (!$session->has('playerBase')) {
-			return false;
-		}
-		if (!\in_array($key, ['ob', 'ms'])) {
-			return false;
-		}
-		$a = new ArrayList();
-
-		$a->add('id', $id);
-		$a->add('name', $name);
-		$a->add('sector', $sector);
-		$a->add('system', $system);
-		$a->add('img', $img);
-		$a->add('type', $type);
-
-		$session->get('playerBase')->get($key)->append($a);
-
-		return true;
 	}
 }

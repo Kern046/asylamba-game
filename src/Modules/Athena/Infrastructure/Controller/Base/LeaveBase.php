@@ -6,6 +6,7 @@ use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Utils;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
@@ -24,6 +25,7 @@ class LeaveBase extends AbstractController
 	public function __invoke(
 		Request $request,
 		OrbitalBase $currentBase,
+		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		CommanderManager $commanderManager,
 		OrbitalBaseManager $orbitalBaseManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
@@ -31,9 +33,7 @@ class LeaveBase extends AbstractController
 		EntityManager $entityManager,
 		EventDispatcherInterface $eventDispatcher,
 	): Response {
-		$session = $request->getSession();
-
-		if ($session->get('playerBase')->get('ob')->size() === 1) {
+		if (1 === $currentPlayerBasesRegistry->count()) {
 			throw new ConflictHttpException('vous ne pouvez pas abandonner votre unique planète');
 		}
 		$baseCommanders = $commanderManager->getBaseCommanders($currentBase->getId());
@@ -54,7 +54,7 @@ class LeaveBase extends AbstractController
 		}
 
 		# change base type if it is a capital
-		if ($currentBase->typeOfBase == OrbitalBase::TYP_CAPITAL) {
+		if ($currentBase->isCapital()) {
 			$newType = (rand(0,1) === 0) ? OrbitalBase::TYP_COMMERCIAL : OrbitalBase::TYP_MILITARY;
 			# delete extra buildings
 			for ($i = 0; $i < OrbitalBaseResource::BUILDING_QUANTITY; $i++) {
@@ -74,15 +74,10 @@ class LeaveBase extends AbstractController
 		$entityManager->flush();
 		$eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place), PlaceOwnerChangeEvent::NAME);
 
-		for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-			if ($session->get('playerBase')->get('ob')->get($i)->get('id') === $currentBase->getId()) {
-				$session->get('playerBase')->get('ob')->remove($i);
-			}
-		}
 		$this->addFlash('success', 'Base abandonnée');
 
 		return $this->redirectToRoute('switchbase', [
-			'baseId' => $session->get('playerBase')->get('ob')->get(0)->get('id')
+			'baseId' => $currentPlayerBasesRegistry->next()->getId(),
 		]);
 	}
 }

@@ -7,6 +7,7 @@ use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Game;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
@@ -28,6 +29,7 @@ class Conquer extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		OrbitalBase $orbitalBase,
+		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		ColorManager $colorManager,
 		CommanderManager $commanderManager,
 		PlaceManager $placeManager,
@@ -51,8 +53,7 @@ class Conquer extends AbstractController
 		$session = $request->getSession();
 		# check si la technologie BASE_QUANTITY a un niveau assez élevé
 		$maxBasesQuantity = $technologies->getTechnology(Technology::BASE_QUANTITY) + 1;
-		$obQuantity = $session->get('playerBase')->get('ob')->size();
-		$msQuantity = $session->get('playerBase')->get('ms')->size();
+		// @TODO Replace this count loop by a repository method
 		$coloQuantity = 0;
 		$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::MOVING]);
 		foreach ($commanders as $commander) {
@@ -60,7 +61,7 @@ class Conquer extends AbstractController
 				$coloQuantity++;
 			}
 		}
-		$totalBases = $obQuantity + $msQuantity + $coloQuantity;
+		$totalBases = $currentPlayerBasesRegistry->count() + $coloQuantity;
 		if ($totalBases >= $maxBasesQuantity) {
 			throw new ConflictHttpException('Vous avez assez de conquête en cours ou un niveau d\'administration étendue trop faible.');
 		}

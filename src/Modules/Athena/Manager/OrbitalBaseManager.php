@@ -9,6 +9,7 @@ use App\Classes\Exception\ErrorException;
 use App\Classes\Entity\EntityManager;
 
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Promethee\Manager\TechnologyQueueManager;
@@ -22,7 +23,6 @@ use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 
 use App\Classes\Daemon\ClientManager;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -33,7 +33,7 @@ class OrbitalBaseManager
 	protected PlayerManager $playerManager;
 
 	public function __construct(
-		protected RequestStack $requestStack,
+		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		protected EntityManager $entityManager,
 		protected ClientManager $clientManager,
 		protected MessageBusInterface $messageBus,
@@ -72,15 +72,12 @@ class OrbitalBaseManager
 	 */
 	public function getPlayerBasesCount(array $movingCommanders): int
 	{
-		$session = $this->requestStack->getSession();
-		$obQuantity = $session->get('playerBase')->get('ob')->size();
-		$msQuantity = $session->get('playerBase')->get('ms')->size();
 		$coloQuantity = \count(\array_filter(
 			$movingCommanders,
 			fn (Commander $commander) => $commander->getTravelType() == Commander::COLO
 		));
 
-		return $obQuantity + $msQuantity + $coloQuantity;
+		return $coloQuantity + $this->currentPlayerBasesRegistry->count();
 	}
 	
 	/**

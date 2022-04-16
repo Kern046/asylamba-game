@@ -7,10 +7,12 @@ use App\Classes\Exception\FormException;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
 use App\Classes\Library\Utils;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\CommercialRoute;
+use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
@@ -18,6 +20,7 @@ use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +29,9 @@ class Propose extends AbstractController
 {
 	public function __invoke(
 		Request $request,
+		OrbitalBase $currentBase,
+		Player $currentPlayer,
+		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		ColorManager $colorManager,
 		OrbitalBaseManager $orbitalBaseManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
@@ -33,16 +39,13 @@ class Propose extends AbstractController
 		NotificationManager $notificationManager,
 		PlayerManager $playerManager,
 	): Response {
-		$session = $request->getSession();
-
-		for ($i=0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-			$verif[] = $session->get('playerBase')->get('ob')->get($i)->get('id');
-		}
 		$baseFrom 	= $request->query->get('sourceBase');
 		$baseTo 	= $request->query->get('destinationBase');
 
-		if ($baseFrom !== FALSE AND $baseTo !== FALSE AND in_array($baseFrom, $verif)) {
-			$proposerBase = $orbitalBaseManager->get($baseFrom);
+		if ($baseFrom !== FALSE AND $baseTo !== FALSE) {
+			if (null === ($proposerBase = $currentPlayerBasesRegistry->get($baseFrom))) {
+				throw $this->createNotFoundException('This base does not exist or does not belong to you');
+			}
 			$otherBase = $orbitalBaseManager->get($baseTo);
 
 			$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::SPATIOPORT, 'level', $proposerBase->getLevelSpatioport(), 'nbRoutesMax');
@@ -53,15 +56,15 @@ class Propose extends AbstractController
 			if (($commercialRouteManager->countBaseRoutes($proposerBase->getId()) < $nbrMaxCommercialRoute) && (!$alreadyARoute) && ($proposerBase->getLevelSpatioport() > 0) && ($otherBase->getLevelSpatioport() > 0)) {
 				$player = $playerManager->get($otherBase->getRPlayer());
 
-				$playerFaction = $colorManager->get($session->get('playerInfo')->get('color'));
+				$playerFaction = $colorManager->get($currentPlayer->rColor);
 				$otherFaction = $colorManager->get($player->rColor);
 
-				if ($playerFaction->colorLink[$player->rColor] != Color::ENEMY && $otherFaction->colorLink[$session->get('playerInfo')->get('color')] != Color::ENEMY) {
+				if ($playerFaction->colorLink[$player->rColor] !== Color::ENEMY && $otherFaction->colorLink[$currentPlayer->rColor] !== Color::ENEMY) {
 
 					if ($proposerBase !== null && $otherBase !== null && ($proposerBase->getRPlayer() != $otherBase->getRPlayer()) && $player !== null) {
 						$distance = Game::getDistance($proposerBase->getXSystem(), $otherBase->getXSystem(), $proposerBase->getYSystem(), $otherBase->getYSystem());
-						$bonusA = ($proposerBase->getSector() != $otherBase->getSector()) ? $this->getParameter('athena.trade.route.sector_bonus') : 1;
-						$bonusB = ($session->get('playerInfo')->get('color')) != $player->getRColor() ? $this->getParameter('athena.trade.route.color_bonus') : 1;
+						$bonusA = ($proposerBase->getSector() !== $otherBase->getSector()) ? $this->getParameter('athena.trade.route.sector_bonus') : 1;
+						$bonusB = ($currentPlayer->rColor !== $player->getRColor()) ? $this->getParameter('athena.trade.route.color_bonus') : 1;
 						$price = Game::getRCPrice($distance);
 						$income = Game::getRCIncome($distance, $bonusA, $bonusB);
 
@@ -82,7 +85,7 @@ class Propose extends AbstractController
 							$priceWithBonus = $price;
 						}
 
-						if ($session->get('playerInfo')->get('credit') >= $priceWithBonus) {
+						if ($currentPlayer->credit >= $priceWithBonus) {
 							# création de la route
 							$cr = new CommercialRoute();
 							$cr->setROrbitalBase($proposerBase->getId());
@@ -97,12 +100,12 @@ class Propose extends AbstractController
 							$commercialRouteManager->add($cr);
 
 							# débit des crédits au joueur
-							$playerManager->decreaseCredit($playerManager->get($session->get('playerId')), $priceWithBonus);
+							$playerManager->decreaseCredit($currentPlayer, $priceWithBonus);
 
 							$n = new Notification();
 							$n->setRPlayer($otherBase->getRPlayer());
 							$n->setTitle('Proposition de route commerciale');
-							$n->addBeg()->addLnk('embassy/player-' . $session->get('playerId'), $session->get('playerInfo')->get('name'));
+							$n->addBeg()->addLnk('embassy/player-' . $currentPlayer->id, $currentPlayer->name);
 							$n->addTxt(' vous propose une route commerciale liant ');
 							$n->addLnk('map/place-' . $proposerBase->getRPlace(), $proposerBase->getName())->addTxt(' et ');
 							$n->addLnk('map/place-' . $otherBase->getRPlace(), $otherBase->getName())->addTxt('.');

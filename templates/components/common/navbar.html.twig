@@ -88,16 +88,14 @@
 		{# Display OVERBOX NAV #}
 
 		{# Changement de base #}
-		{% set orbital_bases = app.session.get('playerBase').get('ob') %}
 		<div class="overbox" id="change-bases">
 			<h2>Changer de bases</h2>
 			<div class="overflow">
-				{% for i in range(0, orbital_bases.size() - 1) %}
-					{% set orbital_base = orbital_bases.get(i) %}
-					<a href="{{ path('switchbase', {'baseId': orbital_base.get('id')}) }}"
-					   {% if orbital_base.get('id') == app.session.get('playerParams').get('base') %}class="active"{% endif %}>
-						<em>{{ orbital_base.get('type')|scalar_base_type }}</em>
-						<strong>{{ orbital_base.get('name') }}</strong>
+				{% for orbital_base in current_player_bases %}
+					<a href="{{ path('switchbase', {'baseId': orbital_base.id}) }}"
+					   {% if orbital_base.id == current_base.id %}class="active"{% endif %}>
+						<em>{{ orbital_base.typeOfBase|scalar_base_type }}</em>
+						<strong>{{ orbital_base.name }}</strong>
 					</a>
 				{% endfor %}
 				</div>

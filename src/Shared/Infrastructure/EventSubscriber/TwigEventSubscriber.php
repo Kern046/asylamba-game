@@ -53,6 +53,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
 		}
 		$currentBase = $this->currentPlayerBasesRegistry->current();
 		$this->twig->addGlobal('current_base', $currentBase);
+		$this->twig->addGlobal('current_player_bases', $this->currentPlayerBasesRegistry->all());
 		$this->twig->addGlobal('next_base', $this->currentPlayerBasesRegistry->next());
 		$this->twig->addGlobal('incoming_commanders', $this->commanderManager->getVisibleIncomingAttacks($playerId));
 		$this->twig->addGlobal('outgoing_commanders', $this->commanderManager->getPlayerCommanders($playerId, [Commander::MOVING]));

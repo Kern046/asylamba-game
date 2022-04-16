@@ -40,13 +40,6 @@ class RenameBase extends AbstractController
 		}
 		$currentBase->setName($name);
 
-		$session = $request->getSession();
-		for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-			if ($session->get('playerBase')->get('ob')->get($i)->get('id') === $currentBase->getId()) {
-				$session->get('playerBase')->get('ob')->get($i)->add('name', $name);
-			}
-		}
-
 		$entityManager->flush($currentBase);
 
 		$this->addFlash('success', 'Le nom a été changé en ' . $name . ' avec succès');

@@ -7,6 +7,7 @@ use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Game;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
@@ -26,6 +27,7 @@ class Colonize extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		ColorManager $colorManager,
 		CommanderManager $commanderManager,
 		TechnologyManager $technologyManager,
@@ -43,7 +45,6 @@ class Colonize extends AbstractController
 		if ($technologies->getTechnology(Technology::COLONIZATION) == 1) {
 			# check si la technologie BASE_QUANTITY a un niveau assez élevé
 			$maxBasesQuantity = $technologies->getTechnology(Technology::BASE_QUANTITY) + 1;
-			$obQuantity = $session->get('playerBase')->get('ob')->size();
 
 			$coloQuantity = 0;
 			$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::MOVING]);
@@ -52,7 +53,7 @@ class Colonize extends AbstractController
 					$coloQuantity++;
 				}
 			}
-			$totalBases = $obQuantity + $coloQuantity;
+			$totalBases = $currentPlayerBasesRegistry->count() + $coloQuantity;
 			if ($totalBases < $maxBasesQuantity) {
 				if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer = $currentPlayer->getId()) {
 					if (($place = $placeManager->get($request->query->getInt('placeId'))) !== null) {

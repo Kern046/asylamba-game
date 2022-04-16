@@ -42,18 +42,14 @@ class ChangeBaseType extends AbstractController
 	): Response {
 		$session = $request->getSession();
 
-		for ($i=0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-			$verif[] = $session->get('playerBase')->get('ob')->get($i)->get('id');
-		}
-
 		$baseId = $currentBase->getId();
 		$type = $request->query->get('type');
 
-		if ($baseId !== FALSE AND $type !== FALSE AND in_array($baseId, $verif)) {
+		if ($type !== FALSE) {
 			if (($orbitalBase = $orbitalBaseManager->getPlayerBase($baseId, $currentPlayer->getId())) !== null) {
 				$player = $currentPlayer;
 
-				if ($orbitalBase->typeOfBase == OrbitalBase::TYP_NEUTRAL) {
+				if ($orbitalBase->typeOfBase === OrbitalBase::TYP_NEUTRAL) {
 					if ($orbitalBase->levelGenerator >= $this->getParameter('athena.obm.change_type_min_level')) {
 						switch ($type) {
 							case OrbitalBase::TYP_COMMERCIAL:
@@ -62,21 +58,6 @@ class ChangeBaseType extends AbstractController
 
 									$orbitalBase->typeOfBase = $type;
 									$playerManager->decreaseCredit($player, $totalPrice);
-
-									# change base type in session
-									for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-										if ($session->get('playerBase')->get('ob')->get($i)->get('id') == $baseId) {
-											$session->get('playerBase')->get('ob')->get($i)->add('type', OrbitalBase::TYP_COMMERCIAL);
-											break;
-										}
-									}
-//									if (true === $this->getContainer()->getParameter('data_analysis')) {
-//										$qr = $database->prepare('INSERT INTO
-//									DA_BaseAction(`from`, type, opt1, weight, dAction)
-//									VALUES(?, ?, ?, ?, ?)'
-//										);
-//										$qr->execute([$session->get('playerId'), 4, $type, DataAnalysis::creditToStdUnit($totalPrice), Utils::now()]);
-//									}
 
 									$this->addFlash('success', $orbitalBase->name . ' est désormais un Centre Industriel');
 								} else {
@@ -90,22 +71,6 @@ class ChangeBaseType extends AbstractController
 									$orbitalBase->typeOfBase = $type;
 									$playerManager->decreaseCredit($player, $totalPrice);
 
-									# change base type in session
-									for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-										if ($session->get('playerBase')->get('ob')->get($i)->get('id') == $baseId) {
-											$session->get('playerBase')->get('ob')->get($i)->add('type', OrbitalBase::TYP_MILITARY);
-											break;
-										}
-									}
-
-//									if (true === $this->getContainer()->getParameter('data_analysis')) {
-//										$qr = $database->prepare('INSERT INTO
-//									DA_BaseAction(`from`, type, opt1, weight, dAction)
-//									VALUES(?, ?, ?, ?, ?)'
-//										);
-//										$qr->execute([$session->get('playerId'), 4, $type, DataAnalysis::creditToStdUnit($totalPrice), Utils::now()]);
-//									}
-
 									$this->addFlash('success', $orbitalBase->name . ' est désormais une Base Militaire');
 								} else {
 									throw new ErrorException('Evolution de votre colonie impossible - vous n\'avez pas assez de crédits');
@@ -117,9 +82,9 @@ class ChangeBaseType extends AbstractController
 					} else {
 						throw new ErrorException('Evolution de votre colonie impossible - niveau du générateur pas assez élevé');
 					}
-				} elseif ($orbitalBase->typeOfBase == OrbitalBase::TYP_COMMERCIAL OR $orbitalBase->typeOfBase == OrbitalBase::TYP_MILITARY) {
+				} elseif ($orbitalBase->typeOfBase == OrbitalBase::TYP_COMMERCIAL || $orbitalBase->typeOfBase == OrbitalBase::TYP_MILITARY) {
 					$baseMinLevelForCapital = $this->getParameter('athena.obm.capital_min_level');
-					if ($type == OrbitalBase::TYP_CAPITAL) {
+					if ($type === OrbitalBase::TYP_CAPITAL) {
 						if ($orbitalBase->levelGenerator >= $baseMinLevelForCapital) {
 							$playerBases = $orbitalBaseManager->getPlayerBases($session->get('playerId'));
 
@@ -135,21 +100,6 @@ class ChangeBaseType extends AbstractController
 									$orbitalBase->typeOfBase = $type;
 									$playerManager->decreaseCredit($player, $totalPrice);
 
-									# change base type in session
-									for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-										if ($session->get('playerBase')->get('ob')->get($i)->get('id') == $baseId) {
-											$session->get('playerBase')->get('ob')->get($i)->add('type', OrbitalBase::TYP_CAPITAL);
-											break;
-										}
-									}
-
-//									if (true === $this->getContainer()->getParameter('data_analysis')) {
-//										$qr = $database->prepare('INSERT INTO
-//									DA_BaseAction(`from`, type, opt1, weight, dAction)
-//									VALUES(?, ?, ?, ?, ?)'
-//										);
-//										$qr->execute([$session->get('playerId'), 4, $type, DataAnalysis::creditToStdUnit($totalPrice), Utils::now()]);
-//									}
 									$this->addFlash('success', $orbitalBase->name . ' est désormais une capitale.');
 								} else {
 									throw new ErrorException('Modification du type de la base orbitale impossible - vous n\'avez pas assez de crédits');
@@ -160,17 +110,13 @@ class ChangeBaseType extends AbstractController
 						} else {
 							throw new ErrorException('Pour transformer votre base en capitale, vous devez augmenter votre générateur jusqu\'au niveau ' . $baseMinLevelForCapital . '.');
 						}
-					} elseif (($orbitalBase->typeOfBase == OrbitalBase::TYP_COMMERCIAL AND $type == OrbitalBase::TYP_MILITARY)
-						OR ($orbitalBase->typeOfBase == OrbitalBase::TYP_MILITARY AND $type == OrbitalBase::TYP_COMMERCIAL)) {
+					} elseif (($orbitalBase->isCommercialBase() && $type === OrbitalBase::TYP_MILITARY)
+						OR ($orbitalBase->isMilitaryBase() && $type === OrbitalBase::TYP_COMMERCIAL)) {
 						# commercial --> military OR military --> commercial
-						if ($type == OrbitalBase::TYP_COMMERCIAL) {
-							$totalPrice = PlaceResource::get(OrbitalBase::TYP_COMMERCIAL, 'price');
-						} else {
-							$totalPrice = PlaceResource::get(OrbitalBase::TYP_MILITARY, 'price');
-						}
+						$totalPrice = PlaceResource::get($type, 'price');
 						if ($player->credit >= $totalPrice) {
 							$canChangeBaseType = TRUE;
-							if ($type == OrbitalBase::TYP_COMMERCIAL) {
+							if ($type === OrbitalBase::TYP_COMMERCIAL) {
 								# delete all recycling missions and logs
 								$recyclingMissionManager->removeBaseMissions($orbitalBase->rPlace);
 
@@ -399,22 +345,8 @@ class ChangeBaseType extends AbstractController
 								$entityManager->flush();
 								# send the right alert
 								if ($type == OrbitalBase::TYP_COMMERCIAL) {
-									# change base type in session
-									for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-										if ($session->get('playerBase')->get('ob')->get($i)->get('id') == $baseId) {
-											$session->get('playerBase')->get('ob')->get($i)->add('type', OrbitalBase::TYP_COMMERCIAL);
-											break;
-										}
-									}
 									$this->addFlash('success', 'Votre Base Militaire devient un Centre Commerciale. Vos bâtiments militaires superflus sont détruits.');
 								} else {
-									# change base type in session
-									for ($i = 0; $i < $session->get('playerBase')->get('ob')->size(); $i++) {
-										if ($session->get('playerBase')->get('ob')->get($i)->get('id') == $baseId) {
-											$session->get('playerBase')->get('ob')->get($i)->add('type', OrbitalBase::TYP_MILITARY);
-											break;
-										}
-									}
 									$this->addFlash('success', 'Votre Centre Industriel devient une Base Militaire. Vos bâtiments commerciaux superflus sont détruits.');
 								}
 							} else {

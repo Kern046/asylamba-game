@@ -22,6 +22,11 @@ class CurrentPlayerBasesRegistry
 		}, []);
 	}
 
+	public function get(int $baseId): OrbitalBase|null
+	{
+		return $this->bases[$baseId] ?? null;
+	}
+
 	public function current(): OrbitalBase
 	{
 		return $this->bases[$this->currentBaseId];
@@ -42,5 +47,11 @@ class CurrentPlayerBasesRegistry
 	public function count(): int
 	{
 		return count($this->bases);
+	}
+
+	/** @return list<OrbitalBase> */
+	public function all(): array
+	{
+		return $this->bases;
 	}
 }
