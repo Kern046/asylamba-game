@@ -27,6 +27,7 @@ class FormatterExtension extends AbstractExtension
 			new TwigFilter('percent', fn (int|float $number, int|float $base) => Format::percent($number, $base)),
 			new TwigFilter('lite_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'lite')),
 			new TwigFilter('large_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'large')),
+			new TwigFilter('short_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'short')),
 			new TwigFilter('date', fn (string $date) => Chronos::transform($date)),
 			new TwigFilter('unserialize', fn (string $data) => \unserialize($data)),
 		];

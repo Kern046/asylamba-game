@@ -1,0 +1,182 @@
+{% extends 'layouts/athena/current_base.html.twig' %}
+
+{% block content %}
+	{% set building_number = constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING') %}
+	{% set recycler_capacity = constant('App\\Modules\\Athena\\Model\\RecyclingMission::RECYCLER_CAPACTIY') %}
+
+	<div class="component building">
+	<div class="head skin-1">
+		<img src="{{ asset('media/orbitalbase/recycling.png') }}" alt="" />
+		<h2>{{ get_building_info(building_number, 'frenchName') }}</h2>
+		<em>Niveau {{ current_base.levelRecycling }}</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="number-box">
+				<span class="label">recycleurs utilisés / totaux</span>
+				<span class="value">{{ busy_recyclers }} / {{ total_recyclers }}</span>
+			</div>
+
+			<div class="number-box grey">
+				<span class="label">recycleur{{ free_recyclers|plural }} libre{{ free_recyclers|plural }}</span>
+				<span class="value">{{ free_recyclers }}</span>
+			</div>
+
+			<hr />
+
+			<h4>capacité de transport d'un recycleur</h4>
+			<div class="number-box grey">
+				<span class="label">en ressources</span>
+				<span class="value">
+					{{ recycler_capacity|number }}
+					<img alt="ressources" src="{{ asset('media/resources/resource.png') }}" class="icon-color">
+				</span>
+			</div>
+			<div class="number-box grey">
+				<span class="label">en crédits</span>
+				<span class="value">
+					{{ (recycler_capacity * 10)|number }}
+					<img alt="crédits" src="{{ asset('media/resources/credit.png') }}" class="icon-color">
+				</span>
+			</div>
+
+			<hr />
+
+			<div class="number-box {% if mission_quantity == 0 %}grey{% endif %}">
+				<span class="label">missions actives</span>
+				<span class="value">{{ mission_quantity }}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% for mission_data in base_missions %}
+		{% set mission = mission_data.mission %}
+		<div class="component">
+			<div class="head skin-5">
+				{% if loop.first %}
+				<h2>Mission{{ mission_quantity|plural }} en cours</h2>
+				{% endif %}
+			</div>
+			<div class="fix-body">
+				<div class="body">
+
+					<div class="build-item base-type">
+						<div class="name">
+							<img src="{{ asset('media/orbitalbase/recycler.png') }}" alt="">
+							<strong>Mission<br /> {{ mission_data.mission_id }}</strong>
+						</div>
+
+						<p class="desc">
+							La mission recycle la
+							<strong>{{ get_place_type(mission.typeOfPlace) }}</strong>
+							située aux coordonnées
+							<strong>
+								<a href="{{ path('map', {'place': mission.rTarget}) }}">{{ mission_data.coords }}</a>
+							</strong>.<br /><br />
+							Il reste <strong>{{ (mission.resources * mission.coefResources / 100)|number }}</strong> ressources,
+							<strong>{{ (mission.resources * mission.coefHistory / 100)|number }}</strong> débris et
+							<strong>{{ (mission.resources * mission.population / 100)|number }}</strong> gaz nobles.
+						</p>
+
+						<p>Retour {{ mission.uRecycling|date|raw }}</p>
+						<p>
+							<span class="progress-bar">
+								<span style="width:{{ mission_data.percent }}%;" class="content"></span>
+								<span class="step hb lt" title="début du recyclage" style="left: {{ mission_data.begin_recv }}%;"></span>
+								<span class="step hb lt" title="fin du recyclage" style="left: {{ mission_data.end_recv }}%;"></span>
+							</span>
+						</p>
+					</div>
+
+					{% if mission.isBeingDeleted %}
+						<p>Cette mission a été annulée, les recycleurs terminent la mission puis deviennent disponibles.</p>
+					{% else %}
+						<p><a href="{{ path('cancel_recycling_mission', {'id': mission.id }) }}" class="common-link">Annuler la mission</a></p>
+					{% endif %}
+
+					<ul class="list-type-1">
+						<li>
+							<span class="label">Recycleurs engagés dans la mission</span>
+							<span class="value">
+								{% if mission.addToNextMission == 0 %}
+									{{ mission.recyclerQuantity|number }}
+								{% else %}
+									{{ mission.recyclerQuantity|number }} + {{ mission.addToNextMission|number }}
+								{% endif %}
+							</span>
+
+							{% if mission.isActive and free_recyclers > 0 %}
+								<span class="buttons"><a href="#" class="sh" data-target="add-recycler-{{ mission.id }}">+</a></span>
+								<form action="{{ path('add_recyclers_to_mission', {'id': mission.id}) }}" method="POST" id="add-recycler-{{ mission.id }}">
+									<p>
+										<input name="quantity" value="{{ free_recyclers }}" type="text">
+										<input value="ok" type="submit">
+									</p>
+								</form>
+							{% endif %}
+							</li>
+						<li>
+							<span class="label">Soute totale de la mission</span>
+							<span class="value">
+								{{ (mission.recyclerQuantity * recycler_capacity)|number }}
+								<img alt="ressources" src="{{ asset('media/resources/resource.png') }}" class="icon-color">
+							</span>
+						</li>
+						<li>
+							<span class="label">Durée du cycle</span>
+							<span class="value">{{ mission.cycleTime|short_seconds }}</span>
+						</li>
+					</ul>
+
+					<h4>Dernières livraisons</h4>
+					{% for log in mission_logs|filter(log => log.rRecycling == mission.id) %}
+						{% set wedge = {
+							'ressource': log.resources,
+							'crédit': log.credits,
+							'pégase': log.ship0,
+							'satyre': log.ship1,
+							'chimère': log.ship2,
+							'sirène': log.ship3,
+							'dryade': log.ship4,
+							'méduse': log.ship5,
+							'griffon': log.ship6,
+							'cyclope': log.ship7,
+							'minotaure': log.ship8,
+							'hydre': log.ship9,
+							'cerbère': log.ship10,
+							'phénix': log.ship11,
+						}|filter() %}
+
+						<p class="info">
+							La mission a ramené
+							{% for type in wedge|keys %}
+								{% set number = wedge[type] %}
+								<strong>{{ number|number }}</strong>
+								{{ type ~ number|plural }}
+								{% if not loop.last %}
+									et
+								{% else -%}
+									,
+								{%- endif %}
+							{% endfor %}
+							<em>{{ log.dLog|date|raw }}</em>
+						</p>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+
+	<div class="component">
+		<div class="head skin-2">
+			<h2>À propos</h2>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				<p class="long-info">{{ get_building_info(building_number, 'description')|raw }}</p>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
