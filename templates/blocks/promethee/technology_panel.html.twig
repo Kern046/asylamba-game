@@ -1,0 +1,47 @@
+<div class="component panel-info">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>{{ name }}</h4>
+			<a href="#" class="removeInfoPanel remove-info hb lt" title="fermer le panneau">x</a>
+
+			<p class="info">{{ short_description }}</p>
+
+			<div class="table">
+				<table>
+					<tr>
+						<td class="hb lt" title="coût de recherche en ressource">coût en ressource</td>
+						<td>{{ resource|number }} <img src="{{ asset('media/resources/resource.png') }}" alt="ressource" class="icon-color" /></td>
+					</tr>
+					<tr>
+						<td class="hb lt" title="coût de recherche en crédit">coût en crédit</td>
+						<td>{{ credit|number }} <img src="{{ asset('media/resources/credit.png') }}" alt="credit" class="icon-color" /></td>
+					</tr>
+					<tr>
+						<td class="hb lt" title="temps de recherche (heures:minutes:secondes)">temps</td>
+						<td>{{ time|lite_seconds }} <img src="{{ asset('media/resources/time.png') }}" alt="relève" class="icon-color" /></td>
+					</tr>
+					<tr>
+						<td class="hb lt" title="points que rapporte la recherche de la technologie au joueur">points</td>
+						<td>{{ points|number }}</td>
+					</tr>
+				</table>
+			</div>
+
+			<h4>Prérequis pour le prochain niveau</h4>
+			<p class="info">
+				Technosphère, niv. {{ technosphere }}<br />
+				{% for research in research_list %}
+					{{ research[0] }}, niv. {{ research[1] }}
+					{% if research[2] %}
+						<img class="requierement" src="{{ asset('media/resources/check.png') }}" alt="" />
+					{% endif %}
+				<br />
+				{% endfor %}
+			</p>
+
+			<h4>Description</h4>
+			<p class="info">{{ description }}</p>
+		</div>
+	</div>
+</div>

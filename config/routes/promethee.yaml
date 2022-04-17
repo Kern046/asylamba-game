@@ -14,3 +14,8 @@ search_technology:
 cancel_technology_queue:
     path: /technology-queues/{identifier}/cancel
     controller: App\Modules\Promethee\Infrastructure\Controller\CancelTechnologyQueue
+
+view_technology_panel:
+    path: /technologies/{identifier}/panel
+    controller: App\Modules\Promethee\Infrastructure\Controller\ViewTechnologyPanel
+
