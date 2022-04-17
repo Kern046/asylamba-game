@@ -35,7 +35,7 @@ refinery:
 
 recycling:
     path: /recycling
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewRecycling
 
 storage:
     path: /storage
@@ -77,8 +77,18 @@ school:
     controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
 
 create_recycling_mission:
-    path: /recycling-missions/create
-    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
+    path: /recycling-missions/create/{targetId}
+    controller: App\Modules\Athena\Infrastructure\Controller\Recycling\CreateMission
+    methods: 'POST'
+
+add_recyclers_to_mission:
+    path: /recycling-missions/{id}/add-recyclers
+    controller: App\Modules\Athena\Infrastructure\Controller\Recycling\AddToMission
+    methods: 'POST'
+
+cancel_recycling_mission:
+    path: /recycling-missions/{id}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Recycling\CancelMission
 
 recycle_ships:
     path: /ships/recycle

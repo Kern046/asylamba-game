@@ -264,7 +264,7 @@
 								<span class="val">{{ recyclers_travel_time }}</span>
 							</span>
 
-						<form class="spy-form" method="post" action="{{ path('create_recycling_mission', {'baseId': current_base.id, 'placeId': place.id}) }}">
+						<form class="spy-form" method="post" action="{{ path('create_recycling_mission', {'targetId': place.id}) }}">
 							<input type="text" name="quantity" value="{{ available_recyclers }}" />
 							<button type="submit">Envoyer</button>
 						</form>

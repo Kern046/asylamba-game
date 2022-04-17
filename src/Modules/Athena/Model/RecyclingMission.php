@@ -155,4 +155,19 @@ class RecyclingMission {
 		$this->sectorId = $sectorId;
 		return $this;
 	}
+
+	public function isActive(): bool
+	{
+		return self::ST_ACTIVE === $this->statement;
+	}
+
+	public function isBeingDeleted(): bool
+	{
+		return self::ST_BEING_DELETED === $this->statement;
+	}
+
+	public function isDeleted(): bool
+	{
+		return self::ST_DELETED === $this->statement;
+	}
 }

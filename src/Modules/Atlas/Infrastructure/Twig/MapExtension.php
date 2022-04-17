@@ -54,7 +54,7 @@ class MapExtension extends AbstractExtension
 				$place->ySystem,
 				$this->requestStack->getSession()->get('playerBonus'),
 			)),
-			new TwigFunction('get_place_type', fn (Place $place) => Game::convertPlaceType($place->typeOfPlace)),
+			new TwigFunction('get_place_type', fn (string $type) => Game::convertPlaceType($type)),
 			new TwigFunction('get_system_info', fn (int $systemType, string $info) => SystemResource::getInfo($systemType, $info)),
 			new TwigFunction('get_place_distance', fn (OrbitalBase $defaultBase, Place $place) => Game::getDistance($defaultBase->xSystem, $place->xSystem, $defaultBase->ySystem, $place->ySystem)),
 			new TwigFunction('get_max_travel_distance', fn () => Game::getMaxTravelDistance($this->requestStack->getSession()->get('playerBonus'))),

@@ -47,6 +47,9 @@ class RecyclingMissionManager implements SchedulerInterface
 		return $this->entityManager->getRepository(RecyclingMission::class)->getBaseMissions($baseId);
 	}
 
+	/**
+	 * @return list<RecyclingMission>
+	 */
 	public function getBaseActiveMissions(int $baseId): array
 	{
 		return $this->entityManager->getRepository(RecyclingMission::class)->getBaseActiveMissions($baseId);
