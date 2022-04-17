@@ -1,0 +1,91 @@
+<div class="component panel-info size2">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>{{ get_building_info(building_number, 'frenchName') }}</h4>
+			<a href="#" class="removeInfoPanel remove-info hb lt" title="fermer le panneau">x</a>
+
+			<div class="table">
+				<table>
+					<tr>
+						<td class="hb lt" title="niveau du bâtiment">niv.</td>
+						<td class="hb lt" title="prix en ressources du bâtiment">prix</td>
+						<td class="hb lt" title="temps de construction du bâtiment (heures:minutes:secondes) sans bonus">temps</td>
+						{% if building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::GENERATOR') %}
+							<td class="hb lt" title="nombre d\'éléments dans la file d\'attente de construction">queues</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::REFINERY') %}
+							<td class="hb lt" title="production de ressources par relève sans bonus et au coeff. ressource moyen de 50 %">prod.</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::STORAGE') %}
+							<td class="hb lt" title="stockage maximum de ressources sans bonus">stockage</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK1') %}
+							<td class="hb lt" title="nombre d\'éléments dans la file d\'attente de construction">queues</td>
+							<td class="hb lt" title="nombre de PEV que le chantier peut stocker">stockage</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK2') %}
+							<td class="hb lt" title="nombre d\'éléments dans la file d\'attente de construction">queues</td>
+							<td class="hb lt" title="nombre de PEV que le chantier peut stocker">stockage</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::TECHNOSPHERE') %}
+							<td class="hb lt" title="nombre d\'éléments dans la file d\'attente de construction">queues</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::COMMERCIAL_PLATEFORME') %}
+							<td class="hb lt" title="nombre de vaisseaux de transports">vaisseaux</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING') %}
+							<td class="hb lt" title="nombre de collecteurs">collecteurs</td>
+						{% elseif building_number == constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT') %}
+							<td class="hb lt" title="nombre de routes commerciales disponibles">routes</td>
+						{% endif %}
+						<td class="hb lt" title="points gagné par le joueur lors de la construction du niveau de bâtiment">points</td>
+					</tr>
+
+					{% for i in 0..(max_level - 1) %}
+						{% set level = i + 1 %}
+						{% set level_data = data[i] %}
+						<tr {% if current_level > level %}class="small-grey"{% elseif current_level == level %}class="active"{% endif %}>
+						<td>{{ level_data.note|raw }}</td>
+						<td>
+							{{ level_data.resourcePrice }}
+							<img src="{{ asset('media/resources/resource.png') }}" alt="ressources" class="icon-color" />
+						</td>
+						<td>
+							{{ level_data.time }}
+							<img src="{{ asset('media/resources/time.png') }}" alt="relève" class="icon-color" />
+						</td>
+						{% for stat_data in level_data.stats %}
+							<td>
+								{{ stat_data.stat }}
+								{% if stat_data.image is defined %}
+									<img src="{{ asset('media/resources/' ~ stat_data.image ~ '.png') }}" alt="{{ stat_data.alt }}" class="icon-color" />
+								{% endif %}
+							</td>
+						{% endfor %}
+						<td>{{ data[i].points }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+		<p class="info">
+			{% for footnote in quantity_array|keys %}
+				{% set quantity = quantity_array[footnote] %}
+				<sup>{{ footnote }}</sup> Niveau maximal pour une base orbitale de type
+
+				{% set qty = 0 %}
+				{% for type in footnote_array|keys %}
+					{% set footnote_id = footnote_array[type] %}
+
+					{% if footnote_id == footnote %}
+						{% set qty = qty + 1 %}
+
+						{% if qty > 1 %}
+							{{ qty == quantity ? ' et ' : ',' }}
+						{% endif %}
+						{{ type|scalar_base_type }}
+					{% endif %}
+				{% endfor %}
+				.<br />
+			{% endfor %}
+		</p>
+
+			<h4>A propos</h4>
+			<p class="info">{{ get_building_info(building_number, 'description') }}</p>
+		</div>
+	</div>
+</div>
