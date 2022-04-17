@@ -54,14 +54,14 @@ class ViewBuildingPanel extends AbstractController
 					OrbitalBaseResource::REFINERY => [
 						[
 							'stat' => Format::numberFormat(Game::resourceProduction($orbitalBaseHelper->getBuildingInfo($identifier, 'level', $level, 'refiningCoefficient'), 50)),
-							'image' => 'resources/resource.png',
+							'image' => 'resource',
 							'alt' => 'resources',
 						],
 					],
 					OrbitalBaseResource::STORAGE => [
 						[
 							'stat' => Format::numberFormat($orbitalBaseHelper->getBuildingInfo($identifier, 'level', $level, 'storageSpace')),
-							'image' => 'resources/resource.png',
+							'image' => 'resource',
 							'alt' => 'resources',
 						],
 					],
@@ -71,7 +71,7 @@ class ViewBuildingPanel extends AbstractController
 						],
 						[
 							'stat' => Format::numberFormat($orbitalBaseHelper->getBuildingInfo($identifier, 'level', $level, 'storageSpace')),
-							'image' => 'resources/pev.png',
+							'image' => 'pev',
 							'alt' => 'pev',
 						],
 					],
@@ -81,7 +81,7 @@ class ViewBuildingPanel extends AbstractController
 						],
 						[
 							'stat' => Format::numberFormat($orbitalBaseHelper->getBuildingInfo($identifier, 'level', $level, 'storageSpace')),
-							'image' => 'resources/pevs.png',
+							'image' => 'pev',
 							'alt' => 'pev',
 						],
 					],
