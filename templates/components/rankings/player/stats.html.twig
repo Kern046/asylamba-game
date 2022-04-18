@@ -1,0 +1,25 @@
+<div class="component player rank">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>A propos</h4>
+
+			<div class="number-box">
+				<span class="label">Joueurs actifs</span>
+				<span class="value">{{ active_players_count|number }}</span>
+				<span class="group-link"><a href="#" title="compte tous les joueurs qui se sont connectés depuis 15 jours" class="hb lt">?</a></span>
+				</div>
+
+			<div class="number-box">
+				<span class="label">Joueurs inscrits</span>
+				<span class="value">{{ all_players_count|number }}</span>
+			</div>
+
+			<p>Le classement est mis à jour tous les jours à 3h (UTC+1) du matin.</p>
+
+			<hr>
+
+			<a class="more-button" href="#rank/mode-top">Voir le haut du classement</a>
+		</div>
+	</div>
+</div>

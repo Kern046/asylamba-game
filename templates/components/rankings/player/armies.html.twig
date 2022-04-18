@@ -1,0 +1,31 @@
+<div class="component player rank">
+	<div class="head skin-4">
+		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<h2>Armée</h2>
+		<em>Total des PEV</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for player_ranking in armies_rankings %}
+				{{ include('atoms/rankings/top_mover.html.twig', {
+					'type': 'armies',
+					'current_position': player_ranking.armiesPosition,
+					loop,
+				}) }}
+
+				{{include('molecules/rankings/player_ranking_card.html.twig', {
+					player_ranking,
+					'position': player_ranking.armiesPosition,
+					'variation': player_ranking.armiesVariation,
+					'value': '',
+				})}}
+
+				{{ include('atoms/rankings/bottom_mover.html.twig', {
+					'type': 'armies',
+					'current_position': player_ranking.armiesPosition,
+					loop,
+				}) }}
+			{% endfor %}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,5 @@
+{% if variation != 0 %}
+	<span class="variance {{ variation > 0 ? 'upper' : 'lower' }}">
+		{{ variation > 0 ? '+' : '-' }}{{ variation|abs }}
+	</span>
+{% endif %}

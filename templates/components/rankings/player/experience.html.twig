@@ -1,0 +1,31 @@
+<div class="component player rank">
+	<div class="head skin-4">
+		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<h2>Expérience</h2>
+		<em>Total accumulé</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for player_ranking in experience_rankings %}
+				{{ include('atoms/rankings/top_mover.html.twig', {
+					'type': 'xp',
+					'current_position': player_ranking.experiencePosition,
+					loop,
+				}) }}
+
+				{{ include('molecules/rankings/player_ranking_card.html.twig', {
+					player_ranking,
+					'position': player_ranking.experiencePosition,
+					'variation': player_ranking.experienceVariation,
+					'value': player_ranking.experience ~ ' xp',
+				}) }}
+
+				{{ include('atoms/rankings/bottom_mover.html.twig', {
+					'type': 'xp',
+					'current_position': player_ranking.experiencePosition,
+					loop,
+				}) }}
+			{% endfor %}
+		</div>
+	</div>
+</div>

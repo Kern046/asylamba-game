@@ -1,0 +1,23 @@
+<div id="subnav">
+	<button class="move-side-bar top" data-dir="up"> </button>
+	<div class="overflow">
+		<a href="{{ path('player_rankings') }}" class="item {% if app.request.get('_route') == 'player_rankings' %}active{% endif %}">
+			<span class="picto">
+				<img src="{{ asset('media/rank/player.png') }}" alt="" />
+			</span>
+			<span class="content skin-1">
+				<span>Classement des joueurs</span>
+			</span>
+		</a>
+
+		<a href="{{ path('faction_rankings') }}" class="item {% if app.request.get('_route') == 'faction_rankings' %}active{% endif %}">
+			<span class="picto">
+				<img src="{{ asset('media/rank/faction.png') }}" alt="" />
+			</span>
+			<span class="content skin-1">
+				<span>Classement des factions</span>
+			</span>
+		</a>
+	</div>
+	<button class="move-side-bar bottom" data-dir="down"> </button>
+</div>

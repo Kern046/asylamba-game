@@ -1,0 +1,31 @@
+<div class="component player rank">
+	<div class="head skin-4">
+		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<h2>Boucher</h2>
+		<em>PEV détruits moins PEV perdus</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for player_ranking in butcher_rankings %}
+				{{ include('atoms/rankings/top_mover.html.twig', {
+					'type': 'butcher',
+					'current_position': player_ranking.butcherPosition,
+					loop,
+				}) }}
+
+				{{ include('molecules/rankings/player_ranking_card.html.twig', {
+					player_ranking,
+					'position': player_ranking.butcherPosition,
+					'variation': player_ranking.butcherVariation,
+					'value': player_ranking.butcher|number ~ ' point' ~ player_ranking.butcher|plural,
+				})}}
+
+				{{ include('atoms/rankings/bottom_mover.html.twig', {
+					'type': 'butcher',
+					'current_position': player_ranking.butcherPosition,
+					loop,
+				}) }}
+			{% endfor %}
+		</div>
+	</div>
+</div>

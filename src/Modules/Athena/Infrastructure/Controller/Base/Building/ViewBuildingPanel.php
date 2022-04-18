@@ -65,17 +65,7 @@ class ViewBuildingPanel extends AbstractController
 							'alt' => 'resources',
 						],
 					],
-					OrbitalBaseResource::DOCK1 => [
-						[
-							'stat' => Format::numberFormat($orbitalBaseHelper->getBuildingInfo($identifier, 'level', $level, 'nbQueues')),
-						],
-						[
-							'stat' => Format::numberFormat($orbitalBaseHelper->getBuildingInfo($identifier, 'level', $level, 'storageSpace')),
-							'image' => 'pev',
-							'alt' => 'pev',
-						],
-					],
-					OrbitalBaseResource::DOCK2 => [
+					OrbitalBaseResource::DOCK1, OrbitalBaseResource::DOCK2 => [
 						[
 							'stat' => Format::numberFormat($orbitalBaseHelper->getBuildingInfo($identifier, 'level', $level, 'nbQueues')),
 						],

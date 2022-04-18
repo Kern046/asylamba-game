@@ -1,0 +1,31 @@
+<div class="component player rank">
+	<div class="head skin-4">
+		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<h2>Trader</h2>
+		<em>Revenu de toutes les routes commerciales par relève</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for player_ranking in trader_rankings %}
+				{{ include('atoms/rankings/top_mover.html.twig', {
+					'type': 'trader',
+					'current_position': player_ranking.traderPosition,
+					loop,
+				}) }}
+
+				{{ include('molecules/rankings/player_ranking_card.html.twig', {
+					player_ranking,
+					'position': player_ranking.traderPosition,
+					'variation': player_ranking.traderVariation,
+					'value': player_ranking.trader|number ~  ' <img src="' ~ asset('media/resources/credit.png') ~ '" class="icon-color" alt="crédits" />',
+				})}}
+
+				{{ include('atoms/rankings/bottom_mover.html.twig', {
+					'type': 'trader',
+					'current_position': player_ranking.traderPosition,
+					loop,
+				}) }}
+			{% endfor %}
+		</div>
+	</div>
+</div>

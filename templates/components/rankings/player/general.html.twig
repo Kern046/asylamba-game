@@ -1,0 +1,31 @@
+<div class="component player rank">
+	<div class="head skin-4">
+		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<h2>Général</h2>
+		<em>Total de vos possessions</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for player_ranking in general_rankings %}
+				{{ include('atoms/rankings/top_mover.html.twig', {
+					'type': 'general',
+					'current_position': player_ranking.generalPosition,
+					loop,
+				}) }}
+
+				{{ include('molecules/rankings/player_ranking_card.html.twig', {
+					player_ranking,
+					'position': player_ranking.generalPosition,
+					'variation': player_ranking.generalVariation,
+					'value': player_ranking.general|number ~ ' point' ~ player_ranking.general|plural,
+				})}}
+
+				{{ include('atoms/rankings/bottom_mover.html.twig', {
+					'type': 'general',
+					'current_position': player_ranking.generalPosition,
+					loop,
+				}) }}
+			{% endfor %}
+		</div>
+	</div>
+</div>

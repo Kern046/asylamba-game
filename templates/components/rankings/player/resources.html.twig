@@ -1,0 +1,31 @@
+<div class="component player rank">
+	<div class="head skin-4">
+		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<h2>Mineur</h2>
+		<em>Production totale par relève</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for player_ranking in resources_rankings %}
+				{{ include('atoms/rankings/top_mover.html.twig', {
+					'type': 'resources',
+					'current_position': player_ranking.resourcesPosition,
+					loop,
+				}) }}
+
+				{{ include('molecules/rankings/player_ranking_card.html.twig', {
+					player_ranking,
+					'position': player_ranking.resourcesPosition,
+					'variation': player_ranking.resourcesVariation,
+					'value': player_ranking.resources|number ~  ' <img src="' ~ asset('media/resources/resource.png') ~ '" class="icon-color" alt="ressources" />',
+				})}}
+
+				{{ include('atoms/rankings/bottom_mover.html.twig', {
+					'type': 'resources',
+					'current_position': player_ranking.resourcesPosition,
+					loop,
+				}) }}
+			{% endfor %}
+		</div>
+	</div>
+</div>

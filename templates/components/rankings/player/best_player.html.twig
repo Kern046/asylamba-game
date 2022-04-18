@@ -1,0 +1,26 @@
+<div class="component profil">
+	<div class="head">
+		<h1>Joueur</h1>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="center-box">
+				<span class="value">Meilleur joueur</span>
+			</div>
+
+			<div class="center-box">
+				<span class="label">
+					{{ get_faction_info(best_player.color, 'status')[best_player.status - 1] }} de {{ get_faction_info(best_player.color, 'popularName') }}
+				</span>
+				<span class="value">{{ best_player.name }}</span>
+			</div>
+
+			<div class="profil-flag color-{{ best_player.color }}">
+				<img
+					src="{{ asset('media//avatar/big/' ~ best_player.avatar ~ '.png') }}"
+					alt="avatar de {{ best_player.name }}"
+				/>
+			</div>
+		</div>
+	</div>
+</div>

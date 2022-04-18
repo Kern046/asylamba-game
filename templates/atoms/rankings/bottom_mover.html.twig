@@ -1,0 +1,5 @@
+{% if loop.last %}
+	<a class="more-item" href="{{ path('view_more_rankings', {'direction': 'prev', type, 'current': current_position }) }}">
+		afficher les joueurs suivants
+	</a>
+{% endif %}

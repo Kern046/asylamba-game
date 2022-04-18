@@ -1,0 +1,5 @@
+{% if loop.first and current_position != 1 %}
+	<a class="more-item" href="{{ path('view_more_rankings', { 'direction': 'next', type, 'current': current_position }) }}" data-dir="top">
+		afficher les joueurs précédents
+	</a>
+{% endif %}
