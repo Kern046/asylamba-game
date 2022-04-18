@@ -1,0 +1,59 @@
+<div class="component profil panel-info">
+	<div class="head skin-2"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Informations sur les conditions de victoire</h4>
+
+			<p>
+				Les différents classements (général, richesse et territorial) rapportent des points à la faction chaque jour en fonction de la position de cette dernière dans les classements.
+				Ces points sont additionnés et font monter une jauge. Lorsqu'une faction atteint le nombre de point requis, le serveur se termine et la victoire est revendiquée.
+			</p>
+
+			<div class="center-box">
+				<span class="label">Points requis pour mettre fin au serveur</span>
+				<span class="value">{{ points_to_win|number }}</span>
+			</div>
+
+			<p>
+				Les différents classements n'ont pas tous le même poids.
+				Les gain journaliers en fonction du classement et de la position dans ce dernier sont disponibles dans le tableau ci-dessous.
+			</p>
+			<div class="table">
+				<table>
+					<tr>
+						<td>Position</td>
+						<td>1<sup>er</sup></td>
+						<td>2<sup>ème</sup></td>
+						<td>3<sup>ème</sup></td>
+						<td>4<sup>ème</sup></td>
+						<td>5<sup>ème</sup></td>
+					</tr>
+					<tr class="small-grey">
+						<td>Général</td>
+						<td>+4</td>
+						<td>+3</td>
+						<td>+2</td>
+						<td>+1</td>
+						<td>+0</td>
+					</tr>
+					<tr class="small-grey">
+						<td>Richesse</td>
+						<td>+16</td>
+						<td>+12</td>
+						<td>+8</td>
+						<td>+4</td>
+						<td>+0</td>
+					</tr>
+					<tr class="small-grey">
+						<td>Territorial</td>
+						<td>+20</td>
+						<td>+15</td>
+						<td>+10</td>
+						<td>+5</td>
+						<td>+0</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

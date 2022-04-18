@@ -1,0 +1,19 @@
+<div class="component player rank">
+	<div class="head skin-4">
+		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<h2>Général</h2>
+		<em>Somme des points des joueurs de la faction</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			{% for faction_ranking in general_rankings %}
+				{{ include('molecules/rankings/faction_ranking_card.html.twig', {
+					faction_ranking,
+					'value': faction_ranking.general|number(-1) ~ ' points',
+					'position': faction_ranking.generalPosition,
+					'variation': faction_ranking.generalVariation,
+				}) }}
+			{% endfor %}
+		</div>
+	</div>
+</div>

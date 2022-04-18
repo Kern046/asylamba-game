@@ -1,0 +1,21 @@
+<div class="component profil">
+	<div class="head">
+		<h1>Faction</h1>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="center-box">
+				<span class="value">Meilleure faction</span>
+				<span class="label">{{ get_faction_info(best_faction.rFaction, 'popularName') }}</span>
+			</div>
+
+			<div class="profil-flag color-{{ best_faction.rFaction }}">
+				<img src="{{ asset('media/ally/big/color' ~ best_faction.rFaction ~ '.png') }}" alt="" />
+			</div>
+
+			<div class="center-box">
+				<span class="label">{{ get_faction_info(best_faction.rFaction, 'devise') }}</span>
+			</div>
+		</div>
+	</div>
+</div>
