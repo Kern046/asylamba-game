@@ -213,7 +213,7 @@ class PlayerManager
 
 	protected function fill(Player $player): void
 	{
-		if ($this->isSynchronized($player)) {
+		if (null !== $this->requestStack->getCurrentRequest() && $this->isSynchronized($player)) {
 			$this->saveSessionData($player);
 		}
 	}
