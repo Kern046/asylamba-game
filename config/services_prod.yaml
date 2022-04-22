@@ -1,0 +1,3 @@
+App\Shared\Infrastructure\Log\DatadogLogProcessor:
+    tags:
+        - { name: monolog.processor, handler: nested }
