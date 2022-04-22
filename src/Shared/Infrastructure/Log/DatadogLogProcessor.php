@@ -17,7 +17,7 @@ class DatadogLogProcessor
 
 	public function __construct(private readonly RequestStack $requestStack)
 	{
-		if (null !== $request = $this->requestStack->getCurrentRequest()) {
+		if (null !== $request = $this->requestStack->getMainRequest()) {
 			$this->requestId = substr(uniqid(), -8);
 			$this->requestParams = $this->cleanInput($request->request->all());
 			$this->queryParams = $this->cleanInput($request->query->all());
@@ -34,8 +34,8 @@ class DatadogLogProcessor
 	public function __invoke(array $record): array
 	{
 		$record['http.request_id'] = $this->requestId;
-		$record['http.session_id'] = $this->requestStack->getCurrentRequest()?->hasPreviousSession()
-			? $this->requestStack->getCurrentRequest()->getSession()->getId()
+		$record['http.session_id'] = $this->requestStack->getMainRequest()?->hasPreviousSession()
+			? $this->requestStack->getMainRequest()->getSession()->getId()
 			: 'Unknown';
 		$record['http.url'] = $this->serverData['http.url'];
 		$record['http.method'] = $this->serverData['http.method'];
