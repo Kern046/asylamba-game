@@ -6,8 +6,8 @@ use App\Classes\Library\Module;
 
 class ZeusModule extends Module
 {
-	public function getName(): string
-	{
-		return 'Zeus';
-	}
+    public function getName(): string
+    {
+        return 'Zeus';
+    }
 }

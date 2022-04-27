@@ -17,48 +17,48 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class Cancel extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		CommercialRouteManager $commercialRouteManager,
-		PlayerManager $playerManager,
-		NotificationManager $notificationManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		EntityManager $entityManager,
-		OrbitalBase $currentBase,
-		Player $currentPlayer,
-		int $id,
-	): Response {
-		$cr = $commercialRouteManager->getByIdAndBase($id, $currentBase->getId());
-		if ($cr === null) {
-			throw $this->createNotFoundException('Commercial route not found');
-		}
-		if (!$cr->isProposed()) {
-			throw new ConflictHttpException('Commercial route has already been established');
-		}
-		$routeCancelRefund = $this->getParameter('athena.trade.route.cancellation_refund');
-		$proposerBase = $orbitalBaseManager->get($cr->getROrbitalBase());
-		$linkedBase = $orbitalBaseManager->get($cr->getROrbitalBaseLinked());
+    public function __invoke(
+        Request $request,
+        CommercialRouteManager $commercialRouteManager,
+        PlayerManager $playerManager,
+        NotificationManager $notificationManager,
+        OrbitalBaseManager $orbitalBaseManager,
+        EntityManager $entityManager,
+        OrbitalBase $currentBase,
+        Player $currentPlayer,
+        int $id,
+    ): Response {
+        $cr = $commercialRouteManager->getByIdAndBase($id, $currentBase->getId());
+        if (null === $cr) {
+            throw $this->createNotFoundException('Commercial route not found');
+        }
+        if (!$cr->isProposed()) {
+            throw new ConflictHttpException('Commercial route has already been established');
+        }
+        $routeCancelRefund = $this->getParameter('athena.trade.route.cancellation_refund');
+        $proposerBase = $orbitalBaseManager->get($cr->getROrbitalBase());
+        $linkedBase = $orbitalBaseManager->get($cr->getROrbitalBaseLinked());
 
-		//rend 80% des crédits investis
-		$playerManager->increaseCredit($currentPlayer, round($cr->getPrice() * $routeCancelRefund));
+        // rend 80% des crédits investis
+        $playerManager->increaseCredit($currentPlayer, round($cr->getPrice() * $routeCancelRefund));
 
-		//notification
-		$n = new Notification();
-		$n->setRPlayer($linkedBase->getRPlayer());
-		$n->setTitle('Route commerciale annulée');
+        // notification
+        $n = new Notification();
+        $n->setRPlayer($linkedBase->getRPlayer());
+        $n->setTitle('Route commerciale annulée');
 
-		$n->addBeg()->addLnk('embassy/player-' . $currentPlayer->getId(), $currentPlayer->getName())->addTxt(' a finalement retiré la proposition de route commerciale qu\'il avait faite entre ');
-		$n->addLnk('map/place-' . $linkedBase->getRPlace(), $linkedBase->getName())->addTxt(' et ');
-		$n->addLnk('map/place-' . $proposerBase->getRPlace(), $proposerBase->getName());
-		$n->addEnd();
-		$notificationManager->add($n);
+        $n->addBeg()->addLnk('embassy/player-'.$currentPlayer->getId(), $currentPlayer->getName())->addTxt(' a finalement retiré la proposition de route commerciale qu\'il avait faite entre ');
+        $n->addLnk('map/place-'.$linkedBase->getRPlace(), $linkedBase->getName())->addTxt(' et ');
+        $n->addLnk('map/place-'.$proposerBase->getRPlace(), $proposerBase->getName());
+        $n->addEnd();
+        $notificationManager->add($n);
 
-		//destruction de la route
-		$commercialRouteManager->remove($cr);
-		$this->addFlash('success', 'Route commerciale annulée. Vous récupérez les ' . $routeCancelRefund * 100 . '% du montant investi.');
+        // destruction de la route
+        $commercialRouteManager->remove($cr);
+        $this->addFlash('success', 'Route commerciale annulée. Vous récupérez les '.$routeCancelRefund * 100 .'% du montant investi.');
 
-		$entityManager->flush();
+        $entityManager->flush();
 
-		return $this->redirect($request->headers->get('referer'));
-	}
+        return $this->redirect($request->headers->get('referer'));
+    }
 }

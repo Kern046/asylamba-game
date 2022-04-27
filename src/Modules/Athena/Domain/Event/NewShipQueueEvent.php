@@ -11,43 +11,42 @@ use App\Shared\Domain\Event\TutorialEvent;
 
 class NewShipQueueEvent implements TutorialEvent, TrackingEvent
 {
-	public function __construct(
-		public readonly ShipQueue $shipQueue,
-		public readonly Player $player,
-	) {
+    public function __construct(
+        public readonly ShipQueue $shipQueue,
+        public readonly Player $player,
+    ) {
+    }
 
-	}
+    public function getTutorialPlayer(): Player
+    {
+        return $this->player;
+    }
 
-	public function getTutorialPlayer(): Player
-	{
-		return $this->player;
-	}
+    public function getTutorialStep(): int|null
+    {
+        return match ($this->shipQueue->shipNumber) {
+            ShipResource::PEGASE => TutorialResource::BUILD_SHIP0,
+            ShipResource::SATYRE => TutorialResource::BUILD_SHIP1,
+            default => null,
+        };
+    }
 
-	public function getTutorialStep(): int|null
-	{
-		return match ($this->shipQueue->shipNumber) {
-			ShipResource::PEGASE => TutorialResource::BUILD_SHIP0,
-			ShipResource::SATYRE => TutorialResource::BUILD_SHIP1,
-			default => null,
-		};
-	}
+    public function getTrackingPeopleId(): int
+    {
+        return $this->player->id;
+    }
 
-	public function getTrackingPeopleId(): int
-	{
-		return $this->player->id;
-	}
+    public function getTrackingEventName(): string
+    {
+        return 'Ships Ordered';
+    }
 
-	public function getTrackingEventName(): string
-	{
-		return 'Ships Ordered';
-	}
-
-	public function getTrackingData(): array
-	{
-		return [
-			'ship_id' => $this->shipQueue->shipNumber,
-			'quantity' => $this->shipQueue->quantity,
-			'place_id' => $this->shipQueue->rOrbitalBase,
-		];
-	}
+    public function getTrackingData(): array
+    {
+        return [
+            'ship_id' => $this->shipQueue->shipNumber,
+            'quantity' => $this->shipQueue->quantity,
+            'place_id' => $this->shipQueue->rOrbitalBase,
+        ];
+    }
 }

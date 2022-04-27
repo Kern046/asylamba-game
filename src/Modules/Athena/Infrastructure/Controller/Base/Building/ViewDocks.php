@@ -20,125 +20,125 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class ViewDocks extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		OrbitalBase $currentBase,
-		Player $currentPlayer,
-		ShipQueueManager $shipQueueManager,
-		TechnologyManager $technologyManager,
-		OrbitalBaseHelper $orbitalBaseHelper,
-		ShipHelper $shipHelper,
-		string $dockType,
-	): Response {
-		$session = $request->getSession();
-		if (OrbitalBase::DOCK_TYPE_MANUFACTURE === $dockType) {
-			$dockLevel = $currentBase->getLevelDock1();
-			$buildingNumber = OrbitalBaseResource::DOCK1;
-			$dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK1_SPEED);
-			$shipsRange = range(0, 5);
-			$dockType = 1;
-		} elseif (OrbitalBase::DOCK_TYPE_SHIPYARD === $dockType) {
-			$dockLevel = $currentBase->getLevelDock2();
-			$buildingNumber = OrbitalBaseResource::DOCK2;
-			$dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK2_SPEED);
-			$shipsRange = range(6, 11);
-			$dockType = 2;
-		} else {
-			throw new BadRequestHttpException('Invalid dock type');
-		}
-		$shipQueues = $shipQueueManager->getByBaseAndDockType($currentBase->getRPlace(), $dockType);
-		$nbShipQueues = count($shipQueues);
-		$technology = $technologyManager->getPlayerTechnology($currentPlayer->getId());
+    public function __invoke(
+        Request $request,
+        OrbitalBase $currentBase,
+        Player $currentPlayer,
+        ShipQueueManager $shipQueueManager,
+        TechnologyManager $technologyManager,
+        OrbitalBaseHelper $orbitalBaseHelper,
+        ShipHelper $shipHelper,
+        string $dockType,
+    ): Response {
+        $session = $request->getSession();
+        if (OrbitalBase::DOCK_TYPE_MANUFACTURE === $dockType) {
+            $dockLevel = $currentBase->getLevelDock1();
+            $buildingNumber = OrbitalBaseResource::DOCK1;
+            $dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK1_SPEED);
+            $shipsRange = range(0, 5);
+            $dockType = 1;
+        } elseif (OrbitalBase::DOCK_TYPE_SHIPYARD === $dockType) {
+            $dockLevel = $currentBase->getLevelDock2();
+            $buildingNumber = OrbitalBaseResource::DOCK2;
+            $dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK2_SPEED);
+            $shipsRange = range(6, 11);
+            $dockType = 2;
+        } else {
+            throw new BadRequestHttpException('Invalid dock type');
+        }
+        $shipQueues = $shipQueueManager->getByBaseAndDockType($currentBase->getRPlace(), $dockType);
+        $nbShipQueues = count($shipQueues);
+        $technology = $technologyManager->getPlayerTechnology($currentPlayer->getId());
 
-		#place dans le hangar
-		$totalSpace = $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'storageSpace');
-		$storage = $currentBase->getShipStorage();
-		$inStorage = 0;
+        // place dans le hangar
+        $totalSpace = $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'storageSpace');
+        $storage = $currentBase->getShipStorage();
+        $inStorage = 0;
 
-		foreach ($shipsRange as $m) {
-			$inStorage += ShipResource::getInfo($m, 'pev') * $storage[$m];
-		}
+        foreach ($shipsRange as $m) {
+            $inStorage += ShipResource::getInfo($m, 'pev') * $storage[$m];
+        }
 
-		$inQueue = 0;
+        $inQueue = 0;
 
-		foreach ($shipQueues as $shipQueue) {
-			$inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * $shipQueue->quantity;
-		}
+        foreach ($shipQueues as $shipQueue) {
+            $inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * $shipQueue->quantity;
+        }
 
-		$maxShips = 0;
+        $maxShips = 0;
 
-		return $this->render('pages/athena/docks.html.twig', [
-			'building_number' => $buildingNumber,
-			'technology' => $technology,
-			'dock_type' => $dockType,
-			'dock_level' => $dockLevel,
-			'ships_range' => $shipsRange,
-			'total_space' => $totalSpace,
-			'ship_queues' => $shipQueues,
-			'nb_ship_queues' => $nbShipQueues,
-			'nb_dock_queues' => $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'nbQueues'),
-			'in_storage' => $inStorage,
-			'in_queue' => $inQueue,
-			'ship_resource_refund' => $this->getParameter('athena.building.ship_queue_resource_refund'),
-			'dock_speed_bonus' => $dockSpeedBonus,
-			'storage' => $storage,
-			'ships_data' => $this->getShipsData(
-				$shipHelper,
-				$currentPlayer,
-				$currentBase,
-				$technology,
-				$shipsRange,
-				$maxShips,
-				$nbShipQueues,
-				$totalSpace,
-				$inStorage,
-				$inQueue,
-			),
-			'max_ships' => $maxShips,
-		]);
-	}
+        return $this->render('pages/athena/docks.html.twig', [
+            'building_number' => $buildingNumber,
+            'technology' => $technology,
+            'dock_type' => $dockType,
+            'dock_level' => $dockLevel,
+            'ships_range' => $shipsRange,
+            'total_space' => $totalSpace,
+            'ship_queues' => $shipQueues,
+            'nb_ship_queues' => $nbShipQueues,
+            'nb_dock_queues' => $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'nbQueues'),
+            'in_storage' => $inStorage,
+            'in_queue' => $inQueue,
+            'ship_resource_refund' => $this->getParameter('athena.building.ship_queue_resource_refund'),
+            'dock_speed_bonus' => $dockSpeedBonus,
+            'storage' => $storage,
+            'ships_data' => $this->getShipsData(
+                $shipHelper,
+                $currentPlayer,
+                $currentBase,
+                $technology,
+                $shipsRange,
+                $maxShips,
+                $nbShipQueues,
+                $totalSpace,
+                $inStorage,
+                $inQueue,
+            ),
+            'max_ships' => $maxShips,
+        ]);
+    }
 
-	private function getShipsData(
-		ShipHelper $shipHelper,
-		Player $currentPlayer,
-		OrbitalBase $currentBase,
-		Technology $technology,
-		array $range,
-		int &$maxShips,
-		int $nbShipQueues,
-		int $totalSpace,
-		int $inStorage,
-		int $inQueue
-	): array {
-		$data = [];
+    private function getShipsData(
+        ShipHelper $shipHelper,
+        Player $currentPlayer,
+        OrbitalBase $currentBase,
+        Technology $technology,
+        array $range,
+        int &$maxShips,
+        int $nbShipQueues,
+        int $totalSpace,
+        int $inStorage,
+        int $inQueue
+    ): array {
+        $data = [];
 
-		foreach ($range as $i) {
-			# calcul du nombre de vaisseaux max
-			$maxShipResource = floor($currentBase->getResourcesStorage() / ShipResource::getInfo($i, 'resourcePrice'));
-			if ($currentPlayer->getRColor() === ColorResource::EMPIRE && in_array($i, [ShipResource::CERBERE, ShipResource::PHENIX])) {
-				# bonus if the player is from the Empire
-				$resourcePrice = ShipResource::getInfo($i, 'resourcePrice');
-				$resourcePrice -= round($resourcePrice * ColorResource::BONUS_EMPIRE_CRUISER / 100);
-				$maxShipResource = floor($currentBase->getResourcesStorage() / $resourcePrice);
-			}
-			$maxShipResource = ($maxShipResource < 100) ? $maxShipResource : 99;
-			$maxShipPev = $totalSpace - $inStorage - $inQueue;
-			$maxShipPev = floor($maxShipPev / ShipResource::getInfo($i, 'pev'));
-			$maxShipPev = ($maxShipPev < 100) ? $maxShipPev : 99;
-			$maxShips = ($maxShipResource <= $maxShipPev) ? $maxShipResource : $maxShipPev;
+        foreach ($range as $i) {
+            // calcul du nombre de vaisseaux max
+            $maxShipResource = floor($currentBase->getResourcesStorage() / ShipResource::getInfo($i, 'resourcePrice'));
+            if (ColorResource::EMPIRE === $currentPlayer->getRColor() && in_array($i, [ShipResource::CERBERE, ShipResource::PHENIX])) {
+                // bonus if the player is from the Empire
+                $resourcePrice = ShipResource::getInfo($i, 'resourcePrice');
+                $resourcePrice -= round($resourcePrice * ColorResource::BONUS_EMPIRE_CRUISER / 100);
+                $maxShipResource = floor($currentBase->getResourcesStorage() / $resourcePrice);
+            }
+            $maxShipResource = ($maxShipResource < 100) ? $maxShipResource : 99;
+            $maxShipPev = $totalSpace - $inStorage - $inQueue;
+            $maxShipPev = floor($maxShipPev / ShipResource::getInfo($i, 'pev'));
+            $maxShipPev = ($maxShipPev < 100) ? $maxShipPev : 99;
+            $maxShips = ($maxShipResource <= $maxShipPev) ? $maxShipResource : $maxShipPev;
 
-			$technologyRights = $shipHelper->haveRights($i, 'techno', $technology);
+            $technologyRights = $shipHelper->haveRights($i, 'techno', $technology);
 
-			$data[$i] = [
-				'max_ships' => $maxShips,
-				'has_technology_requirements' => $technologyRights,
-				'missing_technology' => (true !== $technologyRights) ? $technologyRights : null,
-				'has_ship_tree_requirements' => $shipHelper->haveRights($i, 'shipTree', $currentBase),
-				'dock_needed_level' => $shipHelper->dockLevelNeededFor($i),
-				'has_ship_queue_requirements' => $shipHelper->haveRights($i, 'queue', $currentBase, $nbShipQueues),
-			];
-		}
+            $data[$i] = [
+                'max_ships' => $maxShips,
+                'has_technology_requirements' => $technologyRights,
+                'missing_technology' => (true !== $technologyRights) ? $technologyRights : null,
+                'has_ship_tree_requirements' => $shipHelper->haveRights($i, 'shipTree', $currentBase),
+                'dock_needed_level' => $shipHelper->dockLevelNeededFor($i),
+                'has_ship_queue_requirements' => $shipHelper->haveRights($i, 'queue', $currentBase, $nbShipQueues),
+            ];
+        }
 
-		return $data;
-	}
+        return $data;
+    }
 }

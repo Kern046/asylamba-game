@@ -15,61 +15,62 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TradeMarketController extends AbstractController
 {
-	public function __invoke(
-		CommanderManager $commanderManager,
-		OrbitalBase $currentBase,
-		OrbitalBaseHelper $orbitalBaseHelper,
-		TransactionManager $transactionManager,
-		string $mode,
-	): Response {
-		return $this->render('pages/athena/trade_market.html.twig', [
-			'mode' => $mode,
-			'max_ships' => $orbitalBaseHelper->getInfo(
-				OrbitalBaseResource::COMMERCIAL_PLATEFORME,
-				'level',
-				$currentBase->getLevelCommercialPlateforme(),
-				'nbCommercialShip',
-			),
-			'resources_current_rate' => $transactionManager->getLastCompletedTransaction(Transaction::TYP_RESOURCE)->currentRate,
-			'resource_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_RESOURCE),
-			'commander_current_rate' => $transactionManager->getLastCompletedTransaction(Transaction::TYP_COMMANDER)->currentRate,
-			'commander_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_COMMANDER),
-			'ship_current_rate' => $transactionManager->getLastCompletedTransaction(Transaction::TYP_SHIP)->currentRate,
-			'ship_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_SHIP),
-			'commercial_shippings' => $this->getCommercialShippingsData($currentBase),
-			'base_commanders' => $commanderManager->getBaseCommanders(
-				$currentBase->getId(),
-				[Commander::INSCHOOL, Commander::RESERVE],
-				['c.experience' => 'DESC'],
-			),
-		]);
-	}
+    public function __invoke(
+        CommanderManager $commanderManager,
+        OrbitalBase $currentBase,
+        OrbitalBaseHelper $orbitalBaseHelper,
+        TransactionManager $transactionManager,
+        string $mode,
+    ): Response {
+        return $this->render('pages/athena/trade_market.html.twig', [
+            'mode' => $mode,
+            'max_ships' => $orbitalBaseHelper->getInfo(
+                OrbitalBaseResource::COMMERCIAL_PLATEFORME,
+                'level',
+                $currentBase->getLevelCommercialPlateforme(),
+                'nbCommercialShip',
+            ),
+            'resources_current_rate' => $transactionManager->getLastCompletedTransaction(Transaction::TYP_RESOURCE)->currentRate,
+            'resource_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_RESOURCE),
+            'commander_current_rate' => $transactionManager->getLastCompletedTransaction(Transaction::TYP_COMMANDER)->currentRate,
+            'commander_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_COMMANDER),
+            'ship_current_rate' => $transactionManager->getLastCompletedTransaction(Transaction::TYP_SHIP)->currentRate,
+            'ship_transactions' => $transactionManager->getProposedTransactions(Transaction::TYP_SHIP),
+            'commercial_shippings' => $this->getCommercialShippingsData($currentBase),
+            'base_commanders' => $commanderManager->getBaseCommanders(
+                $currentBase->getId(),
+                [Commander::INSCHOOL, Commander::RESERVE],
+                ['c.experience' => 'DESC'],
+            ),
+        ]);
+    }
 
-	protected function getCommercialShippingsData(OrbitalBase $currentBase): array
-	{
-		$commercialShippings = [
-			'used_ships' => 0,
-			'incoming' => [
-				CommercialShipping::ST_WAITING => [],
-				CommercialShipping::ST_GOING => [],
-				CommercialShipping::ST_MOVING_BACK => [],
-			],
-			'outgoing' => [
-				CommercialShipping::ST_WAITING => [],
-				CommercialShipping::ST_GOING => [],
-				CommercialShipping::ST_MOVING_BACK => [],
-			]
-		];
-		/** @var CommercialShipping $commercialShipping */
-		foreach ($currentBase->commercialShippings as $commercialShipping) {
-			if ($commercialShipping->rBase === $currentBase->getId()) {
-				$commercialShippings['used_ships'] += $commercialShipping->shipQuantity;
-				$commercialShippings['outgoing'][$commercialShipping->statement][] = $commercialShipping;
-			}
-			if ($commercialShipping->rBaseDestination === $currentBase->getId()) {
-				$commercialShippings['incoming'][$commercialShipping->statement][] = $commercialShipping;
-			}
-		}
-		return $commercialShippings;
-	}
+    protected function getCommercialShippingsData(OrbitalBase $currentBase): array
+    {
+        $commercialShippings = [
+            'used_ships' => 0,
+            'incoming' => [
+                CommercialShipping::ST_WAITING => [],
+                CommercialShipping::ST_GOING => [],
+                CommercialShipping::ST_MOVING_BACK => [],
+            ],
+            'outgoing' => [
+                CommercialShipping::ST_WAITING => [],
+                CommercialShipping::ST_GOING => [],
+                CommercialShipping::ST_MOVING_BACK => [],
+            ],
+        ];
+        /** @var CommercialShipping $commercialShipping */
+        foreach ($currentBase->commercialShippings as $commercialShipping) {
+            if ($commercialShipping->rBase === $currentBase->getId()) {
+                $commercialShippings['used_ships'] += $commercialShipping->shipQuantity;
+                $commercialShippings['outgoing'][$commercialShipping->statement][] = $commercialShipping;
+            }
+            if ($commercialShipping->rBaseDestination === $currentBase->getId()) {
+                $commercialShippings['incoming'][$commercialShipping->statement][] = $commercialShipping;
+            }
+        }
+
+        return $commercialShippings;
+    }
 }

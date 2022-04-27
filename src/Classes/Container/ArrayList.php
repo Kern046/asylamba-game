@@ -4,74 +4,87 @@ namespace App\Classes\Container;
 
 class ArrayList implements \Stringable
 {
-    /** @var array **/
-    protected $elements = array();
+    /** @var array * */
+    protected $elements = [];
 
     /**
      * @return int
      */
-    public function size() {
+    public function size()
+    {
         return count($this->elements);
     }
 
     /**
      * @param string $key
+     *
      * @return mixed
      */
-    public function get($key) {
+    public function get($key)
+    {
         if (isset($this->elements[$key])) {
             return $this->elements[$key];
         }
+
         return null;
     }
 
-	/**
-	 * @param string $key
-	 * @return boolean
-	 */
-	public function exist($key) {
-		return isset($this->elements[$key]);
-	}
-
-	public function has(string $key): bool
-	{
-		return isset($this->elements[$key]);
-	}
-
     /**
      * @param string $key
-     * @param mixed $value
-     * @return boolean
+     *
+     * @return bool
      */
-    public function equal($key, $value) {
-        return (($this->exist($key) && $this->get($key) == $value));
+    public function exist($key)
+    {
+        return isset($this->elements[$key]);
+    }
+
+    public function has(string $key): bool
+    {
+        return isset($this->elements[$key]);
     }
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
+     *
+     * @return bool
      */
-    public function add($key, $value) {
+    public function equal($key, $value)
+    {
+        return $this->exist($key) && $this->get($key) == $value;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed  $value
+     */
+    public function add($key, $value)
+    {
         $this->elements[$key] = $value;
     }
 
     /**
      * @param string $key
-     * @return boolean
+     *
+     * @return bool
      */
-    public function remove($key) {
+    public function remove($key)
+    {
         if (isset($this->elements[$key])) {
             unset($this->elements[$key]);
         }
+
         return false;
     }
 
-    public function clear() {
-        $this->elements = array();
+    public function clear()
+    {
+        $this->elements = [];
     }
 
-	public function __toString(): string
-	{
-		return sprintf('[%s]', implode(',', array_values($this->elements)));
-	}
+    public function __toString(): string
+    {
+        return sprintf('[%s]', implode(',', array_values($this->elements)));
+    }
 }

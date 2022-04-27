@@ -4,10 +4,10 @@ namespace App\Shared\Domain\Event;
 
 interface TrackingEvent
 {
-	public function getTrackingPeopleId(): int;
+    public function getTrackingPeopleId(): int;
 
-	public function getTrackingEventName(): string;
+    public function getTrackingEventName(): string;
 
-	/** @return array<string, mixed> */
-	public function getTrackingData(): array;
+    /** @return array<string, mixed> */
+    public function getTrackingData(): array;
 }

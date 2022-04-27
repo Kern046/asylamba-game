@@ -12,7 +12,7 @@ class CommanderTest extends \PHPUnit\Framework\TestCase
         $affectedAt = '2017-05-02 21:20:30';
         $arrivedAt = '2017-05-06 21:20:30';
         $updatedAt = '2017-05-06 20:20:30';
-        
+
         $commander =
             (new Commander())
             ->setId(1)
@@ -63,7 +63,7 @@ class CommanderTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(Commander::MOVING, $commander->getStatement());
         $this->assertEquals($updatedAt, $commander->getUpdatedAt());
     }
-    
+
     public function testArmy()
     {
         $commander = new Commander();
@@ -72,72 +72,72 @@ class CommanderTest extends \PHPUnit\Framework\TestCase
             $commander->addArmyInBegin($squadron['data']);
         }
         $commander->setPevInBegin();
-        
+
         $this->assertCount(3, $commander->getArmyInBegin());
         $this->assertEquals(286, $commander->getPevInBegin());
         $this->assertEquals(3, $commander->getSizeArmy());
         $commander->setArmy();
         $this->assertCount(3, $commander->getArmy());
     }
-    
+
     public function getSquadronsMock()
     {
         return [
-			[
-				'id' => 1,
-				'data' => [
-					2,
-					0,
-					17,
-					0,
-					0,
-					0, 
-					0, 
-					1,
-					0,
-					0,
-					0,
-					0,
-					'2017-05-16 20:00:00', 
-					'2017-05-16 20:00:00'
-				]
-			], [
-				'id' => 2,
-				'data' => [
-					2,
-					0,
-					17,
-					0,
-					0,
-					0, 
-					0, 
-					1,
-					0,
-					0,
-					0,
-					0,
-					'2017-05-16 20:00:00', 
-					'2017-05-16 20:00:00'
-				]
-			], [
-				'id' => 3,
-				'data' => [
-					0,
-					0,
-					0,
-					0,
-					0,
-					0, 
-					0, 
-					0,
-					0,
-					1,
-					0,
-					0,
-					'2017-05-16 20:00:00', 
-					'2017-05-16 20:00:00'
-				]
-			]
+            [
+                'id' => 1,
+                'data' => [
+                    2,
+                    0,
+                    17,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '2017-05-16 20:00:00',
+                    '2017-05-16 20:00:00',
+                ],
+            ], [
+                'id' => 2,
+                'data' => [
+                    2,
+                    0,
+                    17,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '2017-05-16 20:00:00',
+                    '2017-05-16 20:00:00',
+                ],
+            ], [
+                'id' => 3,
+                'data' => [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    '2017-05-16 20:00:00',
+                    '2017-05-16 20:00:00',
+                ],
+            ],
         ];
     }
 }

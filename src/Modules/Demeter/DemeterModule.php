@@ -6,8 +6,8 @@ use App\Classes\Library\Module;
 
 class DemeterModule extends Module
 {
-	public function getName(): string
-	{
-		return 'Demeter';
-	}
+    public function getName(): string
+    {
+        return 'Demeter';
+    }
 }

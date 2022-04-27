@@ -9,20 +9,19 @@ use App\Shared\Domain\Event\TutorialEvent;
 
 class AffectationEvent implements TutorialEvent
 {
-	public function __construct(
-		public readonly Commander $commander,
-		public readonly Player $player,
-	) {
+    public function __construct(
+        public readonly Commander $commander,
+        public readonly Player $player,
+    ) {
+    }
 
-	}
+    public function getTutorialPlayer(): Player
+    {
+        return $this->player;
+    }
 
-	public function getTutorialPlayer(): Player
-	{
-		return $this->player;
-	}
-
-	public function getTutorialStep(): int|null
-	{
-		return TutorialResource::AFFECT_COMMANDER;
-	}
+    public function getTutorialStep(): int|null
+    {
+        return TutorialResource::AFFECT_COMMANDER;
+    }
 }

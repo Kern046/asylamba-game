@@ -3,50 +3,47 @@
 namespace App\Modules\Atlas\Repository;
 
 use App\Classes\Entity\AbstractRepository;
-
-use App\Modules\Demeter\Model\Color;
-
-use App\Modules\Ares\Model\Commander;
-use App\Modules\Zeus\Model\Player;
-use App\Modules\Atlas\Model\PlayerRanking;
-
 use App\Classes\Library\Utils;
+use App\Modules\Ares\Model\Commander;
+use App\Modules\Atlas\Model\PlayerRanking;
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Zeus\Model\Player;
 
 class PlayerRankingRepository extends AbstractRepository
 {
-	public function getFactionPlayerRankings(Color $faction)
-	{
-		$statement = $this->connection->prepare(
-			'SELECT p.id as player_id, p.rColor as player_faction_id, pr.id as player_ranking_id, pr.general as player_general_ranking 
+    public function getFactionPlayerRankings(Color $faction)
+    {
+        $statement = $this->connection->prepare(
+            'SELECT p.id as player_id, p.rColor as player_faction_id, pr.id as player_ranking_id, pr.general as player_general_ranking 
 			FROM player p
 			RIGHT JOIN playerRanking pr ON pr.rPlayer = p.id
 			WHERE p.rColor = :faction_id'
-		);
-		$statement->execute(['faction_id' => $faction->getId()]);
-		
-		return $this->formatPlayerData($statement);
-	}
-	
-	public function getAttackersButcherRanking()
-	{
-		return $this->connection->query(
-			'SELECT
+        );
+        $statement->execute(['faction_id' => $faction->getId()]);
+
+        return $this->formatPlayerData($statement);
+    }
+
+    public function getAttackersButcherRanking()
+    {
+        return $this->connection->query(
+            'SELECT
 				p.id AS player,
 				(SUM(pevInBeginA) - SUM(`pevAtEndA`)) AS lostPEV,
 				(SUM(pevInBeginD) - SUM(`pevAtEndD`)) AS destroyedPEV
 			FROM report AS r
 			RIGHT JOIN player AS p
 				ON p.id = r.rPlayerAttacker
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
-		);
-	}
-	
-	public function getDefendersButcherRanking()
-	{
-		return $this->connection->query(
-			'SELECT
+        );
+    }
+
+    public function getDefendersButcherRanking()
+    {
+        return $this->connection->query(
+            'SELECT
 				p.id AS player,
 				(SUM(pevInBeginD) - SUM(`pevAtEndD`)) AS lostPEV,
 				(SUM(pevInBeginA) - SUM(`pevAtEndA`)) AS destroyedPEV,
@@ -54,16 +51,16 @@ class PlayerRankingRepository extends AbstractRepository
 			FROM report AS r
 			RIGHT JOIN player AS p
 				ON p.id = r.rPlayerDefender
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
-		);
-	}
-	
-	public function getPlayersResources()
-	{
-		return $this->connection->query(
-			'SELECT p.id AS player,
+        );
+    }
+
+    public function getPlayersResources()
+    {
+        return $this->connection->query(
+            'SELECT p.id AS player,
 				ob.levelRefinery AS levelRefinery,
 				pl.coefResources AS coefResources
 			FROM orbitalBase AS ob 
@@ -71,28 +68,28 @@ class PlayerRankingRepository extends AbstractRepository
 				ON pl.id = ob.rPlace
 			LEFT JOIN player AS p
 				on p.id = ob.rPlayer
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')'
-		);
-	}
-	
-	public function getPlayersResourcesData()
-	{
-		return $this->connection->query(
-			'SELECT 
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')'
+        );
+    }
+
+    public function getPlayersResourcesData()
+    {
+        return $this->connection->query(
+            'SELECT 
 				p.id AS player,
 				SUM(ob.resourcesStorage) AS sumResources
 			FROM orbitalBase AS ob 
 			LEFT JOIN player AS p
 				on p.id = ob.rPlayer
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY ob.rPlace'
-		);
-	}
-	
-	public function getPlayersGeneralData()
-	{
-		return $this->connection->query(
-			'SELECT 
+        );
+    }
+
+    public function getPlayersGeneralData()
+    {
+        return $this->connection->query(
+            'SELECT 
 				p.id AS player,
 				SUM(ob.points) AS points,
 				SUM(ob.resourcesStorage) AS resources,
@@ -111,15 +108,15 @@ class PlayerRankingRepository extends AbstractRepository
 			FROM orbitalBase AS ob 
 			LEFT JOIN player AS p
 				ON p.id = ob.rPlayer
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id'
-		);
-	}
-	
-	public function getPlayersArmiesData()
-	{
-		return $this->connection->query(
-			'SELECT 
+        );
+    }
+
+    public function getPlayersArmiesData()
+    {
+        return $this->connection->query(
+            'SELECT 
 				p.id AS player,
 				SUM(sq.ship0) as s0,
 				SUM(sq.ship1) as s1,
@@ -138,29 +135,29 @@ class PlayerRankingRepository extends AbstractRepository
 				ON c.id = sq.rCommander
 			LEFT JOIN player AS p
 				ON p.id = c.rPlayer
-			WHERE c.statement IN (' . implode(',', [Commander::AFFECTED, Commander::MOVING]) . ')
+			WHERE c.statement IN ('.implode(',', [Commander::AFFECTED, Commander::MOVING]).')
 			GROUP BY p.id'
-		);
-	}
-	
-	public function getPlayersPlanetData()
-	{
-		return $this->connection->query(
-			'SELECT 
+        );
+    }
+
+    public function getPlayersPlanetData()
+    {
+        return $this->connection->query(
+            'SELECT 
 				p.id AS player,
 				COUNT(ob.rPlace) AS sumPlanets
 			FROM orbitalBase AS ob
 			LEFT JOIN player AS p
 				on p.id = ob.rPlayer
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY ob.rPlace'
-		);
-	}
-	
-	public function getPlayersTradeRoutes()
-	{
-		return $this->connection->query(
-			'SELECT 
+        );
+    }
+
+    public function getPlayersTradeRoutes()
+    {
+        return $this->connection->query(
+            'SELECT 
 				p.id AS player,
 				SUM(income) AS income
 			FROM commercialRoute AS c
@@ -168,16 +165,16 @@ class PlayerRankingRepository extends AbstractRepository
 				ON o.rPlace = c.rOrbitalBase
 				RIGHT JOIN player AS p
 					ON p.id = o.rPlayer
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
-		);
-	}
-	
-	public function getPlayersLinkedTradeRoutes()
-	{
-		return $this->connection->query(
-			'SELECT 
+        );
+    }
+
+    public function getPlayersLinkedTradeRoutes()
+    {
+        return $this->connection->query(
+            'SELECT 
 				p.id AS player,
 				SUM(income) AS income
 			FROM `commercialRoute` AS c
@@ -185,74 +182,71 @@ class PlayerRankingRepository extends AbstractRepository
 				ON o.rPlace = c.rOrbitalBaseLinked
 				RIGHT JOIN player AS p
 					ON p.id = o.rPlayer
-			WHERE p.statement IN (' . implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]) . ')
+			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
-		);
-	}
-	
-	public function insert($ranking)
-	{
-		
-	}
-	
-	public function insertDataAnalysis(Player $player, PlayerRanking $playerRanking, $resources, $planetNumber)
-	{
-		$statement = $this->connection->prepare('INSERT INTO 
+        );
+    }
+
+    public function insert($ranking)
+    {
+    }
+
+    public function insertDataAnalysis(Player $player, PlayerRanking $playerRanking, $resources, $planetNumber)
+    {
+        $statement = $this->connection->prepare('INSERT INTO 
 			DA_PlayerDaily(rPlayer, credit, experience, level, victory, defeat, status, resources, fleetSize, nbPlanet, planetPoints, rkGeneral, rkFighter, rkProducer, rkButcher, rkTrader, dStorage)
 			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-		);
-		$statement->execute([
-			$player->id,
-			$player->credit,
-			$player->experience,
-			$player->level,
-			$player->victory,
-			$player->defeat,
-			$player->status,
-			$resources,
-			$pr->armies,
-			$planetNumber,
-			$pr->general / $planetNumber,
-			$pr->general,
-			$pr->fight,
-			$pr->resources,
-			$pr->butcher,
-			$pr->trader,
-			Utils::now()
-		]);
-	}
-	
-	public function update($ranking)
-	{
-		
-	}
-	
-	public function remove($ranking)
-	{
-		
-	}
-	
-	public function formatPlayerData($statement)
-	{
-		$results = [];
-		$currentPlayer = null;
-		while ($row = $statement->fetch(\PDO::FETCH_ASSOC))
-		{
-			if (!$currentPlayer instanceof Player || $currentPlayer->getId() !== (int) $row['player_id']) {
-				$currentPlayer =
-					(new Player())
-					->setId((int) $row['player_id'])
-					->setRColor((int) $row['player_faction_id'])
-				;
-			}
-			$results[] =
-				(new PlayerRanking())
-				->setId((int) $row['player_ranking_id'])
-				->setPlayer($currentPlayer)
-				->setGeneral((int) $row['player_general_ranking'])
-			;
-		}
-		return $results;
-	}
+        );
+        $statement->execute([
+            $player->id,
+            $player->credit,
+            $player->experience,
+            $player->level,
+            $player->victory,
+            $player->defeat,
+            $player->status,
+            $resources,
+            $pr->armies,
+            $planetNumber,
+            $pr->general / $planetNumber,
+            $pr->general,
+            $pr->fight,
+            $pr->resources,
+            $pr->butcher,
+            $pr->trader,
+            Utils::now(),
+        ]);
+    }
+
+    public function update($ranking)
+    {
+    }
+
+    public function remove($ranking)
+    {
+    }
+
+    public function formatPlayerData($statement)
+    {
+        $results = [];
+        $currentPlayer = null;
+        while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+            if (!$currentPlayer instanceof Player || $currentPlayer->getId() !== (int) $row['player_id']) {
+                $currentPlayer =
+                    (new Player())
+                    ->setId((int) $row['player_id'])
+                    ->setRColor((int) $row['player_faction_id'])
+                ;
+            }
+            $results[] =
+                (new PlayerRanking())
+                ->setId((int) $row['player_ranking_id'])
+                ->setPlayer($currentPlayer)
+                ->setGeneral((int) $row['player_general_ranking'])
+            ;
+        }
+
+        return $results;
+    }
 }

@@ -4,5 +4,5 @@ namespace App\Classes\Event;
 
 class ServerInitEvent
 {
-	const NAME = 'app.server_init';
+    public const NAME = 'app.server_init';
 }

@@ -1,9 +1,10 @@
 <?php
+
 echo '<h2>Ajout de la table DA_PlayerDaily</h2>';
 
 $db = $this->getContainer()->get(\App\Classes\Database\Database::class);
-$db->query("DROP TABLE IF EXISTS `DA_PlayerDaily`");
-$db->query("CREATE TABLE IF NOT EXISTS `DA_PlayerDaily` (
+$db->query('DROP TABLE IF EXISTS `DA_PlayerDaily`');
+$db->query('CREATE TABLE IF NOT EXISTS `DA_PlayerDaily` (
 	`id` INT unsigned NOT NULL AUTO_INCREMENT,
 	`rPlayer` INT unsigned NOT NULL,
 	`credit` INT unsigned NOT NULL,
@@ -24,4 +25,4 @@ $db->query("CREATE TABLE IF NOT EXISTS `DA_PlayerDaily` (
 	`dStorage` DATETIME NOT NULL,
 	
 	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;');

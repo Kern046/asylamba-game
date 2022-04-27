@@ -2,31 +2,32 @@
 
 namespace App\Classes\Library\Http;
 
-use App\Classes\Library\ParameterBag;
 use App\Classes\Container\Cookie;
+use App\Classes\Library\ParameterBag;
 
-class Request {
-    /** @var string **/
+class Request
+{
+    /** @var string * */
     protected $method;
-    /** @var string **/
+    /** @var string * */
     protected $protocol;
-    /** @var boolean **/
+    /** @var bool * */
     protected $isCrossDomain = false;
-    /** @var string **/
+    /** @var string * */
     protected $externalDomain;
-    /** @var string **/
+    /** @var string * */
     protected $redirect;
-	/** @var string **/
-	protected $path;
-    /** @var ParameterBag **/
+    /** @var string * */
+    protected $path;
+    /** @var ParameterBag * */
     public $headers;
-    /** @var ParameterBag **/
+    /** @var ParameterBag * */
     public $request;
-    /** @var ParameterBag **/
+    /** @var ParameterBag * */
     public $query;
-    /** @var Cookie **/
+    /** @var Cookie * */
     public $cookies;
-    /** @var string **/
+    /** @var string * */
     public $body = '';
 
     public function __construct()
@@ -87,6 +88,7 @@ class Request {
 
     /**
      * @param string $externalDomain
+     *
      * @return \App\Classes\Library\Http\Request
      */
     public function setCrossDomain($externalDomain)
@@ -98,7 +100,7 @@ class Request {
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function getCrossDomain()
     {

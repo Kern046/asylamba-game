@@ -25,72 +25,73 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class CreateCommander extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		OrbitalBase $orbitalBase,
-		OrbitalBaseManager $orbitalBaseManager,
-		CommanderManager $commanderManager,
-		PlayerManager $playerManager,
-		EntityManager $entityManager,
-		EventDispatcherInterface $eventDispatcher,
-	): Response {
-		$school = 0;
-		$name = $request->request->get('name');
+    public function __invoke(
+        Request $request,
+        Player $currentPlayer,
+        OrbitalBase $orbitalBase,
+        OrbitalBaseManager $orbitalBaseManager,
+        CommanderManager $commanderManager,
+        PlayerManager $playerManager,
+        EntityManager $entityManager,
+        EventDispatcherInterface $eventDispatcher,
+    ): Response {
+        $school = 0;
+        $name = $request->request->get('name');
 
-		$cn = new CheckName();
-		$cn->maxLength = 20;
+        $cn = new CheckName();
+        $cn->maxLength = 20;
 
-		if ($name !== FALSE) {
-			if (($orbitalBase = $orbitalBaseManager->getPlayerBase($orbitalBase->getId(), $currentPlayer->getId())) !== null) {
-				$schoolCommanders = $commanderManager->getBaseCommanders($orbitalBase->getId(), [Commander::INSCHOOL]);
+        if (false !== $name) {
+            if (($orbitalBase = $orbitalBaseManager->getPlayerBase($orbitalBase->getId(), $currentPlayer->getId())) !== null) {
+                $schoolCommanders = $commanderManager->getBaseCommanders($orbitalBase->getId(), [Commander::INSCHOOL]);
 
-				if (count($schoolCommanders) < PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
-					$reserveCommanders = $commanderManager->getBaseCommanders($orbitalBase->getId(), [Commander::RESERVE]);
+                if (count($schoolCommanders) < PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
+                    $reserveCommanders = $commanderManager->getBaseCommanders($orbitalBase->getId(), [Commander::RESERVE]);
 
-					if (count($reserveCommanders) < OrbitalBase::MAXCOMMANDERINMESS) {
-						$nbrCommandersToCreate = rand(SchoolClassResource::getInfo($school, 'minSize'), SchoolClassResource::getInfo($school, 'maxSize'));
+                    if (count($reserveCommanders) < OrbitalBase::MAXCOMMANDERINMESS) {
+                        $nbrCommandersToCreate = rand(SchoolClassResource::getInfo($school, 'minSize'), SchoolClassResource::getInfo($school, 'maxSize'));
 
-						if ($cn->checkLength($name) && $cn->checkChar($name)) {
-							if (SchoolClassResource::getInfo($school, 'credit') <= $currentPlayer->getCredit()) {
-								# débit des crédits au joueur
-								$playerManager->decreaseCredit($currentPlayer, SchoolClassResource::getInfo($school, 'credit'));
+                        if ($cn->checkLength($name) && $cn->checkChar($name)) {
+                            if (SchoolClassResource::getInfo($school, 'credit') <= $currentPlayer->getCredit()) {
+                                // débit des crédits au joueur
+                                $playerManager->decreaseCredit($currentPlayer, SchoolClassResource::getInfo($school, 'credit'));
 
-								for ($i = 0; $i < $nbrCommandersToCreate; $i++) {
-									$newCommander = new Commander();
-									$commanderManager->upExperience($newCommander, rand(SchoolClassResource::getInfo($school, 'minExp'), SchoolClassResource::getInfo($school, 'maxExp')));
-									$newCommander->rPlayer = $currentPlayer->getId();
-									$newCommander->rBase = $orbitalBase->getId();
-									$newCommander->palmares = 0;
-									$newCommander->statement = 0;
-									$newCommander->name = $name;
-									$newCommander->avatar = 't' . rand(1, 21) . '-c' . $currentPlayer->getRColor();
-									$newCommander->dCreation = Utils::now();
-									$newCommander->uCommander = Utils::now();
-									$newCommander->setSexe(1);
-									$newCommander->setAge(rand(40, 70));
-									$entityManager->persist($newCommander);
-									$entityManager->flush($newCommander);
+                                for ($i = 0; $i < $nbrCommandersToCreate; ++$i) {
+                                    $newCommander = new Commander();
+                                    $commanderManager->upExperience($newCommander, rand(SchoolClassResource::getInfo($school, 'minExp'), SchoolClassResource::getInfo($school, 'maxExp')));
+                                    $newCommander->rPlayer = $currentPlayer->getId();
+                                    $newCommander->rBase = $orbitalBase->getId();
+                                    $newCommander->palmares = 0;
+                                    $newCommander->statement = 0;
+                                    $newCommander->name = $name;
+                                    $newCommander->avatar = 't'.rand(1, 21).'-c'.$currentPlayer->getRColor();
+                                    $newCommander->dCreation = Utils::now();
+                                    $newCommander->uCommander = Utils::now();
+                                    $newCommander->setSexe(1);
+                                    $newCommander->setAge(rand(40, 70));
+                                    $entityManager->persist($newCommander);
+                                    $entityManager->flush($newCommander);
 
-									$eventDispatcher->dispatch(new NewCommanderEvent($newCommander, $currentPlayer));
-								}
-								$this->addFlash('success', $nbrCommandersToCreate . ' commandant' . Format::addPlural($nbrCommandersToCreate) . ' inscrit' . Format::addPlural($nbrCommandersToCreate) . ' au programme d\'entraînement.');
-							} else {
-								throw new AccessDeniedHttpException('vous n\'avez pas assez de crédit.');
-							}
-						} else {
-							throw new BadRequestHttpException('le nom contient des caractères non autorisé ou trop de caractères.');
-						}
-					} else {
-						throw new ConflictHttpException('Vous ne pouvez pas créer de nouveaux officiers si vous en avez déjà ' . Orbitalbase::MAXCOMMANDERINMESS . ' ou plus.');
-					}
-				} else {
-					throw new ConflictHttpException('Trop d\'officiers en formation. Déplacez des officiers dans le mess pour libérer de la place.');
-				}
-			} else {
-				throw new AccessDeniedHttpException('cette base ne vous appartient pas');
-			}
-		}
-		return $this->redirectToRoute('school');
-	}
+                                    $eventDispatcher->dispatch(new NewCommanderEvent($newCommander, $currentPlayer));
+                                }
+                                $this->addFlash('success', $nbrCommandersToCreate.' commandant'.Format::addPlural($nbrCommandersToCreate).' inscrit'.Format::addPlural($nbrCommandersToCreate).' au programme d\'entraînement.');
+                            } else {
+                                throw new AccessDeniedHttpException('vous n\'avez pas assez de crédit.');
+                            }
+                        } else {
+                            throw new BadRequestHttpException('le nom contient des caractères non autorisé ou trop de caractères.');
+                        }
+                    } else {
+                        throw new ConflictHttpException('Vous ne pouvez pas créer de nouveaux officiers si vous en avez déjà '.Orbitalbase::MAXCOMMANDERINMESS.' ou plus.');
+                    }
+                } else {
+                    throw new ConflictHttpException('Trop d\'officiers en formation. Déplacez des officiers dans le mess pour libérer de la place.');
+                }
+            } else {
+                throw new AccessDeniedHttpException('cette base ne vous appartient pas');
+            }
+        }
+
+        return $this->redirectToRoute('school');
+    }
 }

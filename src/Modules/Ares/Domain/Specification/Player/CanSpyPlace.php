@@ -6,11 +6,11 @@ use App\Modules\Gaia\Model\Place;
 
 class CanSpyPlace extends PlayerSpecification
 {
-	/**
-	 * @param Place $candidate
-	 */
-	public function isSatisfiedBy($candidate): bool
-	{
-		return ($candidate->rPlayer != 0 && $candidate->playerColor != $this->player->rColor) || ($candidate->rPlayer == 0 && $candidate->typeOfPlace == 1);
-	}
+    /**
+     * @param Place $candidate
+     */
+    public function isSatisfiedBy($candidate): bool
+    {
+        return (0 != $candidate->rPlayer && $candidate->playerColor != $this->player->rColor) || (0 == $candidate->rPlayer && 1 == $candidate->typeOfPlace);
+    }
 }

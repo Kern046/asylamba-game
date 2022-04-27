@@ -3,7 +3,6 @@
 namespace App\Modules\Athena\Repository;
 
 use App\Classes\Entity\AbstractRepository;
-
 use App\Modules\Athena\Model\Transaction;
 
 class TransactionRepository extends AbstractRepository
@@ -33,39 +32,42 @@ class TransactionRepository extends AbstractRepository
 			LEFT JOIN system AS s ON p.rSystem = s.id
 			LEFT JOIN sector AS se ON s.rSector = se.id
 			LEFT JOIN commander AS c ON t.identifier = c.id
-			' . $clause
+			'.$clause
         );
         $statement->execute($parameters);
+
         return $statement;
     }
-    
+
     public function get($id)
     {
-		if (($t = $this->unitOfWork->getObject(Transaction::class, $id)) !== null) {
-			return $t;
-		}
-		$query = $this->select('WHERE t.id = :id', ['id' => $id]);
-		
-		if (($row = $query->fetch()) === false) {
-			return null;
-		}
-		$transaction = $this->format($row);
-		$this->unitOfWork->addObject($transaction);
-		return $transaction;
+        if (($t = $this->unitOfWork->getObject(Transaction::class, $id)) !== null) {
+            return $t;
+        }
+        $query = $this->select('WHERE t.id = :id', ['id' => $id]);
+
+        if (($row = $query->fetch()) === false) {
+            return null;
+        }
+        $transaction = $this->format($row);
+        $this->unitOfWork->addObject($transaction);
+
+        return $transaction;
     }
-    
+
     /**
      * @param int $type
      * @param int $statement
      * @param int $limit
+     *
      * @return array
      */
     public function getLastCompletedTransaction($type)
     {
-		$query = $this->select('WHERE t.type = :type AND t.statement = ' . Transaction::ST_COMPLETED . ' ORDER BY t.dValidation DESC LIMIT 1', [
-            'type' => $type
+        $query = $this->select('WHERE t.type = :type AND t.statement = '.Transaction::ST_COMPLETED.' ORDER BY t.dValidation DESC LIMIT 1', [
+            'type' => $type,
         ]);
-		if (($row = $query->fetch()) === false) {
+        if (($row = $query->fetch()) === false) {
             return null;
         }
         if (($t = $this->unitOfWork->getObject(Transaction::class, $row['id'])) !== null) {
@@ -73,117 +75,127 @@ class TransactionRepository extends AbstractRepository
         }
         $transaction = $this->format($row);
         $this->unitOfWork->addObject($transaction);
+
         return $transaction;
     }
-    
-	/**
-	 * @param int $type
-	 * @return array
-	 */
-	public function getProposedTransactions($type)
-	{
-		$query = $this->select('WHERE t.type = :type AND t.statement = ' . Transaction::ST_PROPOSED . ' ORDER BY t.dPublication DESC LIMIT 20', [
-            'type' => $type
+
+    /**
+     * @param int $type
+     *
+     * @return array
+     */
+    public function getProposedTransactions($type)
+    {
+        $query = $this->select('WHERE t.type = :type AND t.statement = '.Transaction::ST_PROPOSED.' ORDER BY t.dPublication DESC LIMIT 20', [
+            'type' => $type,
         ]);
-		
-		$data = [];
-		while($row = $query->fetch()) {
-			if (($t = $this->unitOfWork->getObject(Transaction::class, $row['id'])) !== null) {
-				$data[] = $t;
-				continue;
-			}
-			$transaction = $this->format($row);
-			$this->unitOfWork->addObject($transaction);
-			$data[] = $transaction;
-		}
-		return $data;
-	}
-    
-	/**
+
+        $data = [];
+        while ($row = $query->fetch()) {
+            if (($t = $this->unitOfWork->getObject(Transaction::class, $row['id'])) !== null) {
+                $data[] = $t;
+                continue;
+            }
+            $transaction = $this->format($row);
+            $this->unitOfWork->addObject($transaction);
+            $data[] = $transaction;
+        }
+
+        return $data;
+    }
+
+    /**
      * @param int $playerId
-	 * @param int $type
-	 * @return array
-	 */
-	public function getPlayerPropositions($playerId, $type)
-	{
-		$query = $this->select('WHERE t.rPlayer = :player_id AND t.type = :type AND t.statement = ' . Transaction::ST_PROPOSED, [
+     * @param int $type
+     *
+     * @return array
+     */
+    public function getPlayerPropositions($playerId, $type)
+    {
+        $query = $this->select('WHERE t.rPlayer = :player_id AND t.type = :type AND t.statement = '.Transaction::ST_PROPOSED, [
             'player_id' => $playerId,
-            'type' => $type
+            'type' => $type,
         ]);
-		
-		$data = [];
-		while($row = $query->fetch()) {
-			if (($t = $this->unitOfWork->getObject(Transaction::class, $row['id'])) !== null) {
-				$data[] = $t;
-				continue;
-			}
-			$transaction = $this->format($row);
-			$this->unitOfWork->addObject($transaction);
-			$data[] = $transaction;
-		}
-		return $data;
-	}
-    
-	/**
+
+        $data = [];
+        while ($row = $query->fetch()) {
+            if (($t = $this->unitOfWork->getObject(Transaction::class, $row['id'])) !== null) {
+                $data[] = $t;
+                continue;
+            }
+            $transaction = $this->format($row);
+            $this->unitOfWork->addObject($transaction);
+            $data[] = $transaction;
+        }
+
+        return $data;
+    }
+
+    /**
      * @param int $placeId
-	 * @return array
-	 */
-	public function getBasePropositions($placeId)
-	{
-		$query = $this->select('WHERE t.rPlace = :place_id AND t.statement = ' . Transaction::ST_PROPOSED, [
-            'place_id' => $placeId
+     *
+     * @return array
+     */
+    public function getBasePropositions($placeId)
+    {
+        $query = $this->select('WHERE t.rPlace = :place_id AND t.statement = '.Transaction::ST_PROPOSED, [
+            'place_id' => $placeId,
         ]);
-		
-		$data = [];
-		while($row = $query->fetch()) {
-			if (($t = $this->unitOfWork->getObject(Transaction::class, $row['id'])) !== null) {
-				$data[] = $t;
-				continue;
-			}
-			$transaction = $this->format($row);
-			$this->unitOfWork->addObject($transaction);
-			$data[] = $transaction;
-		}
-		return $data;
-	}
+
+        $data = [];
+        while ($row = $query->fetch()) {
+            if (($t = $this->unitOfWork->getObject(Transaction::class, $row['id'])) !== null) {
+                $data[] = $t;
+                continue;
+            }
+            $transaction = $this->format($row);
+            $this->unitOfWork->addObject($transaction);
+            $data[] = $transaction;
+        }
+
+        return $data;
+    }
 
     /**
      * @param int $transactionType
+     *
      * @return mixed
      */
-	public function getExchangeRate($transactionType) {
-		$statement = $this->connection->prepare(
+    public function getExchangeRate($transactionType)
+    {
+        $statement = $this->connection->prepare(
             'SELECT currentRate
 			FROM transaction 
 			WHERE type = ? AND statement = ?
 			ORDER BY dValidation DESC 
 			LIMIT 1'
         );
-		$statement->execute(array($transactionType, Transaction::ST_COMPLETED));
-		return $statement->fetch()['currentRate'];
-	}
-    
+        $statement->execute([$transactionType, Transaction::ST_COMPLETED]);
+
+        return $statement->fetch()['currentRate'];
+    }
+
     public function insert($transaction)
     {
-		$statement = $this->connection->prepare('INSERT INTO
+        $statement = $this->connection->prepare('INSERT INTO
 			transaction(rPlayer, rPlace, type, quantity, identifier, price, commercialShipQuantity, statement, dPublication, dValidation, currentRate)
 			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-		$statement->execute(array(
-			$transaction->rPlayer,
-			$transaction->rPlace,
-			$transaction->type,
-			$transaction->quantity,
-			$transaction->identifier,
-			$transaction->price,
-			$transaction->commercialShipQuantity,
-			$transaction->statement,
-			$transaction->dPublication,
-			$transaction->dValidation,
-			$transaction->currentRate
-		));
-		$transaction->id = $this->connection->lastInsertId();
+        $statement->execute([
+            $transaction->rPlayer,
+            $transaction->rPlace,
+            $transaction->type,
+            $transaction->quantity,
+            $transaction->identifier,
+            $transaction->price,
+            $transaction->commercialShipQuantity,
+            $transaction->statement,
+            $transaction->dPublication,
+            $transaction->dValidation,
+            $transaction->currentRate,
+        ]);
+        $transaction->id = $this->connection->lastInsertId();
     }
-    
+
     public function update($transaction)
     {
         $statement = $this->connection->prepare(
@@ -201,7 +213,7 @@ class TransactionRepository extends AbstractRepository
                 dValidation = ?,
                 currentRate = ?
             WHERE id = ?');
-        $statement->execute(array(
+        $statement->execute([
             $transaction->id,
             $transaction->rPlayer,
             $transaction->rPlace,
@@ -214,18 +226,19 @@ class TransactionRepository extends AbstractRepository
             $transaction->dPublication,
             $transaction->dValidation,
             $transaction->currentRate,
-            $transaction->id
-        ));
+            $transaction->id,
+        ]);
     }
-    
+
     public function remove($transaction)
     {
-		$statement = $this->connection->prepare('DELETE FROM transaction WHERE id = ?');
-		$statement->execute(array($transaction->id));
+        $statement = $this->connection->prepare('DELETE FROM transaction WHERE id = ?');
+        $statement->execute([$transaction->id]);
     }
-    
+
     /**
      * @param array $data
+     *
      * @return Transaction
      */
     public function format($data)
@@ -260,7 +273,7 @@ class TransactionRepository extends AbstractRepository
         $transaction->commanderVictory = $data['commanderVictory'];
         $transaction->commanderExperience = $data['commanderExperience'];
         $transaction->commanderAvatar = $data['commanderAvatar'];
-        
+
         return $transaction;
     }
 }

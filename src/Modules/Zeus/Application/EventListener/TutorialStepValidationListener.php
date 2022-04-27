@@ -20,70 +20,69 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class TutorialStepValidationListener
 {
-	public function __construct(
-		private TutorialHelper $tutorialHelper,
-	) {
-		
-	}
-	
-	#[AsEventListener]
-	public function onNewBuildingQueue(NewBuildingQueueEvent $event): void
-	{
-		$player = $event->player;
-		$buildingQueue = $event->buildingQueue;
-		$targetLevel = $buildingQueue->getTargetLevel();
+    public function __construct(
+        private TutorialHelper $tutorialHelper,
+    ) {
+    }
 
-		$data = match ($buildingQueue->getBuildingNumber()) {
-			OrbitalBaseResource::GENERATOR => [
-				TutorialResource::GENERATOR_LEVEL_2 => 2,
-			],
-			OrbitalBaseResource::DOCK1 => [
-				TutorialResource::DOCK1_LEVEL_1 => 1,
-				TutorialResource::DOCK1_LEVEL_6 => 6,
-				TutorialResource::DOCK1_LEVEL_15 => 15,
-			],
-			OrbitalBaseResource::REFINERY => [
-				TutorialResource::REFINERY_LEVEL_3 => 3,
-				TutorialResource::REFINERY_LEVEL_10 => 10,
-				TutorialResource::REFINERY_LEVEL_16 => 16,
-				TutorialResource::REFINERY_LEVEL_20 => 20,
-			],
-			OrbitalBaseResource::STORAGE => [
-				TutorialResource::STORAGE_LEVEL_3 => 3,
-				TutorialResource::STORAGE_LEVEL_8 => 8,
-				TutorialResource::STORAGE_LEVEL_12 => 12,
-			],
-			OrbitalBaseResource::TECHNOSPHERE => [
-				TutorialResource::TECHNOSPHERE_LEVEL_1 => 1,
-				TutorialResource::TECHNOSPHERE_LEVEL_6 => 6,
-			],
-			default => [],
-		};
+    #[AsEventListener]
+    public function onNewBuildingQueue(NewBuildingQueueEvent $event): void
+    {
+        $player = $event->player;
+        $buildingQueue = $event->buildingQueue;
+        $targetLevel = $buildingQueue->getTargetLevel();
 
-		foreach ($data as $tutorialStep => $buildingNeededLevel) {
-			if ($tutorialStep === $player->getStepTutorial() && $targetLevel >= $buildingNeededLevel) {
-				$this->tutorialHelper->setStepDone($player);
+        $data = match ($buildingQueue->getBuildingNumber()) {
+            OrbitalBaseResource::GENERATOR => [
+                TutorialResource::GENERATOR_LEVEL_2 => 2,
+            ],
+            OrbitalBaseResource::DOCK1 => [
+                TutorialResource::DOCK1_LEVEL_1 => 1,
+                TutorialResource::DOCK1_LEVEL_6 => 6,
+                TutorialResource::DOCK1_LEVEL_15 => 15,
+            ],
+            OrbitalBaseResource::REFINERY => [
+                TutorialResource::REFINERY_LEVEL_3 => 3,
+                TutorialResource::REFINERY_LEVEL_10 => 10,
+                TutorialResource::REFINERY_LEVEL_16 => 16,
+                TutorialResource::REFINERY_LEVEL_20 => 20,
+            ],
+            OrbitalBaseResource::STORAGE => [
+                TutorialResource::STORAGE_LEVEL_3 => 3,
+                TutorialResource::STORAGE_LEVEL_8 => 8,
+                TutorialResource::STORAGE_LEVEL_12 => 12,
+            ],
+            OrbitalBaseResource::TECHNOSPHERE => [
+                TutorialResource::TECHNOSPHERE_LEVEL_1 => 1,
+                TutorialResource::TECHNOSPHERE_LEVEL_6 => 6,
+            ],
+            default => [],
+        };
 
-				break;
-			}
-		}
-	}
+        foreach ($data as $tutorialStep => $buildingNeededLevel) {
+            if ($tutorialStep === $player->getStepTutorial() && $targetLevel >= $buildingNeededLevel) {
+                $this->tutorialHelper->setStepDone($player);
 
-	#[AsEventListener(AffectationEvent::class)]
-	#[AsEventListener(LineChangeEvent::class)]
-	#[AsEventListener(PlannedLootEvent::class)]
-	#[AsEventListener(NewCommanderEvent::class)]
-	#[AsEventListener(NewShipQueueEvent::class)]
-	#[AsEventListener(NewTechnologyQueueEvent::class)]
-	#[AsEventListener(UniversityInvestmentsUpdateEvent::class)]
-	#[AsEventListener(SpyEvent::class)]
-	#[AsEventListener(SquadronUpdateEvent::class)]
-	public function validateStep(TutorialEvent $event): void
-	{
-		$player = $event->getTutorialPlayer();
+                break;
+            }
+        }
+    }
 
-		if (!$player->stepDone && $player->stepTutorial === $event->getTutorialStep()) {
-			$this->tutorialHelper->setStepDone($player);
-		}
-	}
+    #[AsEventListener(AffectationEvent::class)]
+    #[AsEventListener(LineChangeEvent::class)]
+    #[AsEventListener(PlannedLootEvent::class)]
+    #[AsEventListener(NewCommanderEvent::class)]
+    #[AsEventListener(NewShipQueueEvent::class)]
+    #[AsEventListener(NewTechnologyQueueEvent::class)]
+    #[AsEventListener(UniversityInvestmentsUpdateEvent::class)]
+    #[AsEventListener(SpyEvent::class)]
+    #[AsEventListener(SquadronUpdateEvent::class)]
+    public function validateStep(TutorialEvent $event): void
+    {
+        $player = $event->getTutorialPlayer();
+
+        if (!$player->stepDone && $player->stepTutorial === $event->getTutorialStep()) {
+            $this->tutorialHelper->setStepDone($player);
+        }
+    }
 }

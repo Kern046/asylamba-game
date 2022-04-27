@@ -7,8 +7,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RefineryController extends AbstractController
 {
-	public function __invoke(): Response
-	{
-		return $this->render('pages/athena/refinery.html.twig');
-	}
+    public function __invoke(): Response
+    {
+        return $this->render('pages/athena/refinery.html.twig');
+    }
 }

@@ -1,296 +1,307 @@
 <?php
 /**
- * Place
+ * Place.
  *
  * @author Jacky Casas
  * @copyright Expansion - le jeu
  *
- * @package Gaia
  * @update 21.04.13
 */
+
 namespace App\Modules\Gaia\Model;
 
-class Place { 
-	# CONSTANTS
-	const TYP_EMPTY = 0;
-	const TYP_MS1 = 1;
-	const TYP_MS2 = 2;
-	const TYP_MS3 = 3;
-	const TYP_ORBITALBASE = 4;
+class Place
+{
+    // CONSTANTS
+    public const TYP_EMPTY = 0;
+    public const TYP_MS1 = 1;
+    public const TYP_MS2 = 2;
+    public const TYP_MS3 = 3;
+    public const TYP_ORBITALBASE = 4;
 
-	const COEFFMAXRESOURCE = 600;
-	const COEFFRESOURCE = 2;
-	const REPOPDANGER = 2;
-	const COEFFPOPRESOURCE = 50;
-	const COEFFDANGER = 5;
+    public const COEFFMAXRESOURCE = 600;
+    public const COEFFRESOURCE = 2;
+    public const REPOPDANGER = 2;
+    public const COEFFPOPRESOURCE = 50;
+    public const COEFFDANGER = 5;
 
-	# typeOfPlace
-	const TERRESTRIAL = 1;
-	const EMPTYZONE = 6; # zone vide
+    // typeOfPlace
+    public const TERRESTRIAL = 1;
+    public const EMPTYZONE = 6; // zone vide
 
-	# CONST PNJ COMMANDER
-	const LEVELMAXVCOMMANDER = 20;
-	const POPMAX 			 = 250;
-	const DANGERMAX 		 = 100;
+    // CONST PNJ COMMANDER
+    public const LEVELMAXVCOMMANDER = 20;
+    public const POPMAX = 250;
+    public const DANGERMAX = 100;
 
-	# CONST RESULT BATTLE
-	const CHANGESUCCESS 						= 10;
-	const CHANGEFAIL							= 11;
-	const CHANGELOST							= 12;
+    // CONST RESULT BATTLE
+    public const CHANGESUCCESS = 10;
+    public const CHANGEFAIL = 11;
+    public const CHANGELOST = 12;
 
-	const LOOTEMPTYSSUCCESS 					= 20;
-	const LOOTEMPTYFAIL							= 21;
-	const LOOTPLAYERWHITBATTLESUCCESS			= 22;
-	const LOOTPLAYERWHITBATTLEFAIL				= 23;
-	const LOOTPLAYERWHITOUTBATTLESUCCESS		= 24;
-	const LOOTLOST								= 27;
+    public const LOOTEMPTYSSUCCESS = 20;
+    public const LOOTEMPTYFAIL = 21;
+    public const LOOTPLAYERWHITBATTLESUCCESS = 22;
+    public const LOOTPLAYERWHITBATTLEFAIL = 23;
+    public const LOOTPLAYERWHITOUTBATTLESUCCESS = 24;
+    public const LOOTLOST = 27;
 
-	const CONQUEREMPTYSSUCCESS 					= 30;
-	const CONQUEREMPTYFAIL						= 31;
-	const CONQUERPLAYERWHITBATTLESUCCESS		= 32;
-	const CONQUERPLAYERWHITBATTLEFAIL			= 33;
-	const CONQUERPLAYERWHITOUTBATTLESUCCESS		= 34;
-	const CONQUERLOST							= 37;
+    public const CONQUEREMPTYSSUCCESS = 30;
+    public const CONQUEREMPTYFAIL = 31;
+    public const CONQUERPLAYERWHITBATTLESUCCESS = 32;
+    public const CONQUERPLAYERWHITBATTLEFAIL = 33;
+    public const CONQUERPLAYERWHITOUTBATTLESUCCESS = 34;
+    public const CONQUERLOST = 37;
 
-	const COMEBACK 								= 40;
+    public const COMEBACK = 40;
 
-	# constante de danger
-	const DNG_CASUAL 							= 10;
-	const DNG_EASY 								= 20;
-	const DNG_MEDIUM 							= 50;
-	const DNG_HARD 								= 75;
-	const DNG_VERY_HARD 						= 100;
+    // constante de danger
+    public const DNG_CASUAL = 10;
+    public const DNG_EASY = 20;
+    public const DNG_MEDIUM = 50;
+    public const DNG_HARD = 75;
+    public const DNG_VERY_HARD = 100;
 
-	// PLACE
-	public $id = 0;
-	public $rPlayer = NULL;
-	public $rSystem = 0;
-	public $typeOfPlace = 0;
-	public $position = 0;
-	public $population = 0;
-	public $coefResources = 0;
-	public $coefHistory = 0;
-	public $resources = 0; 						# de la place si $typeOfBase = 0, sinon de la base
-	public $danger = 0;							# danger actuel de la place (force des flottes rebelles)
-	public $maxDanger = 0;						# danger max de la place (force des flottes rebelles)
-	public $uPlace = '';
+    // PLACE
+    public $id = 0;
+    public $rPlayer = null;
+    public $rSystem = 0;
+    public $typeOfPlace = 0;
+    public $position = 0;
+    public $population = 0;
+    public $coefResources = 0;
+    public $coefHistory = 0;
+    public $resources = 0; 						// de la place si $typeOfBase = 0, sinon de la base
+    public $danger = 0;							// danger actuel de la place (force des flottes rebelles)
+    public $maxDanger = 0;						// danger max de la place (force des flottes rebelles)
+    public $uPlace = '';
 
-	// SYSTEM
-	public $rSector = 0;
-	public $xSystem = 0;
-	public $ySystem = 0;
-	public $typeOfSystem = 0;
+    // SYSTEM
+    public $rSector = 0;
+    public $xSystem = 0;
+    public $ySystem = 0;
+    public $typeOfSystem = 0;
 
-	// SECTOR
-	public $tax = 0;
-	public $sectorColor = 0;
+    // SECTOR
+    public $tax = 0;
+    public $sectorColor = 0;
 
-	// PLAYER
-	public $playerColor = 0;
-	public $playerName = '';
-	public $playerAvatar = '';
-	public $playerStatus = 0;
-	public $playerLevel = 0;
+    // PLAYER
+    public $playerColor = 0;
+    public $playerName = '';
+    public $playerAvatar = '';
+    public $playerStatus = 0;
+    public $playerLevel = 0;
 
-	// BASE
-	public $typeOfBase = 0;
-	public $typeOfOrbitalBase;
-	public $baseName = '';
-	public $points = '';
+    // BASE
+    public $typeOfBase = 0;
+    public $typeOfOrbitalBase;
+    public $baseName = '';
+    public $points = '';
 
-	// OB
-	public $levelCommercialPlateforme = 0;
-	public $levelSpatioport = 0;
-	public $antiSpyInvest = 0;
+    // OB
+    public $levelCommercialPlateforme = 0;
+    public $levelSpatioport = 0;
+    public $antiSpyInvest = 0;
 
-	// COMMANDER 
-	public  $commanders = array();
+    // COMMANDER
+    public $commanders = [];
 
-	//uMode
-	public $uMode = TRUE;
+    // uMode
+    public $uMode = true;
 
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setId($v)
+    public function setId($v)
     {
         $this->id = $v;
-    
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getId()
+    public function getId()
     {
         return $this->id;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setRPlayer($v)
+    public function setRPlayer($v)
     {
         $this->rPlayer = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getRPlayer()
+    public function getRPlayer()
     {
         return $this->rPlayer;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setRSystem($v)
+    public function setRSystem($v)
     {
         $this->rSystem = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getRSystem()
+    public function getRSystem()
     {
         return $this->rSystem;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setTypeOfPlace($v)
+    public function setTypeOfPlace($v)
     {
         $this->typeOfPlace = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getTypeOfPlace()
+    public function getTypeOfPlace()
     {
         return $this->typeOfPlace;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setPosition($v)
+    public function setPosition($v)
     {
         $this->position = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getPosition()
+    public function getPosition()
     {
         return $this->position;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setPopulation($v)
+    public function setPopulation($v)
     {
         $this->population = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getPopulation()
+    public function getPopulation()
     {
         return $this->population;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setCoefResources($v)
+    public function setCoefResources($v)
     {
         $this->coefResources = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getCoefResources()
+    public function getCoefResources()
     {
         return $this->coefResources;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setCoefHistory($v)
+    public function setCoefHistory($v)
     {
         $this->coefHistory = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getCoefHistory()
+    public function getCoefHistory()
     {
         return $this->coefHistory;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setResources($v)
+    public function setResources($v)
     {
         $this->resources = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getResources()
+    public function getResources()
     {
         return $this->resources;
     }
-    
+
     /**
      * @param int $danger
+     *
      * @return $this
      */
     public function setDanger($danger)
     {
         $this->danger = $danger;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
@@ -298,18 +309,19 @@ class Place {
     {
         return $this->danger;
     }
-    
+
     /**
      * @param int $maxDanger
+     *
      * @return $this
      */
     public function setMaxDanger($maxDanger)
     {
         $this->maxDanger = $maxDanger;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
@@ -317,307 +329,323 @@ class Place {
     {
         return $this->maxDanger;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setRSector($v)
+    public function setRSector($v)
     {
         $this->rSector = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getRSector()
+    public function getRSector()
     {
         return $this->rSector;
     }
-    
+
     /**
      * @param float $v
+     *
      * @return $this
      */
-	public function setXSystem($v)
+    public function setXSystem($v)
     {
         $this->xSystem = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return float
      */
-	public function getXSystem()
+    public function getXSystem()
     {
         return $this->xSystem;
     }
-    
+
     /**
      * @param float $v
+     *
      * @return $this
      */
-	public function setYSystem($v)
+    public function setYSystem($v)
     {
         $this->ySystem = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return float
      */
-	public function getYSystem()
+    public function getYSystem()
     {
         return $this->ySystem;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setTypeOfSystem($v)
+    public function setTypeOfSystem($v)
     {
         $this->typeOfSystem = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getTypeOfSystem()
+    public function getTypeOfSystem()
     {
         return $this->typeOfSystem;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setTax($v)
+    public function setTax($v)
     {
         $this->tax = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getTax()
+    public function getTax()
     {
         return $this->tax;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setSectorColor($v)
+    public function setSectorColor($v)
     {
         $this->sectorColor = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getSectorColor()
+    public function getSectorColor()
     {
         return $this->sectorColor;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setPlayerColor($v)
+    public function setPlayerColor($v)
     {
         $this->playerColor = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getPlayerColor()
+    public function getPlayerColor()
     {
         return $this->playerColor;
     }
-    
+
     /**
      * @param string $v
+     *
      * @return $this
      */
-	public function setPlayerName($v)
+    public function setPlayerName($v)
     {
         $this->playerName = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return string
      */
-	public function getPlayerName()
+    public function getPlayerName()
     {
         return $this->playerName;
     }
-    
+
     /**
      * @param string $v
+     *
      * @return $this
      */
-	public function setPlayerAvatar($v)
+    public function setPlayerAvatar($v)
     {
         $this->playerAvatar = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return string
      */
-	public function getPlayerAvatar()
+    public function getPlayerAvatar()
     {
         return $this->playerAvatar;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setPlayerStatus($v)
+    public function setPlayerStatus($v)
     {
         $this->playerStatus = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getPlayerStatus()
+    public function getPlayerStatus()
     {
         return $this->playerStatus;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setTypeOfBase($v)
+    public function setTypeOfBase($v)
     {
         $this->typeOfBase = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getTypeOfBase()
+    public function getTypeOfBase()
     {
         return $this->typeOfBase;
     }
-    
+
     /**
      * @param string $v
+     *
      * @return $this
      */
-	public function setBaseName($v)
+    public function setBaseName($v)
     {
         $this->baseName = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return string
      */
-	public function getBaseName()
+    public function getBaseName()
     {
         return $this->baseName;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setPoints($v)
+    public function setPoints($v)
     {
         $this->points = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getPoints()
+    public function getPoints()
     {
         return $this->points;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setLevelCommercialPlateforme($v)
+    public function setLevelCommercialPlateforme($v)
     {
         $this->levelCommercialPlateforme = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getLevelCommercialPlateforme()
+    public function getLevelCommercialPlateforme()
     {
         return $this->levelCommercialPlateforme;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setLevelSpatioport($v)
+    public function setLevelSpatioport($v)
     {
         $this->levelSpatioport = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getLevelSpatioport()
+    public function getLevelSpatioport()
     {
         return $this->levelSpatioport;
     }
-    
+
     /**
      * @param int $v
+     *
      * @return $this
      */
-	public function setAntiSpyInvest($v)
+    public function setAntiSpyInvest($v)
     {
         $this->antiSpyInvest = $v;
-        
+
         return $this;
     }
-    
+
     /**
      * @return int
      */
-	public function getAntiSpyInvest()
+    public function getAntiSpyInvest()
     {
         return $this->antiSpyInvest;
     }

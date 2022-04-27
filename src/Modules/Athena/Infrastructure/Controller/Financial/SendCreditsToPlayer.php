@@ -19,72 +19,72 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SendCreditsToPlayer extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $sender,
-		CreditTransactionManager $creditTransactionManager,
-		NotificationManager $notificationManager,
-		Parser $parser,
-		PlayerManager $playerManager
-	): Response {
-		$name = $request->request->get('name');
-		$credit = $request->request->getInt('quantity');
-		$text = $request->request->get('text');
+    public function __invoke(
+        Request $request,
+        Player $sender,
+        CreditTransactionManager $creditTransactionManager,
+        NotificationManager $notificationManager,
+        Parser $parser,
+        PlayerManager $playerManager
+    ): Response {
+        $name = $request->request->get('name');
+        $credit = $request->request->getInt('quantity');
+        $text = $request->request->get('text');
 
-		if (null === $name || 0 === $credit) {
-			throw new BadRequestHttpException('Le nom ou le montant est invalide');
-		}
+        if (null === $name || 0 === $credit) {
+            throw new BadRequestHttpException('Le nom ou le montant est invalide');
+        }
 
-		if (500 < strlen($text)) {
-			throw new BadRequestHttpException('Le message ne doit pas dépasser 500 caractères');
-		}
+        if (500 < strlen($text)) {
+            throw new BadRequestHttpException('Le message ne doit pas dépasser 500 caractères');
+        }
 
-		if (null === ($receiver = $playerManager->getByName($name))) {
-			throw new NotFoundHttpException('Le bénéficiaire renseigné n\'existe pas');
-		}
+        if (null === ($receiver = $playerManager->getByName($name))) {
+            throw new NotFoundHttpException('Le bénéficiaire renseigné n\'existe pas');
+        }
 
-		if ($receiver->getId() === $sender->getId()) {
-			return $this->redirectToRoute('financial_transfers');
-		}
+        if ($receiver->getId() === $sender->getId()) {
+            return $this->redirectToRoute('financial_transfers');
+        }
 
-		if ($credit > $sender->getCredit()) {
-			throw new BadRequestHttpException('Vous ne disposez pas du montant nécessaire');
-		}
+        if ($credit > $sender->getCredit()) {
+            throw new BadRequestHttpException('Vous ne disposez pas du montant nécessaire');
+        }
 
-		// input protection
-		$name = $parser->protect($name);
-		$text = $parser->parse($text);
+        // input protection
+        $name = $parser->protect($name);
+        $text = $parser->parse($text);
 
-		$playerManager->decreaseCredit($sender, $credit);
-		$playerManager->increaseCredit($receiver, $credit);
+        $playerManager->decreaseCredit($sender, $credit);
+        $playerManager->increaseCredit($receiver, $credit);
 
-		# create the transaction
-		$ct = new CreditTransaction();
-		$ct->rSender = $sender->getId();
-		$ct->type = CreditTransaction::TYP_PLAYER;
-		$ct->rReceiver = $receiver->id;
-		$ct->amount = $credit;
-		$ct->dTransaction = Utils::now();
-		$ct->comment = $text;
-		$creditTransactionManager->add($ct);
+        // create the transaction
+        $ct = new CreditTransaction();
+        $ct->rSender = $sender->getId();
+        $ct->type = CreditTransaction::TYP_PLAYER;
+        $ct->rReceiver = $receiver->id;
+        $ct->amount = $credit;
+        $ct->dTransaction = Utils::now();
+        $ct->comment = $text;
+        $creditTransactionManager->add($ct);
 
-		$n = new Notification();
-		$n->setRPlayer($receiver->id);
-		$n->setTitle('Réception de crédits');
-		$n->addBeg();
-		$n->addLnk('embassy/player-' . $sender->getId(), $sender->getName());
-		$n->addTxt(' vous a envoyé des crédits');
-		if ($text !== '') {
-			$n->addTxt(' avec le message suivant : ')->addBrk()->addTxt('"' . $text . '"');
-		} else {
-			$n->addTxt('.');
-		}
-		$n->addBoxResource('credit', Format::numberFormat($credit), ($credit == 1 ? 'crédit reçu' : 'crédits reçus'), $this->getParameter('media'));
-		$n->addEnd();
-		$notificationManager->add($n);
+        $n = new Notification();
+        $n->setRPlayer($receiver->id);
+        $n->setTitle('Réception de crédits');
+        $n->addBeg();
+        $n->addLnk('embassy/player-'.$sender->getId(), $sender->getName());
+        $n->addTxt(' vous a envoyé des crédits');
+        if ('' !== $text) {
+            $n->addTxt(' avec le message suivant : ')->addBrk()->addTxt('"'.$text.'"');
+        } else {
+            $n->addTxt('.');
+        }
+        $n->addBoxResource('credit', Format::numberFormat($credit), (1 == $credit ? 'crédit reçu' : 'crédits reçus'), $this->getParameter('media'));
+        $n->addEnd();
+        $notificationManager->add($n);
 
-		$this->addFlash('success', 'Crédits envoyés');
+        $this->addFlash('success', 'Crédits envoyés');
 
-		return $this->redirectToRoute('financial_transfers');
-	}
+        return $this->redirectToRoute('financial_transfers');
+    }
 }
