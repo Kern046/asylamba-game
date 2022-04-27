@@ -12,22 +12,22 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Read extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		NotificationManager $notificationManager,
-		EntityManager $entityManager,
-		int $id,
-	): Response {
-		if (($notification = $notificationManager->get($id)) !== null && $notification->rPlayer === $currentPlayer->getId()) {
-			$notification->setReaded(1);
-			$entityManager->flush($notification);
-		} else {
-			throw new FormException('Cette notification ne vous appartient pas');
-		}
+    public function __invoke(
+        Request $request,
+        Player $currentPlayer,
+        NotificationManager $notificationManager,
+        EntityManager $entityManager,
+        int $id,
+    ): Response {
+        if (($notification = $notificationManager->get($id)) !== null && $notification->rPlayer === $currentPlayer->getId()) {
+            $notification->setReaded(1);
+            $entityManager->flush($notification);
+        } else {
+            throw new FormException('Cette notification ne vous appartient pas');
+        }
 
-		return ($request->isXmlHttpRequest())
-			? new Response('', 204)
-			: $this->redirect($request->headers->get('referer'));
-	}
+        return ($request->isXmlHttpRequest())
+            ? new Response('', 204)
+            : $this->redirect($request->headers->get('referer'));
+    }
 }

@@ -5,63 +5,66 @@ namespace App\Classes\Entity;
 use App\Classes\Database\Database as Connection;
 use Symfony\Contracts\Service\Attribute\Required;
 
-class EntityManager {
+class EntityManager
+{
     protected Connection $connection;
     protected ?UnitOfWork $unitOfWork = null;
     protected array $repositories = [];
 
-    public function __construct(Connection $connection) {
+    public function __construct(Connection $connection)
+    {
         $this->connection = $connection;
     }
 
-	#[Required]
+    #[Required]
     public function init()
     {
         $this->unitOfWork = new UnitOfWork($this);
     }
-	
-	public function beginTransaction(): bool
-	{
-		return $this->connection->beginTransaction();
-	}
-	
-	public function inTransaction(): bool
-	{
-		return $this->connection->inTransaction();
-	}
-	
-	public function commit(): bool
-	{
-		return $this->connection->commit();
-	}
-	
-	public function rollBack(): bool
-	{
-		return $this->connection->rollBack();
-	}
-	
+
+    public function beginTransaction(): bool
+    {
+        return $this->connection->beginTransaction();
+    }
+
+    public function inTransaction(): bool
+    {
+        return $this->connection->inTransaction();
+    }
+
+    public function commit(): bool
+    {
+        return $this->connection->commit();
+    }
+
+    public function rollBack(): bool
+    {
+        return $this->connection->rollBack();
+    }
+
     public function getRepository(string $entityClass): AbstractRepository
     {
         if (!isset($this->repositories[$entityClass])) {
-			$repositoryClass = str_replace('Model', 'Repository', $entityClass) . 'Repository';
+            $repositoryClass = str_replace('Model', 'Repository', $entityClass).'Repository';
             $this->repositories[$entityClass] = new $repositoryClass($this->connection, $this->unitOfWork);
         }
+
         return $this->repositories[$entityClass];
     }
-    
+
     public function persist(object $entity): void
     {
         $this->unitOfWork->addObject($entity, UnitOfWork::METADATA_STAGED);
     }
-    
+
     public function remove(object $entity): void
     {
         $this->unitOfWork->removeObject($entity);
     }
-    
+
     public function flush(mixed $entity = null): void
     {
-        switch(gettype($entity)) {
+        switch (gettype($entity)) {
             case 'NULL':
                 $this->unitOfWork->flushAll();
                 break;
@@ -74,10 +77,10 @@ class EntityManager {
                 break;
         }
     }
-    
+
     public function clear(mixed $entity = null): void
     {
-        switch(gettype($entity)) {
+        switch (gettype($entity)) {
             case 'NULL':
                 $this->unitOfWork->clearAll();
                 break;
@@ -89,14 +92,14 @@ class EntityManager {
                 break;
         }
     }
-    
+
     public function getUnitOfWork(): UnitOfWork
     {
         return $this->unitOfWork;
     }
-	
-	public function getConnection(): Connection
-	{
-		return $this->connection;
-	}
+
+    public function getConnection(): Connection
+    {
+        return $this->connection;
+    }
 }

@@ -6,8 +6,8 @@ use App\Classes\Library\Module;
 
 class HermesModule extends Module
 {
-	public function getName(): string
-	{
-		return 'Hermes';
-	}
+    public function getName(): string
+    {
+        return 'Hermes';
+    }
 }

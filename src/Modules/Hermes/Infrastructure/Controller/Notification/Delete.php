@@ -13,24 +13,24 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Delete extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		NotificationManager $notificationManager,
-		EntityManager $entityManager,
-		int $id,
-	): Response {
-		if (null === ($notification = $notificationManager->get($id))) {
-			throw new NotFoundHttpException('Notification not found');
-		}
-		if ($notification->getRPlayer() !== $currentPlayer->getId()) {
-			throw new AccessDeniedHttpException();
-		}
-		$entityManager->remove($notification);
-		$entityManager->flush($notification);
+    public function __invoke(
+        Request $request,
+        Player $currentPlayer,
+        NotificationManager $notificationManager,
+        EntityManager $entityManager,
+        int $id,
+    ): Response {
+        if (null === ($notification = $notificationManager->get($id))) {
+            throw new NotFoundHttpException('Notification not found');
+        }
+        if ($notification->getRPlayer() !== $currentPlayer->getId()) {
+            throw new AccessDeniedHttpException();
+        }
+        $entityManager->remove($notification);
+        $entityManager->flush($notification);
 
-		return ($request->isXmlHttpRequest())
-			? new Response('', 204)
-			: $this->redirect($request->headers->get('referer'));
-	}
+        return ($request->isXmlHttpRequest())
+            ? new Response('', 204)
+            : $this->redirect($request->headers->get('referer'));
+    }
 }

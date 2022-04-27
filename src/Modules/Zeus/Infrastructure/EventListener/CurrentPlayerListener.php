@@ -12,25 +12,24 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 #[AsEventListener]
 class CurrentPlayerListener
 {
-	public function __construct(
-		private PlayerManager $playerManager,
-		private OrbitalBaseManager $orbitalBaseManager,
-		private CurrentPlayerRegistry $currentPlayerRegistry,
-		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-	) {
+    public function __construct(
+        private PlayerManager $playerManager,
+        private OrbitalBaseManager $orbitalBaseManager,
+        private CurrentPlayerRegistry $currentPlayerRegistry,
+        private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+    ) {
+    }
 
-	}
+    public function __invoke(RequestEvent $event): void
+    {
+        $request = $event->getRequest();
 
-	public function __invoke(RequestEvent $event): void
-	{
-		$request = $event->getRequest();
+        if (!$request->hasPreviousSession() || null === ($playerId = $request->getSession()->get('playerId'))) {
+            return;
+        }
 
-		if (!$request->hasPreviousSession() || null === ($playerId = $request->getSession()->get('playerId'))) {
-			return;
-		}
-
-		$this->currentPlayerRegistry->set($this->playerManager->get($playerId));
-		$this->currentPlayerBasesRegistry->setBases($this->orbitalBaseManager->getPlayerBases($playerId));
-		$this->currentPlayerBasesRegistry->setCurrentBase($request->getSession()->get('playerParams')->get('base'));
-	}
+        $this->currentPlayerRegistry->set($this->playerManager->get($playerId));
+        $this->currentPlayerBasesRegistry->setBases($this->orbitalBaseManager->getPlayerBases($playerId));
+        $this->currentPlayerBasesRegistry->setCurrentBase($request->getSession()->get('playerParams')->get('base'));
+    }
 }

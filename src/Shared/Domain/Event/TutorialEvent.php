@@ -6,7 +6,7 @@ use App\Modules\Zeus\Model\Player;
 
 interface TutorialEvent
 {
-	public function getTutorialPlayer(): Player;
+    public function getTutorialPlayer(): Player;
 
-	public function getTutorialStep(): int|null;
+    public function getTutorialStep(): int|null;
 }

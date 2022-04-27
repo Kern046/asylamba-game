@@ -11,23 +11,23 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UpdateUniversityInvestments extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		PlayerManager $playerManager,
-	): Response {
-		if (0 === ($investment = $request->request->getInt('credit'))) {
-			throw new BadRequestHttpException('Montant invalide');
-		}
+    public function __invoke(
+        Request $request,
+        Player $currentPlayer,
+        PlayerManager $playerManager,
+    ): Response {
+        if (0 === ($investment = $request->request->getInt('credit'))) {
+            throw new BadRequestHttpException('Montant invalide');
+        }
 
-		if (500000 < $investment) {
-			throw new BadRequestHttpException('La limite maximale d\'investissement dans l\'Université est de 500\'000 crédits.');
-		}
+        if (500000 < $investment) {
+            throw new BadRequestHttpException('La limite maximale d\'investissement dans l\'Université est de 500\'000 crédits.');
+        }
 
-		$playerManager->updateUniversityInvestment($currentPlayer, $investment);
+        $playerManager->updateUniversityInvestment($currentPlayer, $investment);
 
-		$this->addFlash('success', 'L\'investissement dans l\'université a été modifié');
+        $this->addFlash('success', 'L\'investissement dans l\'université a été modifié');
 
-		return $this->redirectToRoute('financial_investments');
-	}
+        return $this->redirectToRoute('financial_investments');
+    }
 }

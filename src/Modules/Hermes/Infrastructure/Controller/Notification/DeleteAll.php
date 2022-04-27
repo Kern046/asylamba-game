@@ -10,23 +10,23 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DeleteAll extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		NotificationManager $notificationManager,
-	): Response {
-		$nbr = $notificationManager->deleteByRPlayer($currentPlayer);
+    public function __invoke(
+        Request $request,
+        Player $currentPlayer,
+        NotificationManager $notificationManager,
+    ): Response {
+        $nbr = $notificationManager->deleteByRPlayer($currentPlayer);
 
-		if ($nbr > 1) {
-			$this->addFlash('success', $nbr . ' notifications ont été supprimées.');
-		} else if ($nbr == 1) {
-			$this->addFlash('success', 'Une notification a été supprimée.');
-		} else {
-			$this->addFlash('success', 'Toutes vos notifications ont déjà été supprimées.');
-		}
+        if ($nbr > 1) {
+            $this->addFlash('success', $nbr.' notifications ont été supprimées.');
+        } elseif (1 == $nbr) {
+            $this->addFlash('success', 'Une notification a été supprimée.');
+        } else {
+            $this->addFlash('success', 'Toutes vos notifications ont déjà été supprimées.');
+        }
 
-		return ($request->isXmlHttpRequest())
-			? new Response('', 204)
-			: $this->redirect($request->headers->get('referer'));
-	}
+        return ($request->isXmlHttpRequest())
+            ? new Response('', 204)
+            : $this->redirect($request->headers->get('referer'));
+    }
 }

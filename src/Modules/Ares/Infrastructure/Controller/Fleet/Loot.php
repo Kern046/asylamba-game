@@ -22,121 +22,121 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Loot extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		ColorManager $colorManager,
-		CommanderManager $commanderManager,
-		PlaceManager $placeManager,
-		PlayerManager $playerManager,
-		SectorManager $sectorManager,
-		EntityManager $entityManager,
-		EventDispatcherInterface $eventDispatcher,
-		int $id,
-	): Response {
-		// @TODO simplify this hell
-		$session = $request->getSession();
-		$place = $placeManager->get($request->query->getInt('placeId'));
-		if (null === $place->rPlayer || ($player = $playerManager->get($place->rPlayer)) === null) {
-			if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
-				if ($place !== null) {
-					if ($place->typeOfPlace == Place::TERRESTRIAL) {
-						if ($currentPlayer->getRColor() != $place->getPlayerColor()) {
-							$home = $placeManager->get($commander->getRBase());
+    public function __invoke(
+        Request $request,
+        Player $currentPlayer,
+        ColorManager $colorManager,
+        CommanderManager $commanderManager,
+        PlaceManager $placeManager,
+        PlayerManager $playerManager,
+        SectorManager $sectorManager,
+        EntityManager $entityManager,
+        EventDispatcherInterface $eventDispatcher,
+        int $id,
+    ): Response {
+        // @TODO simplify this hell
+        $session = $request->getSession();
+        $place = $placeManager->get($request->query->getInt('placeId'));
+        if (null === $place->rPlayer || ($player = $playerManager->get($place->rPlayer)) === null) {
+            if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
+                if (null !== $place) {
+                    if (Place::TERRESTRIAL == $place->typeOfPlace) {
+                        if ($currentPlayer->getRColor() != $place->getPlayerColor()) {
+                            $home = $placeManager->get($commander->getRBase());
 
-							$length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-							$duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
+                            $length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
+                            $duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
 
-							if ($commander->getPev() > 0) {
-								if ($commander->statement == Commander::AFFECTED) {
+                            if ($commander->getPev() > 0) {
+                                if (Commander::AFFECTED == $commander->statement) {
+                                    $sector = $sectorManager->get($place->rSector);
 
-									$sector = $sectorManager->get($place->rSector);
+                                    $sectorColor = $colorManager->get($sector->rColor);
+                                    $isFactionSector = $sector->rColor == $commander->playerColor || Color::ALLY == $sectorColor->colorLink[$currentPlayer->getRColor()];
 
-									$sectorColor = $colorManager->get($sector->rColor);
-									$isFactionSector = $sector->rColor == $commander->playerColor || $sectorColor->colorLink[$currentPlayer->getRColor()] == Color::ALLY;
+                                    $commander->destinationPlaceName = $place->baseName;
+                                    if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
+                                        $commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration);
+                                        $this->addFlash('success', 'Flotte envoyée.');
+                                        // tutorial
+                                        $entityManager->flush();
 
-									$commander->destinationPlaceName = $place->baseName;
-									if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
-										$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration) ;
-										$this->addFlash('success', 'Flotte envoyée.');
-										# tutorial
-										$entityManager->flush();
+                                        $eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
 
-										$eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
+                                        if ($request->query->has('redirect')) {
+                                            return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
+                                        }
 
-										if ($request->query->has('redirect')) {
-											return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
-										}
-										return $this->redirect($request->headers->get('referer'));
+                                        return $this->redirect($request->headers->get('referer'));
+                                    } else {
+                                        throw new ErrorException('Cet emplacement est trop éloigné.');
+                                    }
+                                } else {
+                                    throw new ErrorException('Cet officier est déjà en déplacement.');
+                                }
+                            } else {
+                                throw new ErrorException('Vous devez affecter au moins un vaisseau à votre officier.');
+                            }
+                        } else {
+                            throw new ErrorException('Vous ne pouvez pas attaquer un lieu appartenant à votre Faction.');
+                        }
+                    } else {
+                        throw new ErrorException('Ce lieu n\'est pas habité.');
+                    }
+                } else {
+                    throw new ErrorException('Ce lieu n\'existe pas.');
+                }
+            } else {
+                throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
+            }
+        } elseif ($player->level > 1 || $player->statement >= \App\Modules\Zeus\Model\Player::DELETED) {
+            if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
+                if (null !== $place) {
+                    $color = $colorManager->get($currentPlayer->getRColor());
 
-									} else {
-										throw new ErrorException('Cet emplacement est trop éloigné.');
-									}
-								} else {
-									throw new ErrorException('Cet officier est déjà en déplacement.');
-								}
-							} else {
-								throw new ErrorException('Vous devez affecter au moins un vaisseau à votre officier.');
-							}
-						} else {
-							throw new ErrorException('Vous ne pouvez pas attaquer un lieu appartenant à votre Faction.');
-						}
-					} else {
-						throw new ErrorException('Ce lieu n\'est pas habité.');
-					}
-				} else {
-					throw new ErrorException('Ce lieu n\'existe pas.');
-				}
-			} else {
-				throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
-			}
-		} elseif ($player->level > 1 || $player->statement >= \App\Modules\Zeus\Model\Player::DELETED) {
-			if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
-				if ($place !== null) {
-					$color = $colorManager->get($currentPlayer->getRColor());
+                    if ($currentPlayer->getRColor() != $place->getPlayerColor() && Color::ALLY != $color->colorLink[$player->rColor]) {
+                        $home = $placeManager->get($commander->getRBase());
 
-					if ($currentPlayer->getRColor() != $place->getPlayerColor() && $color->colorLink[$player->rColor] != Color::ALLY) {
-						$home = $placeManager->get($commander->getRBase());
+                        $length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
+                        $duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
 
-						$length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-						$duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
+                        if ($commander->getPev() > 0) {
+                            $sector = $sectorManager->get($place->rSector);
+                            $sectorColor = $colorManager->get($sector->rColor);
 
-						if ($commander->getPev() > 0) {
-							$sector = $sectorManager->get($place->rSector);
-							$sectorColor = $colorManager->get($sector->rColor);
+                            $isFactionSector = $sector->rColor == $commander->playerColor || Color::ALLY == $sectorColor->colorLink[$currentPlayer->getRColor()];
 
-							$isFactionSector = $sector->rColor == $commander->playerColor || $sectorColor->colorLink[$currentPlayer->getRColor()] == Color::ALLY;
+                            $commander->destinationPlaceName = $place->baseName;
+                            if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
+                                $commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration);
+                                $this->addFlash('success', 'Flotte envoyée.');
 
-							$commander->destinationPlaceName = $place->baseName;
-							if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
-								$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration) ;
-								$this->addFlash('success', 'Flotte envoyée.');
+                                $entityManager->flush();
 
-								$entityManager->flush();
+                                $eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
 
-								$eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
+                                if ($request->query->has('redirect')) {
+                                    return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
+                                }
 
-								if ($request->query->has('redirect')) {
-									return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
-								}
-								return $this->redirect($request->headers->get('referer'));
-							} else {
-								throw new ErrorException('Ce lieu est trop éloigné.');
-							}
-						} else {
-							throw new ErrorException('Vous devez affecter au moins un vaisseau à votre officier.');
-						}
-					} else {
-						throw new ErrorException('Vous ne pouvez pas attaquer un lieu appartenant à votre Faction ou d\'une faction alliée.');
-					}
-				} else {
-					throw new ErrorException('Ce lieu n\'existe pas.');
-				}
-			} else {
-				throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
-			}
-		} else {
-			throw new ErrorException('Vous ne pouvez pas piller un joueur de niveau 1.');
-		}
-	}
+                                return $this->redirect($request->headers->get('referer'));
+                            } else {
+                                throw new ErrorException('Ce lieu est trop éloigné.');
+                            }
+                        } else {
+                            throw new ErrorException('Vous devez affecter au moins un vaisseau à votre officier.');
+                        }
+                    } else {
+                        throw new ErrorException('Vous ne pouvez pas attaquer un lieu appartenant à votre Faction ou d\'une faction alliée.');
+                    }
+                } else {
+                    throw new ErrorException('Ce lieu n\'existe pas.');
+                }
+            } else {
+                throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
+            }
+        } else {
+            throw new ErrorException('Vous ne pouvez pas piller un joueur de niveau 1.');
+        }
+    }
 }

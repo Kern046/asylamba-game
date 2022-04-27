@@ -12,27 +12,26 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class SectorNameResultHandler implements MessageHandlerInterface
 {
-	public function __construct(
-		protected ColorManager $colorManager,
-		protected EntityManager $entityManager,
-		protected LawManager $lawManager,
-		protected SectorManager $sectorManager,
-	) {
+    public function __construct(
+        protected ColorManager $colorManager,
+        protected EntityManager $entityManager,
+        protected LawManager $lawManager,
+        protected SectorManager $sectorManager,
+    ) {
+    }
 
-	}
+    public function __invoke(SectorNameResultMessage $message): void
+    {
+        $law = $this->lawManager->get($message->getLawId());
+        $color = $this->colorManager->get($law->getFactionId());
+        $sector = $this->sectorManager->get($law->options['rSector']);
 
-	public function __invoke(SectorNameResultMessage $message): void
-	{
-		$law = $this->lawManager->get($message->getLawId());
-		$color = $this->colorManager->get($law->getFactionId());
-		$sector = $this->sectorManager->get($law->options['rSector']);
+        if ($sector->rColor == $color->id) {
+            $sector->name = $law->options['name'];
+        }
+        $law->statement = Law::OBSOLETE;
 
-		if ($sector->rColor == $color->id) {
-			$sector->name = $law->options['name'];
-		}
-		$law->statement = Law::OBSOLETE;
-
-		$this->entityManager->flush($sector);
-		$this->entityManager->flush($law);
-	}
+        $this->entityManager->flush($sector);
+        $this->entityManager->flush($law);
+    }
 }

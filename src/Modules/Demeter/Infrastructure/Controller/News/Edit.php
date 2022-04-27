@@ -12,30 +12,30 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Edit extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		FactionNewsManager $factionNewsManager,
-		int $id,
-	): Response {
-		$content = $request->request->get('content');
-		$title = $request->request->get('title');
+    public function __invoke(
+        Request $request,
+        Player $currentPlayer,
+        FactionNewsManager $factionNewsManager,
+        int $id,
+    ): Response {
+        $content = $request->request->get('content');
+        $title = $request->request->get('title');
 
-		if ($title !== null && $content !== null) {
-			if (($factionNew = $factionNewsManager->get($id)) !== null) {
-				if ($currentPlayer->isGovernmentMember() && $currentPlayer->getRColor() === $factionNew->rFaction) {
-					$factionNew->title = $title;
-					$factionNewsManager->edit($factionNew, $content);
+        if (null !== $title && null !== $content) {
+            if (($factionNew = $factionNewsManager->get($id)) !== null) {
+                if ($currentPlayer->isGovernmentMember() && $currentPlayer->getRColor() === $factionNew->rFaction) {
+                    $factionNew->title = $title;
+                    $factionNewsManager->edit($factionNew, $content);
 
-					return $this->redirect($request->headers->get('referer'));
-				} else {
-					throw new ErrorException('Vous n\'avez pas le droit pour créer une annonce.');
-				}
-			} else {
-				throw new FormException('Cette annonce n\'existe pas.');
-			}
-		} else {
-			throw new FormException('Manque d\'information.');
-		}
-	}
+                    return $this->redirect($request->headers->get('referer'));
+                } else {
+                    throw new ErrorException('Vous n\'avez pas le droit pour créer une annonce.');
+                }
+            } else {
+                throw new FormException('Cette annonce n\'existe pas.');
+            }
+        } else {
+            throw new FormException('Manque d\'information.');
+        }
+    }
 }

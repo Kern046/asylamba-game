@@ -6,57 +6,57 @@ use App\Modules\Athena\Model\OrbitalBase;
 
 class CurrentPlayerBasesRegistry
 {
-	private array $bases = [];
+    private array $bases = [];
 
-	private int $currentBaseId = 0;
+    private int $currentBaseId = 0;
 
-	/**
-	 * @param list<OrbitalBase> $bases
-	 */
-	public function setBases(array $bases): void
-	{
-		$this->bases = array_reduce($bases, function (array $acc, OrbitalBase $orbitalBase) {
-			$acc[$orbitalBase->getId()] = $orbitalBase;
+    /**
+     * @param list<OrbitalBase> $bases
+     */
+    public function setBases(array $bases): void
+    {
+        $this->bases = array_reduce($bases, function (array $acc, OrbitalBase $orbitalBase) {
+            $acc[$orbitalBase->getId()] = $orbitalBase;
 
-			return $acc;
-		}, []);
-	}
+            return $acc;
+        }, []);
+    }
 
-	public function get(int $baseId): OrbitalBase|null
-	{
-		return $this->bases[$baseId] ?? null;
-	}
+    public function get(int $baseId): OrbitalBase|null
+    {
+        return $this->bases[$baseId] ?? null;
+    }
 
-	public function current(): OrbitalBase
-	{
-		return $this->bases[$this->currentBaseId];
-	}
+    public function current(): OrbitalBase
+    {
+        return $this->bases[$this->currentBaseId];
+    }
 
-	public function first(): OrbitalBase
-	{
-		return array_values($this->bases)[0];
-	}
+    public function first(): OrbitalBase
+    {
+        return array_values($this->bases)[0];
+    }
 
-	public function next(): OrbitalBase|null
-	{
-		$currentIndex = array_search($this->currentBaseId, array_keys($this->bases));
+    public function next(): OrbitalBase|null
+    {
+        $currentIndex = array_search($this->currentBaseId, array_keys($this->bases));
 
-		return array_values($this->bases)[$currentIndex + 1] ?? null;
-	}
+        return array_values($this->bases)[$currentIndex + 1] ?? null;
+    }
 
-	public function setCurrentBase(int $currentBaseId): void
-	{
-		$this->currentBaseId = $currentBaseId;
-	}
+    public function setCurrentBase(int $currentBaseId): void
+    {
+        $this->currentBaseId = $currentBaseId;
+    }
 
-	public function count(): int
-	{
-		return count($this->bases);
-	}
+    public function count(): int
+    {
+        return count($this->bases);
+    }
 
-	/** @return list<OrbitalBase> */
-	public function all(): array
-	{
-		return $this->bases;
-	}
+    /** @return list<OrbitalBase> */
+    public function all(): array
+    {
+        return $this->bases;
+    }
 }

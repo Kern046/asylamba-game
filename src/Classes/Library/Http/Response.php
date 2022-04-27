@@ -15,21 +15,21 @@ class Response
     protected array $templates = [];
     protected string $body;
     public ParameterBag $headers;
-    /** @var array<int, string> **/
+    /** @var array<int, string> * */
     protected array $statuses = [
         self::STATUS_OK => 'OK',
-		self::STATUS_REDIRECT => 'Found',
-		self::STATUS_NOT_FOUND => 'Not Found',
-		self::STATUS_INTERNAL_SERVER_ERROR => 'Internal Server Error'
+        self::STATUS_REDIRECT => 'Found',
+        self::STATUS_NOT_FOUND => 'Not Found',
+        self::STATUS_INTERNAL_SERVER_ERROR => 'Internal Server Error',
     ];
-	
-	const STATUS_OK = 200;
-	const STATUS_REDIRECT = 302;
-	const STATUS_NOT_FOUND = 404;
-	const STATUS_INTERNAL_SERVER_ERROR = 500;
+
+    public const STATUS_OK = 200;
+    public const STATUS_REDIRECT = 302;
+    public const STATUS_NOT_FOUND = 404;
+    public const STATUS_INTERNAL_SERVER_ERROR = 500;
 
     public function __construct()
-	{
+    {
         $this->headers = new ParameterBag();
     }
 
@@ -37,12 +37,12 @@ class Response
     {
         $this->protocol = $protocol;
     }
-    
+
     public function getProtocol(): string
     {
         return $this->protocol;
     }
-    
+
     public function setStatusCode(int $statusCode): void
     {
         $this->statusCode = $statusCode;
@@ -74,9 +74,9 @@ class Response
     }
 
     public function redirect(string $path): void
-	{
+    {
         $this->redirect = $path;
-		$this->statusCode = self::STATUS_REDIRECT;
+        $this->statusCode = self::STATUS_REDIRECT;
     }
 
     public function getRedirect(): ?string
@@ -108,17 +108,18 @@ class Response
     {
         return $this->statuses[$this->statusCode];
     }
-	
-	public function send(): string
-	{
-		$this->headers->set('Content-Length', strlen($this->getBody()));
-		$message = "{$this->protocol} {$this->statusCode} {$this->statuses[$this->statusCode]}\n";
-		
-		foreach ($this->headers->all() as $header => $value) {
-			$message .= "$header: $value\n";
-		}
-		$message .= "\n";
-		$message .= $this->getBody();
-		return $message;
-	}
+
+    public function send(): string
+    {
+        $this->headers->set('Content-Length', strlen($this->getBody()));
+        $message = "{$this->protocol} {$this->statusCode} {$this->statuses[$this->statusCode]}\n";
+
+        foreach ($this->headers->all() as $header => $value) {
+            $message .= "$header: $value\n";
+        }
+        $message .= "\n";
+        $message .= $this->getBody();
+
+        return $message;
+    }
 }

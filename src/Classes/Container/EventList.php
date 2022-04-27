@@ -2,52 +2,61 @@
 
 namespace App\Classes\Container;
 
-class EventList {
-    # contient des ArrayList('date', 'eventType', 'eventId')
-    # format de la date : 'AAAA-MM-JJ HH:MM:SS' - SQL FORMAT
-    private $events = array(); 
+class EventList
+{
+    // contient des ArrayList('date', 'eventType', 'eventId')
+    // format de la date : 'AAAA-MM-JJ HH:MM:SS' - SQL FORMAT
+    private $events = [];
 
     /**
      * @return int
      */
-    public function size() {
+    public function size()
+    {
         return count($this->events);
     }
 
     /**
      * @param int $index
+     *
      * @return ArrayList
      */
-    public function get($index = 0) {
+    public function get($index = 0)
+    {
         if (isset($this->events[$index])) {
             return $this->events[$index];
         }
+
         return null;
     }
 
     /**
      * @param string $date
+     *
      * @return \App\Classes\Container\StackList
      */
-    public function getPastEvents($date) {
+    public function getPastEvents($date)
+    {
         $past = new StackList();
-        foreach($this->events AS $e) {
+        foreach ($this->events as $e) {
             if ($e->get('date') <= $date) {
                 $past->append($e);
             }
         }
+
         return $past;
     }
 
     /**
      * @param string $date
      */
-    public function clearPastEvents($date) {
+    public function clearPastEvents($date)
+    {
         $size = $this->size() - 1;
-        for ($i = $size; $i >= 0; $i--) {
+        for ($i = $size; $i >= 0; --$i) {
             if ($this->events[$i]->get('date') <= $date) {
                 $this->remove($i);
-                $i--;
+                --$i;
             }
         }
     }
@@ -58,7 +67,8 @@ class EventList {
      * @param string $eventId
      * @param string $eventInfo
      */
-    public function add($date, $eventType, $eventId, $eventInfo = NULL) {
+    public function add($date, $eventType, $eventId, $eventInfo = null)
+    {
         $event = new ArrayList();
         $event->add('date', $date);
         $event->add('eventType', $eventType);
@@ -66,19 +76,19 @@ class EventList {
         $event->add('eventInfo', $eventInfo);
 
         $index = 0;
-        $found = FALSE;
-        foreach($this->events AS $e) {
+        $found = false;
+        foreach ($this->events as $e) {
             if ($e->get('date') > $date) {
-                $found = TRUE;
+                $found = true;
                 break;
             }
-            $index++;
+            ++$index;
         }
         if ($found) {
-                $begin = array_slice($this->events, 0, $index);
-                $begin[] = $event;
-                $end = array_slice($this->events, $index);
-                $this->events = array_merge($begin, $end);
+            $begin = array_slice($this->events, 0, $index);
+            $begin[] = $event;
+            $end = array_slice($this->events, $index);
+            $this->events = array_merge($begin, $end);
         } else {
             $this->events[] = $event;
         }
@@ -86,9 +96,11 @@ class EventList {
 
     /**
      * @param int $index
-     * @return boolean
+     *
+     * @return bool
      */
-    public function remove($index) {
+    public function remove($index)
+    {
         if ($index < 0) {
             $index = count($this->events) + $index;
         }
@@ -96,11 +108,12 @@ class EventList {
             return false;
         }
         $begin = array_slice($this->events, 0, $index);
-        $end = array_slice($this->events, $index+1);
+        $end = array_slice($this->events, $index + 1);
         $this->events = array_merge($begin, $end);
     }
 
-    public function clear() {
-        $this->events = array();
+    public function clear()
+    {
+        $this->events = [];
     }
 }

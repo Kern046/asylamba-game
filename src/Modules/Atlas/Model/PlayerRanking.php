@@ -1,126 +1,127 @@
 <?php
 
 /**
- * PlayerRanking
+ * PlayerRanking.
  *
  * @author Jacky Casas
  * @copyright Asylamba
  *
- * @package Atlas
  * @update 04.06.14
  */
 
 namespace App\Modules\Atlas\Model;
 
-use App\Classes\Library\Format;
-use App\Modules\Demeter\Resource\ColorResource;
-
 use App\Modules\Zeus\Model\Player;
 
-class PlayerRanking {
-	# set number of player before you (remove 1) in rank view
-	const PREV = 4;
-	# set number of player after you in rank view
-	const NEXT = 8;
-	# PREV + NEXT
-	const STEP = 12;
-	# set number of player on ajax load page
-	const PAGE = 10;
-	
-	# attributes
-	public $id; 
-	public $rRanking;
-	public $rPlayer; 
-	
-	/** @var Player **/
-	protected $player;
+class PlayerRanking
+{
+    // set number of player before you (remove 1) in rank view
+    public const PREV = 4;
+    // set number of player after you in rank view
+    public const NEXT = 8;
+    // PREV + NEXT
+    public const STEP = 12;
+    // set number of player on ajax load page
+    public const PAGE = 10;
 
-	public $general;			# pts des bases + flottes + commandants
-	public $generalPosition;
-	public $generalVariation;
+    // attributes
+    public $id;
+    public $rRanking;
+    public $rPlayer;
 
-	public $experience; 		# experience
-	public $experiencePosition;
-	public $experienceVariation;
+    /** @var Player * */
+    protected $player;
 
-	public $butcher;			# destroyedPEV - lostPEV
-	public $butcherDestroyedPEV;
-	public $butcherLostPEV;
-	public $butcherPosition;
-	public $butcherVariation;
+    public $general;			// pts des bases + flottes + commandants
+    public $generalPosition;
+    public $generalVariation;
 
-	public $trader;				# revenu total des routes
-	public $traderPosition;
-	public $traderVariation;
+    public $experience; 		// experience
+    public $experiencePosition;
+    public $experienceVariation;
 
-	public $fight; 				# victoires - défaites 
-	public $victories;
-	public $defeat;
-	public $fightPosition;
-	public $fightVariation;
+    public $butcher;			// destroyedPEV - lostPEV
+    public $butcherDestroyedPEV;
+    public $butcherLostPEV;
+    public $butcherPosition;
+    public $butcherVariation;
 
-	public $armies;				# nb de pev total flotte + hangar
-	public $armiesPosition;
-	public $armiesVariation;
+    public $trader;				// revenu total des routes
+    public $traderPosition;
+    public $traderVariation;
 
-	public $resources; 			# production de ressources par relève (on peut ajouter les recyclages p-e)
-	public $resourcesPosition;
-	public $resourcesVariation;
+    public $fight; 				// victoires - défaites
+    public $victories;
+    public $defeat;
+    public $fightPosition;
+    public $fightVariation;
 
-	# additional attributes
-	public $color;
-	public $name;
-	public $avatar;
-	public $status;
-	
-	/**
-	 * @param int $id
-	 * @return PlayerRanking
-	 */
-	public function setId($id)
-	{
-		$this->id = $id;
-		
-		return $this;
-	}
+    public $armies;				// nb de pev total flotte + hangar
+    public $armiesPosition;
+    public $armiesVariation;
 
-	public function getId() { return $this->id; }
+    public $resources; 			// production de ressources par relève (on peut ajouter les recyclages p-e)
+    public $resourcesPosition;
+    public $resourcesVariation;
 
-	/**
-	 * @param Player $player
-	 * @return PlayerRanking
-	 */
-	public function setPlayer(Player $player)
-	{
-		$this->player = $player;
-		
-		return $this;
-	}
-	
-	/**
-	 * @return Player
-	 */
-	public function getPlayer()
-	{
-		return $this->player;
-	}
-	
-	/**
-	 * @param int $general
-	 * @return PlayerRanking
-	 */
-	public function setGeneral($general)
-	{
-		$this->general = $general;
-		
-		return $this;
-	}
-	
-	/**
-	 * @return int
-	 */
-	public function getGeneral()
-	{
-		return $this->general;
-	}
+    // additional attributes
+    public $color;
+    public $name;
+    public $avatar;
+    public $status;
+
+    /**
+     * @param int $id
+     *
+     * @return PlayerRanking
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return PlayerRanking
+     */
+    public function setPlayer(Player $player)
+    {
+        $this->player = $player;
+
+        return $this;
+    }
+
+    /**
+     * @return Player
+     */
+    public function getPlayer()
+    {
+        return $this->player;
+    }
+
+    /**
+     * @param int $general
+     *
+     * @return PlayerRanking
+     */
+    public function setGeneral($general)
+    {
+        $this->general = $general;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGeneral()
+    {
+        return $this->general;
+    }
 }

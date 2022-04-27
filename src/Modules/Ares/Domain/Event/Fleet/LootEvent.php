@@ -8,32 +8,31 @@ use App\Shared\Domain\Event\TrackingEvent;
 
 class LootEvent implements TrackingEvent
 {
-	public function __construct(
-		public readonly Commander $commander,
-		public readonly Player|null $defender,
-	) {
+    public function __construct(
+        public readonly Commander $commander,
+        public readonly Player|null $defender,
+    ) {
+    }
 
-	}
+    public function getTrackingPeopleId(): int
+    {
+        return $this->commander->rPlayer;
+    }
 
-	public function getTrackingPeopleId(): int
-	{
-		return $this->commander->rPlayer;
-	}
+    public function getTrackingEventName(): string
+    {
+        return 'Loot';
+    }
 
-	public function getTrackingEventName(): string
-	{
-		return 'Loot';
-	}
-
-	public function getTrackingData(): array
-	{
-		return [
-			'commander_id' => $this->commander->id,
-			'origin_place_id' => $this->commander->rStartPlace,
-			'target_place_id' => $this->commander->rDestinationPlace,
-			'is_victorious' => $this->commander->isVictorious(),
-			'resources' => $this->commander->resources,
-			'defender_id' => $this->defender?->id,
-		];
-	}
+    public function getTrackingData(): array
+    {
+        return [
+            'commander_id' => $this->commander->id,
+            'origin_place_id' => $this->commander->rStartPlace,
+            'target_place_id' => $this->commander->rDestinationPlace,
+            'is_victorious' => $this->commander->isVictorious(),
+            'resources' => $this->commander->resources,
+            'defender_id' => $this->defender?->id,
+        ];
+    }
 }

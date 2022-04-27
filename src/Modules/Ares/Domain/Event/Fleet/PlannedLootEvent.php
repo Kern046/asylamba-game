@@ -11,40 +11,39 @@ use App\Shared\Domain\Event\TutorialEvent;
 
 class PlannedLootEvent implements TutorialEvent, TrackingEvent
 {
-	public function __construct(
-		public readonly Place $place,
-		public readonly Commander $commander,
-		public readonly Player $attacker,
-	) {
+    public function __construct(
+        public readonly Place $place,
+        public readonly Commander $commander,
+        public readonly Player $attacker,
+    ) {
+    }
 
-	}
+    public function getTutorialPlayer(): Player
+    {
+        return $this->attacker;
+    }
 
-	public function getTutorialPlayer(): Player
-	{
-		return $this->attacker;
-	}
+    public function getTutorialStep(): int|null
+    {
+        return TutorialResource::LOOT_PLANET;
+    }
 
-	public function getTutorialStep(): int|null
-	{
-		return TutorialResource::LOOT_PLANET;
-	}
+    public function getTrackingPeopleId(): int
+    {
+        return $this->attacker->id;
+    }
 
-	public function getTrackingPeopleId(): int
-	{
-		return $this->attacker->id;
-	}
+    public function getTrackingEventName(): string
+    {
+        return 'Planned Loot Mission';
+    }
 
-	public function getTrackingEventName(): string
-	{
-		return 'Planned Loot Mission';
-	}
-
-	public function getTrackingData(): array
-	{
-		return [
-			'start_place_id' => $this->commander->rStartPlace,
-			'destination_place_id' => $this->commander->rDestinationPlace,
-			'commander_id' => $this->commander->id,
-		];
-	}
+    public function getTrackingData(): array
+    {
+        return [
+            'start_place_id' => $this->commander->rStartPlace,
+            'destination_place_id' => $this->commander->rDestinationPlace,
+            'commander_id' => $this->commander->id,
+        ];
+    }
 }

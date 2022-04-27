@@ -10,38 +10,37 @@ use App\Shared\Domain\Event\TutorialEvent;
 
 class NewCommanderEvent implements TutorialEvent, TrackingEvent
 {
-	public function __construct(
-		public readonly Commander $commander,
-		public readonly Player $player,
-	) {
+    public function __construct(
+        public readonly Commander $commander,
+        public readonly Player $player,
+    ) {
+    }
 
-	}
+    public function getTutorialPlayer(): Player
+    {
+        return $this->player;
+    }
 
-	public function getTutorialPlayer(): Player
-	{
-		return $this->player;
-	}
+    public function getTutorialStep(): int|null
+    {
+        return TutorialResource::CREATE_COMMANDER;
+    }
 
-	public function getTutorialStep(): int|null
-	{
-		return TutorialResource::CREATE_COMMANDER;
-	}
+    public function getTrackingPeopleId(): int
+    {
+        return $this->commander->rPlayer;
+    }
 
-	public function getTrackingPeopleId(): int
-	{
-		return $this->commander->rPlayer;
-	}
+    public function getTrackingEventName(): string
+    {
+        return 'Commander Recruited';
+    }
 
-	public function getTrackingEventName(): string
-	{
-		return 'Commander Recruited';
-	}
-
-	public function getTrackingData(): array
-	{
-		return [
-			'commander_id' => $this->commander->id,
-			'place_id' => $this->commander->rBase,
-		];
-	}
+    public function getTrackingData(): array
+    {
+        return [
+            'commander_id' => $this->commander->id,
+            'place_id' => $this->commander->rBase,
+        ];
+    }
 }
