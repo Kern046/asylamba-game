@@ -16,8 +16,10 @@ use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,6 +29,7 @@ class BuildShips extends AbstractController
     public function __invoke(
         Request $request,
         Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         OrbitalBase $currentBase,
         ColorManager $colorManager,
         OrbitalBaseManager $orbitalBaseManager,
@@ -68,16 +71,16 @@ class BuildShips extends AbstractController
                     $time = ShipResource::getInfo($ship, 'time') * $quantity;
                     switch ($dockType) {
                         case 1:
-                            $playerBonus = PlayerBonus::DOCK1_SPEED;
+                            $playerBonus = PlayerBonusId::DOCK1_SPEED;
                             break;
                         case 2:
-                            $playerBonus = PlayerBonus::DOCK2_SPEED;
+                            $playerBonus = PlayerBonusId::DOCK2_SPEED;
                             break;
                         case 3:
-                            $playerBonus = PlayerBonus::DOCK3_SPEED;
+                            $playerBonus = PlayerBonusId::DOCK3_SPEED;
                             break;
                     }
-                    $bonus = $time * $session->get('playerBonus')->get($playerBonus) / 100;
+                    $bonus = $time * $currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get($playerBonus) / 100;
 
                     $sq->dStart = (0 === $nbShipQueues) ? Utils::now() : $shipQueues[$nbShipQueues - 1]->dEnd;
                     $sq->dEnd = Utils::addSecondsToDate($sq->dStart, round($time - $bonus));

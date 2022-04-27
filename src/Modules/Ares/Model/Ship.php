@@ -13,6 +13,7 @@ namespace App\Modules\Ares\Model;
 
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 
 class Ship
 {
@@ -49,41 +50,41 @@ class Ship
         switch (ShipResource::getInfo($nbrName, 'class')) {
             case 0:
                 if (true == $isAttacker) {
-                    $this->speed += round($this->speed * $bonus->get(PlayerBonus::FIGHTER_SPEED) / 100);
+                    $this->speed += round($this->speed * $bonus->get(PlayerBonusId::FIGHTER_SPEED) / 100);
                     for ($i = 0; $i < $this->nbrAttack; ++$i) {
-                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonus::FIGHTER_ATTACK) / 100);
+                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonusId::FIGHTER_ATTACK) / 100);
                     }
-                    $this->defense += round($this->defense * $bonus->get(PlayerBonus::FIGHTER_DEFENSE) / 100);
+                    $this->defense += round($this->defense * $bonus->get(PlayerBonusId::FIGHTER_DEFENSE) / 100);
                 }
             break;
 
             case 1:
                 if (true == $isAttacker) {
-                    $this->speed += round($this->speed * $bonus->get(PlayerBonus::CORVETTE_SPEED) / 100);
+                    $this->speed += round($this->speed * $bonus->get(PlayerBonusId::CORVETTE_SPEED) / 100);
                     for ($i = 0; $i < $this->nbrAttack; ++$i) {
-                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonus::CORVETTE_ATTACK) / 100);
+                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonusId::CORVETTE_ATTACK) / 100);
                     }
-                    $this->defense += round($this->defense * $bonus->get(PlayerBonus::CORVETTE_DEFENSE) / 100);
+                    $this->defense += round($this->defense * $bonus->get(PlayerBonusId::CORVETTE_DEFENSE) / 100);
                 }
             break;
 
             case 2:
                 if (true == $isAttacker) {
-                    $this->speed += round($this->speed * $bonus->get(PlayerBonus::FRIGATE_SPEED) / 100);
+                    $this->speed += round($this->speed * $bonus->get(PlayerBonusId::FRIGATE_SPEED) / 100);
                     for ($i = 0; $i < $this->nbrAttack; ++$i) {
-                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonus::FRIGATE_ATTACK) / 100);
+                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonusId::FRIGATE_ATTACK) / 100);
                     }
-                    $this->defense += round($this->defense * $bonus->get(PlayerBonus::FRIGATE_DEFENSE) / 100);
+                    $this->defense += round($this->defense * $bonus->get(PlayerBonusId::FRIGATE_DEFENSE) / 100);
                 }
             break;
 
             case 3:
                 if (true == $isAttacker) {
-                    $this->speed += round($this->speed * $bonus->get(PlayerBonus::DESTROYER_SPEED) / 100);
+                    $this->speed += round($this->speed * $bonus->get(PlayerBonusId::DESTROYER_SPEED) / 100);
                     for ($i = 0; $i < $this->nbrAttack; ++$i) {
-                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonus::DESTROYER_ATTACK) / 100);
+                        $this->attack[$i] += round($this->attack[$i] * $bonus->get(PlayerBonusId::DESTROYER_ATTACK) / 100);
                     }
-                    $this->defense += round($this->defense * $bonus->get(PlayerBonus::DESTROYER_DEFENSE) / 100);
+                    $this->defense += round($this->defense * $bonus->get(PlayerBonusId::DESTROYER_DEFENSE) / 100);
                 }
             break;
         }

@@ -15,8 +15,8 @@ use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Gaia\Resource\SystemResource;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -24,7 +24,7 @@ use Twig\TwigFunction;
 class MapExtension extends AbstractExtension
 {
     public function __construct(
-        protected RequestStack $requestStack,
+		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         protected CommercialRouteManager $commercialRouteManager,
         protected PlaceManager $placeManager,
     ) {
@@ -51,12 +51,12 @@ class MapExtension extends AbstractExtension
                 $place->position,
                 $place->xSystem,
                 $place->ySystem,
-                $this->requestStack->getSession()->get('playerBonus'),
+                $this->currentPlayerBonusRegistry->getPlayerBonus(),
             )),
             new TwigFunction('get_place_type', fn (string $type) => Game::convertPlaceType($type)),
             new TwigFunction('get_system_info', fn (int $systemType, string $info) => SystemResource::getInfo($systemType, $info)),
             new TwigFunction('get_place_distance', fn (OrbitalBase $defaultBase, Place $place) => Game::getDistance($defaultBase->xSystem, $place->xSystem, $defaultBase->ySystem, $place->ySystem)),
-            new TwigFunction('get_max_travel_distance', fn () => Game::getMaxTravelDistance($this->requestStack->getSession()->get('playerBonus'))),
+            new TwigFunction('get_max_travel_distance', fn () => Game::getMaxTravelDistance($this->currentPlayerBonusRegistry->getPlayerBonus())),
             new TwigFunction('get_place_demography', fn (Place $place) => Game::getSizeOfPlanet($place->population)),
             new TwigFunction('get_place_technosphere_improvement_coeff', fn (Place $place) => Game::getImprovementFromScientificCoef($place->coefHistory)),
             new TwigFunction('get_commercial_route_data', fn (OrbitalBase $defaultBase, Place $place) => $this->getCommercialRouteData($defaultBase, $place)),

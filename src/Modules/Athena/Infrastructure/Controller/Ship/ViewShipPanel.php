@@ -3,7 +3,9 @@
 namespace App\Modules\Athena\Infrastructure\Controller\Ship;
 
 use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,32 +13,37 @@ use Symfony\Component\HttpFoundation\Response;
 class ViewShipPanel extends AbstractController
 {
     public function __invoke(
-        Request $request,
+        CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         int $shipNumber,
     ): Response {
-        $session = $request->getSession();
+        $playerBonuses = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses;
 
         switch (ShipResource::getInfo($shipNumber, 'class')) {
             case 0:
-                $bonusSPE = $session->get('playerBonus')->get(PlayerBonus::FIGHTER_SPEED);
-                $bonusATT = $session->get('playerBonus')->get(PlayerBonus::FIGHTER_ATTACK);
-                $bonusDEF = $session->get('playerBonus')->get(PlayerBonus::FIGHTER_DEFENSE); break;
+                $bonusSPE = $playerBonuses->get(PlayerBonusId::FIGHTER_SPEED);
+                $bonusATT = $playerBonuses->get(PlayerBonusId::FIGHTER_ATTACK);
+                $bonusDEF = $playerBonuses->get(PlayerBonusId::FIGHTER_DEFENSE);
+                break;
             case 1:
-                $bonusSPE = $session->get('playerBonus')->get(PlayerBonus::CORVETTE_SPEED);
-                $bonusATT = $session->get('playerBonus')->get(PlayerBonus::CORVETTE_ATTACK);
-                $bonusDEF = $session->get('playerBonus')->get(PlayerBonus::CORVETTE_DEFENSE); break;
+                $bonusSPE = $playerBonuses->get(PlayerBonusId::CORVETTE_SPEED);
+                $bonusATT = $playerBonuses->get(PlayerBonusId::CORVETTE_ATTACK);
+                $bonusDEF = $playerBonuses->get(PlayerBonusId::CORVETTE_DEFENSE);
+                break;
             case 2:
-                $bonusSPE = $session->get('playerBonus')->get(PlayerBonus::FRIGATE_SPEED);
-                $bonusATT = $session->get('playerBonus')->get(PlayerBonus::FRIGATE_ATTACK);
-                $bonusDEF = $session->get('playerBonus')->get(PlayerBonus::FRIGATE_DEFENSE); break;
+                $bonusSPE = $playerBonuses->get(PlayerBonusId::FRIGATE_SPEED);
+                $bonusATT = $playerBonuses->get(PlayerBonusId::FRIGATE_ATTACK);
+                $bonusDEF = $playerBonuses->get(PlayerBonusId::FRIGATE_DEFENSE);
+                break;
             case 3:
-                $bonusSPE = $session->get('playerBonus')->get(PlayerBonus::DESTROYER_SPEED);
-                $bonusATT = $session->get('playerBonus')->get(PlayerBonus::DESTROYER_ATTACK);
-                $bonusDEF = $session->get('playerBonus')->get(PlayerBonus::DESTROYER_DEFENSE); break;
+                $bonusSPE = $playerBonuses->get(PlayerBonusId::DESTROYER_SPEED);
+                $bonusATT = $playerBonuses->get(PlayerBonusId::DESTROYER_ATTACK);
+                $bonusDEF = $playerBonuses->get(PlayerBonusId::DESTROYER_DEFENSE);
+                break;
             default:
                 $bonusSPE = 0;
                 $bonusATT = 0;
-                $bonusDEF = 0; break;
+                $bonusDEF = 0;
+                break;
         }
 
         // MAXIMA

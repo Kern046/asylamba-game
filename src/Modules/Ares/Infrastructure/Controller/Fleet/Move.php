@@ -9,6 +9,7 @@ use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Manager\SectorManager;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,21 +20,20 @@ class Move extends AbstractController
     public function __invoke(
         Request $request,
         Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         CommanderManager $commanderManager,
         PlaceManager $placeManager,
         SectorManager $sectorManager,
         EntityManager $entityManager,
         int $id,
     ): Response {
-        $session = $request->getSession();
-
         if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
             if (($place = $placeManager->get($request->query->getInt('placeId'))) !== null) {
                 if ($commander->playerColor == $place->playerColor) {
                     $home = $placeManager->get($commander->getRBase());
 
                     $length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-                    $duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
+                    $duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
 
                     if (Commander::AFFECTED === $commander->statement) {
                         $sector = $sectorManager->get($place->rSector);

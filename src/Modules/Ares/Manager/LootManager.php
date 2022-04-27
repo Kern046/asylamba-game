@@ -40,7 +40,6 @@ class LootManager
         $commanderPlayer = $this->playerManager->get($commander->rPlayer);
         $commanderColor = $this->colorManager->get($commanderPlayer->rColor);
         $playerBonus = $this->playerBonusManager->getBonusByPlayer($commanderPlayer);
-        $this->playerBonusManager->load($playerBonus);
         LiveReport::$type = Commander::LOOT;
         LiveReport::$dFight = $commander->dArrival;
 

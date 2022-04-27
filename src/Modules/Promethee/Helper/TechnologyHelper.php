@@ -9,6 +9,7 @@ use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Promethee\Resource\TechnologyResource;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -60,9 +61,9 @@ class TechnologyHelper
                         return false;
                     }
                     if ('points' == $info) {
-                        return round(TechnologyResource::$technology[$techno][$info] * $level * Technology::COEF_POINTS);
+                        return round(TechnologyResource::$technology[$techno][$info] * $level * TechnologyId::COEF_POINTS);
                     } elseif ('time' == $info) {
-                        return round(TechnologyResource::$technology[$techno][$info] * $level * Technology::COEF_TIME);
+                        return round(TechnologyResource::$technology[$techno][$info] * $level * TechnologyId::COEF_TIME);
                     } else {
                         switch (TechnologyResource::$technology[$techno]['category']) {
                             case 1:

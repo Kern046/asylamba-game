@@ -8,9 +8,11 @@ use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Message\CommandersExperienceMessage;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class CommandersExperienceHandler implements MessageHandlerInterface
@@ -41,11 +43,10 @@ class CommandersExperienceHandler implements MessageHandlerInterface
             $orbitalBase = $this->orbitalBaseManager->get($commander->rBase);
 
             $playerBonus = $this->playerBonusManager->getBonusByPlayer($this->playerManager->get($commander->rPlayer));
-            $this->playerBonusManager->load($playerBonus);
-            $playerBonus = $playerBonus->bonus;
+            $playerBonus = $playerBonus->bonuses;
             foreach ($nbrHours as $hour) {
                 $invest = $orbitalBase->iSchool;
-                $invest += $invest * $playerBonus->get(PlayerBonus::COMMANDER_INVEST) / 100;
+                $invest += $invest * $playerBonus->get(PlayerBonusId::COMMANDER_INVEST) / 100;
 
                 // xp gagnée
                 $earnedExperience = $invest / Commander::COEFFSCHOOL;

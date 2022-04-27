@@ -29,6 +29,7 @@ use App\Modules\Gaia\Resource\SquadronResource;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -196,7 +197,7 @@ class CommanderManager implements SchedulerInterface
 
         foreach ($commander->army as $squadron) {
             foreach ($squadron->squadron as $ship) {
-                $ship->setBonus($playerBonus->bonus);
+                $ship->setBonus($playerBonus->bonuses);
             }
         }
     }
@@ -358,7 +359,6 @@ class CommanderManager implements SchedulerInterface
         $commanderPlace = $this->placeManager->get($commander->rBase);
         $player = $this->playerManager->get($commander->rPlayer);
         $playerBonus = $this->playerBonusManager->getBonusByPlayer($player);
-        $this->playerBonusManager->load($playerBonus);
         // si la place et la flotte ont la même couleur
         // on pose la flotte si il y a assez de place
         // sinon on met la flotte dans les hangars
@@ -454,14 +454,14 @@ class CommanderManager implements SchedulerInterface
     public function comeBack(Place $place, $commander, $commanderPlace, $playerBonus)
     {
         $length = Game::getDistance($place->getXSystem(), $commanderPlace->getXSystem(), $place->getYSystem(), $commanderPlace->getYSystem());
-        $duration = Game::getTimeToTravel($commanderPlace, $place, $playerBonus->bonus);
+        $duration = Game::getTimeToTravel($commanderPlace, $place, $playerBonus->bonuses);
 
         $this->move($commander, $commander->rBase, $place->id, Commander::BACK, $length, $duration);
     }
 
     public function lootAnEmptyPlace(Place $place, $commander, $playerBonus)
     {
-        $bonus = $playerBonus->bonus->get(PlayerBonus::SHIP_CONTAINER);
+        $bonus = $playerBonus->bonuses->get(PlayerBonusId::SHIP_CONTAINER);
 
         $storage = $commander->getPevToLoot() * Commander::COEFFLOOT;
         $storage += round($storage * ((2 * $bonus) / 100));
@@ -477,7 +477,7 @@ class CommanderManager implements SchedulerInterface
 
     public function lootAPlayerPlace($commander, $playerBonus, $placeBase)
     {
-        $bonus = $playerBonus->bonus->get(PlayerBonus::SHIP_CONTAINER);
+        $bonus = $playerBonus->bonuses->get(PlayerBonusId::SHIP_CONTAINER);
 
         $resourcesToLoot = $placeBase->getResourcesStorage() - Commander::LIMITTOLOOT;
 

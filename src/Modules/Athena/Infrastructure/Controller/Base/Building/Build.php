@@ -10,8 +10,10 @@ use App\Modules\Athena\Model\BuildingQueue;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +25,7 @@ class Build extends AbstractController
     public function __invoke(
         Request $request,
         Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         OrbitalBase $currentBase,
         OrbitalBaseHelper $orbitalBaseHelper,
         OrbitalBaseManager $orbitalBaseManager,
@@ -48,7 +51,7 @@ class Build extends AbstractController
                 $bq->buildingNumber = $identifier;
                 $bq->targetLevel = $currentLevel + 1;
                 $time = $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $currentLevel + 1, 'time');
-                $bonus = $time * $session->get('playerBonus')->get(PlayerBonus::GENERATOR_SPEED) / 100;
+                $bonus = $time * $currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::GENERATOR_SPEED) / 100;
                 $nbBuildingQueues = count($buildingQueues);
                 if (0 === $nbBuildingQueues) {
                     $bq->dStart = Utils::now();

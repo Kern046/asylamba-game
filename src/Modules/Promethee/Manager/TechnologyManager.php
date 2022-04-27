@@ -54,7 +54,6 @@ class TechnologyManager
                 }
                 if (!$this->technologyHelper->isAnUnblockingTechnology($id)) {
                     $bonus = $this->playerBonusManager->getBonusByPlayer($player);
-                    $this->playerBonusManager->load($bonus);
                     $this->playerBonusManager->updateTechnoBonus($bonus, $id, $value);
                 }
             }

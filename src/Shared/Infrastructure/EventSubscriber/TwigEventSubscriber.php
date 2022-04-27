@@ -11,7 +11,6 @@ use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Twig\Environment;
@@ -25,15 +24,11 @@ class TwigEventSubscriber implements EventSubscriberInterface
         protected ConversationRepositoryInterface $conversationRepository,
         protected NotificationManager $notificationManager,
         protected CurrentPlayerRegistry $currentPlayerRegistry,
-        private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+        private readonly CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
         protected CommanderManager $commanderManager,
         protected ShipQueueManager $shipQueueManager,
         protected OrbitalBaseManager $orbitalBaseManager,
-        RequestStack $requestStack,
     ) {
-        if (null !== $requestStack->getMainRequest()) {
-            $this->session = $requestStack->getSession();
-        }
     }
 
     public static function getSubscribedEvents(): array
@@ -48,9 +43,10 @@ class TwigEventSubscriber implements EventSubscriberInterface
 
     public function setCurrentBase(): void
     {
-        if (null === ($playerId = $this->session->get('playerId'))) {
+        if (!$this->currentPlayerRegistry->has()) {
             return;
         }
+        $playerId = $this->currentPlayerRegistry->get()->id;
         $currentBase = $this->currentPlayerBasesRegistry->current();
         $this->twig->addGlobal('current_base', $currentBase);
         $this->twig->addGlobal('current_player_bases', $this->currentPlayerBasesRegistry->all());
@@ -70,8 +66,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
         $currentPlayer = $this->currentPlayerRegistry->get();
 
         $this->twig->addGlobal('current_player', $currentPlayer);
-        // @TODO handle registration to avoid accessing the session for this value
-        $this->twig->addGlobal('current_player_faction_id', $this->session->get('playerInfo')->get('color'));
+        $this->twig->addGlobal('current_player_faction_id', $currentPlayer->rColor);
         $this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerConversations($currentPlayer->getId()));
         $this->twig->addGlobal('current_player_notifications', $this->notificationManager->getUnreadNotifications($currentPlayer->getId()));
     }

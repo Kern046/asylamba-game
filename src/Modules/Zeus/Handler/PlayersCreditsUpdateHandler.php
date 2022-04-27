@@ -51,7 +51,6 @@ class PlayersCreditsUpdateHandler implements MessageHandlerInterface
             $player->uPlayer = $now;
             // load the bonus
             $playerBonus = $this->playerBonusManager->getBonusByPlayer($player);
-            $this->playerBonusManager->load($playerBonus);
 
             // load the researches
             $S_RSM1 = $this->researchManager->getCurrentSession();

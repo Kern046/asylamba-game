@@ -23,7 +23,7 @@ use App\Modules\Promethee\Helper\ResearchHelper;
 use App\Modules\Promethee\Manager\ResearchManager;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Model\Research;
-use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Zeus\Helper\CheckName;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -453,6 +453,7 @@ class CreateCharacter extends AbstractController
             $ob = new OrbitalBase();
 
             // choix de la place
+            // @TODO Move to repository
             $qr = $database->prepare('SELECT p.id FROM place AS p
 		INNER JOIN system AS sy ON p.rSystem = sy.id
 			INNER JOIN sector AS se ON sy.rSector = se.id
@@ -527,26 +528,26 @@ class CreateCharacter extends AbstractController
 
             // ajout des techs haut-level
             if ($session->get('high-mode')) {
-                $technologyManager->addTech($player->id, Technology::COM_PLAT_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::DOCK2_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::DOCK3_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::RECYCLING_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SPATIOPORT_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::COM_PLAT_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::DOCK2_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::DOCK3_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::RECYCLING_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SPATIOPORT_UNBLOCK, 1);
 
-                $technologyManager->addTech($player->id, Technology::SHIP0_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP1_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP2_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP3_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP4_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP5_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP6_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP7_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP8_UNBLOCK, 1);
-                $technologyManager->addTech($player->id, Technology::SHIP9_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP0_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP1_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP2_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP3_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP4_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP5_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP6_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP7_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP8_UNBLOCK, 1);
+                $technologyManager->addTech($player->id, TechnologyId::SHIP9_UNBLOCK, 1);
 
-                $technologyManager->addTech($player->id, Technology::COLONIZATION, 1);
-                $technologyManager->addTech($player->id, Technology::CONQUEST, 1);
-                $technologyManager->addTech($player->id, Technology::BASE_QUANTITY, 4);
+                $technologyManager->addTech($player->id, TechnologyId::COLONIZATION, 1);
+                $technologyManager->addTech($player->id, TechnologyId::CONQUEST, 1);
+                $technologyManager->addTech($player->id, TechnologyId::BASE_QUANTITY, 4);
             }
 
             // modification de la place
@@ -556,16 +557,6 @@ class CreateCharacter extends AbstractController
             if ('enabled' === $this->getParameter('apimode')) {
                 $return = $api->confirmInscription($session->get('inscription')->get('bindkey'));
             }
-
-            // enregistrement DA
-            if ($this->getParameter('data_analysis')) {
-                $qr = $database->prepare('INSERT INTO 
-			DA_Player(id, color, dInscription)
-			VALUES(?, ?, ?)'
-                );
-                $qr->execute([$player->getId(), $player->rColor, Utils::now()]);
-            }
-
             // clear les sessions
             $session->remove('inscription');
             $session->remove('prebindkey');

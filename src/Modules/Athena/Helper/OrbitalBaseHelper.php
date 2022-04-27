@@ -6,14 +6,14 @@ use App\Classes\Library\Format;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
-use App\Modules\Zeus\Model\PlayerBonus;
-use Symfony\Component\HttpFoundation\RequestStack;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
+use App\Modules\Zeus\Model\PlayerBonusId;
 
 class OrbitalBaseHelper
 {
     public function __construct(
         protected TechnologyHelper $technologyHelper,
-        protected RequestStack $requestStack,
+        private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
     ) {
     }
 
@@ -49,7 +49,7 @@ class OrbitalBaseHelper
     public function getStoragePercent(OrbitalBase $orbitalBase): float
     {
         $storageSpace = $this->getBuildingInfo(OrbitalBaseResource::STORAGE, 'level', $orbitalBase->getLevelStorage(), 'storageSpace');
-        $storageBonus = $this->requestStack->getSession()->get('playerBonus')->get(PlayerBonus::REFINERY_STORAGE);
+        $storageBonus = $this->currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::REFINERY_STORAGE);
         if ($storageBonus > 0) {
             $storageSpace += ($storageSpace * $storageBonus / 100);
         }
@@ -142,41 +142,18 @@ class OrbitalBaseHelper
                 // droit de construire le batiment ?
                 // $sup est un objet de type OrbitalBase
                 case 'buildingTree':
-                    $diminution = null;
-                    switch ($buildingId) {
-                        case OrbitalBaseResource::GENERATOR:
-                            $diminution = 0;
-                            break;
-                        case OrbitalBaseResource::REFINERY:
-                            $diminution = 0;
-                            break;
-                        case OrbitalBaseResource::DOCK1:
-                            $diminution = 0;
-                            break;
-                        case OrbitalBaseResource::DOCK2:
-                            $diminution = 20;
-                            break;
-                        case OrbitalBaseResource::DOCK3:
-                            $diminution = 30;
-                            break;
-                        case OrbitalBaseResource::TECHNOSPHERE:
-                            $diminution = 0;
-                            break;
-                        case OrbitalBaseResource::COMMERCIAL_PLATEFORME:
-                            $diminution = 10;
-                            break;
-                        case OrbitalBaseResource::STORAGE:
-                            $diminution = 0;
-                            break;
-                        case OrbitalBaseResource::RECYCLING:
-                            $diminution = 10;
-                            break;
-                        case OrbitalBaseResource::SPATIOPORT:
-                            $diminution = 20;
-                            break;
-                        default:
-                            throw new \ErrorException('buildingId invalide (entre 0 et 9) dans haveRights de OrbitalBaseResource');
-                    }
+                    $diminution = match ($buildingId) {
+                        OrbitalBaseResource::GENERATOR,
+                        OrbitalBaseResource::STORAGE,
+                        OrbitalBaseResource::DOCK1,
+                        OrbitalBaseResource::REFINERY,
+                        OrbitalBaseResource::TECHNOSPHERE => 0,
+                        OrbitalBaseResource::DOCK2, OrbitalBaseResource::SPATIOPORT => 20,
+                        OrbitalBaseResource::DOCK3 => 30,
+                        OrbitalBaseResource::COMMERCIAL_PLATEFORME, OrbitalBaseResource::RECYCLING => 10,
+                        // no break
+                        default => throw new \ErrorException('buildingId invalide (entre 0 et 9) dans haveRights de OrbitalBaseResource'),
+                    };
                     if (null !== $diminution) {
                         if (OrbitalBaseResource::GENERATOR == $buildingId) {
                             if ($level > OrbitalBaseResource::$building[$buildingId]['maxLevel'][$sup->typeOfBase]) {
@@ -185,7 +162,7 @@ class OrbitalBaseHelper
                                 return true;
                             }
                         } else {
-                            if (1 == $level and OrbitalBase::TYP_NEUTRAL == $sup->typeOfBase and (OrbitalBaseResource::SPATIOPORT == $buildingId or OrbitalBaseResource::DOCK2 == $buildingId)) {
+                            if (1 == $level and OrbitalBase::TYP_NEUTRAL == $sup->typeOfBase and in_array($buildingId, [OrbitalBaseResource::SPATIOPORT, OrbitalBaseResource::DOCK2])) {
                                 return 'vous devez évoluer votre colonie pour débloquer ce bâtiment';
                             }
                             if ($level > OrbitalBaseResource::$building[$buildingId]['maxLevel'][$sup->typeOfBase]) {

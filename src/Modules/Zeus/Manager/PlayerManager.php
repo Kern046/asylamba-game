@@ -15,7 +15,6 @@ use App\Classes\Container\ArrayList;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Game;
-use App\Classes\Library\Session\SessionWrapper;
 use App\Classes\Library\Utils;
 use App\Classes\Worker\API;
 use App\Modules\Ares\Manager\CommanderManager;
@@ -31,12 +30,12 @@ use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Promethee\Manager\ResearchManager;
 use App\Modules\Promethee\Manager\TechnologyManager;
-use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Zeus\Domain\Event\UniversityInvestmentsUpdateEvent;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Service\Attribute\Required;
 
 // @TODO Remove bounds to sessions
@@ -46,7 +45,6 @@ class PlayerManager
     protected ResearchManager $researchManager;
 
     public function __construct(
-        protected RequestStack $requestStack,
         protected EventDispatcherInterface $eventDispatcher,
         protected EntityManager $entityManager,
         protected GalaxyColorManager $galaxyColorManager,
@@ -57,7 +55,6 @@ class PlayerManager
         protected CommercialRouteManager $commercialRouteManager,
         protected TechnologyManager $technologyManager,
         protected PlayerBonusManager $playerBonusManager,
-        protected SessionWrapper $sessionWrapper,
         protected API $api,
         protected int $playerBaseLevel,
         protected int $playerTaxCoeff,
@@ -80,19 +77,7 @@ class PlayerManager
 
     public function get(int $playerId): Player|null
     {
-        if (null === ($player = $this->entityManager->getRepository(Player::class)->get($playerId))) {
-            return null;
-        }
-        if (null !== $this->requestStack->getCurrentRequest()) {
-            $session = $this->requestStack->getSession();
-
-            if ($session->get('playerId') === $player->id) {
-                $player->synchronized = true;
-            }
-            $this->fill($player);
-        }
-
-        return $player;
+        return $this->entityManager->getRepository(Player::class)->get($playerId);
     }
 
     public function getByName(string $name): ?Player
@@ -102,16 +87,7 @@ class PlayerManager
 
     public function getByBindKey(string $bindKey): ?Player
     {
-        $session = $this->requestStack->getSession();
-
-        if (($player = $this->entityManager->getRepository(Player::class)->getByBindKey($bindKey)) !== null) {
-            if ($session->get('playerId') === $player->id) {
-                $player->synchronized = true;
-            }
-            $this->fill($player);
-        }
-
-        return $player;
+        return $this->entityManager->getRepository(Player::class)->getByBindKey($bindKey);
     }
 
     public function getGodSons(int $id): array
@@ -187,11 +163,7 @@ class PlayerManager
 
     public function getFactionLeader(int $factionId): ?Player
     {
-        if (($leader = $this->entityManager->getRepository(Player::class)->getFactionLeader($factionId)) !== null) {
-            $this->fill($leader);
-        }
-
-        return $leader;
+        return $this->entityManager->getRepository(Player::class)->getFactionLeader($factionId);
     }
 
     public function getActivePlayers(): array
@@ -202,32 +174,6 @@ class PlayerManager
     public function search(string $search): array
     {
         return $this->entityManager->getRepository(Player::class)->search($search);
-    }
-
-    protected function fill(Player $player): void
-    {
-        if (null !== $this->requestStack->getCurrentRequest() && $this->isSynchronized($player)) {
-            $this->saveSessionData($player);
-        }
-    }
-
-    public function isSynchronized(Player $player): bool
-    {
-        return $player->getId() === $this->requestStack->getSession()->get('playerId');
-    }
-
-    public function saveSessionData(Player $player): void
-    {
-        $session = $this->requestStack->getSession();
-        if (!$session->has('playerInfo')) {
-            $session->set('playerInfo', new ArrayList());
-        }
-        $session->get('playerInfo')->add('color', $player->getRColor());
-        $session->get('playerInfo')->add('name', $player->getName());
-        $session->get('playerInfo')->add('avatar', $player->getAvatar());
-        $session->get('playerInfo')->add('credit', $player->getCredit());
-        $session->get('playerInfo')->add('experience', $player->getExperience());
-        $session->get('playerInfo')->add('level', $player->getLevel());
     }
 
     public function add(Player $player): void
@@ -302,9 +248,9 @@ class PlayerManager
             $player->factionPoint = 0;
 
             $technos = $this->technologyManager->getPlayerTechnology($player->id);
-            $levelAE = $technos->getTechnology(Technology::BASE_QUANTITY);
+            $levelAE = $technos->getTechnology(TechnologyId::BASE_QUANTITY);
             if (0 != $levelAE) {
-                $this->technologyManager->deleteByRPlayer($player->id, Technology::BASE_QUANTITY);
+                $this->technologyManager->deleteByRPlayer($player->id, TechnologyId::BASE_QUANTITY);
             }
 
             // attribute new base and place to player
@@ -374,12 +320,12 @@ class PlayerManager
 
         foreach ($playerBases as $base) {
             $popTax = Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $this->playerTaxCoeff);
-            $popTax += $popTax * $playerBonus->bonus->get(PlayerBonus::POPULATION_TAX) / 100;
+            $popTax += $popTax * $playerBonus->bonuses->get(PlayerBonusId::POPULATION_TAX) / 100;
             $nationTax = $base->tax * $popTax / 100;
 
             // revenu des routes commerciales
             $routesIncome = $this->commercialRouteManager->getBaseIncome($base);
-            $routesIncome += $routesIncome * $playerBonus->bonus->get(PlayerBonus::COMMERCIAL_INCOME) / 100;
+            $routesIncome += $routesIncome * $playerBonus->bonuses->get(PlayerBonusId::COMMERCIAL_INCOME) / 100;
 
             $credits += ($popTax - $nationTax + $routesIncome);
             $totalGain += $popTax - $nationTax + $routesIncome;
@@ -590,10 +536,10 @@ class PlayerManager
         $this->researchManager->changeSession($rsmSession);
         if (1 == $this->researchManager->size()) {
             // add the bonus
-            $naturalTech += $naturalTech * $playerBonus->bonus->get(PlayerBonus::UNI_INVEST) / 100;
-            $lifeTech += $lifeTech * $playerBonus->bonus->get(PlayerBonus::UNI_INVEST) / 100;
-            $socialTech += $socialTech * $playerBonus->bonus->get(PlayerBonus::UNI_INVEST) / 100;
-            $informaticTech += $informaticTech * $playerBonus->bonus->get(PlayerBonus::UNI_INVEST) / 100;
+            $naturalTech += $naturalTech * $playerBonus->bonuses->get(PlayerBonusId::UNI_INVEST) / 100;
+            $lifeTech += $lifeTech * $playerBonus->bonuses->get(PlayerBonusId::UNI_INVEST) / 100;
+            $socialTech += $socialTech * $playerBonus->bonuses->get(PlayerBonusId::UNI_INVEST) / 100;
+            $informaticTech += $informaticTech * $playerBonus->bonuses->get(PlayerBonusId::UNI_INVEST) / 100;
 
             $tech = $this->researchManager->get();
             $this->researchManager->update($tech, $player->id, $naturalTech, $lifeTech, $socialTech, $informaticTech);
@@ -628,17 +574,9 @@ class PlayerManager
     {
         $exp = round($exp);
         $player->experience += $exp;
-        if ($player->isSynchronized()) {
-            $session = $this->requestStack->getSession();
-            $session->get('playerInfo')->add('experience', $player->experience);
-        }
         $nextLevel = $this->playerBaseLevel * pow(2, ($player->level - 1));
         if ($player->experience >= $nextLevel) {
             ++$player->level;
-            if ($player->isSynchronized()) {
-                $session = $this->requestStack->getSession();
-                $session->get('playerInfo')->add('level', $player->level);
-            }
             $n = new Notification();
             $n->setTitle('Niveau supérieur');
             $n->setRPlayer($player->id);

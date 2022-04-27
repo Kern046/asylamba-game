@@ -13,9 +13,11 @@ use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Manager\TransactionManager;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +27,7 @@ class Cancel extends AbstractController
     public function __invoke(
         Request $request,
         Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         TransactionManager $transactionManager,
         CommercialShippingManager $commercialShippingManager,
         OrbitalBaseManager $orbitalBaseManager,
@@ -34,7 +37,6 @@ class Cancel extends AbstractController
         EntityManager $entityManager,
         int $id,
     ): Response {
-        $session = $request->getSession();
         $transaction = $transactionManager->get($id);
 
         $commercialShipping = $commercialShippingManager->getByTransactionId($id);
@@ -48,7 +50,7 @@ class Cancel extends AbstractController
                 switch ($transaction->type) {
                     case Transaction::TYP_RESOURCE:
                         $maxStorage = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::STORAGE, 'level', $base->getLevelStorage(), 'storageSpace');
-                        $storageBonus = $session->get('playerBonus')->get(PlayerBonus::REFINERY_STORAGE);
+                        $storageBonus = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::REFINERY_STORAGE);
                         if ($storageBonus > 0) {
                             $maxStorage += ($maxStorage * $storageBonus / 100);
                         }

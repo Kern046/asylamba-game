@@ -9,6 +9,7 @@ use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Gaia\Resource\PlaceResource;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 
 class Game
 {
@@ -71,7 +72,7 @@ class Game
     public static function getFleetSpeed($bonus)
     {
         $b = null != $bonus
-            ? Commander::FLEETSPEED * (3 * ($bonus->get(PlayerBonus::SHIP_SPEED) / 100)) : 0;
+            ? Commander::FLEETSPEED * (3 * ($bonus->get(PlayerBonusId::SHIP_SPEED) / 100)) : 0;
 
         return Commander::FLEETSPEED + $b;
     }

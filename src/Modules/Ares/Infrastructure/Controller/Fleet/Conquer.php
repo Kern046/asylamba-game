@@ -15,7 +15,8 @@ use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Manager\SectorManager;
 use App\Modules\Promethee\Manager\TechnologyManager;
-use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,6 +31,7 @@ class Conquer extends AbstractController
         Player $currentPlayer,
         OrbitalBase $orbitalBase,
         CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         ColorManager $colorManager,
         CommanderManager $commanderManager,
         PlaceManager $placeManager,
@@ -47,12 +49,11 @@ class Conquer extends AbstractController
         $technologies = $technologyManager->getPlayerTechnology($currentPlayer->getId());
 
         // check si technologie CONQUEST débloquée
-        if (1 !== $technologies->getTechnology(Technology::CONQUEST)) {
+        if (1 !== $technologies->getTechnology(TechnologyId::CONQUEST)) {
             throw new ConflictHttpException('Vous devez débloquer la technologie de conquête.');
         }
-        $session = $request->getSession();
         // check si la technologie BASE_QUANTITY a un niveau assez élevé
-        $maxBasesQuantity = $technologies->getTechnology(Technology::BASE_QUANTITY) + 1;
+        $maxBasesQuantity = $technologies->getTechnology(TechnologyId::BASE_QUANTITY) + 1;
         // @TODO Replace this count loop by a repository method
         $coloQuantity = 0;
         $commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::MOVING]);
@@ -77,7 +78,7 @@ class Conquer extends AbstractController
                         $home = $placeManager->get($commander->getRBase());
 
                         $length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-                        $duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
+                        $duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
 
                         // compute price
                         $price = $totalBases * $conquestCost;

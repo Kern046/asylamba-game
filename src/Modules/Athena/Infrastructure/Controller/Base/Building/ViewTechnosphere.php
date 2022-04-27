@@ -12,9 +12,12 @@ use App\Modules\Promethee\Manager\ResearchManager;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Manager\TechnologyQueueManager;
 use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Promethee\Model\TechnologyQueue;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +27,7 @@ class ViewTechnosphere extends AbstractController
     public function __invoke(
         Request $request,
         OrbitalBase $currentBase,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         Player $currentPlayer,
         TechnologyManager $technologyManager,
         TechnologyQueueManager $technologyQueueManager,
@@ -31,7 +35,6 @@ class ViewTechnosphere extends AbstractController
         OrbitalBaseHelper $orbitalBaseHelper,
         ResearchManager $researchManager,
     ): Response {
-        $session = $request->getSession();
         $technologyResourceRefund = $this->getParameter('promethee.technology_queue.resource_refund');
 
         $technology = $technologyManager->getPlayerTechnology($currentPlayer->getId());
@@ -44,7 +47,7 @@ class ViewTechnosphere extends AbstractController
 
         $coef = $currentBase->planetHistory;
         $coefBonus = Game::getImprovementFromScientificCoef($coef);
-        $techBonus = $session->get('playerBonus')->get(PlayerBonus::TECHNOSPHERE_SPEED);
+        $techBonus = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::TECHNOSPHERE_SPEED);
         $factionBonus = 0;
         if (ColorResource::APHERA == $currentPlayer->getRColor()) {
             // bonus if the player is from Aphera
@@ -91,23 +94,23 @@ class ViewTechnosphere extends AbstractController
     ): array {
         $data = [];
 
-        for ($i = 0; $i < Technology::QUANTITY; ++$i) {
-            if ($technologyHelper->isATechnologyNotDisplayed($i)) {
+        foreach (TechnologyId::getAll() as $technologyId) {
+            if ($technologyHelper->isATechnologyNotDisplayed($technologyId)) {
                 continue;
             }
             $disability = 'disable';
             $closed = '';
             $inQueue = false;
             $inALocalQueue = false;
-            $isAnUnblockingTechnology = $technologyHelper->isAnUnblockingTechnology($i);
+            $isAnUnblockingTechnology = $technologyHelper->isAnUnblockingTechnology($technologyId);
 
             foreach ($playerTechnologyQueues as $playerQueue) {
-                if ($playerQueue->getTechnology() !== $i) {
+                if ($playerQueue->getTechnology() !== $technologyId) {
                     continue;
                 }
                 $inQueue = true;
                 foreach ($baseTechnologyQueues as $baseQueue) {
-                    if ($baseQueue->getTechnology() === $i) {
+                    if ($baseQueue->getTechnology() === $technologyId) {
                         $inALocalQueue = true;
                         break;
                     }
@@ -115,32 +118,32 @@ class ViewTechnosphere extends AbstractController
                 break;
             }
 
-            $technologyLevel = $technology->getTechnology($i);
+            $technologyLevel = $technology->getTechnology($technologyId);
             $nextLevel = $technologyLevel + 1;
             if ($isAnUnblockingTechnology) {
-                $researchRequirements = $technologyHelper->haveRights($i, 'research', 1, $researchManager->getResearchList($researchManager->get()));
+                $researchRequirements = $technologyHelper->haveRights($technologyId, 'research', 1, $researchManager->getResearchList($researchManager->get()));
             } else {
-                $researchRequirements = $technologyHelper->haveRights($i, 'research', $nextLevel, $researchManager->getResearchList($researchManager->get()));
+                $researchRequirements = $technologyHelper->haveRights($technologyId, 'research', $nextLevel, $researchManager->getResearchList($researchManager->get()));
             }
 
             // compute time to build with the bonuses
-            $timeToBuild = $technologyHelper->getInfo($i, 'time', $nextLevel);
+            $timeToBuild = $technologyHelper->getInfo($technologyId, 'time', $nextLevel);
             $timeToBuild -= round($timeToBuild * $totalBonus / 100);
             // warning : $totalBonus est défini plus haut (ne pas inverser les blocs de code !)
 
-            $column = $technologyHelper->getInfo($i, 'column');
+            $column = $technologyHelper->getInfo($technologyId, 'column');
 
             $data[$column] ??= [];
             $data[$column][] = [
-                'identifier' => $i,
+                'identifier' => $technologyId,
                 'is_unblocking_technology' => $isAnUnblockingTechnology,
                 'technology_level' => $technologyLevel,
                 'next_level' => $nextLevel,
-                'max_level_requirements' => $technologyHelper->haveRights($i, 'maxLevel', $nextLevel),
-                'queue_requirements' => $technologyHelper->haveRights($i, 'queue', $currentBase, count($baseTechnologyQueues)),
-                'credit_requirements' => $technologyHelper->haveRights($i, 'credit', $nextLevel, $currentPlayer->getCredit()),
-                'resource_requirements' => $technologyHelper->haveRights($i, 'resource', $nextLevel, $currentBase->getResourcesStorage()),
-                'technosphere_requirements' => $technologyHelper->haveRights($i, 'technosphereLevel', $currentBase->getLevelTechnosphere()),
+                'max_level_requirements' => $technologyHelper->haveRights($technologyId, 'maxLevel', $nextLevel),
+                'queue_requirements' => $technologyHelper->haveRights($technologyId, 'queue', $currentBase, count($baseTechnologyQueues)),
+                'credit_requirements' => $technologyHelper->haveRights($technologyId, 'credit', $nextLevel, $currentPlayer->getCredit()),
+                'resource_requirements' => $technologyHelper->haveRights($technologyId, 'resource', $nextLevel, $currentBase->getResourcesStorage()),
+                'technosphere_requirements' => $technologyHelper->haveRights($technologyId, 'technosphereLevel', $currentBase->getLevelTechnosphere()),
                 'research_requirements' => $researchRequirements,
                 'in_queue' => $inQueue,
                 'in_local_queue' => $inALocalQueue,

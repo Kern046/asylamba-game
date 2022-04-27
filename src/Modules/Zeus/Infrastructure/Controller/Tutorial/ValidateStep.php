@@ -10,7 +10,7 @@ use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -154,7 +154,7 @@ class ValidateStep extends AbstractController
                     $nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::DOCK1, 1);
                     break;
                 case TutorialResource::SHIP0_UNBLOCK:
-                    $nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($playerId, Technology::SHIP0_UNBLOCK);
+                    $nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($playerId, TechnologyId::SHIP0_UNBLOCK);
                     break;
                 case TutorialResource::BUILD_SHIP0:
                     // verify in the queue
@@ -209,7 +209,7 @@ class ValidateStep extends AbstractController
                     $nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::TECHNOSPHERE, 6);
                     break;
                 case TutorialResource::SHIP1_UNBLOCK:
-                    $nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($playerId, Technology::SHIP1_UNBLOCK);
+                    $nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($playerId, TechnologyId::SHIP1_UNBLOCK);
                     break;
                 case TutorialResource::DOCK1_LEVEL_15:
                     $nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::DOCK1, 15);

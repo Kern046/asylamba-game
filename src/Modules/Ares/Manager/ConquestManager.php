@@ -71,7 +71,6 @@ class ConquestManager
         $commanderColor = $this->colorManager->get($commanderPlayer->rColor);
         $baseCommanders = $this->commanderManager->getBaseCommanders($place->getId());
         $playerBonus = $this->playerBonusManager->getBonusByPlayer($commanderPlayer);
-        $this->playerBonusManager->load($playerBonus);
         // conquete
         if (null !== $place->rPlayer) {
             $placePlayer = $this->playerManager->get($place->rPlayer);

@@ -7,8 +7,10 @@ use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\SchoolClassResource;
 use App\Modules\Gaia\Resource\PlaceResource;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Helper\CheckName;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,12 +19,11 @@ class ViewSchool extends AbstractController
 {
     public function __invoke(
         Request $request,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         OrbitalBase $currentBase,
         CommanderManager $commanderManager,
     ): Response {
-        $session = $request->getSession();
-
-        $commanderInvestBonus = $session->get('playerBonus')->get(PlayerBonus::COMMANDER_INVEST);
+        $commanderInvestBonus = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::COMMANDER_INVEST);
 
         $invest = $currentBase->iSchool * $commanderInvestBonus / 100;
 

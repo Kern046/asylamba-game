@@ -7,27 +7,27 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Model\Technology;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ViewGenerator extends AbstractController
 {
     public function __invoke(
-        Request $request,
+        CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         Player $currentPlayer,
         OrbitalBase $currentBase,
         OrbitalBaseHelper $orbitalBaseHelper,
         TechnologyManager $technologyManager,
     ): Response {
-        $session = $request->getSession();
         $technology = $technologyManager->getPlayerTechnology($currentPlayer->getId());
 
         return $this->render('pages/athena/generator.html.twig', [
             'technology' => $technology,
-            'generator_speed_bonus' => $session->get('playerBonus')->get(PlayerBonus::GENERATOR_SPEED),
+            'generator_speed_bonus' => $currentPlayerBonusRegistry
+                ->getPlayerBonus()->bonuses->get(PlayerBonusId::GENERATOR_SPEED),
             'building_resource_refund' => $this->getParameter('athena.building.building_queue_resource_refund'),
             'buildings_data' => $this->getBuildingsData($orbitalBaseHelper, $currentBase, $technology),
         ]);

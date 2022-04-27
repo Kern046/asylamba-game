@@ -13,6 +13,7 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Manager\SectorManager;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -25,6 +26,7 @@ class Loot extends AbstractController
     public function __invoke(
         Request $request,
         Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         ColorManager $colorManager,
         CommanderManager $commanderManager,
         PlaceManager $placeManager,
@@ -35,7 +37,6 @@ class Loot extends AbstractController
         int $id,
     ): Response {
         // @TODO simplify this hell
-        $session = $request->getSession();
         $place = $placeManager->get($request->query->getInt('placeId'));
         if (null === $place->rPlayer || ($player = $playerManager->get($place->rPlayer)) === null) {
             if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
@@ -45,7 +46,7 @@ class Loot extends AbstractController
                             $home = $placeManager->get($commander->getRBase());
 
                             $length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-                            $duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
+                            $duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
 
                             if ($commander->getPev() > 0) {
                                 if (Commander::AFFECTED == $commander->statement) {
@@ -98,7 +99,7 @@ class Loot extends AbstractController
                         $home = $placeManager->get($commander->getRBase());
 
                         $length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-                        $duration = Game::getTimeToTravel($home, $place, $session->get('playerBonus'));
+                        $duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
 
                         if ($commander->getPev() > 0) {
                             $sector = $sectorManager->get($place->rSector);

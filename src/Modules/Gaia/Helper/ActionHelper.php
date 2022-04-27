@@ -11,7 +11,7 @@ use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
-use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Promethee\Resource\TechnologyResource;
 
 abstract class ActionHelper
@@ -83,9 +83,9 @@ abstract class ActionHelper
         $box .= '<div data-id="'.$id.'" class="act-bull" style="display:'.((1 == $id) ? 'block' : 'none').';" >';
         $box .= '<h5>Effectuer une conquête</h5>';
         // check si technologie CONQUEST débloquée
-        if (1 == $technologies->getTechnology(Technology::CONQUEST)) {
+        if (1 == $technologies->getTechnology(TechnologyId::CONQUEST)) {
             // check si la technologie BASE_QUANTITY a un niveau assez élevé
-            $maxBasesQuantity = $technologies->getTechnology(Technology::BASE_QUANTITY) + 1;
+            $maxBasesQuantity = $technologies->getTechnology(TechnologyId::BASE_QUANTITY) + 1;
             $obQuantity = $this->sessionWrapper->get('playerBase')->get('ob')->size();
             $msQuantity = $this->sessionWrapper->get('playerBase')->get('ms')->size();
             $coloQuantity = 0;
@@ -142,10 +142,10 @@ abstract class ActionHelper
                 }
                 $this->commanderManager->changeSession($S_COM2);
             } else {
-                $box .= '<p class="info">Pour pouvoir conquérir une planète supplémentaire, il faut augmenter le niveau de la technologie '.TechnologyResource::getInfo(Technology::BASE_QUANTITY, 'name').'.</p>';
+                $box .= '<p class="info">Pour pouvoir conquérir une planète supplémentaire, il faut augmenter le niveau de la technologie '.TechnologyResource::getInfo(TechnologyId::BASE_QUANTITY, 'name').'.</p>';
             }
         } else {
-            $box .= '<p class="info">Pour pouvoir conquérir une planète, il faut développer la technologie '.TechnologyResource::getInfo(Technology::CONQUEST, 'name').'. </p>';
+            $box .= '<p class="info">Pour pouvoir conquérir une planète, il faut développer la technologie '.TechnologyResource::getInfo(TechnologyId::CONQUEST, 'name').'. </p>';
         }
         $box .= '</div>';
     }
@@ -157,9 +157,9 @@ abstract class ActionHelper
         $box .= '<div data-id="'.$id.'" class="act-bull" style="display:'.((1 == $id) ? 'block' : 'none').';" >';
         $box .= '<h5>Effectuer une colonisation</h5>';
         // check si technologie COLONIZATION débloquée
-        if (1 == $technologies->getTechnology(Technology::COLONIZATION)) {
+        if (1 == $technologies->getTechnology(TechnologyId::COLONIZATION)) {
             // check si la technologie BASE_QUANTITY a un niveau assez élevé
-            $maxBasesQuantity = $technologies->getTechnology(Technology::BASE_QUANTITY) + 1;
+            $maxBasesQuantity = $technologies->getTechnology(TechnologyId::BASE_QUANTITY) + 1;
             $obQuantity = $this->sessionWrapper->get('playerBase')->get('ob')->size();
             $msQuantity = $this->sessionWrapper->get('playerBase')->get('ms')->size();
             $coloQuantity = 0;
@@ -216,10 +216,10 @@ abstract class ActionHelper
                 }
                 $this->commanderManager->changeSession($S_COM2);
             } else {
-                $box .= '<p class="info">Pour pouvoir coloniser une planète supplémentaire, il faut augmenter le niveau de la technologie '.TechnologyResource::getInfo(Technology::BASE_QUANTITY, 'name').'.</p>';
+                $box .= '<p class="info">Pour pouvoir coloniser une planète supplémentaire, il faut augmenter le niveau de la technologie '.TechnologyResource::getInfo(TechnologyId::BASE_QUANTITY, 'name').'.</p>';
             }
         } else {
-            $box .= '<p class="info">Pour pouvoir coloniser une planète, il faut développer la technologie '.TechnologyResource::getInfo(Technology::COLONIZATION, 'name').'.</p>';
+            $box .= '<p class="info">Pour pouvoir coloniser une planète, il faut développer la technologie '.TechnologyResource::getInfo(TechnologyId::COLONIZATION, 'name').'.</p>';
         }
         $box .= '</div>';
     }

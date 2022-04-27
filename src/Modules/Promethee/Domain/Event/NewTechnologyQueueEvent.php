@@ -2,7 +2,7 @@
 
 namespace App\Modules\Promethee\Domain\Event;
 
-use App\Modules\Promethee\Model\Technology;
+use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Promethee\Model\TechnologyQueue;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Resource\TutorialResource;
@@ -25,8 +25,8 @@ class NewTechnologyQueueEvent implements TutorialEvent, TrackingEvent
     public function getTutorialStep(): int|null
     {
         return match ($this->technologyQueue->technology) {
-            Technology::SHIP0_UNBLOCK => TutorialResource::SHIP0_UNBLOCK,
-            Technology::SHIP1_UNBLOCK => TutorialResource::SHIP1_UNBLOCK,
+            TechnologyId::SHIP0_UNBLOCK => TutorialResource::SHIP0_UNBLOCK,
+            TechnologyId::SHIP1_UNBLOCK => TutorialResource::SHIP1_UNBLOCK,
             default => null,
         };
     }

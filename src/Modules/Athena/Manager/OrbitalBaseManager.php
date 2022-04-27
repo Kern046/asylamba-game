@@ -20,6 +20,7 @@ use App\Modules\Promethee\Manager\TechnologyQueueManager;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -382,9 +383,8 @@ class OrbitalBaseManager
     public function increaseResources(OrbitalBase $orbitalBase, $resources, $offLimits = false, $persist = true)
     {
         $playerBonus = $this->playerBonusManager->getBonusByPlayer($this->playerManager->get($orbitalBase->rPlayer));
-        $this->playerBonusManager->load($playerBonus);
         $maxStorage = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::STORAGE, 'level', $orbitalBase->levelStorage, 'storageSpace');
-        $maxStorage += $maxStorage * $playerBonus->bonus->get(PlayerBonus::REFINERY_STORAGE) / 100;
+        $maxStorage += $maxStorage * $playerBonus->bonuses->get(PlayerBonusId::REFINERY_STORAGE) / 100;
 
         if (true === $offLimits) {
             $maxStorage += OrbitalBase::EXTRA_STOCK;

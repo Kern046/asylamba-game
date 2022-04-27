@@ -4,7 +4,6 @@ namespace App\Shared\Infrastructure\Controller;
 
 use App\Classes\Container\ArrayList;
 use App\Classes\Container\EventList;
-use App\Classes\Container\StackList;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Security;
 use App\Classes\Library\Utils;
@@ -49,7 +48,6 @@ class ConnectController extends AbstractController
             || !\in_array($player->getStatement(), [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY])) {
             return $this->redirectToRoute('homepage');
         }
-        $player->synchronized = true;
         $player->setStatement(Player::ACTIVE);
 
         $session->set('token', Utils::generateString(5));
@@ -81,31 +79,11 @@ class ConnectController extends AbstractController
         OrbitalBaseManager $orbitalBaseManager,
         Player $player,
     ): void {
-        // création des tableaux de données dans le contrôler
-        $session->set('playerInfo', new ArrayList());
-
-        $session->set('playerBonus', new StackList());
-
         // remplissage des données du joueur
         $session->set('playerId', $player->getId());
 
-        $playerInfo = $session->get('playerInfo');
-        $playerInfo->add('color', $player->getRColor());
-        $playerInfo->add('name', $player->getName());
-        $playerInfo->add('avatar', $player->getAvatar());
-        $playerInfo->add('credit', $player->getCredit());
-        $playerInfo->add('experience', $player->getExperience());
-        $playerInfo->add('level', $player->getLevel());
-        $playerInfo->add('stepTutorial', $player->stepTutorial);
-        $playerInfo->add('stepDone', $player->stepDone);
-        $playerInfo->add('status', $player->status);
-        $playerInfo->add('premium', $player->premium);
-        $playerInfo->add('admin', Utils::isAdmin($player->getBind()));
-
         $playerBases = $orbitalBaseManager->getPlayerBases($player->getId());
         // remplissage des bonus
-        $bonus = $playerBonusManager->getBonusByPlayer($player);
-        $playerBonusManager->initialize($session, $bonus);
 
         // création des paramètres utilisateur
         $session->set('playerParams', new ArrayList());

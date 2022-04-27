@@ -11,8 +11,10 @@ use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Model\Technology;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +25,7 @@ class ViewDocks extends AbstractController
     public function __invoke(
         Request $request,
         OrbitalBase $currentBase,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         Player $currentPlayer,
         ShipQueueManager $shipQueueManager,
         TechnologyManager $technologyManager,
@@ -30,17 +33,18 @@ class ViewDocks extends AbstractController
         ShipHelper $shipHelper,
         string $dockType,
     ): Response {
-        $session = $request->getSession();
+		$playerBonuses = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses;
+
         if (OrbitalBase::DOCK_TYPE_MANUFACTURE === $dockType) {
             $dockLevel = $currentBase->getLevelDock1();
             $buildingNumber = OrbitalBaseResource::DOCK1;
-            $dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK1_SPEED);
+            $dockSpeedBonus = $playerBonuses->get(PlayerBonusId::DOCK1_SPEED);
             $shipsRange = range(0, 5);
             $dockType = 1;
         } elseif (OrbitalBase::DOCK_TYPE_SHIPYARD === $dockType) {
             $dockLevel = $currentBase->getLevelDock2();
             $buildingNumber = OrbitalBaseResource::DOCK2;
-            $dockSpeedBonus = $session->get('playerBonus')->get(PlayerBonus::DOCK2_SPEED);
+            $dockSpeedBonus = $playerBonuses->get(PlayerBonusId::DOCK2_SPEED);
             $shipsRange = range(6, 11);
             $dockType = 2;
         } else {

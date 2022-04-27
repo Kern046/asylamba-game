@@ -12,25 +12,24 @@ use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ViewInvestments extends AbstractController
 {
     public function __invoke(
         Player $currentPlayer,
-        Request $request,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
         CommanderManager $commanderManager,
         CommercialRouteManager $commercialRouteManager,
         PlayerManager $playerManager,
         OrbitalBaseManager $orbitalBaseManager,
         TransactionManager $transactionManager,
     ): Response {
-        $session = $request->getSession();
         $taxCoeff = $this->getParameter('zeus.player.tax_coeff');
 
         $playerBases = $orbitalBaseManager->getPlayerBases($currentPlayer->getId());
@@ -40,8 +39,9 @@ class ViewInvestments extends AbstractController
         $transactions = $transactionManager->getPlayerPropositions($currentPlayer->getId(), Transaction::TYP_SHIP);
 
         // global variable
-        $taxBonus = $session->get('playerBonus')->get(PlayerBonus::POPULATION_TAX);
-        $tradeRoutesIncomeBonus = $session->get('playerBonus')->get(PlayerBonus::COMMERCIAL_INCOME);
+		$playerBonuses = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses;
+        $taxBonus = $playerBonuses->get(PlayerBonusId::POPULATION_TAX);
+        $tradeRoutesIncomeBonus = $playerBonuses->get(PlayerBonusId::COMMERCIAL_INCOME);
 
         $basesData = $this->getBasesData($commercialRouteManager, $playerBases, $taxCoeff);
 
