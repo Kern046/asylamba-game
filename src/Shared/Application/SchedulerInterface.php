@@ -4,5 +4,5 @@ namespace App\Shared\Application;
 
 interface SchedulerInterface
 {
-    public function schedule(): void;
+	public function schedule(): void;
 }

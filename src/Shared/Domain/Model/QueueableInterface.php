@@ -4,7 +4,7 @@ namespace App\Shared\Domain\Model;
 
 interface QueueableInterface
 {
-    public function getEndDate(): string;
+	public function getEndDate(): string;
 
-    public function getResourceIdentifier(): int;
+	public function getResourceIdentifier(): int;
 }

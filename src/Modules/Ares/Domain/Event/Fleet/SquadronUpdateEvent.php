@@ -10,20 +10,20 @@ use App\Shared\Domain\Event\TutorialEvent;
 
 class SquadronUpdateEvent implements TutorialEvent
 {
-    public function __construct(
-        public readonly Commander $commander,
-        public readonly Squadron $squadron,
-        public readonly Player $player,
-    ) {
-    }
+	public function __construct(
+		public readonly Commander $commander,
+		public readonly Squadron $squadron,
+		public readonly Player $player,
+	) {
+	}
 
-    public function getTutorialPlayer(): Player
-    {
-        return $this->player;
-    }
+	public function getTutorialPlayer(): Player
+	{
+		return $this->player;
+	}
 
-    public function getTutorialStep(): int|null
-    {
-        return TutorialResource::FILL_SQUADRON;
-    }
+	public function getTutorialStep(): int|null
+	{
+		return TutorialResource::FILL_SQUADRON;
+	}
 }

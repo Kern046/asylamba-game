@@ -13,14 +13,14 @@ namespace App\Modules\Demeter\Model\Election;
 
 class Vote
 {
-    public $id = 0;
-    public $rCandidate = 0;
-    public $rPlayer = 0;
-    public $rElection = 0;
-    public $dVotation = '';
+	public $id = 0;
+	public $rCandidate = 0;
+	public $rPlayer = 0;
+	public $rElection = 0;
+	public $dVotation = '';
 
-    public function getId()
-    {
-        return $this->id;
-    }
+	public function getId()
+	{
+		return $this->id;
+	}
 }

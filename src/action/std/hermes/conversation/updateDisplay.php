@@ -11,35 +11,35 @@ $conversationManager = $this->getContainer()->get(\App\Modules\Hermes\Manager\Co
 $conversation = $request->query->get('conversation');
 
 if (false !== $conversation) {
-    // vérifier que c'est l'utilisateur courant
+	// vérifier que c'est l'utilisateur courant
 
-    $S_CVM = $conversationManager->getCurrentSession();
-    $conversationManager->newSession();
-    $conversationManager->load(
-        ['c.id' => $conversation, 'cu.rPlayer' => $session->get('playerId')]
-    );
+	$S_CVM = $conversationManager->getCurrentSession();
+	$conversationManager->newSession();
+	$conversationManager->load(
+		['c.id' => $conversation, 'cu.rPlayer' => $session->get('playerId')]
+	);
 
-    if (1 == $conversationManager->size()) {
-        $conv = $conversationManager->get();
-        $users = $conv->players;
+	if (1 == $conversationManager->size()) {
+		$conv = $conversationManager->get();
+		$users = $conv->players;
 
-        foreach ($users as $user) {
-            if ($user->rPlayer == $session->get('playerId')) {
-                if (ConversationUser::CS_DISPLAY == $user->convStatement) {
-                    $user->convStatement = ConversationUser::CS_ARCHIVED;
-                    $session->addFlashbag('La conversation a été archivée.', Flashbag::TYPE_SUCCESS);
-                } else {
-                    $user->convStatement = ConversationUser::CS_DISPLAY;
-                    $session->addFlashbag('La conversation a été désarchivée.', Flashbag::TYPE_SUCCESS);
-                }
-                break;
-            }
-        }
-    } else {
-        throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
-    }
+		foreach ($users as $user) {
+			if ($user->rPlayer == $session->get('playerId')) {
+				if (ConversationUser::CS_DISPLAY == $user->convStatement) {
+					$user->convStatement = ConversationUser::CS_ARCHIVED;
+					$session->addFlashbag('La conversation a été archivée.', Flashbag::TYPE_SUCCESS);
+				} else {
+					$user->convStatement = ConversationUser::CS_DISPLAY;
+					$session->addFlashbag('La conversation a été désarchivée.', Flashbag::TYPE_SUCCESS);
+				}
+				break;
+			}
+		}
+	} else {
+		throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
+	}
 
-    $conversationManager->changeSession($S_CVM);
+	$conversationManager->changeSession($S_CVM);
 } else {
-    throw new ErrorException('Informations manquantes pour quitter la conversation.');
+	throw new ErrorException('Informations manquantes pour quitter la conversation.');
 }

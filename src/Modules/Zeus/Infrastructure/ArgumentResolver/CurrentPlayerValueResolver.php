@@ -10,21 +10,21 @@ use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
 class CurrentPlayerValueResolver implements ArgumentValueResolverInterface
 {
-    public function __construct(protected CurrentPlayerRegistry $currentPlayerRegistry)
-    {
-    }
+	public function __construct(protected CurrentPlayerRegistry $currentPlayerRegistry)
+	{
+	}
 
-    public function supports(Request $request, ArgumentMetadata $argument): bool
-    {
-        if (Player::class !== $argument->getType()) {
-            return false;
-        }
+	public function supports(Request $request, ArgumentMetadata $argument): bool
+	{
+		if (Player::class !== $argument->getType()) {
+			return false;
+		}
 
-        return $this->currentPlayerRegistry->has();
-    }
+		return $this->currentPlayerRegistry->has();
+	}
 
-    public function resolve(Request $request, ArgumentMetadata $argument): iterable
-    {
-        yield $this->currentPlayerRegistry->get();
-    }
+	public function resolve(Request $request, ArgumentMetadata $argument): iterable
+	{
+		yield $this->currentPlayerRegistry->get();
+	}
 }

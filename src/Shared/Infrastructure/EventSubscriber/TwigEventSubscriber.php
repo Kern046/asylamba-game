@@ -17,57 +17,57 @@ use Twig\Environment;
 
 class TwigEventSubscriber implements EventSubscriberInterface
 {
-    protected SessionInterface|null $session;
+	protected SessionInterface|null $session;
 
-    public function __construct(
-        protected Environment $twig,
-        protected ConversationRepositoryInterface $conversationRepository,
-        protected NotificationManager $notificationManager,
-        protected CurrentPlayerRegistry $currentPlayerRegistry,
-        private readonly CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-        protected CommanderManager $commanderManager,
-        protected ShipQueueManager $shipQueueManager,
-        protected OrbitalBaseManager $orbitalBaseManager,
-    ) {
-    }
+	public function __construct(
+		protected Environment $twig,
+		protected ConversationRepositoryInterface $conversationRepository,
+		protected NotificationManager $notificationManager,
+		protected CurrentPlayerRegistry $currentPlayerRegistry,
+		private readonly CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		protected CommanderManager $commanderManager,
+		protected ShipQueueManager $shipQueueManager,
+		protected OrbitalBaseManager $orbitalBaseManager,
+	) {
+	}
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ControllerEvent::class => [
-                ['setCurrentPlayer'],
-                ['setCurrentBase'],
-            ],
-        ];
-    }
+	public static function getSubscribedEvents(): array
+	{
+		return [
+			ControllerEvent::class => [
+				['setCurrentPlayer'],
+				['setCurrentBase'],
+			],
+		];
+	}
 
-    public function setCurrentBase(): void
-    {
-        if (!$this->currentPlayerRegistry->has()) {
-            return;
-        }
-        $playerId = $this->currentPlayerRegistry->get()->id;
-        $currentBase = $this->currentPlayerBasesRegistry->current();
-        $this->twig->addGlobal('current_base', $currentBase);
-        $this->twig->addGlobal('current_player_bases', $this->currentPlayerBasesRegistry->all());
-        $this->twig->addGlobal('first_base', $this->currentPlayerBasesRegistry->first());
-        $this->twig->addGlobal('next_base', $this->currentPlayerBasesRegistry->next());
-        $this->twig->addGlobal('incoming_commanders', $this->commanderManager->getVisibleIncomingAttacks($playerId));
-        $this->twig->addGlobal('outgoing_commanders', $this->commanderManager->getPlayerCommanders($playerId, [Commander::MOVING]));
-        $this->twig->addGlobal('current_dock1_ship_queues', $this->shipQueueManager->getByBaseAndDockType($currentBase->rPlace, 1));
-        $this->twig->addGlobal('current_dock2_ship_queues', $this->shipQueueManager->getByBaseAndDockType($currentBase->rPlace, 2));
-    }
+	public function setCurrentBase(): void
+	{
+		if (!$this->currentPlayerRegistry->has()) {
+			return;
+		}
+		$playerId = $this->currentPlayerRegistry->get()->id;
+		$currentBase = $this->currentPlayerBasesRegistry->current();
+		$this->twig->addGlobal('current_base', $currentBase);
+		$this->twig->addGlobal('current_player_bases', $this->currentPlayerBasesRegistry->all());
+		$this->twig->addGlobal('first_base', $this->currentPlayerBasesRegistry->first());
+		$this->twig->addGlobal('next_base', $this->currentPlayerBasesRegistry->next());
+		$this->twig->addGlobal('incoming_commanders', $this->commanderManager->getVisibleIncomingAttacks($playerId));
+		$this->twig->addGlobal('outgoing_commanders', $this->commanderManager->getPlayerCommanders($playerId, [Commander::MOVING]));
+		$this->twig->addGlobal('current_dock1_ship_queues', $this->shipQueueManager->getByBaseAndDockType($currentBase->rPlace, 1));
+		$this->twig->addGlobal('current_dock2_ship_queues', $this->shipQueueManager->getByBaseAndDockType($currentBase->rPlace, 2));
+	}
 
-    public function setCurrentPlayer(): void
-    {
-        if (!$this->currentPlayerRegistry->has()) {
-            return;
-        }
-        $currentPlayer = $this->currentPlayerRegistry->get();
+	public function setCurrentPlayer(): void
+	{
+		if (!$this->currentPlayerRegistry->has()) {
+			return;
+		}
+		$currentPlayer = $this->currentPlayerRegistry->get();
 
-        $this->twig->addGlobal('current_player', $currentPlayer);
-        $this->twig->addGlobal('current_player_faction_id', $currentPlayer->rColor);
-        $this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerConversations($currentPlayer->getId()));
-        $this->twig->addGlobal('current_player_notifications', $this->notificationManager->getUnreadNotifications($currentPlayer->getId()));
-    }
+		$this->twig->addGlobal('current_player', $currentPlayer);
+		$this->twig->addGlobal('current_player_faction_id', $currentPlayer->rColor);
+		$this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerConversations($currentPlayer->getId()));
+		$this->twig->addGlobal('current_player_notifications', $this->notificationManager->getUnreadNotifications($currentPlayer->getId()));
+	}
 }

@@ -23,44 +23,44 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class ShipQueueManager implements SchedulerInterface
 {
-    public function __construct(
-        private EventDispatcherInterface $eventDispatcher,
-        protected EntityManager $entityManager,
-        protected MessageBusInterface $messageBus,
-    ) {
-    }
+	public function __construct(
+		private EventDispatcherInterface $eventDispatcher,
+		protected EntityManager $entityManager,
+		protected MessageBusInterface $messageBus,
+	) {
+	}
 
-    public function get($id): ?ShipQueue
-    {
-        return $this->entityManager->getRepository(ShipQueue::class)->get($id);
-    }
+	public function get($id): ?ShipQueue
+	{
+		return $this->entityManager->getRepository(ShipQueue::class)->get($id);
+	}
 
-    public function getBaseQueues(int $orbitalBaseId): array
-    {
-        return $this->entityManager->getRepository(ShipQueue::class)->getBaseQueues($orbitalBaseId);
-    }
+	public function getBaseQueues(int $orbitalBaseId): array
+	{
+		return $this->entityManager->getRepository(ShipQueue::class)->getBaseQueues($orbitalBaseId);
+	}
 
-    public function getByBaseAndDockType(int $orbitalBaseId, int $dockType): array
-    {
-        return $this->entityManager->getRepository(ShipQueue::class)->getByBaseAndDockType($orbitalBaseId, $dockType);
-    }
+	public function getByBaseAndDockType(int $orbitalBaseId, int $dockType): array
+	{
+		return $this->entityManager->getRepository(ShipQueue::class)->getByBaseAndDockType($orbitalBaseId, $dockType);
+	}
 
-    public function add(ShipQueue $shipQueue, Player $player): void
-    {
-        $this->entityManager->persist($shipQueue);
-        $this->entityManager->flush($shipQueue);
+	public function add(ShipQueue $shipQueue, Player $player): void
+	{
+		$this->entityManager->persist($shipQueue);
+		$this->entityManager->flush($shipQueue);
 
-        $this->messageBus->dispatch(new ShipQueueMessage($shipQueue->getId()), [DateTimeConverter::to_delay_stamp($shipQueue->dEnd)]);
+		$this->messageBus->dispatch(new ShipQueueMessage($shipQueue->getId()), [DateTimeConverter::to_delay_stamp($shipQueue->dEnd)]);
 
-        $this->eventDispatcher->dispatch(new NewShipQueueEvent($shipQueue, $player));
-    }
+		$this->eventDispatcher->dispatch(new NewShipQueueEvent($shipQueue, $player));
+	}
 
-    public function schedule(): void
-    {
-        $queues = $this->entityManager->getRepository(ShipQueue::class)->getAll();
+	public function schedule(): void
+	{
+		$queues = $this->entityManager->getRepository(ShipQueue::class)->getAll();
 
-        foreach ($queues as $queue) {
-            $this->messageBus->dispatch(new ShipQueueMessage($queue->getId()), [DateTimeConverter::to_delay_stamp($queue->dEnd)]);
-        }
-    }
+		foreach ($queues as $queue) {
+			$this->messageBus->dispatch(new ShipQueueMessage($queue->getId()), [DateTimeConverter::to_delay_stamp($queue->dEnd)]);
+		}
+	}
 }

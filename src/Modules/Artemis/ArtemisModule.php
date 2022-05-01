@@ -6,8 +6,8 @@ use App\Classes\Library\Module;
 
 class ArtemisModule extends Module
 {
-    public function getName(): string
-    {
-        return 'Artemis';
-    }
+	public function getName(): string
+	{
+		return 'Artemis';
+	}
 }

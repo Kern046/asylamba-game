@@ -11,9 +11,9 @@ include 'defaultElement/movers.php';
 
 // contenu spécifique
 echo '<div id="content">';
-    include $componentPath.'publicity.php';
-    include $componentPath.'params/general.php';
-    include $componentPath.'params/display.php';
-    include $componentPath.'params/chat.php';
+	include $componentPath.'publicity.php';
+	include $componentPath.'params/general.php';
+	include $componentPath.'params/display.php';
+	include $componentPath.'params/chat.php';
 //	include $componentPath . 'params/advertisement.php';
 echo '</div>';

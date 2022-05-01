@@ -11,17 +11,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ViewUniversity extends AbstractController
 {
-    public function __invoke(
-        Player $currentPlayer,
-        CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-        ResearchManager $researchManager,
-    ): Response {
-        $researchManager->load(['rPlayer' => $currentPlayer->getId()]);
+	public function __invoke(
+		Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		ResearchManager $researchManager,
+	): Response {
+		$researchManager->load(['rPlayer' => $currentPlayer->getId()]);
 
-        return $this->render('pages/promethee/university.html.twig', [
-            'university_investment_bonus' => $currentPlayerBonusRegistry
-                ->getPlayerBonus()->bonuses->get(PlayerBonusId::UNI_INVEST),
-            'research' => $researchManager->get(0),
-        ]);
-    }
+		return $this->render('pages/promethee/university.html.twig', [
+			'university_investment_bonus' => $currentPlayerBonusRegistry
+				->getPlayerBonus()->bonuses->get(PlayerBonusId::UNI_INVEST),
+			'research' => $researchManager->get(0),
+		]);
+	}
 }

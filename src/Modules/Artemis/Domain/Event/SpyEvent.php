@@ -10,39 +10,39 @@ use App\Shared\Domain\Event\TutorialEvent;
 
 class SpyEvent implements TutorialEvent, TrackingEvent
 {
-    public function __construct(
-        public readonly SpyReport $spyReport,
-        public readonly Player $player
-    ) {
-    }
+	public function __construct(
+		public readonly SpyReport $spyReport,
+		public readonly Player $player
+	) {
+	}
 
-    public function getTutorialPlayer(): Player
-    {
-        return $this->player;
-    }
+	public function getTutorialPlayer(): Player
+	{
+		return $this->player;
+	}
 
-    public function getTutorialStep(): int|null
-    {
-        return TutorialResource::SPY_PLANET;
-    }
+	public function getTutorialStep(): int|null
+	{
+		return TutorialResource::SPY_PLANET;
+	}
 
-    public function getTrackingPeopleId(): int
-    {
-        return $this->player->id;
-    }
+	public function getTrackingPeopleId(): int
+	{
+		return $this->player->id;
+	}
 
-    public function getTrackingEventName(): string
-    {
-        return 'New Spy Report';
-    }
+	public function getTrackingEventName(): string
+	{
+		return 'New Spy Report';
+	}
 
-    public function getTrackingData(): array
-    {
-        return [
-            'place_id' => $this->spyReport->rPlace,
-            'enemy_id' => $this->spyReport->rEnemy,
-            'price' => $this->spyReport->price,
-            'success_percent' => $this->spyReport->success,
-        ];
-    }
+	public function getTrackingData(): array
+	{
+		return [
+			'place_id' => $this->spyReport->rPlace,
+			'enemy_id' => $this->spyReport->rEnemy,
+			'price' => $this->spyReport->price,
+			'success_percent' => $this->spyReport->success,
+		];
+	}
 }

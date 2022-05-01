@@ -8,25 +8,25 @@ use App\Modules\Ares\Model\Squadron;
 
 class SquadronManager
 {
-    public function __construct(protected EntityManager $entityManager)
-    {
-    }
+	public function __construct(protected EntityManager $entityManager)
+	{
+	}
 
-    /**
-     * @return array
-     */
-    public function getCommanderSquadrons(Commander $commander)
-    {
-        return $this->entityManager->getRepository(Squadron::class)->getCommanderSquadrons($commander->getId());
-    }
+	/**
+	 * @return array
+	 */
+	public function getCommanderSquadrons(Commander $commander)
+	{
+		return $this->entityManager->getRepository(Squadron::class)->getCommanderSquadrons($commander->getId());
+	}
 
-    /**
-     * @param int $id
-     *
-     * @return Squadron
-     */
-    public function get($id)
-    {
-        return $this->entityManager->getRepository(Squadron::class)->get($id);
-    }
+	/**
+	 * @param int $id
+	 *
+	 * @return Squadron
+	 */
+	public function get($id)
+	{
+		return $this->entityManager->getRepository(Squadron::class)->get($id);
+	}
 }

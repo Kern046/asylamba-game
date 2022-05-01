@@ -14,30 +14,30 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 #[AsEventListener]
 class CurrentPlayerListener
 {
-    public function __construct(
-        private PlayerManager $playerManager,
-        private PlayerBonusManager $playerBonusManager,
-        private OrbitalBaseManager $orbitalBaseManager,
-        private CurrentPlayerRegistry $currentPlayerRegistry,
-        private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-        private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-    ) {
-    }
+	public function __construct(
+		private PlayerManager $playerManager,
+		private PlayerBonusManager $playerBonusManager,
+		private OrbitalBaseManager $orbitalBaseManager,
+		private CurrentPlayerRegistry $currentPlayerRegistry,
+		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+	) {
+	}
 
-    public function __invoke(RequestEvent $event): void
-    {
-        $request = $event->getRequest();
+	public function __invoke(RequestEvent $event): void
+	{
+		$request = $event->getRequest();
 
-        if (!$request->hasPreviousSession() || null === ($playerId = $request->getSession()->get('playerId'))) {
-            return;
-        }
+		if (!$request->hasPreviousSession() || null === ($playerId = $request->getSession()->get('playerId'))) {
+			return;
+		}
 
-        $player = $this->playerManager->get($playerId);
-        $this->currentPlayerRegistry->set($player);
-        $this->currentPlayerBasesRegistry->setBases($this->orbitalBaseManager->getPlayerBases($playerId));
-        $this->currentPlayerBasesRegistry->setCurrentBase($request->getSession()->get('playerParams')->get('base'));
+		$player = $this->playerManager->get($playerId);
+		$this->currentPlayerRegistry->set($player);
+		$this->currentPlayerBasesRegistry->setBases($this->orbitalBaseManager->getPlayerBases($playerId));
+		$this->currentPlayerBasesRegistry->setCurrentBase($request->getSession()->get('playerParams')->get('base'));
 
-        $bonus = $this->playerBonusManager->getBonusByPlayer($player);
-        $this->currentPlayerBonusRegistry->setPlayerBonus($bonus);
-    }
+		$bonus = $this->playerBonusManager->getBonusByPlayer($player);
+		$this->currentPlayerBonusRegistry->setPlayerBonus($bonus);
+	}
 }

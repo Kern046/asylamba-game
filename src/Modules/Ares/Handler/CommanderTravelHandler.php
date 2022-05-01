@@ -15,43 +15,43 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class CommanderTravelHandler implements MessageHandlerInterface
 {
-    public function __construct(
-        protected CommanderManager $commanderManager,
-        protected ConquestManager $conquestManager,
-        protected LootManager $lootManager,
-        protected PlaceManager $placeManager,
-        protected OrbitalBaseManager $orbitalBaseManager,
-        protected EntityManager $entityManager,
-    ) {
-    }
+	public function __construct(
+		protected CommanderManager $commanderManager,
+		protected ConquestManager $conquestManager,
+		protected LootManager $lootManager,
+		protected PlaceManager $placeManager,
+		protected OrbitalBaseManager $orbitalBaseManager,
+		protected EntityManager $entityManager,
+	) {
+	}
 
-    public function __invoke(CommanderTravelMessage $commanderTravelMessage): void
-    {
-        if (null === ($commander = $this->commanderManager->get($commanderTravelMessage->getCommanderId()))) {
-            return;
-        }
+	public function __invoke(CommanderTravelMessage $commanderTravelMessage): void
+	{
+		if (null === ($commander = $this->commanderManager->get($commanderTravelMessage->getCommanderId()))) {
+			return;
+		}
 
-        match ($commander->getTravelType()) {
-            Commander::MOVE => $this->commanderManager->uChangeBase($commander),
-            Commander::LOOT => $this->lootManager->loot($commander),
-            Commander::COLO => $this->conquestManager->conquer($commander),
-            Commander::BACK => $this->moveBack($commander),
-        };
-    }
+		match ($commander->getTravelType()) {
+			Commander::MOVE => $this->commanderManager->uChangeBase($commander),
+			Commander::LOOT => $this->lootManager->loot($commander),
+			Commander::COLO => $this->conquestManager->conquer($commander),
+			Commander::BACK => $this->moveBack($commander),
+		};
+	}
 
-    protected function moveBack(Commander $commander): void
-    {
-        $place = $this->placeManager->get($commander->rDestinationPlace);
-        $commanderBase = $this->orbitalBaseManager->get($commander->rBase);
+	protected function moveBack(Commander $commander): void
+	{
+		$place = $this->placeManager->get($commander->rDestinationPlace);
+		$commanderBase = $this->orbitalBaseManager->get($commander->rBase);
 
-        $this->commanderManager->endTravel($commander, Commander::AFFECTED);
+		$this->commanderManager->endTravel($commander, Commander::AFFECTED);
 
-        $this->placeManager->sendNotif($place, Place::COMEBACK, $commander);
+		$this->placeManager->sendNotif($place, Place::COMEBACK, $commander);
 
-        if ($commander->resources > 0) {
-            $this->orbitalBaseManager->increaseResources($commanderBase, $commander->resources, true);
-            $commander->resources = 0;
-        }
-        $this->entityManager->flush($commander);
-    }
+		if ($commander->resources > 0) {
+			$this->orbitalBaseManager->increaseResources($commanderBase, $commander->resources, true);
+			$commander->resources = 0;
+		}
+		$this->entityManager->flush($commander);
+	}
 }

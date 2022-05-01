@@ -15,35 +15,35 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class RenameBase extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        OrbitalBase $currentBase,
-        Parser $parser,
-        OrbitalBaseManager $orbitalBaseManager,
-        EntityManager $entityManager,
-    ): Response {
-        // protection du nouveau nom de la base
-        $name = $parser->protect($request->request->get('name'));
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		OrbitalBase $currentBase,
+		Parser $parser,
+		OrbitalBaseManager $orbitalBaseManager,
+		EntityManager $entityManager,
+	): Response {
+		// protection du nouveau nom de la base
+		$name = $parser->protect($request->request->get('name'));
 
-        if (empty($name)) {
-            throw new BadRequestHttpException('Nom invalide');
-        }
-        $check = new CheckName();
-        $check->setMaxLength(20);
+		if (empty($name)) {
+			throw new BadRequestHttpException('Nom invalide');
+		}
+		$check = new CheckName();
+		$check->setMaxLength(20);
 
-        if (!$check->checkLength($name)) {
-            throw new BadRequestHttpException('modification du nom de la base orbitale impossible - nom trop long ou trop court');
-        }
-        if (!$check->checkChar($name)) {
-            throw new BadRequestHttpException('modification du nom de la base orbitale impossible - le nom contient des caractères non-autorisés');
-        }
-        $currentBase->setName($name);
+		if (!$check->checkLength($name)) {
+			throw new BadRequestHttpException('modification du nom de la base orbitale impossible - nom trop long ou trop court');
+		}
+		if (!$check->checkChar($name)) {
+			throw new BadRequestHttpException('modification du nom de la base orbitale impossible - le nom contient des caractères non-autorisés');
+		}
+		$currentBase->setName($name);
 
-        $entityManager->flush($currentBase);
+		$entityManager->flush($currentBase);
 
-        $this->addFlash('success', 'Le nom a été changé en '.$name.' avec succès');
+		$this->addFlash('success', 'Le nom a été changé en '.$name.' avec succès');
 
-        return $this->redirectToRoute('base_overview');
-    }
+		return $this->redirectToRoute('base_overview');
+	}
 }

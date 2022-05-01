@@ -14,32 +14,32 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class MixpanelListener
 {
-    public function __construct(private \Mixpanel $mixpanel, string $environment)
-    {
-        $this->mixpanel->register('environment', $environment);
-    }
+	public function __construct(private \Mixpanel $mixpanel, string $environment)
+	{
+		$this->mixpanel->register('environment', $environment);
+	}
 
-    #[AsEventListener(priority: 10)]
-    public function onPlayerConnection(PlayerConnectionEvent $event): void
-    {
-        $player = $event->player;
+	#[AsEventListener(priority: 10)]
+	public function onPlayerConnection(PlayerConnectionEvent $event): void
+	{
+		$player = $event->player;
 
-        $this->mixpanel->people->set($player->getId(), [
-            'faction_id' => $player->getRColor(),
-        ]);
-    }
+		$this->mixpanel->people->set($player->getId(), [
+			'faction_id' => $player->getRColor(),
+		]);
+	}
 
-    #[AsEventListener(NewBuildingQueueEvent::class)]
-    #[AsEventListener(NewShipQueueEvent::class)]
-    #[AsEventListener(NewTechnologyQueueEvent::class)]
-    #[AsEventListener(NewCommanderEvent::class)]
-    #[AsEventListener(LootEvent::class)]
-    #[AsEventListener(PlayerConnectionEvent::class)]
-    #[AsEventListener(SpyEvent::class)]
-    public function onTrackingEvent(TrackingEvent $event): void
-    {
-        $this->mixpanel->identify($event->getTrackingPeopleId());
+	#[AsEventListener(NewBuildingQueueEvent::class)]
+	#[AsEventListener(NewShipQueueEvent::class)]
+	#[AsEventListener(NewTechnologyQueueEvent::class)]
+	#[AsEventListener(NewCommanderEvent::class)]
+	#[AsEventListener(LootEvent::class)]
+	#[AsEventListener(PlayerConnectionEvent::class)]
+	#[AsEventListener(SpyEvent::class)]
+	public function onTrackingEvent(TrackingEvent $event): void
+	{
+		$this->mixpanel->identify($event->getTrackingPeopleId());
 
-        $this->mixpanel->track($event->getTrackingEventName(), $event->getTrackingData());
-    }
+		$this->mixpanel->track($event->getTrackingEventName(), $event->getTrackingData());
+	}
 }

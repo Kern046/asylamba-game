@@ -15,48 +15,48 @@ $conversationMessageManager = $this->getContainer()->get(\App\Modules\Hermes\Man
 $content = $parser->parse($request->request->get('message'));
 
 if (false == $session->get('playerInfo')->get('admin')) {
-    $response->redirect('profil');
+	$response->redirect('profil');
 } else {
-    if (false !== $content) {
-        if (strlen($content) < 10000) {
-            $S_CVM = $conversationManager->getCurrentSession();
-            $conversationManager->newSession();
-            $conversationManager->load(
-                ['cu.rPlayer' => ID_JEANMI]
-            );
+	if (false !== $content) {
+		if (strlen($content) < 10000) {
+			$S_CVM = $conversationManager->getCurrentSession();
+			$conversationManager->newSession();
+			$conversationManager->load(
+				['cu.rPlayer' => ID_JEANMI]
+			);
 
-            if (1 == $conversationManager->size()) {
-                $conv = $conversationManager->get();
+			if (1 == $conversationManager->size()) {
+				$conv = $conversationManager->get();
 
-                ++$conv->messages;
-                $conv->dLastMessage = Utils::now();
+				++$conv->messages;
+				$conv->dLastMessage = Utils::now();
 
-                // désarchiver tous les users
-                $users = $conv->players;
-                foreach ($users as $user) {
-                    $user->convStatement = ConversationUser::CS_DISPLAY;
-                }
+				// désarchiver tous les users
+				$users = $conv->players;
+				foreach ($users as $user) {
+					$user->convStatement = ConversationUser::CS_DISPLAY;
+				}
 
-                // création du message
-                $message = new ConversationMessage();
+				// création du message
+				$message = new ConversationMessage();
 
-                $message->rConversation = $conv->id;
-                $message->rPlayer = ID_JEANMI;
-                $message->type = ConversationMessage::TY_STD;
-                $message->content = $content;
-                $message->dCreation = Utils::now();
-                $message->dLastModification = null;
+				$message->rConversation = $conv->id;
+				$message->rPlayer = ID_JEANMI;
+				$message->type = ConversationMessage::TY_STD;
+				$message->content = $content;
+				$message->dCreation = Utils::now();
+				$message->dLastModification = null;
 
-                $conversationMessageManager->add($message);
-            } else {
-                throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
-            }
+				$conversationMessageManager->add($message);
+			} else {
+				throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
+			}
 
-            $conversationManager->changeSession($S_CVM);
-        } else {
-            throw new ErrorException('Le message est trop long.');
-        }
-    } else {
-        throw new ErrorException('Informations manquantes pour démarrer une nouvelle conversation.');
-    }
+			$conversationManager->changeSession($S_CVM);
+		} else {
+			throw new ErrorException('Le message est trop long.');
+		}
+	} else {
+		throw new ErrorException('Informations manquantes pour démarrer une nouvelle conversation.');
+	}
 }

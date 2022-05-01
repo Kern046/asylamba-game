@@ -16,16 +16,16 @@ use App\Modules\Promethee\Model\Technology;
 
 class PlayerBonus
 {
-    public int $rPlayer;
-    public Technology $technology;
-    public StackList $bonuses;
-    public int $playerColor;
+	public int $rPlayer;
+	public Technology $technology;
+	public StackList $bonuses;
+	public int $playerColor;
 
-    public function __construct(Player $player, Technology $technology)
-    {
-        $this->rPlayer = $player->id;
-        $this->playerColor = $player->rColor;
-        $this->technology = $technology;
-        $this->bonuses = new StackList();
-    }
+	public function __construct(Player $player, Technology $technology)
+	{
+		$this->rPlayer = $player->id;
+		$this->playerColor = $player->rColor;
+		$this->technology = $technology;
+		$this->bonuses = new StackList();
+	}
 }

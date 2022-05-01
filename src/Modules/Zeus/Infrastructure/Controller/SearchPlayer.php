@@ -10,15 +10,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SearchPlayer extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        PlayerManager $playerManager,
-    ): Response {
-        $id = $request->request->getInt('playerid');
-        if (($player = $playerManager->get($id)) !== null) {
-            return $this->redirectToRoute('embassy', ['player' => $player->getId()]);
-        } else {
-            throw new ErrorException('Aucun joueur ne correspond à votre recherche.');
-        }
-    }
+	public function __invoke(
+		Request $request,
+		PlayerManager $playerManager,
+	): Response {
+		$id = $request->request->getInt('playerid');
+		if (($player = $playerManager->get($id)) !== null) {
+			return $this->redirectToRoute('embassy', ['player' => $player->getId()]);
+		} else {
+			throw new ErrorException('Aucun joueur ne correspond à votre recherche.');
+		}
+	}
 }

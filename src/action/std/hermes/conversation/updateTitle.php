@@ -14,27 +14,27 @@ $title = $request->request->get('title');
 $title = $parser->parse($title);
 
 if (false !== $conversation) {
-    $S_CVM = $conversationManager->getCurrentSession();
-    $conversationManager->newSession();
-    $conversationManager->load(
-        [
-            'c.id' => $conversation,
-            'cu.rPlayer' => $session->get('playerId'),
-            'cu.playerStatement' => ConversationUser::US_ADMIN,
-        ]
-    );
+	$S_CVM = $conversationManager->getCurrentSession();
+	$conversationManager->newSession();
+	$conversationManager->load(
+		[
+			'c.id' => $conversation,
+			'cu.rPlayer' => $session->get('playerId'),
+			'cu.playerStatement' => ConversationUser::US_ADMIN,
+		]
+	);
 
-    if (1 == $conversationManager->size()) {
-        if (strlen($title) < 255) {
-            $conv = $conversationManager->get()->title = $title;
-        } else {
-            throw new ErrorException('Le titre est trop long.');
-        }
-    } else {
-        throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
-    }
+	if (1 == $conversationManager->size()) {
+		if (strlen($title) < 255) {
+			$conv = $conversationManager->get()->title = $title;
+		} else {
+			throw new ErrorException('Le titre est trop long.');
+		}
+	} else {
+		throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
+	}
 
-    $conversationManager->changeSession($S_CVM);
+	$conversationManager->changeSession($S_CVM);
 } else {
-    throw new ErrorException('Informations manquantes pour ajouter un joueur à la conversation.');
+	throw new ErrorException('Informations manquantes pour ajouter un joueur à la conversation.');
 }

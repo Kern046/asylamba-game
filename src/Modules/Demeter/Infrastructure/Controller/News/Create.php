@@ -14,30 +14,30 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Create extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        FactionNewsManager $factionNewsManager,
-    ): Response {
-        $content = $request->request->get('content');
-        $title = $request->request->get('title');
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		FactionNewsManager $factionNewsManager,
+	): Response {
+		$content = $request->request->get('content');
+		$title = $request->request->get('title');
 
-        if (null !== $title and null !== $content) {
-            if ($currentPlayer->isGovernmentMember()) {
-                $news = new FactionNews();
-                $news->rFaction = $currentPlayer->getRColor();
-                $news->title = $title;
-                $factionNewsManager->edit($news, $content);
-                $news->dCreation = Utils::now();
+		if (null !== $title and null !== $content) {
+			if ($currentPlayer->isGovernmentMember()) {
+				$news = new FactionNews();
+				$news->rFaction = $currentPlayer->getRColor();
+				$news->title = $title;
+				$factionNewsManager->edit($news, $content);
+				$news->dCreation = Utils::now();
 
-                $factionNewsManager->add($news);
+				$factionNewsManager->add($news);
 
-                return $this->redirect($request->headers->get('referer'));
-            } else {
-                throw new ErrorException('Vous n\'avez pas le droit de créer une annonce.');
-            }
-        } else {
-            throw new FormException('Manque d\'information.');
-        }
-    }
+				return $this->redirect($request->headers->get('referer'));
+			} else {
+				throw new ErrorException('Vous n\'avez pas le droit de créer une annonce.');
+			}
+		} else {
+			throw new FormException('Manque d\'information.');
+		}
+	}
 }

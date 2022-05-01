@@ -10,25 +10,25 @@ $godSons = $playerManager->getGodSons($session->get('playerId'));
 
 // display
 echo '<div class="component player rank">';
-    echo '<div class="head skin-2"></div>';
-    echo '<div class="fix-body">';
-        echo '<div class="body">';
-            echo '<h4>Liste de vos filleuls</h4>';
+	echo '<div class="head skin-2"></div>';
+	echo '<div class="fix-body">';
+		echo '<div class="body">';
+			echo '<h4>Liste de vos filleuls</h4>';
 
-            foreach ($godSons as $player) {
-                echo '<div class="player color'.$player->rColor.' active">';
-                echo '<a href="'.$appRoot.'embassy/player-'.$player->id.'">';
-                echo '<img src="'.$mediaPath.'avatar/small/'.$player->avatar.'.png" alt="'.$player->name.'" class="picto">';
-                echo '</a>';
-                echo '<span class="title">'.$player->name.'</span>';
-                echo '<strong class="name">'.$player->name.'</strong>';
-                echo '<span class="experience">niveau '.$player->level.'</span>';
-                echo '</div>';
-            }
+			foreach ($godSons as $player) {
+				echo '<div class="player color'.$player->rColor.' active">';
+				echo '<a href="'.$appRoot.'embassy/player-'.$player->id.'">';
+				echo '<img src="'.$mediaPath.'avatar/small/'.$player->avatar.'.png" alt="'.$player->name.'" class="picto">';
+				echo '</a>';
+				echo '<span class="title">'.$player->name.'</span>';
+				echo '<strong class="name">'.$player->name.'</strong>';
+				echo '<span class="experience">niveau '.$player->level.'</span>';
+				echo '</div>';
+			}
 
-            if (0 === count($godSons)) {
-                echo '<p>Vous n\'avez encore aucun filleul.</p>';
-            }
-        echo '</div>';
-    echo '</div>';
+			if (0 === count($godSons)) {
+				echo '<p>Vous n\'avez encore aucun filleul.</p>';
+			}
+		echo '</div>';
+	echo '</div>';
 echo '</div>';

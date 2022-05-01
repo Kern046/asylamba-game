@@ -13,86 +13,86 @@ namespace App\Classes\Library;
 
 class Benchtime
 {
-    // time storage
-    protected $name;
-    protected $time = [];
+	// time storage
+	protected $name;
+	protected $time = [];
 
-    // params variables
-    public const TXT = 1;
-    public const HTML = 2;
-    public const PHP = 3;
+	// params variables
+	public const TXT = 1;
+	public const HTML = 2;
+	public const PHP = 3;
 
-    public function __construct($name = 'Default')
-    {
-        $this->name = $name;
-        $this->makePoint('Start');
-    }
+	public function __construct($name = 'Default')
+	{
+		$this->name = $name;
+		$this->makePoint('Start');
+	}
 
-    // démarre un nouveau temps
-    public function makePoint($name = false)
-    {
-        $this->time[] = [
-            'name' => ucfirst($name ? $name : 'Breakpoint'),
-            'time' => $this->getMicrotime(),
-        ];
-    }
+	// démarre un nouveau temps
+	public function makePoint($name = false)
+	{
+		$this->time[] = [
+			'name' => ucfirst($name ? $name : 'Breakpoint'),
+			'time' => $this->getMicrotime(),
+		];
+	}
 
-    public function getResult($mode = false)
-    {
-        $interval = $this->transform();
-        $mode = $mode ? $mode : self::HTML;
-        $ret = '';
+	public function getResult($mode = false)
+	{
+		$interval = $this->transform();
+		$mode = $mode ? $mode : self::HTML;
+		$ret = '';
 
-        if (self::TXT == $mode) {
-            $ret .= $this->name."\r\n";
-            $ret .= '-------------------'."\r\n";
-            $ret .= '   | time  | name  '."\r\n";
-            $ret .= '---|-------|-------'."\r\n";
+		if (self::TXT == $mode) {
+			$ret .= $this->name."\r\n";
+			$ret .= '-------------------'."\r\n";
+			$ret .= '   | time  | name  '."\r\n";
+			$ret .= '---|-------|-------'."\r\n";
 
-            foreach ($interval as $k => $v) {
-                $ret .= '#'.($k + 1).' | '.number_format($v['time'], 3, '.', ' ').' | '.$v['name']."\r\n";
-            }
-        } elseif (self::HTML == $mode) {
-            $ret .= '<table>';
-            $ret .= '<tr>';
-            $ret .= '<th></th>';
-            $ret .= '<th>time</th>';
-            $ret .= '<th>name</th>';
-            $ret .= '</tr>';
+			foreach ($interval as $k => $v) {
+				$ret .= '#'.($k + 1).' | '.number_format($v['time'], 3, '.', ' ').' | '.$v['name']."\r\n";
+			}
+		} elseif (self::HTML == $mode) {
+			$ret .= '<table>';
+			$ret .= '<tr>';
+			$ret .= '<th></th>';
+			$ret .= '<th>time</th>';
+			$ret .= '<th>name</th>';
+			$ret .= '</tr>';
 
-            foreach ($interval as $k => $v) {
-                $ret .= '<tr>';
-                $ret .= '<td>#'.($k + 1).'</td>';
-                $ret .= '<td>'.number_format($v['time'], 3, '.', ' ').'</td>';
-                $ret .= '<td>'.$v['name'].'</td>';
-                $ret .= '</tr>';
-            }
-            $ret .= '</table>';
-        } elseif (self::PHP == $mode) {
-            $ret = $interval;
-        }
+			foreach ($interval as $k => $v) {
+				$ret .= '<tr>';
+				$ret .= '<td>#'.($k + 1).'</td>';
+				$ret .= '<td>'.number_format($v['time'], 3, '.', ' ').'</td>';
+				$ret .= '<td>'.$v['name'].'</td>';
+				$ret .= '</tr>';
+			}
+			$ret .= '</table>';
+		} elseif (self::PHP == $mode) {
+			$ret = $interval;
+		}
 
-        return $ret;
-    }
+		return $ret;
+	}
 
-    protected function transform()
-    {
-        $interval = [];
+	protected function transform()
+	{
+		$interval = [];
 
-        for ($i = 1; $i < count($this->time); ++$i) {
-            $interval[] = [
-                'name' => $this->time[$i]['name'],
-                'time' => $this->time[$i]['time'] - $this->time[$i - 1]['time'],
-            ];
-        }
+		for ($i = 1; $i < count($this->time); ++$i) {
+			$interval[] = [
+				'name' => $this->time[$i]['name'],
+				'time' => $this->time[$i]['time'] - $this->time[$i - 1]['time'],
+			];
+		}
 
-        return $interval;
-    }
+		return $interval;
+	}
 
-    protected function getMicrotime()
-    {
-        list($usec, $sec) = explode(' ', microtime());
+	protected function getMicrotime()
+	{
+		list($usec, $sec) = explode(' ', microtime());
 
-        return (float) $usec + (float) $sec;
-    }
+		return (float) $usec + (float) $sec;
+	}
 }

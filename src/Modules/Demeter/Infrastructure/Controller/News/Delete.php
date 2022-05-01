@@ -11,24 +11,24 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Delete extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        EntityManager $entityManager,
-        FactionNewsManager $factionNewsManager,
-        int $id,
-    ): Response {
-        if (($factionNew = $factionNewsManager->get($id)) === null) {
-            throw $this->createNotFoundException('Cette annonce n\'existe pas.');
-        }
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		EntityManager $entityManager,
+		FactionNewsManager $factionNewsManager,
+		int $id,
+	): Response {
+		if (($factionNew = $factionNewsManager->get($id)) === null) {
+			throw $this->createNotFoundException('Cette annonce n\'existe pas.');
+		}
 
-        if (!$currentPlayer->isGovernmentMember() || $currentPlayer->getRColor() !== $factionNew->rFaction) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas le droit de supprimer cette annonce');
-        }
+		if (!$currentPlayer->isGovernmentMember() || $currentPlayer->getRColor() !== $factionNew->rFaction) {
+			throw $this->createAccessDeniedException('Vous n\'avez pas le droit de supprimer cette annonce');
+		}
 
-        $entityManager->remove($factionNew);
-        $this->addFlash('success', 'L\'annonce a bien été supprimée.');
+		$entityManager->remove($factionNew);
+		$this->addFlash('success', 'L\'annonce a bien été supprimée.');
 
-        return $this->redirect($request->headers->get('referer'));
-    }
+		return $this->redirect($request->headers->get('referer'));
+	}
 }

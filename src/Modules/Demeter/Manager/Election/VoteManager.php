@@ -18,34 +18,34 @@ use App\Modules\Zeus\Model\Player;
 
 class VoteManager
 {
-    public function __construct(protected EntityManager $entityManager)
-    {
-    }
+	public function __construct(protected EntityManager $entityManager)
+	{
+	}
 
-    /**
-     * @return array
-     */
-    public function getElectionVotes(Election $election)
-    {
-        return $this->entityManager->getRepository(Vote::class)->getElectionVotes($election->id);
-    }
+	/**
+	 * @return array
+	 */
+	public function getElectionVotes(Election $election)
+	{
+		return $this->entityManager->getRepository(Vote::class)->getElectionVotes($election->id);
+	}
 
-    /**
-     * @return Vote
-     */
-    public function getPlayerVote(Player $player, Election $election)
-    {
-        return $this->entityManager->getRepository(Vote::class)->getPlayerVote($player->id, $election->id);
-    }
+	/**
+	 * @return Vote
+	 */
+	public function getPlayerVote(Player $player, Election $election)
+	{
+		return $this->entityManager->getRepository(Vote::class)->getPlayerVote($player->id, $election->id);
+	}
 
-    /**
-     * @return int
-     */
-    public function add(Vote $vote)
-    {
-        $this->entityManager->persist($vote);
-        $this->entityManager->flush($vote);
+	/**
+	 * @return int
+	 */
+	public function add(Vote $vote)
+	{
+		$this->entityManager->persist($vote);
+		$this->entityManager->flush($vote);
 
-        return $vote->id;
-    }
+		return $vote->id;
+	}
 }

@@ -7,7 +7,7 @@ use App\Shared\Domain\Specification\Specification;
 
 abstract class PlayerSpecification implements Specification
 {
-    public function __construct(protected Player $player)
-    {
-    }
+	public function __construct(protected Player $player)
+	{
+	}
 }

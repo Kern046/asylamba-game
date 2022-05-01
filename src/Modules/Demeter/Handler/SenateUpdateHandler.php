@@ -13,27 +13,27 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class SenateUpdateHandler implements MessageHandlerInterface
 {
-    public function __construct(
-        protected ColorManager $colorManager,
-        protected PlayerManager $playerManager,
-        protected MessageBusInterface $messageBus,
-        protected EntityManager $entityManager,
-    ) {
-    }
+	public function __construct(
+		protected ColorManager $colorManager,
+		protected PlayerManager $playerManager,
+		protected MessageBusInterface $messageBus,
+		protected EntityManager $entityManager,
+	) {
+	}
 
-    public function __invoke(SenateUpdateMessage $message): void
-    {
-        $faction = $this->colorManager->get($message->getFactionId());
-        $this->colorManager->updateStatus($faction, $this->playerManager->getFactionPlayersByRanking($faction->getId()));
+	public function __invoke(SenateUpdateMessage $message): void
+	{
+		$faction = $this->colorManager->get($message->getFactionId());
+		$this->colorManager->updateStatus($faction, $this->playerManager->getFactionPlayersByRanking($faction->getId()));
 
-        if (Color::ROYALISTIC === $faction->regime && Color::MANDATE === $faction->electionStatement) {
-            $date = date('Y-m-d H:i:s', time() + $faction->mandateDuration);
-            $faction->dLastElection = $date;
-            $this->messageBus->dispatch(
-                new SenateUpdateMessage($faction->getId()),
-                [DateTimeConverter::to_delay_stamp($date)],
-            );
-            $this->entityManager->flush($faction);
-        }
-    }
+		if (Color::ROYALISTIC === $faction->regime && Color::MANDATE === $faction->electionStatement) {
+			$date = date('Y-m-d H:i:s', time() + $faction->mandateDuration);
+			$faction->dLastElection = $date;
+			$this->messageBus->dispatch(
+				new SenateUpdateMessage($faction->getId()),
+				[DateTimeConverter::to_delay_stamp($date)],
+			);
+			$this->entityManager->flush($faction);
+		}
+	}
 }

@@ -8,6 +8,10 @@ $finder = (new PhpCsFixer\Finder())
 return (new PhpCsFixer\Config())
     ->setRules([
         '@Symfony' => true,
+		'@PSR2' => true,
+		'indentation_type' => true,
     ])
+	->setIndent("\t")
+	->setLineEnding("\n")
     ->setFinder($finder)
 ;

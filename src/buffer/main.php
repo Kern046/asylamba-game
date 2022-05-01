@@ -5,10 +5,10 @@ use App\Modules\Zeus\Model\Player;
 
 $container = $this->getContainer();
 if ('dev' === $this->getContainer()->getParameter('environment') || $this->getContainer()->get('app.request')->query->get('key') === $this->getContainer()->getParameter('security_buffer_key')) {
-    $playerManager = $this->getContainer()->get(\App\Modules\Zeus\Manager\PlayerManager::class);
-    $security = $this->getContainer()->get(\App\Classes\Library\Security::class);
+	$playerManager = $this->getContainer()->get(\App\Modules\Zeus\Manager\PlayerManager::class);
+	$security = $this->getContainer()->get(\App\Classes\Library\Security::class);
 
-    $activePlayers = $playerManager->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]); ?>
+	$activePlayers = $playerManager->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]); ?>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -27,29 +27,29 @@ if ('dev' === $this->getContainer()->getParameter('environment') || $this->getCo
 
 	<div class="content">
 <?php
-        echo '<a href="'.$container->getParameter('app_root').'inscription/bindkey-'.$security->crypt($security->buildBindkey(Utils::generateString(10))).'">';
-    echo '<em>Créer un</em>';
-    echo '<strong>Personnage lvl. 1</strong>';
-    echo '<img src="'.$container->getParameter('media').'avatar/big/empty.png" alt="" />';
-    echo '</a>';
+		echo '<a href="'.$container->getParameter('app_root').'inscription/bindkey-'.$security->crypt($security->buildBindkey(Utils::generateString(10))).'">';
+	echo '<em>Créer un</em>';
+	echo '<strong>Personnage lvl. 1</strong>';
+	echo '<img src="'.$container->getParameter('media').'avatar/big/empty.png" alt="" />';
+	echo '</a>';
 
-    if ($container->getParameter('highmode')) {
-        echo '<a href="'.$container->getParameter('app_root').'inscription/bindkey-'.$security->crypt($security->buildBindkey(Utils::generateString(10))).'/mode-high">';
-        echo '<em>Créer un</em>';
-        echo '<strong>Personnage lvl. 5</strong>';
-        echo '<img src="'.$container->getParameter('media').'avatar/big/empty.png" alt=œ"" />';
-        echo '<span class="number">+5</span>';
-        echo '</a>';
-    }
+	if ($container->getParameter('highmode')) {
+		echo '<a href="'.$container->getParameter('app_root').'inscription/bindkey-'.$security->crypt($security->buildBindkey(Utils::generateString(10))).'/mode-high">';
+		echo '<em>Créer un</em>';
+		echo '<strong>Personnage lvl. 5</strong>';
+		echo '<img src="'.$container->getParameter('media').'avatar/big/empty.png" alt=œ"" />';
+		echo '<span class="number">+5</span>';
+		echo '</a>';
+	}
 
-    foreach ($activePlayers as $player) {
-        echo '<a class="color'.$player->rColor.'" href="'.$container->getParameter('app_root').'connection/bindkey-'.$security->crypt($security->buildBindkey($player->bind)).'">';
-        echo '<em>Grade '.$player->level.'</em>';
-        echo '<strong>'.$player->name.'</strong>';
-        echo '<img src="'.$container->getParameter('media').'avatar/big/'.$player->avatar.'.png" alt="" />';
-        echo '<span class="number">'.$player->level.'</span>';
-        echo '</a>';
-    } ?>
+	foreach ($activePlayers as $player) {
+		echo '<a class="color'.$player->rColor.'" href="'.$container->getParameter('app_root').'connection/bindkey-'.$security->crypt($security->buildBindkey($player->bind)).'">';
+		echo '<em>Grade '.$player->level.'</em>';
+		echo '<strong>'.$player->name.'</strong>';
+		echo '<img src="'.$container->getParameter('media').'avatar/big/'.$player->avatar.'.png" alt="" />';
+		echo '<span class="number">'.$player->level.'</span>';
+		echo '</a>';
+	} ?>
 	</div>
 </body>
 

@@ -13,192 +13,192 @@ namespace App\Modules\Gaia\Model;
 
 class Sector
 {
-    public $id = 0;
+	public $id = 0;
 
-    public $rColor;
-    public $rSurrender;
-    public $xPosition;
-    public $yPosition;
-    public $xBarycentric;
-    public $yBarycentric;
-    public $tax;
-    public $name;
-    public $points;
+	public $rColor;
+	public $rSurrender;
+	public $xPosition;
+	public $yPosition;
+	public $xBarycentric;
+	public $yBarycentric;
+	public $tax;
+	public $name;
+	public $points;
 
-    public $population;
-    public $lifePlanet;
-    /** @var bool * */
-    public $prime;
+	public $population;
+	public $lifePlanet;
+	/** @var bool * */
+	public $prime;
 
-    // public $prime
+	// public $prime
 
-    public $systems = [];
+	public $systems = [];
 
-    public function __construct()
-    {
-    }
+	public function __construct()
+	{
+	}
 
-    // GETTER
-    public function getId()
-    {
-        return $this->id;
-    }
+	// GETTER
+	public function getId()
+	{
+		return $this->id;
+	}
 
-    public function getRColor()
-    {
-        return $this->rColor;
-    }
+	public function getRColor()
+	{
+		return $this->rColor;
+	}
 
-    public function getXPosition()
-    {
-        return $this->xPosition;
-    }
+	public function getXPosition()
+	{
+		return $this->xPosition;
+	}
 
-    public function getYPosition()
-    {
-        return $this->yPosition;
-    }
+	public function getYPosition()
+	{
+		return $this->yPosition;
+	}
 
-    public function getXBarycentric()
-    {
-        return $this->xBarycentric;
-    }
+	public function getXBarycentric()
+	{
+		return $this->xBarycentric;
+	}
 
-    public function getYBarycentric()
-    {
-        return $this->yBarycentric;
-    }
+	public function getYBarycentric()
+	{
+		return $this->yBarycentric;
+	}
 
-    public function getTax()
-    {
-        return $this->tax;
-    }
+	public function getTax()
+	{
+		return $this->tax;
+	}
 
-    public function getName()
-    {
-        return $this->name;
-    }
+	public function getName()
+	{
+		return $this->name;
+	}
 
-    public function getPoints()
-    {
-        return $this->points;
-    }
+	public function getPoints()
+	{
+		return $this->points;
+	}
 
-    public function getPopulation()
-    {
-        return $this->population;
-    }
+	public function getPopulation()
+	{
+		return $this->population;
+	}
 
-    public function getLifePlanet()
-    {
-        return $this->lifePlanet;
-    }
+	public function getLifePlanet()
+	{
+		return $this->lifePlanet;
+	}
 
-    /**
-     * @return bool
-     */
-    public function getPrime()
-    {
-        return $this->prime;
-    }
+	/**
+	 * @return bool
+	 */
+	public function getPrime()
+	{
+		return $this->prime;
+	}
 
-    // SETTER
-    public function setId($v)
-    {
-        $this->id = $v;
+	// SETTER
+	public function setId($v)
+	{
+		$this->id = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setRColor($v)
-    {
-        $this->rColor = $v;
+	public function setRColor($v)
+	{
+		$this->rColor = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setXPosition($v)
-    {
-        $this->xPosition = $v;
+	public function setXPosition($v)
+	{
+		$this->xPosition = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setYPosition($v)
-    {
-        $this->yPosition = $v;
+	public function setYPosition($v)
+	{
+		$this->yPosition = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setXBarycentric($v)
-    {
-        $this->xBarycentric = $v;
+	public function setXBarycentric($v)
+	{
+		$this->xBarycentric = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setYBarycentric($v)
-    {
-        $this->yBarycentric = $v;
+	public function setYBarycentric($v)
+	{
+		$this->yBarycentric = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setTax($v)
-    {
-        $this->tax = $v;
+	public function setTax($v)
+	{
+		$this->tax = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setName($v)
-    {
-        $this->name = $v;
+	public function setName($v)
+	{
+		$this->name = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setPoints($v)
-    {
-        $this->points = $v;
+	public function setPoints($v)
+	{
+		$this->points = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setPopulation($v)
-    {
-        $this->population = $v;
+	public function setPopulation($v)
+	{
+		$this->population = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setLifePlanet($v)
-    {
-        $this->lifePlanet = $v;
+	public function setLifePlanet($v)
+	{
+		$this->lifePlanet = $v;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @param bool $isPrime
-     *
-     * @return \App\Modules\Gaia\Model\Sector
-     */
-    public function setPrime($isPrime)
-    {
-        $this->prime = $isPrime;
+	/**
+	 * @param bool $isPrime
+	 *
+	 * @return \App\Modules\Gaia\Model\Sector
+	 */
+	public function setPrime($isPrime)
+	{
+		$this->prime = $isPrime;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function getSystemsByPosition($i)
-    {
-        return $this->systems[$i];
-    }
+	public function getSystemsByPosition($i)
+	{
+		return $this->systems[$i];
+	}
 
-    public function systemsSize()
-    {
-        return count($this->systems);
-    }
+	public function systemsSize()
+	{
+		return count($this->systems);
+	}
 }

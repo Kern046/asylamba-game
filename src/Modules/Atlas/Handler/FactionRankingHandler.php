@@ -16,58 +16,58 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class FactionRankingHandler implements MessageHandlerInterface
 {
-    public function __construct(
-        protected EntityManager $entityManager,
-        protected ColorManager $colorManager,
-        protected FactionRankingManager $factionRankingManager,
-        protected RankingManager $rankingManager,
-        protected string $serverStartTime,
-        protected int $hoursBeforeStartOfRanking,
-        protected int $pointsToWin,
-    ) {
-    }
+	public function __construct(
+		protected EntityManager $entityManager,
+		protected ColorManager $colorManager,
+		protected FactionRankingManager $factionRankingManager,
+		protected RankingManager $rankingManager,
+		protected string $serverStartTime,
+		protected int $hoursBeforeStartOfRanking,
+		protected int $pointsToWin,
+	) {
+	}
 
-    public function __invoke(FactionRankingMessage $message): void
-    {
-        if (true === $this->entityManager->getRepository(Ranking::class)->hasBeenAlreadyProcessed(false, true)) {
-            return;
-        }
-        $factionRoutine = new FactionRoutine();
+	public function __invoke(FactionRankingMessage $message): void
+	{
+		if (true === $this->entityManager->getRepository(Ranking::class)->hasBeenAlreadyProcessed(false, true)) {
+			return;
+		}
+		$factionRoutine = new FactionRoutine();
 
-        $factions = $this->colorManager->getInGameFactions();
-        $playerRankingRepository = $this->entityManager->getRepository(PlayerRanking::class);
-        $factionRankingRepository = $this->entityManager->getRepository(FactionRanking::class);
-        $sectors = $this->entityManager->getRepository(Sector::class)->getAll();
+		$factions = $this->colorManager->getInGameFactions();
+		$playerRankingRepository = $this->entityManager->getRepository(PlayerRanking::class);
+		$factionRankingRepository = $this->entityManager->getRepository(FactionRanking::class);
+		$sectors = $this->entityManager->getRepository(Sector::class)->getAll();
 
-        $S_FRM1 = $this->factionRankingManager->getCurrentSession();
-        $this->factionRankingManager->newSession();
-        $this->factionRankingManager->loadLastContext();
+		$S_FRM1 = $this->factionRankingManager->getCurrentSession();
+		$this->factionRankingManager->newSession();
+		$this->factionRankingManager->loadLastContext();
 
-        $ranking = $this->rankingManager->createRanking(false, true);
+		$ranking = $this->rankingManager->createRanking(false, true);
 
-        foreach ($factions as $faction) {
-            $this->colorManager->updateInfos($faction);
+		foreach ($factions as $faction) {
+			$this->colorManager->updateInfos($faction);
 
-            $routesIncome = $factionRankingRepository->getRoutesIncome($faction);
-            $playerRankings = $playerRankingRepository->getFactionPlayerRankings($faction);
+			$routesIncome = $factionRankingRepository->getRoutesIncome($faction);
+			$playerRankings = $playerRankingRepository->getFactionPlayerRankings($faction);
 
-            $factionRoutine->execute($faction, $playerRankings, $routesIncome, $sectors);
-        }
+			$factionRoutine->execute($faction, $playerRankings, $routesIncome, $sectors);
+		}
 
-        $winningFactionId = $factionRoutine->processResults(
-            $ranking,
-            $factions,
-            $this->factionRankingManager,
-            $this->serverStartTime,
-            $this->hoursBeforeStartOfRanking,
-            $this->pointsToWin,
-        );
+		$winningFactionId = $factionRoutine->processResults(
+			$ranking,
+			$factions,
+			$this->factionRankingManager,
+			$this->serverStartTime,
+			$this->hoursBeforeStartOfRanking,
+			$this->pointsToWin,
+		);
 
-        $this->factionRankingManager->changeSession($S_FRM1);
+		$this->factionRankingManager->changeSession($S_FRM1);
 
-        if (null !== $winningFactionId) {
-            $this->rankingManager->processWinningFaction($winningFactionId);
-        }
-        $this->entityManager->flush();
-    }
+		if (null !== $winningFactionId) {
+			$this->rankingManager->processWinningFaction($winningFactionId);
+		}
+		$this->entityManager->flush();
+	}
 }

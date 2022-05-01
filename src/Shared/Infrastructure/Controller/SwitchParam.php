@@ -9,14 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SwitchParam extends AbstractController
 {
-    public function __invoke(Request $request): Response
-    {
-        $params = $request->query->get('params');
+	public function __invoke(Request $request): Response
+	{
+		$params = $request->query->get('params');
 
-        if (false !== $params && in_array($params, Params::getParams())) {
-            $request->cookies->set('p'.$params, $request->cookies->get('p'.$params) ?? Params::$params[$params]);
-        }
+		if (false !== $params && in_array($params, Params::getParams())) {
+			$request->cookies->set('p'.$params, $request->cookies->get('p'.$params) ?? Params::$params[$params]);
+		}
 
-        return $this->redirect($request->headers->get('Referer'));
-    }
+		return $this->redirect($request->headers->get('Referer'));
+	}
 }

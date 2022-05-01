@@ -24,41 +24,42 @@ $content = $request->request->get('content');
 $rForum = $request->query->get('rforum');
 
 if (false !== $title and false !== $content and false !== $rForum) {
-    $topic = new ForumTopic();
-    $topic->title = $title;
-    $topic->rForum = $rForum;
-    $topic->rPlayer = $session->get('playerId');
-    $topic->rColor = $session->get('playerInfo')->get('color');
-    $topic->dCreation = Utils::now();
-    $topic->dLastMessage = Utils::now();
+	$topic = new ForumTopic();
+	$topic->title = $title;
+	$topic->rForum = $rForum;
+	$topic->rPlayer = $session->get('playerId');
+	$topic->rColor = $session->get('playerInfo')->get('color');
+	$topic->dCreation = Utils::now();
+	$topic->dLastMessage = Utils::now();
 
-    $rTopic = $topicManager->add($topic);
+	$rTopic = $topicManager->add($topic);
 
-    $message = new ForumMessage();
-    $message->rPlayer = $session->get('playerId');
-    $message->rTopic = $rTopic;
-    $forumMessageManager->edit($message, $content);
-    $message->dCreation = Utils::now();
-    $message->dLastMessage = Utils::now();
+	$message = new ForumMessage();
+	$message->rPlayer = $session->get('playerId');
+	$message->rTopic = $rTopic;
+	$forumMessageManager->edit($message, $content);
+	$message->dCreation = Utils::now();
+	$message->dLastMessage = Utils::now();
 
-    $forumMessageManager->add($message);
+	$forumMessageManager->add($message);
 
-    // tutorial
-    if (false == $session->get('playerInfo')->get('stepDone') &&
-        TutorialResource::FACTION_FORUM === $session->get('playerInfo')->get('stepTutorial')) {
-        $tutorialHelper->setStepDone();
-    }
+	// tutorial
+	if (false == $session->get('playerInfo')->get('stepDone') &&
+		TutorialResource::FACTION_FORUM === $session->get('playerInfo')->get('stepTutorial')) {
+		$tutorialHelper->setStepDone();
+	}
 
-    if (true === $this->getContainer()->getParameter('data_analysis')) {
-        $qr = $database->prepare('INSERT INTO 
+	if (true === $this->getContainer()->getParameter('data_analysis')) {
+		$qr = $database->prepare(
+			'INSERT INTO 
 			DA_SocialRelation(`from`, type, message, dAction)
 			VALUES(?, ?, ?, ?)'
-        );
-        $qr->execute([$session->get('playerId'), 1, $content, Utils::now()]);
-    }
+		);
+		$qr->execute([$session->get('playerId'), 1, $content, Utils::now()]);
+	}
 
-    $response->redirect('faction/view-forum/forum-'.$topic->rForum.'/topic-'.$topic->id.'/sftr-2');
-    $session->addFlashbag('Topic créé.', Flashbag::TYPE_SUCCESS);
+	$response->redirect('faction/view-forum/forum-'.$topic->rForum.'/topic-'.$topic->id.'/sftr-2');
+	$session->addFlashbag('Topic créé.', Flashbag::TYPE_SUCCESS);
 } else {
-    throw new FormException('Manque d\information.');
+	throw new FormException('Manque d\information.');
 }

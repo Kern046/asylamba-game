@@ -8,9 +8,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ViewForum extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-    ): Response {
-        return $this->render('pages/demeter/forum.html.twig');
-    }
+	public function __invoke(
+		Request $request,
+	): Response {
+		return $this->render('pages/demeter/forum.html.twig');
+	}
 }

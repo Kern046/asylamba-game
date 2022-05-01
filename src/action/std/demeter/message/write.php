@@ -23,50 +23,51 @@ $content = $request->request->get('content');
 $rTopic = $request->query->get('rtopic');
 
 if ($rTopic and $content) {
-    $S_TOM_1 = $topicManager->getCurrentSession();
-    $topicManager->load(['id' => $rTopic]);
+	$S_TOM_1 = $topicManager->getCurrentSession();
+	$topicManager->load(['id' => $rTopic]);
 
-    if (1 == $topicManager->size()) {
-        if (!$topicManager->get()->isClosed) {
-            $message = new ForumMessage();
-            $message->rPlayer = $session->get('playerId');
-            $message->rTopic = $rTopic;
-            $message->dCreation = Utils::now();
-            $message->dLastMessage = Utils::now();
+	if (1 == $topicManager->size()) {
+		if (!$topicManager->get()->isClosed) {
+			$message = new ForumMessage();
+			$message->rPlayer = $session->get('playerId');
+			$message->rTopic = $rTopic;
+			$message->dCreation = Utils::now();
+			$message->dLastMessage = Utils::now();
 
-            $forumMessageManager->edit($message, $content);
+			$forumMessageManager->edit($message, $content);
 
-            $forumMessageManager->add($message);
+			$forumMessageManager->add($message);
 
-            $topicManager->get()->dLastMessage = Utils::now();
+			$topicManager->get()->dLastMessage = Utils::now();
 
-            // tutorial
-            if (false == $session->get('playerInfo')->get('stepDone') &&
-                TutorialResource::FACTION_FORUM === $session->get('playerInfo')->get('stepTutorial')) {
-                $tutorialHelper->setStepDone();
-            }
+			// tutorial
+			if (false == $session->get('playerInfo')->get('stepDone') &&
+				TutorialResource::FACTION_FORUM === $session->get('playerInfo')->get('stepTutorial')) {
+				$tutorialHelper->setStepDone();
+			}
 
-            if (30 != $topicManager->get()->rForum) {
-                $response->redirect('faction/view-forum/forum-'.$topicManager->get()->rForum.'/topic-'.$rTopic.'/sftr-2');
-            }
+			if (30 != $topicManager->get()->rForum) {
+				$response->redirect('faction/view-forum/forum-'.$topicManager->get()->rForum.'/topic-'.$rTopic.'/sftr-2');
+			}
 
-            if (true === $this->getContainer()->getParameter('data_analysis')) {
-                $qr = $database->prepare('INSERT INTO 
+			if (true === $this->getContainer()->getParameter('data_analysis')) {
+				$qr = $database->prepare(
+					'INSERT INTO 
 					DA_SocialRelation(`from`, type, message, dAction)
 					VALUES(?, ?, ?, ?)'
-                );
-                $qr->execute([$session->get('playerId'), 1, $content, Utils::now()]);
-            }
+				);
+				$qr->execute([$session->get('playerId'), 1, $content, Utils::now()]);
+			}
 
-            $session->addFlashbag('Message créé.', Flashbag::TYPE_SUCCESS);
-        } else {
-            throw new ErrorException('Ce sujet est fermé.');
-        }
-    } else {
-        throw new ErrorException('Le topic n\'existe pas.');
-    }
+			$session->addFlashbag('Message créé.', Flashbag::TYPE_SUCCESS);
+		} else {
+			throw new ErrorException('Ce sujet est fermé.');
+		}
+	} else {
+		throw new ErrorException('Le topic n\'existe pas.');
+	}
 
-    $topicManager->changeSession($S_TOM_1);
+	$topicManager->changeSession($S_TOM_1);
 } else {
-    throw new FormException('Manque d\'information.');
+	throw new FormException('Manque d\'information.');
 }

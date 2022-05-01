@@ -9,7 +9,7 @@ $this->getContainer()->get(\App\Classes\Database\DatabaseAdmin::class)->query('A
 $factions = $this->getContainer()->get(\App\Modules\Demeter\Manager\ColorManager::class)->getAll();
 
 foreach ($factions as $faction) {
-    $faction->isInGame = 1;
+	$faction->isInGame = 1;
 }
 
 $this->getContainer()->get(\App\Classes\Entity\EntityManager::class)->flush(Color::class);

@@ -23,40 +23,40 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class BuildingQueueManager implements SchedulerInterface
 {
-    public function __construct(
-        private MessageBusInterface $messenger,
-        private EntityManager $entityManager,
-        private EventDispatcherInterface $eventDispatcher,
-    ) {
-    }
+	public function __construct(
+		private MessageBusInterface $messenger,
+		private EntityManager $entityManager,
+		private EventDispatcherInterface $eventDispatcher,
+	) {
+	}
 
-    public function get(int $id): ?BuildingQueue
-    {
-        return $this->entityManager->getRepository(BuildingQueue::class)->get($id);
-    }
+	public function get(int $id): ?BuildingQueue
+	{
+		return $this->entityManager->getRepository(BuildingQueue::class)->get($id);
+	}
 
-    public function getBaseQueues(int $baseId): array
-    {
-        return $this->entityManager->getRepository(BuildingQueue::class)->getBaseQueues($baseId);
-    }
+	public function getBaseQueues(int $baseId): array
+	{
+		return $this->entityManager->getRepository(BuildingQueue::class)->getBaseQueues($baseId);
+	}
 
-    public function schedule(): void
-    {
-        $buildingQueues = $this->entityManager->getRepository(BuildingQueue::class)->getAll();
+	public function schedule(): void
+	{
+		$buildingQueues = $this->entityManager->getRepository(BuildingQueue::class)->getAll();
 
-        /** @var BuildingQueue $buildingQueue */
-        foreach ($buildingQueues as $buildingQueue) {
-            $this->messenger->dispatch(new BuildingQueueMessage($buildingQueue->id), [DateTimeConverter::to_delay_stamp($buildingQueue->getDEnd())]);
-        }
-    }
+		/** @var BuildingQueue $buildingQueue */
+		foreach ($buildingQueues as $buildingQueue) {
+			$this->messenger->dispatch(new BuildingQueueMessage($buildingQueue->id), [DateTimeConverter::to_delay_stamp($buildingQueue->getDEnd())]);
+		}
+	}
 
-    public function add(BuildingQueue $buildingQueue, Player $player): void
-    {
-        $this->entityManager->persist($buildingQueue);
-        $this->entityManager->flush($buildingQueue);
+	public function add(BuildingQueue $buildingQueue, Player $player): void
+	{
+		$this->entityManager->persist($buildingQueue);
+		$this->entityManager->flush($buildingQueue);
 
-        $this->messenger->dispatch(new BuildingQueueMessage($buildingQueue->id), [DateTimeConverter::to_delay_stamp($buildingQueue->getDEnd())]);
+		$this->messenger->dispatch(new BuildingQueueMessage($buildingQueue->id), [DateTimeConverter::to_delay_stamp($buildingQueue->getDEnd())]);
 
-        $this->eventDispatcher->dispatch(new NewBuildingQueueEvent($buildingQueue, $player));
-    }
+		$this->eventDispatcher->dispatch(new NewBuildingQueueEvent($buildingQueue, $player));
+	}
 }
