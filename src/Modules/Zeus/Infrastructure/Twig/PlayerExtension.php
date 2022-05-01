@@ -6,6 +6,7 @@ use App\Classes\Library\Utils;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Helper\ResearchHelper;
+use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use Twig\Extension\AbstractExtension;
@@ -14,6 +15,7 @@ use Twig\TwigFunction;
 class PlayerExtension extends AbstractExtension
 {
 	public function __construct(
+		private BonusApplierInterface $bonusApplier,
 		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		protected OrbitalBaseManager $orbitalBaseManager,
 		protected ResearchHelper $researchHelper,
@@ -25,6 +27,7 @@ class PlayerExtension extends AbstractExtension
 	public function getFunctions(): array
 	{
 		return [
+			new TwigFunction('apply_player_bonus', fn (int|float $initialValue, int $playerBonusId) => $this->bonusApplier->apply($initialValue, $playerBonusId)),
 			new TwigFunction('get_player_bonus', fn (int $playerBonusId) => $this->currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get($playerBonusId)),
 			new TwigFunction('get_faction_info', fn (int $factionId, string $info) => ColorResource::getInfo($factionId, $info)),
 			new TwigFunction('get_player_bases_count', fn (array $movingCommanders) => $this->orbitalBaseManager->getPlayerBasesCount($movingCommanders)),

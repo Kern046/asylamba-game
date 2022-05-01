@@ -6,14 +6,14 @@ use App\Classes\Library\Format;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
-use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
+use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
 use App\Modules\Zeus\Model\PlayerBonusId;
 
 class OrbitalBaseHelper
 {
 	public function __construct(
+		private BonusApplierInterface $bonusApplier,
 		protected TechnologyHelper $technologyHelper,
-		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 	) {
 	}
 
@@ -48,11 +48,13 @@ class OrbitalBaseHelper
 
 	public function getStoragePercent(OrbitalBase $orbitalBase): float
 	{
-		$storageSpace = $this->getBuildingInfo(OrbitalBaseResource::STORAGE, 'level', $orbitalBase->getLevelStorage(), 'storageSpace');
-		$storageBonus = $this->currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::REFINERY_STORAGE);
-		if ($storageBonus > 0) {
-			$storageSpace += ($storageSpace * $storageBonus / 100);
-		}
+		$storageSpace = $this->getBuildingInfo(
+			OrbitalBaseResource::STORAGE,
+			'level',
+			$orbitalBase->getLevelStorage(),
+			'storageSpace',
+		);
+		$storageSpace += $this->bonusApplier->apply($storageSpace, PlayerBonusId::REFINERY_STORAGE);
 
 		return Format::numberFormat($orbitalBase->getResourcesStorage() / $storageSpace * 100);
 	}

@@ -11,19 +11,19 @@ abstract class AbstractBonusApplier implements BonusApplierInterface
 	{
 	}
 
-	public function apply(float|int $value, int $bonusId, PlayerBonus $playerBonus = null): float
+	public function apply(float|int $initialValue, int $modifierId, PlayerBonus $playerBonus = null): float
 	{
 		$playerBonus = $playerBonus ?? $this->currentPlayerBonusRegistry->getPlayerBonus();
 
-		$bonusValue = $playerBonus->bonuses->get($bonusId);
-		$newValue = $value * $bonusValue / 100;
+		$modifierValue = $playerBonus->bonuses->get($modifierId);
+		$modifiedValue = $initialValue * $modifierValue / 100;
 
-		$this->postApply($bonusId, $bonusValue, $value, $newValue);
+		$this->postApply($modifierId, $modifierValue, $initialValue, $modifiedValue);
 
-		return $newValue;
+		return $modifiedValue;
 	}
 
-	protected function postApply(int $bonusId, float $bonusValue, float|int $oldValue, float $newValue): void
+	protected function postApply(int $modifierId, float $modifierValue, float|int $initialValue, float $modifiedValue): void
 	{
 	}
 }

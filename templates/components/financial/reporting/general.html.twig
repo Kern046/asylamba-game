@@ -14,7 +14,7 @@
 									<span class="label">impôts</span>
 									<span class="value">
 										{{- investments_data.totalTaxIn|number -}}
-										{% if tax_bonus > 0 %}
+										{% if investments_data.totalTaxInBonus > 0 %}
 											<span class="bonus">+{{- investments_data.totalTaxInBonus|number -}}</span>
 										{% endif %}
 										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
@@ -24,7 +24,7 @@
 									<span class="label">taxes commerciales</span>
 									<span class="value">
 										{{- investments_data.totalRouteIncome -}}
-										{% if trade_routes_income_bonus > 0 %}
+										{% if investments_data.totalRouteIncomeBonus > 0 %}
 											<span class="bonus">+{{- investments_data.totalRouteIncomeBonus|number -}}</span>
 										{% endif %}
 										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />

@@ -24,6 +24,8 @@ services:
             - '../../Repository'
             - '../../Resource'
 
+    App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface: '@App\Modules\Zeus\Application\Handler\Bonus\BonusApplier'
+
     App\Modules\Zeus\Infrastructure\ArgumentResolver\CurrentPlayerValueResolver:
         tags:
             - { name: 'controller.argument_value_resolver', priority: 50 }
@@ -39,3 +41,7 @@ services:
         arguments:
             $timeEventUpdate: '%time_event_update%'
             $allyInactiveTime: '%zeus.player.ally_inactive_time%'
+
+when@dev:
+    services:
+        App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface: '@App\Modules\Zeus\Application\Handler\Bonus\TraceableBonusApplier'

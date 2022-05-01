@@ -108,9 +108,9 @@ class TechnologyId
 
 	public static function getAll(): array
 	{
-		dd([
+		return [
 			...self::UNBLOCKING_TECHNOLOGIES_IDS,
 			...self::BONUS_TECHNOLOGIES_IDS,
-		]);
+		];
 	}
 }

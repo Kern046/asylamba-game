@@ -6,5 +6,5 @@ use App\Modules\Zeus\Model\PlayerBonus;
 
 interface BonusApplierInterface
 {
-	public function apply(int|float $value, int $bonusId, PlayerBonus $playerBonus = null): float;
+	public function apply(int|float $initialValue, int $modifierId, PlayerBonus $playerBonus = null): float;
 }

@@ -20,8 +20,8 @@
 							<span class="label">{{ base.name }} [{{ base_data['routes_count'] }} route{{ base_data['routes_count']|plural }}]</span>
 							<span class="value">
 								{{- base_data['routes_income'] -}}
-								{% if trade_routes_income_bonus > 0 %}
-									<span class="bonus">+{{ ((base_data['routes_income'] * trade_routes_income_bonus) / 100)|number }}</span>
+								{% if base_data['routes_income_bonus'] > 0 %}
+									<span class="bonus">+{{ base_data['routes_income_bonus']|number }}</span>
 								{% endif %}
 								<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
 							</span>
@@ -49,7 +49,7 @@
 						<span class="label">total des routes commerciales</span>
 						<span class="value">
 							{{- investments_data.totalRouteIncome|number -}}
-							{% if trade_routes_income_bonus > 0 %}
+							{% if investments_data.totalRouteIncomeBonus > 0 %}
 								<span class="bonus">+{{- investments_data.totalRouteIncomeBonus|number -}}</span>
 							{% endif %}
 							<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />

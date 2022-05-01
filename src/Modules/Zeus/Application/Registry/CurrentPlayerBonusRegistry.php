@@ -13,8 +13,8 @@ class CurrentPlayerBonusRegistry
 		$this->playerBonus = $playerBonus;
 	}
 
-	public function getPlayerBonus(): PlayerBonus
+	public function getPlayerBonus(): PlayerBonus|null
 	{
-		return $this->playerBonus;
+		return $this->playerBonus ?? null;
 	}
 }

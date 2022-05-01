@@ -17,7 +17,6 @@ use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
-use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +28,6 @@ class BuildShips extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		BonusApplierInterface $bonusApplier,
 		OrbitalBase $currentBase,
 		ColorManager $colorManager,
@@ -70,13 +68,13 @@ class BuildShips extends AbstractController
 					$sq->quantity = $quantity;
 
 					$time = ShipResource::getInfo($ship, 'time') * $quantity;
-					$playerBonusId = match ($dockType) {
+
+					$bonus = $bonusApplier->apply($time, match ($dockType) {
 						1 => PlayerBonusId::DOCK1_SPEED,
 						2 => PlayerBonusId::DOCK2_SPEED,
 						3 => PlayerBonusId::DOCK3_SPEED,
 						default => throw new \LogicException('Invalid Dock ID'),
-					};
-					$bonus = $bonusApplier->apply($time, $playerBonusId);
+					});
 
 					$sq->dStart = (0 === $nbShipQueues) ? Utils::now() : $shipQueues[$nbShipQueues - 1]->dEnd;
 					$sq->dEnd = Utils::addSecondsToDate($sq->dStart, round($time - $bonus));
