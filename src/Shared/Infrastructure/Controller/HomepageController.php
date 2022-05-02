@@ -11,19 +11,19 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class HomepageController extends AbstractController
 {
-    public function __invoke(PlayerManager $playerManager, Security $security): Response
-    {
-        $players = $playerManager->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
+	public function __invoke(PlayerManager $playerManager, Security $security): Response
+	{
+		$players = $playerManager->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
 
-        return $this->render('pages/homepage.html.twig', [
-            'active_players' => $players,
-            'bind_key' => $security->crypt($security->buildBindkey(Utils::generateString(10))),
-            'player_bind_keys' => array_reduce($players, function (array $acc, Player $player) use ($security) {
-                $acc[$player->getId()] = $security->crypt($security->buildBindkey($player->bind));
+		return $this->render('pages/homepage.html.twig', [
+			'active_players' => $players,
+			'bind_key' => $security->crypt($security->buildBindkey(Utils::generateString(10))),
+			'player_bind_keys' => array_reduce($players, function (array $acc, Player $player) use ($security) {
+				$acc[$player->getId()] = $security->crypt($security->buildBindkey($player->bind));
 
-                return $acc;
-            }, []),
-            'high_mode' => $this->getParameter('highmode'),
-        ]);
-    }
+				return $acc;
+			}, []),
+			'high_mode' => $this->getParameter('highmode'),
+		]);
+	}
 }

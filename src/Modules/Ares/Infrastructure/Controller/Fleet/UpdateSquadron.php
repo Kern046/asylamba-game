@@ -18,80 +18,80 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UpdateSquadron extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        OrbitalBaseManager $orbitalBaseManager,
-        CommanderManager $commanderManager,
-        EventDispatcherInterface $eventDispatcher,
-        EntityManager $entityManager,
-        int $id,
-        int $squadronId,
-    ): Response {
-        $payload = $request->toArray();
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		OrbitalBaseManager $orbitalBaseManager,
+		CommanderManager $commanderManager,
+		EventDispatcherInterface $eventDispatcher,
+		EntityManager $entityManager,
+		int $id,
+		int $squadronId,
+	): Response {
+		$payload = $request->toArray();
 
-        if (empty($payload['army']) || empty($payload['base_id'])) {
-            throw new FormException('Pas assez d\'informations pour assigner un vaisseau.');
-        }
+		if (empty($payload['army']) || empty($payload['base_id'])) {
+			throw new FormException('Pas assez d\'informations pour assigner un vaisseau.');
+		}
 
-        $newSquadron = array_map(fn ($el) => $el > 0 ? (int) $el : 0, $payload['army']);
+		$newSquadron = array_map(fn ($el) => $el > 0 ? (int) $el : 0, $payload['army']);
 
-        if (12 !== count($newSquadron)) {
-            throw new FormException('Pas assez d\'informations pour assigner un vaisseau.');
-        }
+		if (12 !== count($newSquadron)) {
+			throw new FormException('Pas assez d\'informations pour assigner un vaisseau.');
+		}
 
-        $commander = $commanderManager->get($id);
-        $base = $orbitalBaseManager->get($payload['base_id']);
+		$commander = $commanderManager->get($id);
+		$base = $orbitalBaseManager->get($payload['base_id']);
 
-        if (null === $commander || null === $base || $commander->rBase !== $base->getId() || Commander::AFFECTED !== $commander->statement) {
-            throw new ErrorException('Erreur dans les références du commandant ou de la base.');
-        }
-        $squadron = $commander->getSquadron($squadronId);
+		if (null === $commander || null === $base || $commander->rBase !== $base->getId() || Commander::AFFECTED !== $commander->statement) {
+			throw new ErrorException('Erreur dans les références du commandant ou de la base.');
+		}
+		$squadron = $commander->getSquadron($squadronId);
 
-        if (false === $squadron) {
-            throw new ErrorException('Erreur dans les références du commandant ou de la base.');
-        }
+		if (false === $squadron) {
+			throw new ErrorException('Erreur dans les références du commandant ou de la base.');
+		}
 
-        $squadronSHIP = $squadron->arrayOfShips;
-        $baseSHIP = $base->shipStorage;
+		$squadronSHIP = $squadron->arrayOfShips;
+		$baseSHIP = $base->shipStorage;
 
-        foreach ($newSquadron as $i => $v) {
-            $baseSHIP[$i] -= ($v - $squadronSHIP[$i]);
-            $squadronSHIP[$i] = $v;
-        }
+		foreach ($newSquadron as $i => $v) {
+			$baseSHIP[$i] -= ($v - $squadronSHIP[$i]);
+			$squadronSHIP[$i] = $v;
+		}
 
-        // token de vérification
-        $baseOK = true;
-        $squadronOK = true;
-        $totalPEV = 0;
-        // vérif shipStorage (pas de nombre négatif)
-        foreach ($baseSHIP as $i => $v) {
-            if ($v < 0) {
-                $baseOK = false;
-                break;
-            }
-        }
+		// token de vérification
+		$baseOK = true;
+		$squadronOK = true;
+		$totalPEV = 0;
+		// vérif shipStorage (pas de nombre négatif)
+		foreach ($baseSHIP as $i => $v) {
+			if ($v < 0) {
+				$baseOK = false;
+				break;
+			}
+		}
 
-        // vérif de squadron (pas plus de 100 PEV, pas de nombre négatif)
-        foreach ($squadronSHIP as $i => $v) {
-            $totalPEV += $v * ShipResource::getInfo($i, 'pev');
-            if ($v < 0) {
-                $squadronOK = false;
-                break;
-            }
-        }
+		// vérif de squadron (pas plus de 100 PEV, pas de nombre négatif)
+		foreach ($squadronSHIP as $i => $v) {
+			$totalPEV += $v * ShipResource::getInfo($i, 'pev');
+			if ($v < 0) {
+				$squadronOK = false;
+				break;
+			}
+		}
 
-        if (!$baseOK || !$squadronOK || $totalPEV > 100) {
-            throw new ErrorException('Erreur dans la répartition des vaisseaux.');
-        }
+		if (!$baseOK || !$squadronOK || $totalPEV > 100) {
+			throw new ErrorException('Erreur dans la répartition des vaisseaux.');
+		}
 
-        $base->shipStorage = $baseSHIP;
-        $commander->getSquadron($squadronId)->arrayOfShips = $squadronSHIP;
+		$base->shipStorage = $baseSHIP;
+		$commander->getSquadron($squadronId)->arrayOfShips = $squadronSHIP;
 
-        $entityManager->flush();
+		$entityManager->flush();
 
-        $eventDispatcher->dispatch(new SquadronUpdateEvent($commander, $commander->getSquadron($squadronId), $currentPlayer));
+		$eventDispatcher->dispatch(new SquadronUpdateEvent($commander, $commander->getSquadron($squadronId), $currentPlayer));
 
-        return new Response('', Response::HTTP_NO_CONTENT);
-    }
+		return new Response('', Response::HTTP_NO_CONTENT);
+	}
 }

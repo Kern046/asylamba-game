@@ -6,8 +6,8 @@ use App\Classes\Library\Module;
 
 class PrometheeModule extends Module
 {
-    public function getName(): string
-    {
-        return 'Promethee';
-    }
+	public function getName(): string
+	{
+		return 'Promethee';
+	}
 }

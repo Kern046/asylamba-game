@@ -10,31 +10,31 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:hephaistos:schedule-actions',
-    description: 'Retrieve planned actions and set them in Messenger'
+	name: 'app:hephaistos:schedule-actions',
+	description: 'Retrieve planned actions and set them in Messenger'
 )]
 class ScheduleActions extends Command
 {
-    /**
-     * @param list<SchedulerInterface> $schedulers
-     */
-    public function __construct(protected iterable $schedulers)
-    {
-        parent::__construct();
-    }
+	/**
+	 * @param list<SchedulerInterface> $schedulers
+	 */
+	public function __construct(protected iterable $schedulers)
+	{
+		parent::__construct();
+	}
 
-    public function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $style = new SymfonyStyle($input, $output);
+	public function execute(InputInterface $input, OutputInterface $output): int
+	{
+		$style = new SymfonyStyle($input, $output);
 
-        foreach ($this->schedulers as $scheduler) {
-            $style->info(\sprintf('Scheduling %s actions', get_class($scheduler)));
+		foreach ($this->schedulers as $scheduler) {
+			$style->info(\sprintf('Scheduling %s actions', get_class($scheduler)));
 
-            $scheduler->schedule();
-        }
+			$scheduler->schedule();
+		}
 
-        $style->success('All schedulers have been processed !');
+		$style->success('All schedulers have been processed !');
 
-        return self::SUCCESS;
-    }
+		return self::SUCCESS;
+	}
 }

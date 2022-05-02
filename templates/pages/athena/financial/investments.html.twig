@@ -9,10 +9,7 @@
 	<div id="content">
 		{{ include ('molecules/common/advertising.html.twig') }}
 
-		{{ include('components/financial/reporting/general.html.twig', {
-			tax_bonus,
-			investments_data,
-		}) }}
+		{{ include('components/financial/reporting/general.html.twig') }}
 		{{ include('components/financial/reporting/imposition.html.twig') }}
 		{{ include('components/financial/reporting/commercial_routes.html.twig') }}
 		{{ include('components/financial/reporting/base_investments.html.twig') }}

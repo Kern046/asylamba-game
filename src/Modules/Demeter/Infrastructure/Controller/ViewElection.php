@@ -20,76 +20,76 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ViewElection extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        CandidateManager $candidateManager,
-        ColorManager $colorManager,
-        ElectionManager $electionManager,
-        VoteManager $voteManager,
-        PlayerManager $playerManager,
-        ForumTopicManager $forumTopicManager,
-        ForumMessageManager $forumMessageManager,
-    ): Response {
-        $faction = $colorManager->get($currentPlayer->getRColor());
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		CandidateManager $candidateManager,
+		ColorManager $colorManager,
+		ElectionManager $electionManager,
+		VoteManager $voteManager,
+		PlayerManager $playerManager,
+		ForumTopicManager $forumTopicManager,
+		ForumMessageManager $forumMessageManager,
+	): Response {
+		$faction = $colorManager->get($currentPlayer->getRColor());
 
-        $election = $electionManager->getFactionLastElection($faction->id);
+		$election = $electionManager->getFactionLastElection($faction->id);
 
-        $data = [
-            'faction' => $faction,
-            'election' => $election,
-        ];
+		$data = [
+			'faction' => $faction,
+			'election' => $election,
+		];
 
-        if (null !== $election) {
-            $candidates = $candidateManager->getByElection($election);
+		if (null !== $election) {
+			$candidates = $candidateManager->getByElection($election);
 
-            $data['candidates'] = $candidates;
-            $data['is_candidate'] = 1 <= count(array_filter(
-                $candidates,
-                fn (Candidate $candidate) => $candidate->rPlayer === $currentPlayer->getId()
-            ));
+			$data['candidates'] = $candidates;
+			$data['is_candidate'] = 1 <= count(array_filter(
+				$candidates,
+				fn (Candidate $candidate) => $candidate->rPlayer === $currentPlayer->getId()
+			));
 
-            if ($faction->isInElection()) {
-                $votes = $voteManager->getElectionVotes($election);
+			if ($faction->isInElection()) {
+				$votes = $voteManager->getElectionVotes($election);
 
-                $data['player_vote'] = $voteManager->getPlayerVote($currentPlayer, $election);
-                $data['votes'] = $votes;
-                $data['faction_members'] = $playerManager->getFactionPlayers($faction->getId());
+				$data['player_vote'] = $voteManager->getPlayerVote($currentPlayer, $election);
+				$data['votes'] = $votes;
+				$data['faction_members'] = $playerManager->getFactionPlayers($faction->getId());
 
-                $candidate = ($request->query->has('candidate') && ($candidate = $candidateManager->get($request->query->get('candidate'))) !== null) ? $candidate : ([] !== $candidates ? $candidates[0] : null);
+				$candidate = ($request->query->has('candidate') && ($candidate = $candidateManager->get($request->query->get('candidate'))) !== null) ? $candidate : ([] !== $candidates ? $candidates[0] : null);
 
-                $data['candidate'] = $candidate;
+				$data['candidate'] = $candidate;
 
-                if (null !== $candidate) {
-                    if ($faction->isRoyalistic()) {
-                        $data['putsch_supporters_count'] = count(array_filter($votes, fn (Vote $vote) => $vote->rCandidate === $candidate->rPlayer));
-                        $endPutsch = Utils::addSecondsToDate($faction->dLastElection, Color::PUTSCHTIME);
-                        $data['remaining_putsch_time'] = Utils::interval(Utils::now(), $endPutsch, 's');
-                    }
+				if (null !== $candidate) {
+					if ($faction->isRoyalistic()) {
+						$data['putsch_supporters_count'] = count(array_filter($votes, fn (Vote $vote) => $vote->rCandidate === $candidate->rPlayer));
+						$endPutsch = Utils::addSecondsToDate($faction->dLastElection, Color::PUTSCHTIME);
+						$data['remaining_putsch_time'] = Utils::interval(Utils::now(), $endPutsch, 's');
+					}
 
-                    $forumTopicManager->load(
-                        [
-                            'rForum' => 30,
-                            'rPlayer' => $candidate->rPlayer,
-                        ],
-                        ['id', 'DESC'],
-                        [0, 1],
-                        $currentPlayer->getId(),
-                    );
+					$forumTopicManager->load(
+						[
+							'rForum' => 30,
+							'rPlayer' => $candidate->rPlayer,
+						],
+						['id', 'DESC'],
+						[0, 1],
+						$currentPlayer->getId(),
+					);
 
-                    if (1 == $forumTopicManager->size()) {
-                        $topic = $forumTopicManager->get(0);
-                        $forumTopicManager->updateLastView($topic, $currentPlayer->getId());
+					if (1 == $forumTopicManager->size()) {
+						$topic = $forumTopicManager->get(0);
+						$forumTopicManager->updateLastView($topic, $currentPlayer->getId());
 
-                        $forumMessageManager->load(['rTopic' => $topic->id], ['dCreation', 'DESC', 'id', 'DESC']);
+						$forumMessageManager->load(['rTopic' => $topic->id], ['dCreation', 'DESC', 'id', 'DESC']);
 
-                        $data['topic'] = $topic;
-                        $data['topic_messages'] = $forumMessageManager->getAll();
-                    }
-                }
-            }
-        }
+						$data['topic'] = $topic;
+						$data['topic_messages'] = $forumMessageManager->getAll();
+					}
+				}
+			}
+		}
 
-        return $this->render('pages/demeter/faction/election.html.twig', $data);
-    }
+		return $this->render('pages/demeter/faction/election.html.twig', $data);
+	}
 }

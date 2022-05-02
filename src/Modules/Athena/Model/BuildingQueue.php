@@ -15,93 +15,93 @@ use App\Shared\Domain\Model\QueueableInterface;
 
 class BuildingQueue implements QueueableInterface
 {
-    // ATTRIBUTES
-    public $id;
-    public $rOrbitalBase;
-    public $buildingNumber;
-    public $targetLevel;
-    public $dStart;
-    public $dEnd;
+	// ATTRIBUTES
+	public $id;
+	public $rOrbitalBase;
+	public $buildingNumber;
+	public $targetLevel;
+	public $dStart;
+	public $dEnd;
 
-    public function getEndDate(): string
-    {
-        return $this->dEnd;
-    }
+	public function getEndDate(): string
+	{
+		return $this->dEnd;
+	}
 
-    public function getResourceIdentifier(): int
-    {
-        return $this->buildingNumber;
-    }
+	public function getResourceIdentifier(): int
+	{
+		return $this->buildingNumber;
+	}
 
-    public function getId()
-    {
-        return $this->id;
-    }
+	public function getId()
+	{
+		return $this->id;
+	}
 
-    public function getROrbitalBase()
-    {
-        return $this->rOrbitalBase;
-    }
+	public function getROrbitalBase()
+	{
+		return $this->rOrbitalBase;
+	}
 
-    public function getBuildingNumber()
-    {
-        return $this->buildingNumber;
-    }
+	public function getBuildingNumber()
+	{
+		return $this->buildingNumber;
+	}
 
-    public function getTargetLevel()
-    {
-        return $this->targetLevel;
-    }
+	public function getTargetLevel()
+	{
+		return $this->targetLevel;
+	}
 
-    public function getDStart()
-    {
-        return $this->dStart;
-    }
+	public function getDStart()
+	{
+		return $this->dStart;
+	}
 
-    public function getDEnd()
-    {
-        return $this->dEnd;
-    }
+	public function getDEnd()
+	{
+		return $this->dEnd;
+	}
 
-    public function setId($id)
-    {
-        $this->id = $id;
+	public function setId($id)
+	{
+		$this->id = $id;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setROrbitalBase($rOrbitalBase)
-    {
-        $this->rOrbitalBase = $rOrbitalBase;
+	public function setROrbitalBase($rOrbitalBase)
+	{
+		$this->rOrbitalBase = $rOrbitalBase;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setBuildingLevel($buildingLevel)
-    {
-        $this->buildingLevel = $buildingLevel;
+	public function setBuildingLevel($buildingLevel)
+	{
+		$this->buildingLevel = $buildingLevel;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setTargetLevel($targetLevel)
-    {
-        $this->targetLevel = $targetLevel;
+	public function setTargetLevel($targetLevel)
+	{
+		$this->targetLevel = $targetLevel;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setDStart($dStart)
-    {
-        $this->dStart = $dStart;
+	public function setDStart($dStart)
+	{
+		$this->dStart = $dStart;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function setDEnd($dEnd)
-    {
-        $this->dEnd = $dEnd;
+	public function setDEnd($dEnd)
+	{
+		$this->dEnd = $dEnd;
 
-        return $this;
-    }
+		return $this;
+	}
 }

@@ -21,22 +21,23 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 
 class SpyReportManager extends Manager
 {
-    protected $managerType = '_SpyReport';
+	protected $managerType = '_SpyReport';
 
-    public function __construct(
-        Database $database,
-        private EventDispatcherInterface $eventDispatcher,
-    ) {
-        parent::__construct($database);
-    }
+	public function __construct(
+		Database $database,
+		private EventDispatcherInterface $eventDispatcher,
+	) {
+		parent::__construct($database);
+	}
 
-    public function load($where = [], $order = [], $limit = [])
-    {
-        $formatWhere = Utils::arrayToWhere($where, 'sr.');
-        $formatOrder = Utils::arrayToOrder($order);
-        $formatLimit = Utils::arrayToLimit($limit);
+	public function load($where = [], $order = [], $limit = [])
+	{
+		$formatWhere = Utils::arrayToWhere($where, 'sr.');
+		$formatOrder = Utils::arrayToOrder($order);
+		$formatLimit = Utils::arrayToLimit($limit);
 
-        $qr = $this->database->prepare('SELECT sr.*,
+		$qr = $this->database->prepare(
+			'SELECT sr.*,
 			p.typeOfPlace AS typeOfPlace,
 			p.position AS position,
 			p.population AS population,
@@ -54,104 +55,104 @@ class SpyReportManager extends Manager
 			'.$formatWhere.'
 			'.$formatOrder.'
 			'.$formatLimit
-        );
+		);
 
-        foreach ($where as $v) {
-            if (is_array($v)) {
-                foreach ($v as $p) {
-                    $valuesArray[] = $p;
-                }
-            } else {
-                $valuesArray[] = $v;
-            }
-        }
+		foreach ($where as $v) {
+			if (is_array($v)) {
+				foreach ($v as $p) {
+					$valuesArray[] = $p;
+				}
+			} else {
+				$valuesArray[] = $v;
+			}
+		}
 
-        if (empty($valuesArray)) {
-            $qr->execute();
-        } else {
-            $qr->execute($valuesArray);
-        }
+		if (empty($valuesArray)) {
+			$qr->execute();
+		} else {
+			$qr->execute($valuesArray);
+		}
 
-        while ($aw = $qr->fetch()) {
-            $sr = new SpyReport();
+		while ($aw = $qr->fetch()) {
+			$sr = new SpyReport();
 
-            $sr->id = $aw['id'];
-            $sr->rPlayer = $aw['rPlayer'];
-            $sr->price = $aw['price'];
-            $sr->rPlace = $aw['rPlace'];
-            $sr->placeColor = $aw['placeColor'];
-            $sr->typeOfBase = $aw['typeOfBase'];
-            $sr->typeOfOrbitalBase = $aw['typeOfOrbitalBase'];
-            $sr->placeName = $aw['placeName'];
-            $sr->points = $aw['points'];
-            $sr->rEnemy = $aw['rEnemy'];
-            $sr->enemyName = $aw['enemyName'];
-            $sr->enemyAvatar = $aw['enemyAvatar'];
-            $sr->enemyLevel = $aw['enemyLevel'];
-            $sr->resources = $aw['resources'];
-            $sr->shipsInStorage = $aw['shipsInStorage'];
-            $sr->antiSpyInvest = $aw['antiSpyInvest'];
-            $sr->commercialRouteIncome = $aw['commercialRouteIncome'];
-            $sr->commanders = $aw['commanders'];
-            $sr->success = $aw['success'];
-            $sr->type = $aw['type'];
-            $sr->dSpying = $aw['dSpying'];
+			$sr->id = $aw['id'];
+			$sr->rPlayer = $aw['rPlayer'];
+			$sr->price = $aw['price'];
+			$sr->rPlace = $aw['rPlace'];
+			$sr->placeColor = $aw['placeColor'];
+			$sr->typeOfBase = $aw['typeOfBase'];
+			$sr->typeOfOrbitalBase = $aw['typeOfOrbitalBase'];
+			$sr->placeName = $aw['placeName'];
+			$sr->points = $aw['points'];
+			$sr->rEnemy = $aw['rEnemy'];
+			$sr->enemyName = $aw['enemyName'];
+			$sr->enemyAvatar = $aw['enemyAvatar'];
+			$sr->enemyLevel = $aw['enemyLevel'];
+			$sr->resources = $aw['resources'];
+			$sr->shipsInStorage = $aw['shipsInStorage'];
+			$sr->antiSpyInvest = $aw['antiSpyInvest'];
+			$sr->commercialRouteIncome = $aw['commercialRouteIncome'];
+			$sr->commanders = $aw['commanders'];
+			$sr->success = $aw['success'];
+			$sr->type = $aw['type'];
+			$sr->dSpying = $aw['dSpying'];
 
-            $sr->typeOfPlace = $aw['typeOfPlace'];
-            $sr->position = $aw['position'];
-            $sr->population = $aw['population'];
-            $sr->coefResources = $aw['coefResources'];
-            $sr->coefHistory = $aw['coefHistory'];
-            $sr->rSector = $aw['rSector'];
-            $sr->xPosition = $aw['xPosition'];
-            $sr->yPosition = $aw['yPosition'];
-            $sr->typeOfSystem = $aw['typeOfSystem'];
+			$sr->typeOfPlace = $aw['typeOfPlace'];
+			$sr->position = $aw['position'];
+			$sr->population = $aw['population'];
+			$sr->coefResources = $aw['coefResources'];
+			$sr->coefHistory = $aw['coefHistory'];
+			$sr->rSector = $aw['rSector'];
+			$sr->xPosition = $aw['xPosition'];
+			$sr->yPosition = $aw['yPosition'];
+			$sr->typeOfSystem = $aw['typeOfSystem'];
 
-            $currentT = $this->_Add($sr);
-        }
-    }
+			$currentT = $this->_Add($sr);
+		}
+	}
 
-    public function add(SpyReport $sr, Player $player): void
-    {
-        $qr = $this->database->prepare('INSERT INTO
+	public function add(SpyReport $sr, Player $player): void
+	{
+		$qr = $this->database->prepare('INSERT INTO
 			spyReport(rPlayer, price, rPlace, placeColor, typeOfBase, typeOfOrbitalBase, placeName, points, rEnemy, enemyName, enemyAvatar, enemyLevel, resources, shipsInStorage, antiSpyInvest, commercialRouteIncome, commanders, success, type, dSpying)
 			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        $qr->execute([
-            $sr->rPlayer,
-            $sr->price,
-            $sr->rPlace,
-            $sr->placeColor,
-            $sr->typeOfBase,
-            $sr->typeOfOrbitalBase,
-            $sr->placeName,
-            $sr->points,
-            $sr->rEnemy,
-            $sr->enemyName,
-            $sr->enemyAvatar,
-            $sr->enemyLevel,
-            $sr->resources,
-            $sr->shipsInStorage,
-            $sr->antiSpyInvest,
-            $sr->commercialRouteIncome,
-            $sr->commanders,
-            $sr->success,
-            $sr->type,
-            $sr->dSpying,
-        ]);
+		$qr->execute([
+			$sr->rPlayer,
+			$sr->price,
+			$sr->rPlace,
+			$sr->placeColor,
+			$sr->typeOfBase,
+			$sr->typeOfOrbitalBase,
+			$sr->placeName,
+			$sr->points,
+			$sr->rEnemy,
+			$sr->enemyName,
+			$sr->enemyAvatar,
+			$sr->enemyLevel,
+			$sr->resources,
+			$sr->shipsInStorage,
+			$sr->antiSpyInvest,
+			$sr->commercialRouteIncome,
+			$sr->commanders,
+			$sr->success,
+			$sr->type,
+			$sr->dSpying,
+		]);
 
-        $sr->id = $this->database->lastInsertId();
+		$sr->id = $this->database->lastInsertId();
 
-        $this->eventDispatcher->dispatch(new SpyEvent($sr, $player));
+		$this->eventDispatcher->dispatch(new SpyEvent($sr, $player));
 
-        $this->_Add($sr);
-    }
+		$this->_Add($sr);
+	}
 
-    public function save()
-    {
-        $reports = $this->_Save();
+	public function save()
+	{
+		$reports = $this->_Save();
 
-        foreach ($reports as $sr) {
-            $qr = $this->database->prepare('UPDATE spyReport
+		foreach ($reports as $sr) {
+			$qr = $this->database->prepare('UPDATE spyReport
 				SET	id = ?,
 					rPlayer = ?,
 					price = ?,
@@ -174,57 +175,57 @@ class SpyReportManager extends Manager
 					type = ?,
 					dSpying = ?
 				WHERE id = ?');
-            $qr->execute([
-                $sr->id,
-                $sr->rPlayer,
-                $sr->price,
-                $sr->rPlace,
-                $sr->placeColor,
-                $sr->typeOfBase,
-                $sr->typeOfOrbitalBase,
-                $sr->placeName,
-                $sr->points,
-                $sr->rEnemy,
-                $sr->enemyName,
-                $sr->enemyAvatar,
-                $sr->enemyLevel,
-                $sr->resources,
-                $sr->shipsInStorage,
-                $sr->antiSpyInvest,
-                $sr->commercialRouteIncome,
-                $sr->commanders,
-                $sr->success,
-                $sr->type,
-                $sr->dSpying,
-                $sr->id,
-            ]);
-        }
-    }
+			$qr->execute([
+				$sr->id,
+				$sr->rPlayer,
+				$sr->price,
+				$sr->rPlace,
+				$sr->placeColor,
+				$sr->typeOfBase,
+				$sr->typeOfOrbitalBase,
+				$sr->placeName,
+				$sr->points,
+				$sr->rEnemy,
+				$sr->enemyName,
+				$sr->enemyAvatar,
+				$sr->enemyLevel,
+				$sr->resources,
+				$sr->shipsInStorage,
+				$sr->antiSpyInvest,
+				$sr->commercialRouteIncome,
+				$sr->commanders,
+				$sr->success,
+				$sr->type,
+				$sr->dSpying,
+				$sr->id,
+			]);
+		}
+	}
 
-    public function deleteById($id)
-    {
-        $qr = $this->database->prepare('DELETE FROM spyReport WHERE id = ?');
-        $qr->execute([$id]);
+	public function deleteById($id)
+	{
+		$qr = $this->database->prepare('DELETE FROM spyReport WHERE id = ?');
+		$qr->execute([$id]);
 
-        $this->_Remove($id);
+		$this->_Remove($id);
 
-        return true;
-    }
+		return true;
+	}
 
-    public function deleteByRPlayer($rPlayer)
-    {
-        $qr = $this->database->prepare('DELETE FROM spyReport WHERE rPlayer = ?');
-        $qr->execute([$rPlayer]);
+	public function deleteByRPlayer($rPlayer)
+	{
+		$qr = $this->database->prepare('DELETE FROM spyReport WHERE rPlayer = ?');
+		$qr->execute([$rPlayer]);
 
-        $nbrDeleted = 0;
-        for ($i = 0; $i < $this->size(); ++$i) {
-            if ($this->get($i)->rPlayer == $rPlayer) {
-                ++$nbrDeleted;
-            }
+		$nbrDeleted = 0;
+		for ($i = 0; $i < $this->size(); ++$i) {
+			if ($this->get($i)->rPlayer == $rPlayer) {
+				++$nbrDeleted;
+			}
 
-            $this->_Remove($this->get($i)->getId());
-        }
+			$this->_Remove($this->get($i)->getId());
+		}
 
-        return $nbrDeleted;
-    }
+		return $nbrDeleted;
+	}
 }

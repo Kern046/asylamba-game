@@ -6,8 +6,8 @@ use App\Classes\Library\Module;
 
 class AthenaModule extends Module
 {
-    public function getName(): string
-    {
-        return 'Athena';
-    }
+	public function getName(): string
+	{
+		return 'Athena';
+	}
 }

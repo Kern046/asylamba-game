@@ -7,7 +7,7 @@ use App\Shared\Domain\Specification\Specification;
 
 abstract class OrbitalBaseSpecification implements Specification
 {
-    public function __construct(protected OrbitalBase $orbitalBase)
-    {
-    }
+	public function __construct(protected OrbitalBase $orbitalBase)
+	{
+	}
 }

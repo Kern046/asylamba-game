@@ -83,7 +83,7 @@
 					<span class="label">production par relève</span>
 					<span class="value">
 						{% set production = get_base_production(current_base) %}
-						{% set refining_bonus = app.session.get('playerBonus').get(constant('App\\Modules\\Zeus\\Model\\PlayerBonus::REFINERY_REFINING')) %}
+						{% set refining_bonus = get_player_bonus(constant('App\\Modules\\Zeus\\Model\\PlayerBonusId::REFINERY_REFINING')) %}
 						{{ production|number }}
 						{% if refining_bonus > 0 %}
 							<span class="bonus">+{{ ((production * refining_bonus) / 100)|number }}</span>

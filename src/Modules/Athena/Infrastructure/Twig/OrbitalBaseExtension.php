@@ -18,56 +18,56 @@ use Twig\TwigFunction;
 
 class OrbitalBaseExtension extends AbstractExtension
 {
-    public function __construct(
-        protected OrbitalBaseHelper $orbitalBaseHelper,
-    ) {
-    }
+	public function __construct(
+		protected OrbitalBaseHelper $orbitalBaseHelper,
+	) {
+	}
 
-    public function getFilters(): array
-    {
-        return [
-            new TwigFilter('base_demography', fn (OrbitalBase $orbitalBase) => Game::getSizeOfPlanet($orbitalBase->getPlanetPopulation())),
-            new TwigFilter('base_type', fn (OrbitalBase $orbitalBase) => PlaceResource::get($orbitalBase->typeOfBase, 'name')),
-            new TwigFilter('scalar_base_type', fn (string $type) => PlaceResource::get($type, 'name')),
-            new TwigFilter('base_storage_percent', fn (OrbitalBase $orbitalBase) => $this->orbitalBaseHelper->getStoragePercent($orbitalBase)),
-            new TwigFilter('base_coords', fn (OrbitalBase $orbitalBase) => Game::formatCoord($orbitalBase->getXSystem(), $orbitalBase->getYSystem(), $orbitalBase->getPosition(), $orbitalBase->getSector())),
-            // @TODO Factorize that coords call
-            new TwigFilter('spy_report_coords', fn (SpyReport $spyReport) => Game::formatCoord($spyReport->xPosition, $spyReport->yPosition, $spyReport->position, $spyReport->rSector)),
-        ];
-    }
+	public function getFilters(): array
+	{
+		return [
+			new TwigFilter('base_demography', fn (OrbitalBase $orbitalBase) => Game::getSizeOfPlanet($orbitalBase->getPlanetPopulation())),
+			new TwigFilter('base_type', fn (OrbitalBase $orbitalBase) => PlaceResource::get($orbitalBase->typeOfBase, 'name')),
+			new TwigFilter('scalar_base_type', fn (string $type) => PlaceResource::get($type, 'name')),
+			new TwigFilter('base_storage_percent', fn (OrbitalBase $orbitalBase) => $this->orbitalBaseHelper->getStoragePercent($orbitalBase)),
+			new TwigFilter('base_coords', fn (OrbitalBase $orbitalBase) => Game::formatCoord($orbitalBase->getXSystem(), $orbitalBase->getYSystem(), $orbitalBase->getPosition(), $orbitalBase->getSector())),
+			// @TODO Factorize that coords call
+			new TwigFilter('spy_report_coords', fn (SpyReport $spyReport) => Game::formatCoord($spyReport->xPosition, $spyReport->yPosition, $spyReport->position, $spyReport->rSector)),
+		];
+	}
 
-    public function getFunctions(): array
-    {
-        return [
-            new TwigFunction('get_planet_size', fn (int|float $population) => Game::getSizeOfPlanet($population)),
-            new TwigFunction('get_base_type_info', fn (string $baseType, string $info) => PlaceResource::get($baseType, $info)),
-            new TwigFunction('can_leave_base', fn (OrbitalBase $orbitalBase) => Utils::interval(Utils::now(), $orbitalBase->dCreation, 'h') < OrbitalBase::COOL_DOWN),
-            new TwigFunction('get_time_until_cooldown_end', fn (OrbitalBase $orbitalBase) => OrbitalBase::COOL_DOWN * 60 * 60 - Utils::interval(Utils::now(), $orbitalBase->dCreation, 's')),
-            new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, int $level = null) => Game::resourceProduction(
-                $this->orbitalBaseHelper->getBuildingInfo(
-                    OrbitalBaseResource::REFINERY,
-                    'level',
-                    $level ?? $orbitalBase->getLevelRefinery(),
-                    'refiningCoefficient'
-                ),
-                $orbitalBase->getPlanetResources()
-            )),
-            new TwigFunction('get_building_info', fn (int $buildingNumber, string $info, int $level = 0, string $sub = 'default') => $this->orbitalBaseHelper->getInfo($buildingNumber, $info, $level, $sub)),
-            new TwigFunction('get_building_level_range', fn (int $currentLevel) => \range(
-                ($currentLevel < 3) ? 1 : $currentLevel - 2,
-                (($currentLevel > 35) ? 41 : $currentLevel + 5) - 1,
-            )),
-            new TwigFunction('get_base_fleet_cost', fn (OrbitalBase $base) => Game::getFleetCost($base->shipStorage, false)),
-            new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff)),
-            // @TODO Improve that part
-            new TwigFunction('get_base_image', fn (OrbitalBase $base) => '1-'.Game::getSizeOfPlanet($base->getPlanetPopulation())),
-            // @TODO move to a rightful place
-            new TwigFunction('get_ship_transaction_cost', fn (Transaction $transaction) => ShipResource::getInfo($transaction->identifier, 'cost') * ShipResource::COST_REDUCTION * $transaction->quantity),
-            new TwigFunction('can_leave_orbital_base', function (OrbitalBase $orbitalBase) {
-                $canLeaveBase = new CanLeaveOrbitalBase();
+	public function getFunctions(): array
+	{
+		return [
+			new TwigFunction('get_planet_size', fn (int|float $population) => Game::getSizeOfPlanet($population)),
+			new TwigFunction('get_base_type_info', fn (string $baseType, string $info) => PlaceResource::get($baseType, $info)),
+			new TwigFunction('can_leave_base', fn (OrbitalBase $orbitalBase) => Utils::interval(Utils::now(), $orbitalBase->dCreation, 'h') < OrbitalBase::COOL_DOWN),
+			new TwigFunction('get_time_until_cooldown_end', fn (OrbitalBase $orbitalBase) => OrbitalBase::COOL_DOWN * 60 * 60 - Utils::interval(Utils::now(), $orbitalBase->dCreation, 's')),
+			new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, int $level = null) => Game::resourceProduction(
+				$this->orbitalBaseHelper->getBuildingInfo(
+					OrbitalBaseResource::REFINERY,
+					'level',
+					$level ?? $orbitalBase->getLevelRefinery(),
+					'refiningCoefficient'
+				),
+				$orbitalBase->getPlanetResources()
+			)),
+			new TwigFunction('get_building_info', fn (int $buildingNumber, string $info, int $level = 0, string $sub = 'default') => $this->orbitalBaseHelper->getInfo($buildingNumber, $info, $level, $sub)),
+			new TwigFunction('get_building_level_range', fn (int $currentLevel) => \range(
+				($currentLevel < 3) ? 1 : $currentLevel - 2,
+				(($currentLevel > 35) ? 41 : $currentLevel + 5) - 1,
+			)),
+			new TwigFunction('get_base_fleet_cost', fn (OrbitalBase $base) => Game::getFleetCost($base->shipStorage, false)),
+			new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff)),
+			// @TODO Improve that part
+			new TwigFunction('get_base_image', fn (OrbitalBase $base) => '1-'.Game::getSizeOfPlanet($base->getPlanetPopulation())),
+			// @TODO move to a rightful place
+			new TwigFunction('get_ship_transaction_cost', fn (Transaction $transaction) => ShipResource::getInfo($transaction->identifier, 'cost') * ShipResource::COST_REDUCTION * $transaction->quantity),
+			new TwigFunction('can_leave_orbital_base', function (OrbitalBase $orbitalBase) {
+				$canLeaveBase = new CanLeaveOrbitalBase();
 
-                return $canLeaveBase->isSatisfiedBy($orbitalBase);
-            }),
-        ];
-    }
+				return $canLeaveBase->isSatisfiedBy($orbitalBase);
+			}),
+		];
+	}
 }

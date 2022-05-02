@@ -13,20 +13,20 @@ namespace App\Modules\Demeter\Model\Forum;
 
 class FactionNews
 {
-    public const STANDARD = 0;
-    public const PINNED = 1;
+	public const STANDARD = 0;
+	public const PINNED = 1;
 
-    public $id = 0;
-    public $rFaction = 0;
-    public $title = 0;
-    public $oContent = 0;
-    public $pContent = 0;
-    public $pinned = 0;
-    public $statement = 0;
-    public $dCreation = '';
+	public $id = 0;
+	public $rFaction = 0;
+	public $title = 0;
+	public $oContent = 0;
+	public $pContent = 0;
+	public $pinned = 0;
+	public $statement = 0;
+	public $dCreation = '';
 
-    public function getId()
-    {
-        return $this->id;
-    }
+	public function getId()
+	{
+		return $this->id;
+	}
 }

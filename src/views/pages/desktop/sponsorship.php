@@ -11,8 +11,8 @@ include 'defaultElement/movers.php';
 
 // contenu spécifique
 echo '<div id="content">';
-    include $componentPath.'publicity.php';
-    include $componentPath.'sponsorship/infos.php';
-    include $componentPath.'sponsorship/send-mail.php';
-    include $componentPath.'sponsorship/list-godson.php';
+	include $componentPath.'publicity.php';
+	include $componentPath.'sponsorship/infos.php';
+	include $componentPath.'sponsorship/send-mail.php';
+	include $componentPath.'sponsorship/list-godson.php';
 echo '</div>';

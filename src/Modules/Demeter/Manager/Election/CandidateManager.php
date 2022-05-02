@@ -18,44 +18,44 @@ use App\Modules\Zeus\Model\Player;
 
 class CandidateManager
 {
-    public function __construct(protected EntityManager $entityManager)
-    {
-    }
+	public function __construct(protected EntityManager $entityManager)
+	{
+	}
 
-    /**
-     * @param int $id
-     *
-     * @return Candidate
-     */
-    public function get($id)
-    {
-        return $this->entityManager->getRepository(Candidate::class)->get($id);
-    }
+	/**
+	 * @param int $id
+	 *
+	 * @return Candidate
+	 */
+	public function get($id)
+	{
+		return $this->entityManager->getRepository(Candidate::class)->get($id);
+	}
 
-    /**
-     * @return array
-     */
-    public function getByElection(Election $election)
-    {
-        return $this->entityManager->getRepository(Candidate::class)->getByElection($election->id);
-    }
+	/**
+	 * @return array
+	 */
+	public function getByElection(Election $election)
+	{
+		return $this->entityManager->getRepository(Candidate::class)->getByElection($election->id);
+	}
 
-    /**
-     * @return Candidate
-     */
-    public function getByElectionAndPlayer(Election $election, Player $player)
-    {
-        return $this->entityManager->getRepository(Candidate::class)->getByElectionAndPlayer($election->id, $player->id);
-    }
+	/**
+	 * @return Candidate
+	 */
+	public function getByElectionAndPlayer(Election $election, Player $player)
+	{
+		return $this->entityManager->getRepository(Candidate::class)->getByElectionAndPlayer($election->id, $player->id);
+	}
 
-    /**
-     * @return int
-     */
-    public function add(Candidate $candidate)
-    {
-        $this->entityManager->persist($candidate);
-        $this->entityManager->flush($candidate);
+	/**
+	 * @return int
+	 */
+	public function add(Candidate $candidate)
+	{
+		$this->entityManager->persist($candidate);
+		$this->entityManager->flush($candidate);
 
-        return $candidate->id;
-    }
+		return $candidate->id;
+	}
 }

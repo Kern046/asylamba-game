@@ -13,33 +13,33 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ArchiveReport extends AbstractController
 {
-    public function __invoke(
-        Player $currentPlayer,
-        ReportManager $reportManager,
-        EntityManager $entityManager,
-        int $id
-    ): Response {
-        if (($report = $reportManager->get($id)) !== null) {
-            if ($currentPlayer->getId() == $report->rPlayerAttacker) {
-                if (Report::STANDARD == $report->statementAttacker) {
-                    $report->statementAttacker = Report::ARCHIVED;
-                } else {
-                    $report->statementAttacker = Report::STANDARD;
-                }
-            } elseif ($currentPlayer->getId() == $report->rPlayerDefender) {
-                if (Report::STANDARD == $report->statementDefender) {
-                    $report->statementDefender = Report::ARCHIVED;
-                } else {
-                    $report->statementDefender = Report::STANDARD;
-                }
-            } else {
-                throw new AccessDeniedHttpException('Ce rapport ne vous appartient pas.');
-            }
-        } else {
-            throw new NotFoundHttpException('Ce rapport n\'existe pas.');
-        }
-        $entityManager->flush();
+	public function __invoke(
+		Player $currentPlayer,
+		ReportManager $reportManager,
+		EntityManager $entityManager,
+		int $id
+	): Response {
+		if (($report = $reportManager->get($id)) !== null) {
+			if ($currentPlayer->getId() == $report->rPlayerAttacker) {
+				if (Report::STANDARD == $report->statementAttacker) {
+					$report->statementAttacker = Report::ARCHIVED;
+				} else {
+					$report->statementAttacker = Report::STANDARD;
+				}
+			} elseif ($currentPlayer->getId() == $report->rPlayerDefender) {
+				if (Report::STANDARD == $report->statementDefender) {
+					$report->statementDefender = Report::ARCHIVED;
+				} else {
+					$report->statementDefender = Report::STANDARD;
+				}
+			} else {
+				throw new AccessDeniedHttpException('Ce rapport ne vous appartient pas.');
+			}
+		} else {
+			throw new NotFoundHttpException('Ce rapport n\'existe pas.');
+		}
+		$entityManager->flush();
 
-        return $this->redirectToRoute('fleet_archives');
-    }
+		return $this->redirectToRoute('fleet_archives');
+	}
 }

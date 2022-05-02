@@ -13,136 +13,136 @@ namespace App\Modules\Gaia\Model;
 
 class System
 {
-    /** @var int * */
-    public $id = 0;
-    /** @var int * */
-    public $rSector = 0;
-    /** @var int * */
-    public $rColor = 0;
-    /** @var int * */
-    public $xPosition = 0;
-    /** @var int * */
-    public $yPosition = 0;
-    /** @var int * */
-    public $typeOfSystem = 0;
+	/** @var int * */
+	public $id = 0;
+	/** @var int * */
+	public $rSector = 0;
+	/** @var int * */
+	public $rColor = 0;
+	/** @var int * */
+	public $xPosition = 0;
+	/** @var int * */
+	public $yPosition = 0;
+	/** @var int * */
+	public $typeOfSystem = 0;
 
-    /**
-     * @param int $id
-     *
-     * @return System
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
+	/**
+	 * @param int $id
+	 *
+	 * @return System
+	 */
+	public function setId($id)
+	{
+		$this->id = $id;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * @return int
+	 */
+	public function getId()
+	{
+		return $this->id;
+	}
 
-    /**
-     * @param int $sectorId
-     *
-     * @return System
-     */
-    public function setSectorId($sectorId)
-    {
-        $this->rSector = $sectorId;
+	/**
+	 * @param int $sectorId
+	 *
+	 * @return System
+	 */
+	public function setSectorId($sectorId)
+	{
+		$this->rSector = $sectorId;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return int
-     */
-    public function getSectorId()
-    {
-        return $this->rSector;
-    }
+	/**
+	 * @return int
+	 */
+	public function getSectorId()
+	{
+		return $this->rSector;
+	}
 
-    /**
-     * @param int $factionId
-     *
-     * @return System
-     */
-    public function setFactionId($factionId)
-    {
-        $this->rColor = $factionId;
+	/**
+	 * @param int $factionId
+	 *
+	 * @return System
+	 */
+	public function setFactionId($factionId)
+	{
+		$this->rColor = $factionId;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return int
-     */
-    public function getFactionId()
-    {
-        return $this->rColor;
-    }
+	/**
+	 * @return int
+	 */
+	public function getFactionId()
+	{
+		return $this->rColor;
+	}
 
-    /**
-     * @param int $xPosition
-     *
-     * @return System
-     */
-    public function setXPosition($xPosition)
-    {
-        $this->xPosition = $xPosition;
+	/**
+	 * @param int $xPosition
+	 *
+	 * @return System
+	 */
+	public function setXPosition($xPosition)
+	{
+		$this->xPosition = $xPosition;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return int
-     */
-    public function getXPosition()
-    {
-        return $this->xPosition;
-    }
+	/**
+	 * @return int
+	 */
+	public function getXPosition()
+	{
+		return $this->xPosition;
+	}
 
-    /**
-     * @param int $yPosition
-     *
-     * @return System
-     */
-    public function setYPosition($yPosition)
-    {
-        $this->yPosition = $yPosition;
+	/**
+	 * @param int $yPosition
+	 *
+	 * @return System
+	 */
+	public function setYPosition($yPosition)
+	{
+		$this->yPosition = $yPosition;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return int
-     */
-    public function getYPosition()
-    {
-        return $this->yPosition;
-    }
+	/**
+	 * @return int
+	 */
+	public function getYPosition()
+	{
+		return $this->yPosition;
+	}
 
-    /**
-     * @param int $systemType
-     *
-     * @return System
-     */
-    public function setSystemType($systemType)
-    {
-        $this->typeOfSystem = $systemType;
+	/**
+	 * @param int $systemType
+	 *
+	 * @return System
+	 */
+	public function setSystemType($systemType)
+	{
+		$this->typeOfSystem = $systemType;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return int
-     */
-    public function getSystemType()
-    {
-        return $this->typeOfSystem;
-    }
+	/**
+	 * @return int
+	 */
+	public function getSystemType()
+	{
+		return $this->typeOfSystem;
+	}
 }

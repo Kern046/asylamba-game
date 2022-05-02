@@ -4,7 +4,9 @@ namespace App\Modules\Zeus\Infrastructure\EventListener;
 
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
+use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Manager\PlayerManager;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -12,24 +14,30 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 #[AsEventListener]
 class CurrentPlayerListener
 {
-    public function __construct(
-        private PlayerManager $playerManager,
-        private OrbitalBaseManager $orbitalBaseManager,
-        private CurrentPlayerRegistry $currentPlayerRegistry,
-        private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-    ) {
-    }
+	public function __construct(
+		private PlayerManager $playerManager,
+		private PlayerBonusManager $playerBonusManager,
+		private OrbitalBaseManager $orbitalBaseManager,
+		private CurrentPlayerRegistry $currentPlayerRegistry,
+		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+	) {
+	}
 
-    public function __invoke(RequestEvent $event): void
-    {
-        $request = $event->getRequest();
+	public function __invoke(RequestEvent $event): void
+	{
+		$request = $event->getRequest();
 
-        if (!$request->hasPreviousSession() || null === ($playerId = $request->getSession()->get('playerId'))) {
-            return;
-        }
+		if (!$request->hasPreviousSession() || null === ($playerId = $request->getSession()->get('playerId'))) {
+			return;
+		}
 
-        $this->currentPlayerRegistry->set($this->playerManager->get($playerId));
-        $this->currentPlayerBasesRegistry->setBases($this->orbitalBaseManager->getPlayerBases($playerId));
-        $this->currentPlayerBasesRegistry->setCurrentBase($request->getSession()->get('playerParams')->get('base'));
-    }
+		$player = $this->playerManager->get($playerId);
+		$this->currentPlayerRegistry->set($player);
+		$this->currentPlayerBasesRegistry->setBases($this->orbitalBaseManager->getPlayerBases($playerId));
+		$this->currentPlayerBasesRegistry->setCurrentBase($request->getSession()->get('playerParams')->get('base'));
+
+		$bonus = $this->playerBonusManager->getBonusByPlayer($player);
+		$this->currentPlayerBonusRegistry->setPlayerBonus($bonus);
+	}
 }

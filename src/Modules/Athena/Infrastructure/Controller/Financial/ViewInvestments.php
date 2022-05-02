@@ -12,142 +12,154 @@ use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Model\PlayerBonus;
+use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ViewInvestments extends AbstractController
 {
-    public function __invoke(
-        Player $currentPlayer,
-        Request $request,
-        CommanderManager $commanderManager,
-        CommercialRouteManager $commercialRouteManager,
-        PlayerManager $playerManager,
-        OrbitalBaseManager $orbitalBaseManager,
-        TransactionManager $transactionManager,
-    ): Response {
-        $session = $request->getSession();
-        $taxCoeff = $this->getParameter('zeus.player.tax_coeff');
+	public function __construct(
+		private BonusApplierInterface $bonusApplier,
+		private CommercialRouteManager $commercialRouteManager,
+	) {
+	}
 
-        $playerBases = $orbitalBaseManager->getPlayerBases($currentPlayer->getId());
+	public function __invoke(
+		Player $currentPlayer,
+		CommanderManager $commanderManager,
+		PlayerManager $playerManager,
+		OrbitalBaseManager $orbitalBaseManager,
+		TransactionManager $transactionManager,
+	): Response {
+		$taxCoeff = $this->getParameter('zeus.player.tax_coeff');
 
-        $commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::AFFECTED, Commander::MOVING], ['c.rBase' => 'ASC']);
+		$playerBases = $orbitalBaseManager->getPlayerBases($currentPlayer->getId());
 
-        $transactions = $transactionManager->getPlayerPropositions($currentPlayer->getId(), Transaction::TYP_SHIP);
+		$commanders = $commanderManager->getPlayerCommanders(
+			$currentPlayer->getId(),
+			[Commander::AFFECTED, Commander::MOVING],
+			['c.rBase' => 'ASC'],
+		);
 
-        // global variable
-        $taxBonus = $session->get('playerBonus')->get(PlayerBonus::POPULATION_TAX);
-        $tradeRoutesIncomeBonus = $session->get('playerBonus')->get(PlayerBonus::COMMERCIAL_INCOME);
+		$transactions = $transactionManager->getPlayerPropositions($currentPlayer->getId(), Transaction::TYP_SHIP);
 
-        $basesData = $this->getBasesData($commercialRouteManager, $playerBases, $taxCoeff);
+		$basesData = $this->getBasesData($playerBases, $taxCoeff);
 
-        return $this->render('pages/athena/financial/investments.html.twig', [
-            'commanders' => $commanders,
-            'commanders_by_base' => array_reduce($commanders, function ($carry, Commander $commander) {
-                if (!isset($carry[$commander->getRBase()])) {
-                    $carry[$commander->getRBase()] = [];
-                }
-                $carry[$commander->getRBase()][] = $commander;
+		return $this->render('pages/athena/financial/investments.html.twig', [
+			'commanders' => $commanders,
+			'commanders_by_base' => array_reduce($commanders, function ($carry, Commander $commander) {
+				if (!isset($carry[$commander->getRBase()])) {
+					$carry[$commander->getRBase()] = [];
+				}
+				$carry[$commander->getRBase()][] = $commander;
 
-                return $carry;
-            }, []),
-            'player_bases' => $playerBases,
-            'tax_coeff' => $taxCoeff,
-            'tax_bonus' => $taxBonus,
-            'transactions' => $transactions,
-            'trade_routes_income_bonus' => $tradeRoutesIncomeBonus,
-            'bases_data' => $basesData,
-            'investments_data' => $this->getInvestmentsData(
-                $currentPlayer,
-                $playerBases,
-                $commanders,
-                $transactions,
-                $basesData,
-                $taxBonus,
-                $taxCoeff,
-                $tradeRoutesIncomeBonus,
-            ),
-        ]);
-    }
+				return $carry;
+			}, []),
+			'player_bases' => $playerBases,
+			'tax_coeff' => $taxCoeff,
+			'transactions' => $transactions,
+			'bases_data' => $basesData,
+			'investments_data' => $this->getInvestmentsData(
+				$currentPlayer,
+				$playerBases,
+				$commanders,
+				$transactions,
+				$basesData,
+				$taxCoeff,
+			),
+		]);
+	}
 
-    private function getBasesData(CommercialRouteManager $commercialRouteManager, array $bases, int $taxCoeff): array
-    {
-        return array_reduce($bases, function (array $carry, OrbitalBase $base) use ($commercialRouteManager, $taxCoeff) {
-            $carry[$base->getId()] = [
-                'tax_income' => Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff),
-                'routes' => array_merge(
-                    $commercialRouteManager->getByBase($base->getId()),
-                    $commercialRouteManager->getByDistantBase($base->getId())
-                ),
-                'routes_count' => $commercialRouteManager->countBaseActiveRoutes($base->getId()),
-                'routes_income' => $commercialRouteManager->getBaseIncome($base),
-            ];
+	private function getBasesData(array $bases, int $taxCoeff): array
+	{
+		return array_reduce($bases, function (array $carry, OrbitalBase $base) use ($taxCoeff) {
+			$routesIncome = $this->commercialRouteManager->getBaseIncome($base);
+			$taxIncome = Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff);
 
-            return $carry;
-        }, []);
-    }
+			$carry[$base->getId()] = [
+				'tax_income' => $taxIncome,
+				'tax_income_bonus' => $this->bonusApplier->apply($taxIncome, PlayerBonusId::POPULATION_TAX),
+				'routes' => array_merge(
+					$this->commercialRouteManager->getByBase($base->getId()),
+					$this->commercialRouteManager->getByDistantBase($base->getId())
+				),
+				'routes_count' => $this->commercialRouteManager->countBaseActiveRoutes($base->getId()),
+				'routes_income' => $routesIncome,
+				'routes_income_bonus' => $this->bonusApplier->apply($routesIncome, PlayerBonusId::COMMERCIAL_INCOME),
+			];
 
-    private function getInvestmentsData(
-        Player $player,
-        array $playerBases,
-        array $commanders,
-        array $transactions,
-        array $basesData,
-        int $taxBonus,
-        int $taxCoeff,
-        int $tradeRoutesIncomeBonus
-    ): array {
-        $data = [
-            'totalTaxIn' => 0,
-            'totalTaxInBonus' => 0,
-            'totalRouteIncome' => 0,
-            'totalRouteIncomeBonus' => 0,
-            'totalInvest' => 0,
-            'totalInvestUni' => $player->iUniversity,
-            'totalFleetFees' => 0,
-            'totalShipsFees' => 0,
-            'totalTaxOut' => 0,
-            'totalMSFees' => 0,
-        ];
+			return $carry;
+		}, []);
+	}
 
-        foreach ($playerBases as $base) {
-            $taxIn = Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff);
-            $taxInBonus = $taxIn * $taxBonus / 100;
-            $data['totalTaxIn'] += $taxIn;
-            $data['totalTaxInBonus'] += $taxInBonus;
-            $data['totalTaxOut'] += ($taxIn + $taxInBonus) * $base->getTax() / 100;
-            $data['totalInvest'] += $base->getISchool() + $base->getIAntiSpy();
-            $data['totalShipsFees'] += Game::getFleetCost($base->shipStorage, false);
+	private function getInvestmentsData(
+		Player $player,
+		array $playerBases,
+		array $commanders,
+		array $transactions,
+		array $basesData,
+		int $taxCoeff,
+	): array {
+		$data = [
+			'totalTaxIn' => 0,
+			'totalTaxInBonus' => 0,
+			'totalRouteIncome' => 0,
+			'totalInvest' => 0,
+			'totalInvestUni' => $player->iUniversity,
+			'totalFleetFees' => 0,
+			'totalShipsFees' => 0,
+			'totalTaxOut' => 0,
+			'totalMSFees' => 0,
+		];
 
-            // @TODO cout des trucs en vente
+		foreach ($playerBases as $base) {
+			$taxIn = Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff);
+			$taxInBonus = $this->bonusApplier->apply($taxIn, PlayerBonusId::POPULATION_TAX);
+			$data['totalTaxIn'] += $taxIn;
+			$data['totalTaxInBonus'] += $taxInBonus;
+			$data['totalTaxOut'] += ($taxIn + $taxInBonus) * $base->getTax() / 100;
+			$data['totalInvest'] += $base->getISchool() + $base->getIAntiSpy();
+			$data['totalShipsFees'] += Game::getFleetCost($base->shipStorage, false);
 
-            foreach ($basesData[$base->getId()]['routes'] as $route) {
-                if (CommercialRoute::ACTIVE == $route->getStatement()) {
-                    $data['totalRouteIncome'] += $route->getIncome();
-                    $data['totalRouteIncomeBonus'] += $route->getIncome() * $tradeRoutesIncomeBonus / 100;
-                }
-            }
-        }
+			// @TODO cout des trucs en vente
 
-        foreach ($commanders as $commander) {
-            $data['totalFleetFees'] += $commander->getLevel() * Commander::LVLINCOMECOMMANDER;
-            $data['totalShipsFees'] += Game::getFleetCost($commander->getNbrShipByType());
-        }
+			foreach ($basesData[$base->getId()]['routes'] as $route) {
+				if (CommercialRoute::ACTIVE == $route->getStatement()) {
+					$data['totalRouteIncome'] += $route->getIncome();
+				}
+			}
+		}
 
-        foreach ($transactions as $transaction) {
-            $data['totalShipsFees'] += ShipResource::getInfo($transaction->identifier, 'cost') * ShipResource::COST_REDUCTION * $transaction->quantity;
-        }
+		foreach ($commanders as $commander) {
+			$data['totalFleetFees'] += $commander->getLevel() * Commander::LVLINCOMECOMMANDER;
+			$data['totalShipsFees'] += Game::getFleetCost($commander->getNbrShipByType());
+		}
 
-        $data['total_income'] = $data['totalTaxIn'] + $data['totalTaxInBonus'] + $data['totalRouteIncome'] + $data['totalRouteIncomeBonus'];
-        $data['total_expenses'] = $data['totalInvest'] + $data['totalInvestUni'] + $data['totalTaxOut'] + $data['totalMSFees'] + $data['totalFleetFees'] + $data['totalShipsFees'];
+		foreach ($transactions as $transaction) {
+			$data['totalShipsFees'] += ShipResource::getInfo($transaction->identifier, 'cost') * ShipResource::COST_REDUCTION * $transaction->quantity;
+		}
 
-        $data['gains'] = $data['total_income'] - $data['total_expenses'];
-        $data['remains'] = round($player->getCredit()) + round($data['gains']);
+		$data['totalRouteIncomeBonus'] = $this->bonusApplier->apply(
+			$data['totalRouteIncome'],
+			PlayerBonusId::COMMERCIAL_INCOME
+		);
+		$data['total_income'] = $data['totalTaxIn']
+			+ $data['totalTaxInBonus']
+			+ $data['totalRouteIncome']
+			+ $data['totalRouteIncomeBonus'];
+		$data['total_expenses'] = $data['totalInvest']
+			+ $data['totalInvestUni']
+			+ $data['totalTaxOut']
+			+ $data['totalMSFees']
+			+ $data['totalFleetFees']
+			+ $data['totalShipsFees'];
 
-        return $data;
-    }
+		$data['gains'] = $data['total_income'] - $data['total_expenses'];
+		$data['remains'] = round($player->getCredit()) + round($data['gains']);
+
+		return $data;
+	}
 }

@@ -6,21 +6,21 @@ use App\Modules\Gaia\Model\Place;
 
 class PlaceOwnerChangeEvent
 {
-    /** @var Place * */
-    protected $place;
+	/** @var Place * */
+	protected $place;
 
-    public const NAME = 'gaia.place_owner_change';
+	public const NAME = 'gaia.place_owner_change';
 
-    public function __construct(Place $place)
-    {
-        $this->place = $place;
-    }
+	public function __construct(Place $place)
+	{
+		$this->place = $place;
+	}
 
-    /**
-     * @return Place
-     */
-    public function getPlace()
-    {
-        return $this->place;
-    }
+	/**
+	 * @return Place
+	 */
+	public function getPlace()
+	{
+		return $this->place;
+	}
 }

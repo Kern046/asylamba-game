@@ -62,7 +62,7 @@
 					</div>
 				</div>
 
-			{% set max_bases = technologies.getTechnology(constant('App\\Modules\\Promethee\\Model\\Technology::BASE_QUANTITY')) + 1 %}
+			{% set max_bases = technologies.getTechnology(constant('App\\Modules\\Promethee\\Model\\TechnologyId::BASE_QUANTITY')) + 1 %}
 			{% set total_bases = get_player_bases_count(moving_commanders) %}
 
 			<div class="box" data-id="2">
@@ -74,9 +74,9 @@
 						Vous ne pouvez pas conquérir un joueur de votre faction.
 					{% elseif place.typeOfPlace == 1 and place.playerLevel <= 3 and place.playerLevel > 0 and place.playerColor != 0 %}
 						Vous ne pouvez pas conquérir un joueur de niveau 3 ou inférieur.
-					{% elseif place.rPlayer == 0 and technologies.getTechnology(constant('App\\Modules\\Promethee\\Model\\Technology::COLONIZATION')) == 0 %}
+					{% elseif place.rPlayer == 0 and technologies.getTechnology(constant('App\\Modules\\Promethee\\Model\\TechnologyId::COLONIZATION')) == 0 %}
 						Vous devez développer la technologie colonisation.
-					{% elseif place.rPlayer != 0 and technologies.getTechnology(constant('App\\Modules\\Promethee\\Model\\Technology::COLONIZATION')) == 0 %}
+					{% elseif place.rPlayer != 0 and technologies.getTechnology(constant('App\\Modules\\Promethee\\Model\\TechnologyId::COLONIZATION')) == 0 %}
 						Vous devez développer la technologie conquête.
 					{% elseif total_bases >= max_bases %}
 						Vous devez améliorer le niveau de la technologie administration étendue pour disposer de planète supplémentaire.

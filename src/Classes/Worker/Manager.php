@@ -7,246 +7,246 @@ use App\Classes\Library\Bug;
 
 abstract class Manager
 {
-    // SESSION MANAGER CORE
-    /** @var string * */
-    protected $managerType = '_Main';
-    protected $currentSession;
-    protected array $sessions = [];
+	// SESSION MANAGER CORE
+	/** @var string * */
+	protected $managerType = '_Main';
+	protected $currentSession;
+	protected array $sessions = [];
 
-    /**
-     * @param Database $database
-     */
-    public function __construct(protected Database $database)
-    {
-        $this->newSession();
-    }
+	/**
+	 * @param Database $database
+	 */
+	public function __construct(protected Database $database)
+	{
+		$this->newSession();
+	}
 
-    public function newSession($uMode = true)
-    {
-        ++$this->statSessions;
-        ++$this->statChangeSessions;
+	public function newSession($uMode = true)
+	{
+		++$this->statSessions;
+		++$this->statChangeSessions;
 
-        if (0 == count($this->sessions)) {
-            $session = new ManagerSession('_1', $this->managerType, true);
-        } else {
-            $session = new ManagerSession('_'.(count($this->sessions) + 1), $this->managerType, $uMode);
-        }
-        $this->currentSession = $session;
-        $this->sessions[] = $session;
+		if (0 == count($this->sessions)) {
+			$session = new ManagerSession('_1', $this->managerType, true);
+		} else {
+			$session = new ManagerSession('_'.(count($this->sessions) + 1), $this->managerType, $uMode);
+		}
+		$this->currentSession = $session;
+		$this->sessions[] = $session;
 
-        $this->objects[$session->getId()] = [];
-        $this->origin[$session->getId()] = [];
+		$this->objects[$session->getId()] = [];
+		$this->origin[$session->getId()] = [];
 
-        return $session;
-    }
+		return $session;
+	}
 
-    public function changeSession(ManagerSession $session)
-    {
-        ++$this->statChangeSessions;
+	public function changeSession(ManagerSession $session)
+	{
+		++$this->statChangeSessions;
 
-        if (in_array($session, $this->sessions) and $session->getType() == $this->managerType) {
-            $this->currentSession = $session;
+		if (in_array($session, $this->sessions) and $session->getType() == $this->managerType) {
+			$this->currentSession = $session;
 
-            return true;
-        } else {
-            return false;
-        }
-    }
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    public function getCurrentSession()
-    {
-        return $this->currentSession;
-    }
+	public function getCurrentSession()
+	{
+		return $this->currentSession;
+	}
 
-    public function getFirstSession()
-    {
-        return $this->sessions[0];
-    }
+	public function getFirstSession()
+	{
+		return $this->sessions[0];
+	}
 
-    // OBJECT MANAGER CORE
-    protected $objects = [];
-    protected $origin = [];
+	// OBJECT MANAGER CORE
+	protected $objects = [];
+	protected $origin = [];
 
-    public function get($i = 0)
-    {
-        if (isset($this->objects[$this->currentSession->getId()][$i])) {
-            return $this->objects[$this->currentSession->getId()][$i];
-        } else {
-            return false;
-        }
-    }
+	public function get($i = 0)
+	{
+		if (isset($this->objects[$this->currentSession->getId()][$i])) {
+			return $this->objects[$this->currentSession->getId()][$i];
+		} else {
+			return false;
+		}
+	}
 
-    public function getById($id)
-    {
-        foreach ($this->objects[$this->currentSession->getId()] as $o) {
-            if ($o->getId() == $id) {
-                return $o;
-            }
-        }
+	public function getById($id)
+	{
+		foreach ($this->objects[$this->currentSession->getId()] as $o) {
+			if ($o->getId() == $id) {
+				return $o;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    public function getAll()
-    {
-        return $this->objects[$this->currentSession->getId()];
-    }
+	public function getAll()
+	{
+		return $this->objects[$this->currentSession->getId()];
+	}
 
-    public function size()
-    {
-        return count($this->objects[$this->currentSession->getId()]);
-    }
+	public function size()
+	{
+		return count($this->objects[$this->currentSession->getId()]);
+	}
 
-    protected function _ObjectExist($object)
-    {
-        foreach ($this->sessions as $s) {
-            foreach ($this->origin[$s->getId()] as $k => $o) {
-                if ($o->getId() == $object->getId()) {
-                    if ($s->getId() == $this->currentSession->getId()) {
-                        return true;
-                    } else {
-                        return $this->objects[$s->getId()][$k];
-                    }
-                }
-            }
-        }
+	protected function _ObjectExist($object)
+	{
+		foreach ($this->sessions as $s) {
+			foreach ($this->origin[$s->getId()] as $k => $o) {
+				if ($o->getId() == $object->getId()) {
+					if ($s->getId() == $this->currentSession->getId()) {
+						return true;
+					} else {
+						return $this->objects[$s->getId()][$k];
+					}
+				}
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    protected function _Add($object)
-    {
-        $element = $this->_ObjectExist($object);
+	protected function _Add($object)
+	{
+		$element = $this->_ObjectExist($object);
 
-        if (false === $element) {
-            ++$this->statObject;
-            ++$this->statRealObject;
+		if (false === $element) {
+			++$this->statObject;
+			++$this->statRealObject;
 
-            $this->objects[$this->currentSession->getId()][] = $object;
-            $this->origin[$this->currentSession->getId()][] = clone $object;
+			$this->objects[$this->currentSession->getId()][] = $object;
+			$this->origin[$this->currentSession->getId()][] = clone $object;
 
-            return $object;
-        } elseif (true === $element) {
-            $currentIdSession = $this->currentSession->getId();
-            foreach ($this->origin[$currentIdSession] as $k => $o) {
-                if ($o == $object) {
-                    return $this->objects[$currentIdSession][$k];
-                }
-            }
+			return $object;
+		} elseif (true === $element) {
+			$currentIdSession = $this->currentSession->getId();
+			foreach ($this->origin[$currentIdSession] as $k => $o) {
+				if ($o == $object) {
+					return $this->objects[$currentIdSession][$k];
+				}
+			}
 
-            return false;
-        } else {
-            ++$this->statObject;
-            ++$this->statReferenceObject;
+			return false;
+		} else {
+			++$this->statObject;
+			++$this->statReferenceObject;
 
-            $this->objects[$this->currentSession->getId()][] = $element;
-            $this->origin[$this->currentSession->getId()][] = $element;
+			$this->objects[$this->currentSession->getId()][] = $element;
+			$this->origin[$this->currentSession->getId()][] = $element;
 
-            return $element;
-        }
-    }
+			return $element;
+		}
+	}
 
-    protected function _Remove($id)
-    {
-        foreach ($this->sessions as $session) {
-            foreach ($this->objects[$session->getId()] as $k => $o) {
-                if ($o->getId() == $id) {
-                    unset($this->objects[$session->getId()][$k]);
-                    unset($this->origin[$session->getId()][$k]);
-                }
-            }
-            $this->objects[$session->getId()] = array_values($this->objects[$session->getId()]);
-            $this->origin[$session->getId()] = array_values($this->origin[$session->getId()]);
-        }
+	protected function _Remove($id)
+	{
+		foreach ($this->sessions as $session) {
+			foreach ($this->objects[$session->getId()] as $k => $o) {
+				if ($o->getId() == $id) {
+					unset($this->objects[$session->getId()][$k]);
+					unset($this->origin[$session->getId()][$k]);
+				}
+			}
+			$this->objects[$session->getId()] = array_values($this->objects[$session->getId()]);
+			$this->origin[$session->getId()] = array_values($this->origin[$session->getId()]);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    public function _Save()
-    {
-        $savingList = [];
-        if (!empty($this->objects)) {
-            foreach ($this->sessions as $s) {
-                foreach ($this->objects[$s->getId()] as $k => $o) {
-                    if ($this->objects[$s->getId()][$k] != $this->origin[$s->getId()][$k]) {
-                        $savingList[] = $o;
-                    }
-                }
-            }
-            $this->statSavingObject = count($savingList);
-        }
+	public function _Save()
+	{
+		$savingList = [];
+		if (!empty($this->objects)) {
+			foreach ($this->sessions as $s) {
+				foreach ($this->objects[$s->getId()] as $k => $o) {
+					if ($this->objects[$s->getId()][$k] != $this->origin[$s->getId()][$k]) {
+						$savingList[] = $o;
+					}
+				}
+			}
+			$this->statSavingObject = count($savingList);
+		}
 
-        return $savingList;
-    }
+		return $savingList;
+	}
 
-    public function clean()
-    {
-        $this->sessions = [];
-        $this->objects = [];
-        $this->origin = [];
+	public function clean()
+	{
+		$this->sessions = [];
+		$this->objects = [];
+		$this->origin = [];
 
-        $this->newSession();
-    }
+		$this->newSession();
+	}
 
-    public function _EmptyCurrentSession()
-    {
-        $currentSessionId = $this->currentSession->getId();
-        foreach ($this->objects[$currentSessionId] as $k => $o) {
-            // code...
-            unset($this->objects[$currentSessionId][$k]);
-            unset($this->origin[$currentSessionId][$k]);
-        }
-    }
+	public function _EmptyCurrentSession()
+	{
+		$currentSessionId = $this->currentSession->getId();
+		foreach ($this->objects[$currentSessionId] as $k => $o) {
+			// code...
+			unset($this->objects[$currentSessionId][$k]);
+			unset($this->origin[$currentSessionId][$k]);
+		}
+	}
 
-    // DEBUG & STATISTIC MANAGER CORE
-    protected $statObject = 0;
-    protected $statRealObject = 0;
-    protected $statReferenceObject = 0;
-    protected $statSavingObject = 0;
+	// DEBUG & STATISTIC MANAGER CORE
+	protected $statObject = 0;
+	protected $statRealObject = 0;
+	protected $statReferenceObject = 0;
+	protected $statSavingObject = 0;
 
-    protected $statSessions = 0;
-    protected $statChangeSessions = 0;
+	protected $statSessions = 0;
+	protected $statChangeSessions = 0;
 
-    public function saveStat($path)
-    {
-        $ret = 'objet '.$this->managerType.'<br />';
-        $ret .= 'object : '.$this->statObject.'<br />';
-        $ret .= 'real object : '.$this->statRealObject.'<br />';
-        $ret .= 'ref object : '.$this->statReferenceObject.'<br />';
-        $ret .= 'saving object : '.$this->statSavingObject.'<br />';
+	public function saveStat($path)
+	{
+		$ret = 'objet '.$this->managerType.'<br />';
+		$ret .= 'object : '.$this->statObject.'<br />';
+		$ret .= 'real object : '.$this->statRealObject.'<br />';
+		$ret .= 'ref object : '.$this->statReferenceObject.'<br />';
+		$ret .= 'saving object : '.$this->statSavingObject.'<br />';
 
-        $ret .= 'sessions : '.$this->statSessions.'<br />';
-        $ret .= 'change sessions : '.$this->statChangeSessions.'<br />';
-        $ret .= '-----------------------------------------------------<br />';
-        Bug::writeLog($path, $ret);
-    }
+		$ret .= 'sessions : '.$this->statSessions.'<br />';
+		$ret .= 'change sessions : '.$this->statChangeSessions.'<br />';
+		$ret .= '-----------------------------------------------------<br />';
+		Bug::writeLog($path, $ret);
+	}
 
-    public function showStat()
-    {
-        $ret = 'objet '.$this->managerType.'<br />';
-        $ret .= 'object : '.$this->statObject.'<br />';
-        $ret .= 'real object : '.$this->statRealObject.'<br />';
-        $ret .= 'ref object : '.$this->statReferenceObject.'<br />';
-        $ret .= 'saving object : '.$this->statSavingObject.'<br />';
+	public function showStat()
+	{
+		$ret = 'objet '.$this->managerType.'<br />';
+		$ret .= 'object : '.$this->statObject.'<br />';
+		$ret .= 'real object : '.$this->statRealObject.'<br />';
+		$ret .= 'ref object : '.$this->statReferenceObject.'<br />';
+		$ret .= 'saving object : '.$this->statSavingObject.'<br />';
 
-        $ret .= 'sessions : '.$this->statSessions.'<br />';
-        $ret .= 'change sessions : '.$this->statChangeSessions.'<br />';
-        $ret .= '-----------------------------------------------------<br />';
-        echo $ret;
-    }
+		$ret .= 'sessions : '.$this->statSessions.'<br />';
+		$ret .= 'change sessions : '.$this->statChangeSessions.'<br />';
+		$ret .= '-----------------------------------------------------<br />';
+		echo $ret;
+	}
 
-    public function show($flag = 1)
-    {
-        if (1 == $flag) {
-            var_dump($this->objects);
-        } elseif (2 == $flag) {
-            var_dump($this->origin);
-        } else {
-            var_dump($this->objects);
-            var_dump($this->origin);
-        }
-        for ($i = 0; $i < 200; ++$i) {
-            echo '-';
-        }
-    }
+	public function show($flag = 1)
+	{
+		if (1 == $flag) {
+			var_dump($this->objects);
+		} elseif (2 == $flag) {
+			var_dump($this->origin);
+		} else {
+			var_dump($this->objects);
+			var_dump($this->origin);
+		}
+		for ($i = 0; $i < 200; ++$i) {
+			echo '-';
+		}
+	}
 }

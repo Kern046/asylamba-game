@@ -12,29 +12,29 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Fire extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        CommanderManager $commanderManager,
-        EntityManager $entityManager,
-        int $id,
-    ): Response {
-        if (($commander = $commanderManager->get($id)) === null || $commander->rPlayer !== $currentPlayer->getId()) {
-            throw new ErrorException('Ce commandant n\'existe pas ou ne vous appartient pas.');
-        }
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		CommanderManager $commanderManager,
+		EntityManager $entityManager,
+		int $id,
+	): Response {
+		if (($commander = $commanderManager->get($id)) === null || $commander->rPlayer !== $currentPlayer->getId()) {
+			throw new ErrorException('Ce commandant n\'existe pas ou ne vous appartient pas.');
+		}
 
-        if (1 == $commander->statement) {
-            // vider le commandant
-            $commanderManager->emptySquadrons($commander);
-            $commander->setStatement(4);
+		if (1 == $commander->statement) {
+			// vider le commandant
+			$commanderManager->emptySquadrons($commander);
+			$commander->setStatement(4);
 
-            $this->addFlash('success', 'Vous avez renvoyé votre commandant '.$commander->getName().'.');
-        } else {
-            $this->addFlash('error', 'Vous ne pouvez pas renvoyer un officier en déplacement.');
-        }
+			$this->addFlash('success', 'Vous avez renvoyé votre commandant '.$commander->getName().'.');
+		} else {
+			$this->addFlash('error', 'Vous ne pouvez pas renvoyer un officier en déplacement.');
+		}
 
-        $entityManager->flush();
+		$entityManager->flush();
 
-        return $this->redirectToRoute('fleet_headquarters');
-    }
+		return $this->redirectToRoute('fleet_headquarters');
+	}
 }

@@ -7,8 +7,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ViewFleetDetails extends AbstractController
 {
-    public function __invoke(): Response
-    {
-        return $this->render('pages/ares/fleet/details.html.twig');
-    }
+	public function __invoke(): Response
+	{
+		return $this->render('pages/ares/fleet/details.html.twig');
+	}
 }

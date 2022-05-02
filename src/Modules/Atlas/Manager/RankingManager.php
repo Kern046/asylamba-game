@@ -16,72 +16,72 @@ use App\Modules\Hermes\Model\ConversationUser;
 
 class RankingManager
 {
-    public function __construct(
-        protected EntityManager $entityManager,
-        protected ColorManager $colorManager,
-        protected ConversationManager $conversationManager,
-        protected ConversationMessageManager $conversationMessageManager,
-        protected string $pointsToWin,
-        protected int $jeanMiId
-    ) {
-    }
+	public function __construct(
+		protected EntityManager $entityManager,
+		protected ColorManager $colorManager,
+		protected ConversationManager $conversationManager,
+		protected ConversationMessageManager $conversationMessageManager,
+		protected string $pointsToWin,
+		protected int $jeanMiId
+	) {
+	}
 
-    public function processWinningFaction($factionId)
-    {
-        $faction = $this->colorManager->get($factionId);
-        $faction->isWinner = Color::WIN;
+	public function processWinningFaction($factionId)
+	{
+		$faction = $this->colorManager->get($factionId);
+		$faction->isWinner = Color::WIN;
 
-        // envoyer un message de Jean-Mi
-        $winnerName = ColorResource::getInfo($faction->id, 'officialName');
-        $content = 'Salut,<br /><br />La victoire vient d\'être remportée par : <br /><strong>'.$winnerName.'</strong><br />';
-        $content .= 'Cette faction a atteint les '.$this->pointsToWin.' points, la partie est donc terminée.<br /><br />Bravo et un grand merci à tous les participants !';
+		// envoyer un message de Jean-Mi
+		$winnerName = ColorResource::getInfo($faction->id, 'officialName');
+		$content = 'Salut,<br /><br />La victoire vient d\'être remportée par : <br /><strong>'.$winnerName.'</strong><br />';
+		$content .= 'Cette faction a atteint les '.$this->pointsToWin.' points, la partie est donc terminée.<br /><br />Bravo et un grand merci à tous les participants !';
 
-        $S_CVM1 = $this->conversationManager->getCurrentSession();
-        $this->conversationManager->newSession();
-        $this->conversationManager->load(
-            ['cu.rPlayer' => $this->jeanMiId]
-        );
+		$S_CVM1 = $this->conversationManager->getCurrentSession();
+		$this->conversationManager->newSession();
+		$this->conversationManager->load(
+			['cu.rPlayer' => $this->jeanMiId]
+		);
 
-        if (1 == $this->conversationManager->size()) {
-            $conv = $this->conversationManager->get();
+		if (1 == $this->conversationManager->size()) {
+			$conv = $this->conversationManager->get();
 
-            ++$conv->messages;
-            $conv->dLastMessage = Utils::now();
+			++$conv->messages;
+			$conv->dLastMessage = Utils::now();
 
-            // désarchiver tous les users
-            $users = $conv->players;
-            foreach ($users as $user) {
-                $user->convStatement = ConversationUser::CS_DISPLAY;
-            }
+			// désarchiver tous les users
+			$users = $conv->players;
+			foreach ($users as $user) {
+				$user->convStatement = ConversationUser::CS_DISPLAY;
+			}
 
-            // création du message
-            $message = new ConversationMessage();
+			// création du message
+			$message = new ConversationMessage();
 
-            $message->rConversation = $conv->id;
-            $message->rPlayer = $this->jeanMiId;
-            $message->type = ConversationMessage::TY_STD;
-            $message->content = $content;
-            $message->dCreation = Utils::now();
-            $message->dLastModification = null;
+			$message->rConversation = $conv->id;
+			$message->rPlayer = $this->jeanMiId;
+			$message->type = ConversationMessage::TY_STD;
+			$message->content = $content;
+			$message->dCreation = Utils::now();
+			$message->dLastModification = null;
 
-            $this->conversationMessageManager->add($message);
-        } else {
-            throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
-        }
-        $this->conversationManager->changeSession($S_CVM1);
-    }
+			$this->conversationMessageManager->add($message);
+		} else {
+			throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
+		}
+		$this->conversationManager->changeSession($S_CVM1);
+	}
 
-    public function createRanking(bool $isPlayer, bool $isFaction): Ranking
-    {
-        $ranking =
-            (new Ranking())
-            ->setIsPlayer($isPlayer)
-            ->setIsFaction($isFaction)
-            ->setCreatedAt(Utils::now())
-        ;
-        $this->entityManager->persist($ranking);
-        $this->entityManager->flush($ranking);
+	public function createRanking(bool $isPlayer, bool $isFaction): Ranking
+	{
+		$ranking =
+			(new Ranking())
+			->setIsPlayer($isPlayer)
+			->setIsFaction($isFaction)
+			->setCreatedAt(Utils::now())
+		;
+		$this->entityManager->persist($ranking);
+		$this->entityManager->flush($ranking);
 
-        return $ranking;
-    }
+		return $ranking;
+	}
 }

@@ -17,36 +17,36 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class PutCommanderInSchool extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        CommanderManager $commanderManager,
-        OrbitalBaseManager $orbitalBaseManager,
-        EntityManager $entityManager,
-        int $id
-    ): Response {
-        if (null === ($commander = $commanderManager->get($id)) || $commander->rPlayer !== $currentPlayer->getId()) {
-            throw new BadRequestHttpException('Ce commandant n\'existe pas ou ne vous appartient pas');
-        }
-        $orbitalBase = $orbitalBaseManager->get($commander->rBase);
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		CommanderManager $commanderManager,
+		OrbitalBaseManager $orbitalBaseManager,
+		EntityManager $entityManager,
+		int $id
+	): Response {
+		if (null === ($commander = $commanderManager->get($id)) || $commander->rPlayer !== $currentPlayer->getId()) {
+			throw new BadRequestHttpException('Ce commandant n\'existe pas ou ne vous appartient pas');
+		}
+		$orbitalBase = $orbitalBaseManager->get($commander->rBase);
 
-        if (Commander::RESERVE == $commander->statement) {
-            $commanders = $commanderManager->getBaseCommanders($commander->rBase, [Commander::INSCHOOL]);
+		if (Commander::RESERVE == $commander->statement) {
+			$commanders = $commanderManager->getBaseCommanders($commander->rBase, [Commander::INSCHOOL]);
 
-            if (count($commanders) < PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
-                $commander->statement = Commander::INSCHOOL;
-                $commander->uCommander = Utils::now();
-            } else {
-                throw new ConflictHttpException('Votre école est déjà pleine.');
-            }
-        } elseif (Commander::INSCHOOL == $commander->statement) {
-            $commander->statement = Commander::RESERVE;
-            $commander->uCommander = Utils::now();
-        } else {
-            throw new ConflictHttpException('Vous ne pouvez rien faire avec cet officier.');
-        }
-        $entityManager->flush();
+			if (count($commanders) < PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
+				$commander->statement = Commander::INSCHOOL;
+				$commander->uCommander = Utils::now();
+			} else {
+				throw new ConflictHttpException('Votre école est déjà pleine.');
+			}
+		} elseif (Commander::INSCHOOL == $commander->statement) {
+			$commander->statement = Commander::RESERVE;
+			$commander->uCommander = Utils::now();
+		} else {
+			throw new ConflictHttpException('Vous ne pouvez rien faire avec cet officier.');
+		}
+		$entityManager->flush();
 
-        return $this->redirectToRoute('school');
-    }
+		return $this->redirectToRoute('school');
+	}
 }

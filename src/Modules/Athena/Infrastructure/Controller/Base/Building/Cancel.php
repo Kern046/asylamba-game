@@ -18,69 +18,69 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class Cancel extends AbstractController
 {
-    public function __invoke(
-        Request $request,
-        Player $currentPlayer,
-        OrbitalBase $currentBase,
-        OrbitalBaseHelper $orbitalBaseHelper,
-        OrbitalBaseManager $orbitalBaseManager,
-        BuildingQueueManager $buildingQueueManager,
-        EntityManager $entityManager,
-        int $identifier,
-    ): Response {
-        if ($orbitalBaseHelper->isABuilding($identifier)) {
-            $buildingQueues = $buildingQueueManager->getBaseQueues($currentBase->getId());
+	public function __invoke(
+		Request $request,
+		Player $currentPlayer,
+		OrbitalBase $currentBase,
+		OrbitalBaseHelper $orbitalBaseHelper,
+		OrbitalBaseManager $orbitalBaseManager,
+		BuildingQueueManager $buildingQueueManager,
+		EntityManager $entityManager,
+		int $identifier,
+	): Response {
+		if ($orbitalBaseHelper->isABuilding($identifier)) {
+			$buildingQueues = $buildingQueueManager->getBaseQueues($currentBase->getId());
 
-            $index = null;
-            $nbBuildingQueues = count($buildingQueues);
-            for ($i = 0; $i < $nbBuildingQueues; ++$i) {
-                $queue = $buildingQueues[$i];
-                // get the last element from the correct building
-                if ($queue->buildingNumber == $identifier) {
-                    $index = $i;
-                    $targetLevel = $queue->targetLevel;
-                    $dStart = $queue->dStart;
-                }
-            }
+			$index = null;
+			$nbBuildingQueues = count($buildingQueues);
+			for ($i = 0; $i < $nbBuildingQueues; ++$i) {
+				$queue = $buildingQueues[$i];
+				// get the last element from the correct building
+				if ($queue->buildingNumber == $identifier) {
+					$index = $i;
+					$targetLevel = $queue->targetLevel;
+					$dStart = $queue->dStart;
+				}
+			}
 
-            // if it's the first, the next must restart by now
-            if (0 == $index) {
-                $dStart = Utils::now();
-            }
+			// if it's the first, the next must restart by now
+			if (0 == $index) {
+				$dStart = Utils::now();
+			}
 
-            if (null !== $index) {
-                // shift
-                for ($i = $index + 1; $i < $nbBuildingQueues; ++$i) {
-                    $queue = $buildingQueues[$i];
+			if (null !== $index) {
+				// shift
+				for ($i = $index + 1; $i < $nbBuildingQueues; ++$i) {
+					$queue = $buildingQueues[$i];
 
-                    $oldDate = $queue->dEnd;
-                    $queue->dEnd = Utils::addSecondsToDate($dStart, Utils::interval($queue->dStart, $queue->dEnd, 's'));
-                    $queue->dStart = $dStart;
+					$oldDate = $queue->dEnd;
+					$queue->dEnd = Utils::addSecondsToDate($dStart, Utils::interval($queue->dStart, $queue->dEnd, 's'));
+					$queue->dStart = $dStart;
 
-                    // @TODO handle rescheduling
-                    // $scheduler->reschedule($queue, $queue->dEnd, $oldDate);
+					// @TODO handle rescheduling
+					// $scheduler->reschedule($queue, $queue->dEnd, $oldDate);
 
-                    $dStart = $queue->dEnd;
-                }
+					$dStart = $queue->dEnd;
+				}
 
-                // @TODO handle cancellation
-                // $scheduler->cancel($buildingQueues[$index], $buildingQueues[$index]->dEnd);
-                $entityManager->remove($buildingQueues[$index]);
-                $entityManager->flush(BuildingQueue::class);
+				// @TODO handle cancellation
+				// $scheduler->cancel($buildingQueues[$index], $buildingQueues[$index]->dEnd);
+				$entityManager->remove($buildingQueues[$index]);
+				$entityManager->flush(BuildingQueue::class);
 
-                $buildingResourceRefund = $this->getParameter('athena.building.building_queue_resource_refund');
-                // give the resources back
-                $resourcePrice = $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $targetLevel, 'resourcePrice');
-                $resourcePrice *= $buildingResourceRefund;
-                $orbitalBaseManager->increaseResources($currentBase, $resourcePrice, true);
-                $this->addFlash('success', 'Construction annulée, vous récupérez le '.$buildingResourceRefund * 100 .'% du montant investi pour la construction');
+				$buildingResourceRefund = $this->getParameter('athena.building.building_queue_resource_refund');
+				// give the resources back
+				$resourcePrice = $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $targetLevel, 'resourcePrice');
+				$resourcePrice *= $buildingResourceRefund;
+				$orbitalBaseManager->increaseResources($currentBase, $resourcePrice, true);
+				$this->addFlash('success', 'Construction annulée, vous récupérez le '.$buildingResourceRefund * 100 .'% du montant investi pour la construction');
 
-                return $this->redirect($request->headers->get('referer'));
-            } else {
-                throw new ConflictHttpException('suppression de bâtiment impossible');
-            }
-        } else {
-            throw new BadRequestHttpException('le bâtiment indiqué n\'est pas valide');
-        }
-    }
+				return $this->redirect($request->headers->get('referer'));
+			} else {
+				throw new ConflictHttpException('suppression de bâtiment impossible');
+			}
+		} else {
+			throw new BadRequestHttpException('le bâtiment indiqué n\'est pas valide');
+		}
+	}
 }

@@ -10,37 +10,37 @@ use App\Modules\Gaia\Manager\SystemManager;
 
 class SectorListener
 {
-    public function __construct(
-        protected SectorManager $sectorManager,
-        protected SystemManager $systemManager,
-        protected EntityManager $entityManager,
-        protected RedisManager $redisManager,
-        protected array $scores,
-        protected int $sectorMinimalScore,
-    ) {
-    }
+	public function __construct(
+		protected SectorManager $sectorManager,
+		protected SystemManager $systemManager,
+		protected EntityManager $entityManager,
+		protected RedisManager $redisManager,
+		protected array $scores,
+		protected int $sectorMinimalScore,
+	) {
+	}
 
-    public function onPlaceOwnerChange(PlaceOwnerChangeEvent $event): void
-    {
-        $system = $this->systemManager->get($event->getPlace()->rSystem);
-        $sector = $this->sectorManager->get($system->rSector);
-        $scores = $this->sectorManager->calculateOwnership($sector);
+	public function onPlaceOwnerChange(PlaceOwnerChangeEvent $event): void
+	{
+		$system = $this->systemManager->get($event->getPlace()->rSystem);
+		$sector = $this->sectorManager->get($system->rSector);
+		$scores = $this->sectorManager->calculateOwnership($sector);
 
-        $newColor = key($scores);
-        $hasEnoughPoints = false;
-        foreach ($scores as $factionId => $score) {
-            if (0 !== $factionId && $score >= $this->sectorMinimalScore) {
-                $hasEnoughPoints = true;
-                break;
-            }
-        }
-        // If the faction has more points than the minimal score and the current owner of the sector, he claims it
-        if (true === $hasEnoughPoints && $sector->rColor !== $newColor && $scores[$newColor] > $scores[$sector->rColor]) {
-            $sector->rColor = $newColor;
-        // If this is a prime sector, we do not pull back the color from the sector
-        } elseif (false === $hasEnoughPoints && false === $sector->getPrime()) {
-            $sector->rColor = 0;
-        }
-        $this->sectorManager->changeOwnership($sector);
-    }
+		$newColor = key($scores);
+		$hasEnoughPoints = false;
+		foreach ($scores as $factionId => $score) {
+			if (0 !== $factionId && $score >= $this->sectorMinimalScore) {
+				$hasEnoughPoints = true;
+				break;
+			}
+		}
+		// If the faction has more points than the minimal score and the current owner of the sector, he claims it
+		if (true === $hasEnoughPoints && $sector->rColor !== $newColor && $scores[$newColor] > $scores[$sector->rColor]) {
+			$sector->rColor = $newColor;
+		// If this is a prime sector, we do not pull back the color from the sector
+		} elseif (false === $hasEnoughPoints && false === $sector->getPrime()) {
+			$sector->rColor = 0;
+		}
+		$this->sectorManager->changeOwnership($sector);
+	}
 }

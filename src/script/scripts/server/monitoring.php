@@ -20,16 +20,16 @@ echo '<p>Heure : '.Utils::now().'</p>';
 echo '<h3>Process</h3>';
 echo '<div style="display:flex;justify-content:space-around;">';
 foreach ($processManager->getProcesses() as $process) {
-    $tasks = $process->getTasks();
-    echo "<div><ul><li>Name : {$process->getName()}</li>";
-    echo "<li>Mémoire allouée: {$process->getAllocatedMemory()}b</li>";
-    echo "<li>Mémoire utilisée: {$process->getMemory()}</li>";
-    echo "<li>Temps estimé de travail: {$process->getExpectedWorkTime()}</li>";
-    echo '<li>Tasks '.count($tasks).'</li>';
-    foreach ($tasks as $task) {
-        var_dump($task);
-    }
-    echo '</ul></div>';
+	$tasks = $process->getTasks();
+	echo "<div><ul><li>Name : {$process->getName()}</li>";
+	echo "<li>Mémoire allouée: {$process->getAllocatedMemory()}b</li>";
+	echo "<li>Mémoire utilisée: {$process->getMemory()}</li>";
+	echo "<li>Temps estimé de travail: {$process->getExpectedWorkTime()}</li>";
+	echo '<li>Tasks '.count($tasks).'</li>';
+	foreach ($tasks as $task) {
+		var_dump($task);
+	}
+	echo '</ul></div>';
 }
 echo '</div>';
 echo '<div style="display:flex;justify-content:space-between;">';
@@ -46,8 +46,8 @@ echo '</ul></div>';
 
 echo '<div><h3>Clients</h3><ul id="clients">';
 foreach ($clientManager->getClients() as $id => $client) {
-    echo '<li><pre>';
-    var_dump($client);
-    echo '</pre></li>';
+	echo '<li><pre>';
+	var_dump($client);
+	echo '</pre></li>';
 }
 echo '</ul></div></div>';

@@ -11,23 +11,23 @@ use Symfony\Component\Messenger\Middleware\SendMessageMiddleware;
 
 class BusFactory
 {
-    public static function createBus(
-        HandlersLocatorInterface $handlersLocator,
-        SendersLocator $sendersLocator,
-        LoggerInterface $logger,
-        ?bool $enableLogs,
-    ): MessageBusInterface {
-        $setLogger = (true === $enableLogs)
-            ? function ($middleware) use ($logger) {
-                $middleware->setLogger($logger);
+	public static function createBus(
+		HandlersLocatorInterface $handlersLocator,
+		SendersLocator $sendersLocator,
+		LoggerInterface $logger,
+		?bool $enableLogs,
+	): MessageBusInterface {
+		$setLogger = (true === $enableLogs)
+			? function ($middleware) use ($logger) {
+				$middleware->setLogger($logger);
 
-                return $middleware;
-            }
-        : fn ($middleware) => $middleware;
+				return $middleware;
+			}
+		: fn ($middleware) => $middleware;
 
-        return new MessageBus([
-            $setLogger(new SendMessageMiddleware($sendersLocator)),
-            $setLogger(new HandleMessageMiddleware($handlersLocator)),
-        ]);
-    }
+		return new MessageBus([
+			$setLogger(new SendMessageMiddleware($sendersLocator)),
+			$setLogger(new HandleMessageMiddleware($handlersLocator)),
+		]);
+	}
 }

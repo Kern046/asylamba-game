@@ -23,75 +23,75 @@ include 'defaultElement/movers.php';
 
 // contenu spécifique
 echo '<div id="content">';
-    include $componentPath.'publicity.php';
-        // liste des conv's
-    $display =
-        (ConversationUser::CS_ARCHIVED === (int) $request->query->get('mode'))
-        ? ConversationUser::CS_ARCHIVED
-        : ConversationUser::CS_DISPLAY
-    ;
-    // chargement de toutes les conversations
-    $conversationManager->newSession();
-    $conversationManager->load(
-        ['cu.rPlayer' => $session->get('playerId'), 'cu.convStatement' => $display],
-        ['c.dLastMessage', 'DESC'],
-        [0, Conversation::CONVERSATION_BY_PAGE]
-    );
+	include $componentPath.'publicity.php';
+		// liste des conv's
+	$display =
+		(ConversationUser::CS_ARCHIVED === (int) $request->query->get('mode'))
+		? ConversationUser::CS_ARCHIVED
+		: ConversationUser::CS_DISPLAY
+	;
+	// chargement de toutes les conversations
+	$conversationManager->newSession();
+	$conversationManager->load(
+		['cu.rPlayer' => $session->get('playerId'), 'cu.convStatement' => $display],
+		['c.dLastMessage', 'DESC'],
+		[0, Conversation::CONVERSATION_BY_PAGE]
+	);
 
-    $conversation_listmode = false;
+	$conversation_listmode = false;
 
-    include $componentPath.'conversation/list.php';
+	include $componentPath.'conversation/list.php';
 
-    if ($request->query->has('conversation')) {
-        if ('new' === $request->query->get('conversation')) {
-            include $componentPath.'conversation/create.php';
-        } else {
-            // chargement d'une conversation
-            $conversationManager->newSession();
-            $conversationManager->load(
-                ['c.id' => $request->query->get('conversation'), 'cu.rPlayer' => $session->get('playerId')]
-            );
+	if ($request->query->has('conversation')) {
+		if ('new' === $request->query->get('conversation')) {
+			include $componentPath.'conversation/create.php';
+		} else {
+			// chargement d'une conversation
+			$conversationManager->newSession();
+			$conversationManager->load(
+				['c.id' => $request->query->get('conversation'), 'cu.rPlayer' => $session->get('playerId')]
+			);
 
-            if (1 == $conversationManager->size()) {
-                // chargement des infos d'une conversation
-                $conversationUserManager->newSession();
-                $conversationUserManager->load(['c.rConversation' => $request->query->get('conversation')]);
+			if (1 == $conversationManager->size()) {
+				// chargement des infos d'une conversation
+				$conversationUserManager->newSession();
+				$conversationUserManager->load(['c.rConversation' => $request->query->get('conversation')]);
 
-                // mis à jour de l'heure de la dernière vue
-                for ($i = 0; $i < $conversationUserManager->size(); ++$i) {
-                    if ($conversationUserManager->get($i)->rPlayer == $session->get('playerId')) {
-                        $dPlayerLastMessage = $conversationUserManager->get($i)->dLastView;
-                        $currentUser = $conversationUserManager->get($i);
+				// mis à jour de l'heure de la dernière vue
+				for ($i = 0; $i < $conversationUserManager->size(); ++$i) {
+					if ($conversationUserManager->get($i)->rPlayer == $session->get('playerId')) {
+						$dPlayerLastMessage = $conversationUserManager->get($i)->dLastView;
+						$currentUser = $conversationUserManager->get($i);
 
-                        $conversationUserManager->get($i)->dLastView = Utils::now();
-                    }
-                }
+						$conversationUserManager->get($i)->dLastView = Utils::now();
+					}
+				}
 
-                // chargement des messages
-                $conversationMessageManager->newSession();
-                $conversationMessageManager->load(
-                    ['c.rConversation' => $request->query->get('conversation')],
-                    ['c.dCreation', 'DESC'],
-                    [0, ConversationMessage::MESSAGE_BY_PAGE]
-                );
+				// chargement des messages
+				$conversationMessageManager->newSession();
+				$conversationMessageManager->load(
+					['c.rConversation' => $request->query->get('conversation')],
+					['c.dCreation', 'DESC'],
+					[0, ConversationMessage::MESSAGE_BY_PAGE]
+				);
 
-                $message_listmode = false;
+				$message_listmode = false;
 
-                include $componentPath.'conversation/messages.php';
-                include $componentPath.'conversation/manage.php';
-            } else {
-                $this->getContainer()->get('app.response')->redirect('message');
-            }
-        }
-    } else {
-        include $componentPath.'conversation/new.php';
-    }
+				include $componentPath.'conversation/messages.php';
+				include $componentPath.'conversation/manage.php';
+			} else {
+				$this->getContainer()->get('app.response')->redirect('message');
+			}
+		}
+	} else {
+		include $componentPath.'conversation/new.php';
+	}
 
-    $unarchivedNotifications = $notificationManager->getPlayerNotificationsByArchive($session->get('playerId'), 0);
-    include $componentPath.'notif/last.php';
+	$unarchivedNotifications = $notificationManager->getPlayerNotificationsByArchive($session->get('playerId'), 0);
+	include $componentPath.'notif/last.php';
 
-    $archivedNotifications = $notificationManager->getPlayerNotificationsByArchive($session->get('playerId'), 1);
-    if (count($archivedNotifications) > 0) {
-        include $componentPath.'notif/archived.php';
-    }
+	$archivedNotifications = $notificationManager->getPlayerNotificationsByArchive($session->get('playerId'), 1);
+	if (count($archivedNotifications) > 0) {
+		include $componentPath.'notif/archived.php';
+	}
 echo '</div>';

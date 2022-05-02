@@ -7,134 +7,137 @@ use App\Modules\Hermes\Model\Notification;
 
 class NotificationRepository extends AbstractRepository
 {
-    /**
-     * @param int $id
-     *
-     * @return Notification
-     */
-    public function get($id)
-    {
-        if (($n = $this->unitOfWork->getObject(Notification::class, $id)) !== null) {
-            return $n;
-        }
-        $statement = $this->connection->prepare('SELECT * FROM notification WHERE id = :id');
-        $statement->execute(['id' => $id]);
+	/**
+	 * @param int $id
+	 *
+	 * @return Notification
+	 */
+	public function get($id)
+	{
+		if (($n = $this->unitOfWork->getObject(Notification::class, $id)) !== null) {
+			return $n;
+		}
+		$statement = $this->connection->prepare('SELECT * FROM notification WHERE id = :id');
+		$statement->execute(['id' => $id]);
 
-        if (($row = $statement->fetch()) === false) {
-            return null;
-        }
-        $notification = $this->format($row);
-        $this->unitOfWork->addObject($notification);
+		if (($row = $statement->fetch()) === false) {
+			return null;
+		}
+		$notification = $this->format($row);
+		$this->unitOfWork->addObject($notification);
 
-        return $notification;
-    }
+		return $notification;
+	}
 
-    public function getUnreadNotifications($playerId)
-    {
-        $statement = $this->connection->prepare('SELECT * FROM notification WHERE rPlayer = :player_id AND readed = 0 ORDER BY dSending DESC');
-        $statement->execute(['player_id' => $playerId]);
-        $data = [];
-        while ($row = $statement->fetch()) {
-            if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
-                $data[] = $n;
-                continue;
-            }
-            $notification = $this->format($row);
-            $this->unitOfWork->addObject($notification);
-            $data[] = $notification;
-        }
+	public function getUnreadNotifications($playerId)
+	{
+		$statement = $this->connection->prepare('SELECT * FROM notification WHERE rPlayer = :player_id AND readed = 0 ORDER BY dSending DESC');
+		$statement->execute(['player_id' => $playerId]);
+		$data = [];
+		while ($row = $statement->fetch()) {
+			if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
+				$data[] = $n;
+				continue;
+			}
+			$notification = $this->format($row);
+			$this->unitOfWork->addObject($notification);
+			$data[] = $notification;
+		}
 
-        return $data;
-    }
+		return $data;
+	}
 
-    public function getPlayerNotificationsByArchive($playerId, $isArchived)
-    {
-        $statement = $this->connection->prepare(
-            'SELECT * FROM notification WHERE rPlayer = :player_id AND archived = :is_archived ORDER BY dSending DESC LIMIT 50');
-        $statement->execute(['player_id' => $playerId, 'is_archived' => $isArchived]);
-        $data = [];
-        while ($row = $statement->fetch()) {
-            if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
-                $data[] = $n;
-                continue;
-            }
-            $notification = $this->format($row);
-            $this->unitOfWork->addObject($notification);
-            $data[] = $notification;
-        }
+	public function getPlayerNotificationsByArchive($playerId, $isArchived)
+	{
+		$statement = $this->connection->prepare(
+			'SELECT * FROM notification WHERE rPlayer = :player_id AND archived = :is_archived ORDER BY dSending DESC LIMIT 50'
+		);
+		$statement->execute(['player_id' => $playerId, 'is_archived' => $isArchived]);
+		$data = [];
+		while ($row = $statement->fetch()) {
+			if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
+				$data[] = $n;
+				continue;
+			}
+			$notification = $this->format($row);
+			$this->unitOfWork->addObject($notification);
+			$data[] = $notification;
+		}
 
-        return $data;
-    }
+		return $data;
+	}
 
-    public function getAllByReadState($isReaded)
-    {
-        $statement = $this->connection->prepare(
-            'SELECT * FROM notification WHERE readed = :is_readed');
-        $statement->execute(['is_readed' => $isReaded]);
-        $data = [];
-        while ($row = $statement->fetch()) {
-            if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
-                $data[] = $n;
-                continue;
-            }
-            $notification = $this->format($row);
-            $this->unitOfWork->addObject($notification);
-            $data[] = $notification;
-        }
+	public function getAllByReadState($isReaded)
+	{
+		$statement = $this->connection->prepare(
+			'SELECT * FROM notification WHERE readed = :is_readed'
+		);
+		$statement->execute(['is_readed' => $isReaded]);
+		$data = [];
+		while ($row = $statement->fetch()) {
+			if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
+				$data[] = $n;
+				continue;
+			}
+			$notification = $this->format($row);
+			$this->unitOfWork->addObject($notification);
+			$data[] = $notification;
+		}
 
-        return $data;
-    }
+		return $data;
+	}
 
-    /**
-     * @param int    $commanderPlayerId
-     * @param int    $placePlayerId
-     * @param string $arrivedAt
-     *
-     * @return array
-     */
-    public function getMultiCombatNotifications($commanderPlayerId, $placePlayerId, $arrivedAt)
-    {
-        $statement = $this->connection->prepare(
-            'SELECT * FROM notification WHERE (rPlayer = :commander_player_id OR rPlayer = :place_player_id) AND dSending = :arrived_at');
-        $statement->execute([
-            'commander_player_id' => $commanderPlayerId,
-            'place_player_id' => $placePlayerId,
-            'arrived_at' => $arrivedAt,
-        ]);
-        $data = [];
-        while ($row = $statement->fetch()) {
-            if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
-                $data[] = $n;
-                continue;
-            }
-            $notification = $this->format($row);
-            $this->unitOfWork->addObject($notification);
-            $data[] = $notification;
-        }
+	/**
+	 * @param int    $commanderPlayerId
+	 * @param int    $placePlayerId
+	 * @param string $arrivedAt
+	 *
+	 * @return array
+	 */
+	public function getMultiCombatNotifications($commanderPlayerId, $placePlayerId, $arrivedAt)
+	{
+		$statement = $this->connection->prepare(
+			'SELECT * FROM notification WHERE (rPlayer = :commander_player_id OR rPlayer = :place_player_id) AND dSending = :arrived_at'
+		);
+		$statement->execute([
+			'commander_player_id' => $commanderPlayerId,
+			'place_player_id' => $placePlayerId,
+			'arrived_at' => $arrivedAt,
+		]);
+		$data = [];
+		while ($row = $statement->fetch()) {
+			if (($n = $this->unitOfWork->getObject(Notification::class, $row['id'])) !== null) {
+				$data[] = $n;
+				continue;
+			}
+			$notification = $this->format($row);
+			$this->unitOfWork->addObject($notification);
+			$data[] = $notification;
+		}
 
-        return $data;
-    }
+		return $data;
+	}
 
-    public function insert($notification)
-    {
-        $qr = $this->connection->prepare('INSERT INTO
+	public function insert($notification)
+	{
+		$qr = $this->connection->prepare('INSERT INTO
 			notification(rPlayer, title, content, dSending, readed, archived)
 			VALUES(?, ?, ?, ?, ?, ?)');
-        $qr->execute([
-            $notification->getRPlayer(),
-            $notification->getTitle(),
-            $notification->getContent(),
-            $notification->getDSending(),
-            (int) $notification->getReaded(),
-            (int) $notification->getArchived(),
-        ]);
-        $notification->setId($this->connection->lastInsertId());
-    }
+		$qr->execute([
+			$notification->getRPlayer(),
+			$notification->getTitle(),
+			$notification->getContent(),
+			$notification->getDSending(),
+			(int) $notification->getReaded(),
+			(int) $notification->getArchived(),
+		]);
+		$notification->setId($this->connection->lastInsertId());
+	}
 
-    public function update($notification)
-    {
-        $statement = $this->connection->prepare(
-            'UPDATE notification SET id = ?,
+	public function update($notification)
+	{
+		$statement = $this->connection->prepare(
+			'UPDATE notification SET id = ?,
                 rPlayer = ?,
                 title = ?,
                 content = ?,
@@ -142,72 +145,72 @@ class NotificationRepository extends AbstractRepository
                 readed = ?,
                 archived = ?
             WHERE id = ?'
-        );
-        $statement->execute([
-            $notification->getId(),
-            $notification->getRPlayer(),
-            $notification->getTitle(),
-            $notification->getContent(),
-            $notification->getDSending(),
-            (int) $notification->getReaded(),
-            (int) $notification->getArchived(),
-            $notification->getId(),
-        ]);
-    }
+		);
+		$statement->execute([
+			$notification->getId(),
+			$notification->getRPlayer(),
+			$notification->getTitle(),
+			$notification->getContent(),
+			$notification->getDSending(),
+			(int) $notification->getReaded(),
+			(int) $notification->getArchived(),
+			$notification->getId(),
+		]);
+	}
 
-    public function remove($notification)
-    {
-        $statement = $this->connection->prepare('DELETE FROM notification WHERE id = ?');
-        $statement->execute([$notification->id]);
-    }
+	public function remove($notification)
+	{
+		$statement = $this->connection->prepare('DELETE FROM notification WHERE id = ?');
+		$statement->execute([$notification->id]);
+	}
 
-    /**
-     * @param int $playerId
-     *
-     * @return int
-     */
-    public function removePlayerNotifications($playerId)
-    {
-        $statement = $this->connection->prepare('DELETE FROM notification WHERE rPlayer = ? AND archived = 0');
-        $statement->execute([$playerId]);
+	/**
+	 * @param int $playerId
+	 *
+	 * @return int
+	 */
+	public function removePlayerNotifications($playerId)
+	{
+		$statement = $this->connection->prepare('DELETE FROM notification WHERE rPlayer = ? AND archived = 0');
+		$statement->execute([$playerId]);
 
-        return $statement->rowCount();
-    }
+		return $statement->rowCount();
+	}
 
-    /**
-     * @param string $readTimeout
-     * @param string $unreadTimeout
-     *
-     * @return int
-     */
-    public function cleanNotifications($readTimeout, $unreadTimeout)
-    {
-        $statement = $this->connection->prepare(
-            'DELETE FROM notification WHERE
+	/**
+	 * @param string $readTimeout
+	 * @param string $unreadTimeout
+	 *
+	 * @return int
+	 */
+	public function cleanNotifications($readTimeout, $unreadTimeout)
+	{
+		$statement = $this->connection->prepare(
+			'DELETE FROM notification WHERE
 			(readed = 0 AND TIMESTAMPDIFF(HOUR, dSending, NOW()) < :unread_timeout) OR
 			(readed = 1 AND TIMESTAMPDIFF(HOUR, dSending, NOW()) < :read_timeout)'
-        );
-        $statement->execute(['read_timeout' => $readTimeout, 'unread_timeout' => $unreadTimeout]);
+		);
+		$statement->execute(['read_timeout' => $readTimeout, 'unread_timeout' => $unreadTimeout]);
 
-        return $statement->rowCount();
-    }
+		return $statement->rowCount();
+	}
 
-    /**
-     * @param array $data
-     *
-     * @return Notification
-     */
-    public function format($data)
-    {
-        $notification = new Notification();
-        $notification->setId((int) $data['id']);
-        $notification->setRPlayer((int) $data['rPlayer']);
-        $notification->setTitle($data['title']);
-        $notification->setContent($data['content']);
-        $notification->setDSending($data['dSending']);
-        $notification->setReaded((bool) $data['readed']);
-        $notification->setArchived((bool) $data['archived']);
+	/**
+	 * @param array $data
+	 *
+	 * @return Notification
+	 */
+	public function format($data)
+	{
+		$notification = new Notification();
+		$notification->setId((int) $data['id']);
+		$notification->setRPlayer((int) $data['rPlayer']);
+		$notification->setTitle($data['title']);
+		$notification->setContent($data['content']);
+		$notification->setDSending($data['dSending']);
+		$notification->setReaded((bool) $data['readed']);
+		$notification->setArchived((bool) $data['archived']);
 
-        return $notification;
-    }
+		return $notification;
+	}
 }

@@ -7,8 +7,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ListController extends AbstractController
 {
-    public function __invoke(): Response
-    {
-        return new Response();
-    }
+	public function __invoke(): Response
+	{
+		return new Response();
+	}
 }

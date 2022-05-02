@@ -16,51 +16,51 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class PlayerRankingHandler implements MessageHandlerInterface
 {
-    public function __construct(
-        protected EntityManager $entityManager,
-        protected PlayerManager $playerManager,
-        protected PlayerRankingManager $playerRankingManager,
-        protected RankingManager $rankingManager,
-        protected OrbitalBaseHelper $orbitalBaseHelper,
-        protected bool $dataAnalysis,
-    ) {
-    }
+	public function __construct(
+		protected EntityManager $entityManager,
+		protected PlayerManager $playerManager,
+		protected PlayerRankingManager $playerRankingManager,
+		protected RankingManager $rankingManager,
+		protected OrbitalBaseHelper $orbitalBaseHelper,
+		protected bool $dataAnalysis,
+	) {
+	}
 
-    public function __invoke(PlayerRankingMessage $message): void
-    {
-        if (true === $this->entityManager->getRepository(Ranking::class)->hasBeenAlreadyProcessed(true, false)) {
-            return;
-        }
-        $playerRoutine = new PlayerRoutine($this->dataAnalysis);
+	public function __invoke(PlayerRankingMessage $message): void
+	{
+		if (true === $this->entityManager->getRepository(Ranking::class)->hasBeenAlreadyProcessed(true, false)) {
+			return;
+		}
+		$playerRoutine = new PlayerRoutine($this->dataAnalysis);
 
-        $players = $this->playerManager->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
+		$players = $this->playerManager->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
 
-        $playerRankingRepository = $this->entityManager->getRepository(PlayerRanking::class);
+		$playerRankingRepository = $this->entityManager->getRepository(PlayerRanking::class);
 
-        // $S_PRM1 = $this->playerRankingManager->getCurrentSession();
-        // $this->playerRankingManager->newSession();
-        // $this->playerRankingManager->loadLastContext();
+		// $S_PRM1 = $this->playerRankingManager->getCurrentSession();
+		// $this->playerRankingManager->newSession();
+		// $this->playerRankingManager->loadLastContext();
 
-        $ranking = $this->rankingManager->createRanking(true, false);
+		$ranking = $this->rankingManager->createRanking(true, false);
 
-        $playerRoutine->execute(
-            $players,
-            $playerRankingRepository->getPlayersResources(),
-            $playerRankingRepository->getPlayersResourcesData(),
-            $playerRankingRepository->getPlayersGeneralData(),
-            $playerRankingRepository->getPlayersArmiesData(),
-            $playerRankingRepository->getPlayersPlanetData(),
-            $playerRankingRepository->getPlayersTradeRoutes(),
-            $playerRankingRepository->getPlayersLinkedTradeRoutes(),
-            $playerRankingRepository->getAttackersButcherRanking(),
-            $playerRankingRepository->getDefendersButcherRanking(),
-            $this->orbitalBaseHelper
-        );
+		$playerRoutine->execute(
+			$players,
+			$playerRankingRepository->getPlayersResources(),
+			$playerRankingRepository->getPlayersResourcesData(),
+			$playerRankingRepository->getPlayersGeneralData(),
+			$playerRankingRepository->getPlayersArmiesData(),
+			$playerRankingRepository->getPlayersPlanetData(),
+			$playerRankingRepository->getPlayersTradeRoutes(),
+			$playerRankingRepository->getPlayersLinkedTradeRoutes(),
+			$playerRankingRepository->getAttackersButcherRanking(),
+			$playerRankingRepository->getDefendersButcherRanking(),
+			$this->orbitalBaseHelper
+		);
 
-        $playerRoutine->processResults($ranking, $players, $this->playerRankingManager, $playerRankingRepository);
+		$playerRoutine->processResults($ranking, $players, $this->playerRankingManager, $playerRankingRepository);
 
-        // $this->playerRankingManager->changeSession($S_PRM1);
+		// $this->playerRankingManager->changeSession($S_PRM1);
 
-        $this->entityManager->flush();
-    }
+		$this->entityManager->flush();
+	}
 }
