@@ -7,7 +7,7 @@ use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
-use Symfony\Component\HttpFoundation\RequestStack;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class ShipHelper
@@ -15,7 +15,7 @@ class ShipHelper
 	protected OrbitalBaseHelper $orbitalBaseHelper;
 
 	public function __construct(
-		protected RequestStack $requestStack,
+		private CurrentPlayerRegistry $currentPlayerRegistry,
 		protected TechnologyHelper $technologyHelper,
 		protected ShipQueueManager $shipQueueManager
 	) {
@@ -35,7 +35,7 @@ class ShipHelper
 				case 'resource':
 					$price = ShipResource::getInfo($shipId, 'resourcePrice') * $quantity;
 					if (ShipResource::CERBERE == $shipId || ShipResource::PHENIX == $shipId) {
-						if (ColorResource::EMPIRE == $this->requestStack->getSession()->get('playerInfo')->get('color')) {
+						if (ColorResource::EMPIRE == $this->currentPlayerRegistry->get()->rColor) {
 							// bonus if the player is from the Empire
 							$price -= round($price * ColorResource::BONUS_EMPIRE_CRUISER / 100);
 						}
