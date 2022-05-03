@@ -6,6 +6,7 @@ use App\Classes\Library\Game;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -13,7 +14,7 @@ use Twig\TwigFunction;
 class TradeRouteExtension extends AbstractExtension
 {
 	public function __construct(
-		protected RequestStack $requestStack,
+		private CurrentPlayerRegistry $currentPlayerRegistry,
 	) {
 	}
 
@@ -23,7 +24,7 @@ class TradeRouteExtension extends AbstractExtension
 			new TwigFunction('get_route_price', function (float $distance) {
 				$price = Game::getRCPrice($distance);
 
-				if (ColorResource::NEGORA == $this->requestStack->getSession()->get('playerInfo')->get('color')) {
+				if (ColorResource::NEGORA == $this->currentPlayerRegistry->get()->rColor) {
 					// bonus if the player is from Negore
 					$price -= round($price * ColorResource::BONUS_NEGORA_ROUTE / 100);
 				}
@@ -38,7 +39,7 @@ class TradeRouteExtension extends AbstractExtension
 				float $routeColorBonus,
 			) {
 				$bonusA = ($defaultBase->sector != $place->rSector) ? $routeSectorBonus : 1;
-				$bonusB = ($this->requestStack->getSession()->get('playerInfo')->get('color')) != $place->playerColor ? $routeColorBonus : 1;
+				$bonusB = ($this->currentPlayerRegistry->get()->rColor) != $place->playerColor ? $routeColorBonus : 1;
 
 				return Game::getRCIncome($distance, $bonusA, $bonusB);
 			}),
