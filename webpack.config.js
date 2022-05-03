@@ -21,8 +21,12 @@ Encore
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
 	.copyFiles({
-		from: './assets/media',
+		from: './assets/media-src',
 		to: './media/[path][name].[ext]',
+	})
+	.copyFiles({
+		from: './assets/css-media',
+		to: './css-media/[path][name].[ext]',
 	})
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
