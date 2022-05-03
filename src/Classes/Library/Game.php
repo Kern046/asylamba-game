@@ -103,12 +103,12 @@ class Game
 		);
 	}
 
-	public static function getTimeTravelCommercial($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, $bonus = null)
+	public static function getTimeTravelCommercial($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, PlayerBonus|null $bonus = null)
 	{
 		return round(self::getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
 	}
 
-	public static function getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, PlayerBonus $bonus = null)
+	public static function getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, PlayerBonus|null $bonus = null)
 	{
 		return $systemFrom == $systemTo
 			? Game::getTimeTravelInSystem($positionFrom, $positionTo)
@@ -122,7 +122,7 @@ class Game
 		return round((Commander::COEFFMOVEINSYSTEM * $distance) * ((40 - $distance) / 50) + 180);
 	}
 
-	public static function getTimeTravelOutOfSystem(PlayerBonus $bonus, $startX, $startY, $destinationX, $destinationY)
+	public static function getTimeTravelOutOfSystem(PlayerBonus|null $bonus, $startX, $startY, $destinationX, $destinationY)
 	{
 		$distance = self::getDistance($startX, $destinationX, $startY, $destinationY);
 		$time = Commander::COEFFMOVEOUTOFSYSTEM;

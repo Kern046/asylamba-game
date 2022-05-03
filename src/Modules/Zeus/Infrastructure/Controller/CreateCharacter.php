@@ -357,8 +357,6 @@ class CreateCharacter extends AbstractController
 			$player->setName(trim($session->get('inscription')->get('pseudo')));
 			$player->setAvatar($session->get('inscription')->get('avatar'));
 
-			$playerManager->saveSessionData($player);
-
 			if ($session->has('rgodfather')) {
 				$player->rGodfather = $session->get('rgodfather');
 			}
