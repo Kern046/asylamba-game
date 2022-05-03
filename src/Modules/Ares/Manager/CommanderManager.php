@@ -189,19 +189,6 @@ class CommanderManager implements SchedulerInterface
 		}
 	}
 
-	public function setBonus(Commander $commander): void
-	{
-		$commander->setArmy();
-		$playerBonus = new PlayerBonus($commander->rPlayer);
-		$playerBonus->load();
-
-		foreach ($commander->army as $squadron) {
-			foreach ($squadron->squadron as $ship) {
-				$ship->setBonus($playerBonus->bonuses);
-			}
-		}
-	}
-
 	public function upExperience(Commander $commander, $earnedExperience)
 	{
 		$commander->experience += $earnedExperience;

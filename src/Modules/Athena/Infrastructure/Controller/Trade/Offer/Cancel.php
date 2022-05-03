@@ -91,9 +91,9 @@ class Cancel extends AbstractController
 					});
 
 					$entityManager->flush();
-
-					return $this->redirect($request->headers->get('referer'));
 				}
+
+				return $this->redirect($request->headers->get('referer'));
 			} else {
 				throw new ErrorException('vous n\'avez pas assez de crédits pour annuler la proposition');
 			}

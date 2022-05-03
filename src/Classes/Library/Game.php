@@ -8,6 +8,7 @@ use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Gaia\Resource\PlaceResource;
+use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Zeus\Model\PlayerBonusId;
 
 class Game
@@ -68,10 +69,10 @@ class Game
 		return ($distance < 1) ? 1 : $distance;
 	}
 
-	public static function getFleetSpeed($bonus)
+	public static function getFleetSpeed(PlayerBonus|null $bonus): float
 	{
 		$b = null != $bonus
-			? Commander::FLEETSPEED * (3 * ($bonus->get(PlayerBonusId::SHIP_SPEED) / 100)) : 0;
+			? Commander::FLEETSPEED * (3 * ($bonus->bonuses->get(PlayerBonusId::SHIP_SPEED) / 100)) : 0;
 
 		return Commander::FLEETSPEED + $b;
 	}
@@ -86,7 +87,7 @@ class Game
 		return round(self::getTimeToTravel($startPlace, $destinationPlace, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
 	}
 
-	public static function getTimeToTravel($startPlace, $destinationPlace, $bonus = null)
+	public static function getTimeToTravel($startPlace, $destinationPlace, PlayerBonus $bonus = null)
 	{
 		// $startPlace and $destinationPlace are instance of Place
 		return self::getTimeTravel(
@@ -107,7 +108,7 @@ class Game
 		return round(self::getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
 	}
 
-	public static function getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, $bonus = null)
+	public static function getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, PlayerBonus $bonus = null)
 	{
 		return $systemFrom == $systemTo
 			? Game::getTimeTravelInSystem($positionFrom, $positionTo)
@@ -121,7 +122,7 @@ class Game
 		return round((Commander::COEFFMOVEINSYSTEM * $distance) * ((40 - $distance) / 50) + 180);
 	}
 
-	public static function getTimeTravelOutOfSystem($bonus, $startX, $startY, $destinationX, $destinationY)
+	public static function getTimeTravelOutOfSystem(PlayerBonus $bonus, $startX, $startY, $destinationX, $destinationY)
 	{
 		$distance = self::getDistance($startX, $destinationX, $startY, $destinationY);
 		$time = Commander::COEFFMOVEOUTOFSYSTEM;

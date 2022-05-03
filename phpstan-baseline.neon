@@ -46,11 +46,6 @@ parameters:
 			path: src/Classes/Logger/AbstractLogger.php
 
 		-
-			message: "#^Class App\\\\Modules\\\\Zeus\\\\Model\\\\PlayerBonus does not have a constructor and must be instantiated without any parameters\\.$#"
-			count: 1
-			path: src/Modules/Ares/Manager/CommanderManager.php
-
-		-
 			message: "#^Method App\\\\Modules\\\\Ares\\\\Manager\\\\CommanderManager\\:\\:setEarnedExperience\\(\\) invoked with 3 parameters, 2 required\\.$#"
 			count: 1
 			path: src/Modules/Ares/Manager/CommanderManager.php
@@ -99,11 +94,6 @@ parameters:
 			message: "#^Variable \\$data might not be defined\\.$#"
 			count: 1
 			path: src/Modules/Athena/Infrastructure/Controller/Base/Building/ViewBuildingPanel.php
-
-		-
-			message: "#^Variable \\$playerBonus might not be defined\\.$#"
-			count: 1
-			path: src/Modules/Athena/Infrastructure/Controller/Ship/BuildShips.php
 
 		-
 			message: "#^Variable \\$dStart might not be defined\\.$#"
@@ -249,16 +239,6 @@ parameters:
 			message: "#^Variable \\$return might not be defined\\.$#"
 			count: 1
 			path: src/Modules/Zeus/Helper/PlayerHelper.php
-
-		-
-			message: "#^Class App\\\\Modules\\\\Promethee\\\\Model\\\\Technology does not have a constructor and must be instantiated without any parameters\\.$#"
-			count: 1
-			path: src/Modules/Zeus/Manager/PlayerBonusManager.php
-
-		-
-			message: "#^Undefined variable\\: \\$increment$#"
-			count: 1
-			path: src/Modules/Zeus/Manager/PlayerBonusManager.php
 
 		-
 			message: "#^Access to an undefined property App\\\\Modules\\\\Zeus\\\\Model\\\\Player\\:\\:\\$factionPoints\\.$#"
