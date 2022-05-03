@@ -441,7 +441,7 @@ class CommanderManager implements SchedulerInterface
 	public function comeBack(Place $place, $commander, $commanderPlace, $playerBonus)
 	{
 		$length = Game::getDistance($place->getXSystem(), $commanderPlace->getXSystem(), $place->getYSystem(), $commanderPlace->getYSystem());
-		$duration = Game::getTimeToTravel($commanderPlace, $place, $playerBonus->bonuses);
+		$duration = Game::getTimeToTravel($commanderPlace, $place, $playerBonus);
 
 		$this->move($commander, $commander->rBase, $place->id, Commander::BACK, $length, $duration);
 	}
