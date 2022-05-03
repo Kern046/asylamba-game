@@ -3,10 +3,12 @@
 namespace App\Modules\Ares\Infrastructure\Controller;
 
 use App\Classes\Container\Params;
+use App\Classes\Library\Game;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -56,7 +58,7 @@ class ViewHeadquarters extends AbstractController
 						'id' => $orbitalBase->getId(),
 						'name' => $orbitalBase->name,
 						'type' => $orbitalBase->typeOfBase,
-						'img' => $orbitalBase->img,
+						'img' => '1-'.Game::getSizeOfPlanet($orbitalBase->getPlanetPopulation()),
 					],
 					'fleets' => [],
 				];
