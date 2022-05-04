@@ -16,13 +16,13 @@
 		<meta name="description" content="{{ app_description }}" />
 
 		<link rel="icon" type="image/png" href="{{ asset('media/favicon/color' ~ faction_id ~ '.png') }}" />
-		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('css/buffer/main.css') }}" />
-		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('css/main.desktop.v3.color' ~ (faction_id != 0 ? faction_id : 1) ~ '.css') }}" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('build/css/buffer/main.css') }}" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('build/css/main.faction' ~ (faction_id != 0 ? faction_id : 1) ~ '.css') }}" />
 	</head>
 	<body class="color{{ faction_id }} no-scrolling {% if app.request.get('_route') == 'create_character' %}inscription{% endif %}" data-init-sftr="2">
 		{% block body %}{% endblock body %}
 
-		<script type="text/javascript" src="{{ asset('js/jquery1.8.2.min.js') }}"></script>
+		<script type="text/javascript" src="{{ asset('build/js/jquery1.8.2.min.js') }}"></script>
 
 		<script type="text/javascript">
 			jQuery(document).ready(function($) {
@@ -33,8 +33,8 @@
 				};
 			});
 			</script>
-		<script type="text/javascript" src="{{ asset('js/main.js') }}"></script>
-		<script type="text/javascript" src="{{ asset('js/main.desktop.js') }}"></script>
-		<script type="text/javascript" src="{{ asset('js/autocomplete.module.js') }}"></script>
+		<script type="text/javascript" src="{{ asset('build/js/main.js') }}"></script>
+		<script type="text/javascript" src="{{ asset('build/js/main.desktop.js') }}"></script>
+		<script type="text/javascript" src="{{ asset('build/js/autocomplete.module.js') }}"></script>
 	</body>
 </html>
