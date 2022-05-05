@@ -1,7 +1,7 @@
 {% apply spaceless %}
 	<div class="component financial">
 		<div class="head skin-1">
-			<img src="{{ asset('media/financial/taxin.png') }}" alt="" />
+			<img src="{{ asset('build/media/financial/taxin.png') }}" alt="" />
 			<h2>Impôts</h2>
 			<em>Imposition par planète</em>
 		</div>
@@ -18,7 +18,7 @@
 								{% if base_tax_income_bonus > 0 %}
 									<span class="bonus">+{{ base_tax_income_bonus|number }}</span>
 								{% endif %}
-								<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 							</span>
 						</li>
 					{% endfor %}
@@ -30,7 +30,7 @@
 							{% if investments_data.totalTaxInBonus > 0 %}
 								<span class="bonus">+{{ investments_data.totalTaxInBonus|number }}</span>
 							{% endif %}
-							<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 						</span>
 					</li>
 				</ul>

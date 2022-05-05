@@ -1,6 +1,6 @@
 <div class="component player rank">
 	<div class="head skin-4">
-		<img class="main" alt="ressource" src="{{ asset('media/rank/cup.png') }}">
+		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">
 		<h2>Trader</h2>
 		<em>Revenu de toutes les routes commerciales par relève</em>
 	</div>
@@ -17,7 +17,7 @@
 					player_ranking,
 					'position': player_ranking.traderPosition,
 					'variation': player_ranking.traderVariation,
-					'value': player_ranking.trader|number ~  ' <img src="' ~ asset('media/resources/credit.png') ~ '" class="icon-color" alt="crédits" />',
+					'value': player_ranking.trader|number ~  ' <img src="' ~ asset('build/media/resources/credit.png') ~ '" class="icon-color" alt="crédits" />',
 				})}}
 
 				{{ include('atoms/rankings/bottom_mover.html.twig', {

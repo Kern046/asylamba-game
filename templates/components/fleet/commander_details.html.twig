@@ -87,7 +87,7 @@
 				<span class="label">Salaire de l'officier</span>
 				<span class="value">
 					{{- (commander.level * constant('App\\Modules\\Ares\\Model\\Commander::LVLINCOMECOMMANDER'))|number -}}
-					<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits">
+					<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">
 				</span>
 			</div>
 
@@ -95,7 +95,7 @@
 				<span class="label">Frais d'entretien des vaisseaux</span>
 				<span class="value">
 					{{- get_fleet_cost(commander)|number -}}
-					<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits">
+					<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">
 				</span>
 			</div>
 		</div>

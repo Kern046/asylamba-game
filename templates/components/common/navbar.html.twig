@@ -2,54 +2,54 @@
 	<div id="nav">
 		<div class="box left">
 			<a href="#" class="square sh" data-target="change-bases">
-				<img src="{{ asset('media/common/nav-base.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-base.png') }}" alt="" />
 			</a>
 			<a href="{{ path('base_overview') }}" class="current-base {% if app.request.get('_route') == 'bases' %}active{% endif %}">
-				<img src="{{ asset('media/map/place/place' ~ get_base_image(current_base) ~ '.png') }}" alt="{{ current_base.name }}" />
+				<img src="{{ asset('build/media/map/place/place' ~ get_base_image(current_base) ~ '.png') }}" alt="{{ current_base.name }}" />
 				{{ current_base.name }}
 			</a>
 			<a href="{{ path('switchbase', {'baseId': next_base is not null ? next_base.id : first_base.id }) }}" class="square">
-				<img src="{{ asset('media/common/next-base.png') }}" alt="base suivante" />
+				<img src="{{ asset('build/media/common/next-base.png') }}" alt="base suivante" />
 			</a>
 		</div>
 
 		<div class="box left-2">
 			<a href="{{ path('profile') }}" class="square hb rb {% if app.request.get('_route') == 'profile' %}active{% endif %}" title="profil">
-				<img src="{{ asset('media/common/nav-profil.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-profil.png') }}" alt="" />
 			</a>
 			<a href="{{ path('fleet_headquarters') }}" class="square hb rb {% if app.request.get('_route') == 'fleet' %}active{% endif %}" title="amirauté">
-				<img src="{{ asset('media/common/nav-fleet.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-fleet.png') }}" alt="" />
 			</a>
 			<a href="{{ path('map') }}" class="square hb rb {% if app.request.get('_route') == 'map' %}active{% endif %}" title="galaxie">
-				<img src="{{ asset('media/common/nav-map.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-map.png') }}" alt="" />
 			</a>
 			<a href="{{ path('financial_investments') }}" class="square hb rb {% if app.request.get('_route') in ['financial_investments', 'financial_transfers'] %}active{% endif %}" title="finances">
-				<img src="{{ asset('media/common/nav-financial.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-financial.png') }}" alt="" />
 			</a>
 			<a href="{{ path('university') }}" class="square hb rb {% if app.request.get('_route') == 'university' %}active{% endif %}" title="université">
-				<img src="{{ asset('media/common/nav-techno.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-techno.png') }}" alt="" />
 			</a>
 			<a href="{{ path('faction_overview') }}" class="square hb rb {% if app.request.get('_route') == 'faction_overview' %}active{% endif %}" title="faction">
-				<img src="{{ asset('media/common/nav-faction.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-faction.png') }}" alt="" />
 			</a>
 		</div>
 
 		<div class="box left-3">
 			<a href="{{ path('player_rankings') }}" class="square hb rb {% if app.request.get('_route') == 'player_rankings' %}active{% endif %}" title="classements">
-				<img src="{{ asset('media/common/nav-rank.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-rank.png') }}" alt="" />
 			</a>
 			<a href="{{ path('embassy') }}" class="square hb rb {% if app.request.get('_route') == 'embassy' %}active{% endif %}" title="ambassades">
-				<img src="{{ asset('media/common/nav-embassy.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-embassy.png') }}" alt="" />
 			</a>
 			<a href="{{ path('list_conversations') }}" class="square hb rb {% if app.request.get('_route') == 'list_conversations' %}active{% endif %}" title="messagerie">
-				<img src="{{ asset('media/common/nav-message.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-message.png') }}" alt="" />
 				{% if conversations_count > 0 %}
 					<span class="number">{{ conversations_count }}</span>
 				{% endif %}
 			</a>
 
 			<a href="{{ path('list_conversations') }}" id="general-notif-container" class="square sh" data-target="new-notifications">
-				<img src="{{ asset('media/common/nav-notif.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-notif.png') }}" alt="" />
 				{% if current_player_notifications|length > 0 %}
 					<span class="number">{{ current_player_notifications|length }}</span>;
 				{% endif %}
@@ -59,30 +59,30 @@
 		<div class="box right">
 			{% if true == app.session.get('admin') %}
 				<a href="{{ path('admin') }}" class="square {% if app.request.get('_route') == 'admin' %}active{% endif %}">
-					<img src="{{ asset('media/common/tool-admin.png') }}" alt="" />
+					<img src="{{ asset('build/media/common/tool-admin.png') }}" alt="" />
 				</a>
 			{% endif %}
 
 			{# old logic : ((bool)$request->cookies->get('p' . Params::REDIRECT_CHAT, Params::$params[Params::REDIRECT_CHAT]) #}
 			<a href="https://discordapp.com/channels/132106417703354378/132106417703354378" target="_blank" class="square">
-				<img src="{{ asset('media/common/nav-chat.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-chat.png') }}" alt="" />
 			</a>
 
 			{% if current_player.stepTutorial > 0 %}
 				<a href="#" class="hide-slpash square sh {% if current_player.stepDone is same as(true) %}active flashy{% endif %}" data-target="tutorial">
-					<img src="{{ asset('media/common/tool-star.png') }}" alt="tutoriel" />
+					<img src="{{ asset('build/media/common/tool-star.png') }}" alt="tutoriel" />
 					<span class="number">{{ current_player.stepTutorial }}</span>
 				</a>
 			{% endif %}
 			<a href="#" class="square sh" data-target="bug-tracker">
-				<img src="{{ asset('media/common/tool-bugtracker.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/tool-bugtracker.png') }}" alt="" />
 			</a>
 
 			<a href="{{ path('params') }}" class="square hb lb {% if app.request.get('_route') == 'params' %}active{% endif %}" title="paramètres">
-				<img src="{{ asset('media/common/tool-param.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/tool-param.png') }}" alt="" />
 			</a>
 
-			<a href="#" class="square sh" data-target="disconnect-box"><img src="{{ asset('media/common/tool-exit.png') }}" alt="" /></a>
+			<a href="#" class="square sh" data-target="disconnect-box"><img src="{{ asset('build/media/common/tool-exit.png') }}" alt="" /></a>
 			</div>
 
 		{# Display OVERBOX NAV #}

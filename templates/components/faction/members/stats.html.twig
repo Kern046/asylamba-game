@@ -21,7 +21,7 @@
 			{% for player in last_faction_players %}
 				<div class="player">
 					<a href="{{ path('embassy', {'player': player.id}) }}">
-						<img src="{{ asset('media/avatar/small/' ~ player.avatar ~ '.png') }}" class="picto" alt="{{ player.name }}" />
+						<img src="{{ asset('build/media/avatar/small/' ~ player.avatar ~ '.png') }}" class="picto" alt="{{ player.name }}" />
 					</a>
 					<span class="title">{{ statuses[player.status - 1] }}</span>
 					<strong class="name">{{ player.name }}</strong>

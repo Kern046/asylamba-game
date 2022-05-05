@@ -7,7 +7,7 @@
 				{% set faction_id = tax.relatedFaction %}
 				<div class="player faction color{{ faction_id }}">
 					<a href="{{ path('embassy', {'faction': faction_id}) }}">
-						<img src="{{ asset('media/faction/flag/flag-' ~ faction_id ~ '.png') }}" alt="" class="picto">
+						<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_id ~ '.png') }}" alt="" class="picto">
 					</a>
 					<span class="title">produits {{ get_faction_info(faction_id, 'demonym') }}</span>
 					<strong class="name">{{ tax.importTax }} %</strong>

@@ -26,7 +26,7 @@
 		{% for faction in sorted_factions|filter(f => f.id != 0) %}
 			<div class="component inscription color{{ faction.id }}">
 				<div class="head skin-1">
-					<img class="color{{ faction.id }}" src="{{ asset('media/ally/big/color' ~ faction.id ~ '.png') }}" alt="" />
+					<img class="color{{ faction.id }}" src="{{ asset('build/media/ally/big/color' ~ faction.id ~ '.png') }}" alt="" />
 					<h2>{{ get_faction_info(faction.id, 'officialName') }}</h2>
 					<em>{{ get_faction_info(faction.id, 'government') }}</em>
 				</div>
@@ -69,7 +69,7 @@
 						{% for bonus in faction.bonusText %}
 							<div class="build-item" style="margin: 25px 0;">
 								<div class="name">
-									<img src="{{ asset('media/' ~ bonus.path) }}" alt="" />
+									<img src="{{ asset('build/media/' ~ bonus.path) }}" alt="" />
 									<strong>{{ bonus.title }}</strong>
 									<em>{{ bonus.desc }}</em>
 								</div>

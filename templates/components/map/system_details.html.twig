@@ -9,12 +9,12 @@
 			{% if system.rColor == 0 %}
 				Non revendiqué
 			{% else %}
-				<img src="{{ asset('media/ally/big/color' ~ system.rColor ~ '.png') }}" alt="" />
+				<img src="{{ asset('build/media/ally/big/color' ~ system.rColor ~ '.png') }}" alt="" />
 				Revendiqué par {{ get_faction_info(system.rColor, 'popularName') }}
 			{% endif %}
 		</li>
 		<li>
-			<img src="{{ asset('media/map/systems/t' ~ system.typeOfSystem ~ 'c0.png') }}" alt="" />
+			<img src="{{ asset('build/media/map/systems/t' ~ system.typeOfSystem ~ 'c0.png') }}" alt="" />
 			{{ get_system_info(system.typeOfSystem, 'frenchName') }}
 		</li>
 	</ul>
@@ -34,7 +34,7 @@
 					<a href="#" class="openplace" data-target="{{ position }}">
 						<strong>{{ position }}</strong>
 						{% if place.typeOfPlace == 1 %}
-							<img class="land" src="{{ asset('media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" />
+							<img class="land" src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" />
 						{% else %}
 							{% if place.resources > 10000000 %}
 								{% set size = 3 %}
@@ -44,10 +44,10 @@
 								{% set size = 1 %}
 							{% endif %}
 
-							<img class="land" src="{{ asset('media/map/place/place' ~ place.typeOfPlace ~ '-' ~ size ~ '.png') }}" />
+							<img class="land" src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ size ~ '.png') }}" />
 						{% endif %}
 						{% if place.rPlayer != 0 %}
-							<img class="avatar" src="{{ asset('media//avatar/small/' ~ place.playerAvatar ~ '.png') }}" />
+							<img class="avatar" src="{{ asset('build/media//avatar/small/' ~ place.playerAvatar ~ '.png') }}" />
 						{% endif %}
 					</a>
 				</li>
@@ -66,7 +66,7 @@
 							   class="last-spy-link hb"
 							   title="voir le rapport d'espionnage le plus récent"
 							>
-								<img src="{{ asset('media/map/spy/last-spy.png') }}" alt="" />
+								<img src="{{ asset('build/media/map/spy/last-spy.png') }}" alt="" />
 							</a>
 						{% endif %}
 
@@ -103,7 +103,7 @@
 									constant('App\\Modules\\Gaia\\Model\\Place::DNG_HARD'),
 								],
 								'coeff': place.maxDanger,
-								'media_path': asset('media/resources/defense.png'),
+								'media_path': asset('build/media/resources/defense.png'),
 							}) }}
 						{% endif %}
 
@@ -113,19 +113,19 @@
 									'label': 'Population',
 									'coeff': place.population,
 									'values': [0, 50, 100, 150, 200],
-									'media_path': asset('media/resources/population.png'),
+									'media_path': asset('build/media/resources/population.png'),
 								},
 								{
 									'label': 'Ressource',
 									'coeff': place.coefResources,
 									'values': [0, 20, 40, 60, 80],
-									'media_path': asset('media/resources/resource.png'),
+									'media_path': asset('build/media/resources/resource.png'),
 								},
 								{
 									'label': 'Science',
 									'coeff': get_place_technosphere_improvement_coeff(place),
 									'values': [0, 8, 16, 24, 32],
-									'media_path': asset('media/resources/science.png'),
+									'media_path': asset('build/media/resources/science.png'),
 								}
 							] %}
 							{% for coeff_data in coeffs_data %}

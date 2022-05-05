@@ -1,7 +1,7 @@
 {% apply spaceless %}
 	<div class="component financial">
 		<div class="head skin-1">
-			<img src="{{ asset('media/financial/commercial-route.png') }}" alt="route commerciale" />
+			<img src="{{ asset('build/media/financial/commercial-route.png') }}" alt="route commerciale" />
 			<h2>Commerce</h2>
 			<em>Revenus des routes commerciales par planète</em>
 		</div>
@@ -23,7 +23,7 @@
 								{% if base_data['routes_income_bonus'] > 0 %}
 									<span class="bonus">+{{ base_data['routes_income_bonus']|number }}</span>
 								{% endif %}
-								<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 							</span>
 
 							{% if base_data['routes_count'] > 0 %}
@@ -52,7 +52,7 @@
 							{% if investments_data.totalRouteIncomeBonus > 0 %}
 								<span class="bonus">+{{- investments_data.totalRouteIncomeBonus|number -}}</span>
 							{% endif %}
-							<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 						</span>
 					</li>
 				</ul>

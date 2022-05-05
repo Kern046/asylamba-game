@@ -3,7 +3,7 @@
 {% block content %}
 	<div class="component building rc">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/spatioport.png') }}" alt="" />
+			<img src="{{ asset('build/media/orbitalbase/spatioport.png') }}" alt="" />
 			<h2>
 				{{- get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::COMMERCIAL_PLATEFORME'), 'frenchName') -}}
 			</h2>
@@ -12,13 +12,13 @@
 		<div class="fix-body">
 			<div class="body">
 				<a href="{{ path('spatioport') }}" class="nav-element {% if mode == 'list' %}active{% endif %}">
-					<img src="{{ asset('media/map/option/market.png') }}" alt="" />
+					<img src="{{ asset('build/media/map/option/market.png') }}" alt="" />
 					<strong>Routes commerciales</strong>
 					<em>Gérez vos routes commerciales</em>
 				</a>
 
 				<a href="{{ path('spatioport', {'mode': 'search'}) }}" class="nav-element {% if mode == 'search' %}active{% endif %}">
-					<img src="{{ asset('media/map/option/radio.png') }}" alt="" />
+					<img src="{{ asset('build/media/map/option/radio.png') }}" alt="" />
 					<strong>Recherche</strong>
 					<em>Trouvez des partenaires commerciaux</em>
 				</a>
@@ -65,7 +65,7 @@
 						{% if player_commercial_income_bonus > 0 %}
 							<span class="bonus">+ {{ (player_commercial_income_bonus * routes_data.total_income / 100)|number }}</span>
 						{% endif %}
-						<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" />
+						<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
 					</span>
 				</div>
 			</div>
@@ -115,7 +115,7 @@
 				<div class="body">
 					{% for base in search_results %}
 						<a href="{{ path('map', {'place': base.rPlace}) }}" class="player color{{ base.playerColor }}">
-							<img src="{{ asset('media/avatar/small/' ~ base.playerAvatar ~ '.png') }}" alt="" class="picto">
+							<img src="{{ asset('build/media/avatar/small/' ~ base.playerAvatar ~ '.png') }}" alt="" class="picto">
 							<span class="title">{{ base.playerName }}</span>
 							<strong class="name">{{ base.baseName }}</strong>
 							<span class="experience">{{ base.distance}} al.</span>
@@ -195,7 +195,7 @@
 											{% if is_player_from_negora %}
 												<span class="bonus">- {{ (negora_commercial_bonus * route.price / 100)|number }}</span>
 											{% endif %}
-											 <img src="{{ asset('media/resources/credit.png') }}" class="icon-color" />
+											 <img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
 										</strong>
 									</li>
 									<li>
@@ -205,7 +205,7 @@
 											{% if player_commercial_income_bonus > 0 %}
 												<span class="bonus">+ {{ (player_commercial_income_bonus * route.income / 100)|number }}</span>
 											{% endif %}
-											<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" />
+											<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
 										</strong>
 									</li>
 									<li>
@@ -300,7 +300,7 @@
 											{% if player_commercial_income_bonus > 0 %}
 											<span class="bonus">+ {{ (player_commercial_income_bonus * route.income / 100)|number }}</span>
 											{% endif %}
-											<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" />
+											<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
 										</strong>
 									</li>
 									<li>

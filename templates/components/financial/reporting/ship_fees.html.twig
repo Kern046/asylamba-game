@@ -1,7 +1,7 @@
 {% apply spaceless %}
 	<div class="component financial">
 		<div class="head skin-1">
-			<img src="{{ asset('media/financial/fleet.png') }}" alt="flottes" />
+			<img src="{{ asset('build/media/financial/fleet.png') }}" alt="flottes" />
 			<h2>Entretien</h2>
 			<em>Entretien des vaisseaux</em>
 		</div>
@@ -24,7 +24,7 @@
 							<span class="label">{{ base.name }}</span>
 							<span class="value">
 								{{- total_base|number -}}
-								<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 							</span>
 
 							<ul class="sub-list-type-1" id="ships-base-{{ base.id }}">
@@ -58,7 +58,7 @@
 						<span class="label">total des coûts</span>
 						<span class="value">
 							{{- investments_data.totalShipsFees|number -}}
-							<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 						</span>
 					</li>
 				</ul>

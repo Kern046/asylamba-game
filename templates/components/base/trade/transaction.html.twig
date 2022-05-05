@@ -9,14 +9,14 @@
 	 data-sort-cr="{{ transaction_data.rate }}">
 	<div class="product sh" data-target="transaction-{{ transaction_type }}-{{ transaction.id }}">
 		{% if transaction.hasResources %}
-			<img src="{{ asset('media/market/resources-pack-' ~ transaction|transaction_picto ~ '.png') }}" alt="" class="picto" />
+			<img src="{{ asset('build/media/market/resources-pack-' ~ transaction|transaction_picto ~ '.png') }}" alt="" class="picto" />
 			<span class="rate">{{ transaction_data.rate }} %</span>
 
 			<div class="offer">
-				{{ transaction.quantity|number }} <img src="{{ asset('media/resources/resource.png') }}" alt="" class="icon-color" />
+				{{ transaction.quantity|number }} <img src="{{ asset('build/media/resources/resource.png') }}" alt="" class="icon-color" />
 			</div>
 		{% elseif transaction.hasCommander %}
-			<img src="{{ asset('media/commander/small/' ~ transaction.commanderAvatar ~ '.png') }}" alt="" class="picto" />
+			<img src="{{ asset('build/media/commander/small/' ~ transaction.commanderAvatar ~ '.png') }}" alt="" class="picto" />
 			<span class="rate">{{ transaction_data.rate }} %</span>
 
 			<div class="offer">
@@ -24,7 +24,7 @@
 				<em>{{ transaction.commanderExperience }} xp | {{ transaction.commanderVictory }} victoire{{ transaction.commanderVictory|plural }}</em>
 			</div>
 		{% elseif transaction.hasShips %}
-			<img src="{{ asset('media/ship/picto/ship' ~ transaction.identifier ~ '.png') }}" alt="" class="picto" />
+			<img src="{{ asset('build/media/ship/picto/ship' ~ transaction.identifier ~ '.png') }}" alt="" class="picto" />
 			<span class="rate">{{ transaction_data.rate }} %</span>
 
 			<div class="offer">
@@ -36,7 +36,7 @@
 			<span>pour</span>
 			</div>
 		<div class="price">
-			{{ transaction_data.total_price|number }} <img src="{{ asset('media/resources/credit.png') }}" alt="" class="icon-color" />
+			{{ transaction_data.total_price|number }} <img src="{{ asset('build/media/resources/credit.png') }}" alt="" class="icon-color" />
 			</div>
 		</div>
 
@@ -49,21 +49,21 @@
 			<div class="price-detail">
 				<p>
 					{{ transaction.price|number }}
-					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" />
+					<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" />
 				</p>
 				<p class="hb lt" title="taxe de vente de {{ get_faction_info(transaction_data.export_faction, 'popularName') }} sur les produits vendus à {{ get_faction_info(transaction_data.import_faction, 'popularName') }}">
 					<span>+ taxe ({{ transaction_data.export_tax }}%) </span>
 					{{ transaction_data.export_price|number }}
-					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" />
+					<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" />
 				</p>
 				<p class="hb lt" title="taxe d'achat de {{ get_faction_info(transaction_data.import_faction, 'popularName') }} sur les produits {{ get_faction_info(transaction_data.export_faction, 'demonym') }}">
 					<span>+ taxe ({{ transaction_data.import_tax }}%) </span>
 					{{ transaction_data.import_price|number }}
-					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" /></p>
+					<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" /></p>
 				<hr />
 				<p><span>=</span>
 					{{ transaction_data.total_price|number }}
-					<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="crédit" />
+					<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" />
 				</p>
 			</div>
 		</div>
@@ -71,9 +71,9 @@
 		<div class="button">
 			<a href="{{ path('accept_offer', {'id': transaction.id}) }}">
 				acheter pour {{ transaction_data.total_price|number }}
-				<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}"><br />
+				<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}"><br />
 				durée du transit {{ transaction_data.time|lite_seconds }}
-				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+				<img class="icon-color" alt="relèves" src="{{ asset('build/media/resources/time.png') }}">
 			</a>
 		</div>
 	</div>

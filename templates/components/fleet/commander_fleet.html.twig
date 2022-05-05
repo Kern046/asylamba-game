@@ -4,7 +4,7 @@
 {% apply spaceless %}
 	<div class="component size2 commander-fleet">
 		<div class="head skin-1">
-			<img src="{{ asset('media/commander/medium/' ~ commander.avatar ~ '.png') }}" alt="{{ commander.name }}" />
+			<img src="{{ asset('build/media/commander/medium/' ~ commander.avatar ~ '.png') }}" alt="{{ commander.name }}" />
 			<h2>{{ commander.name }}</h2>
 			<em>{{ commander|commander_rank }}</em>
 		</div>
@@ -82,15 +82,15 @@
 			data-base="{{ commander.rBase }}"
 			data-commander="{{ commander.id }}">
 			<div class="head skin-3">
-				<img class="left" src="{{ asset('media/fleet/commanders.png') }}" alt="/" />
-				<img class="right" src="{{ asset('media/orbitalbase/dock2.png') }}" alt="/" />
+				<img class="left" src="{{ asset('build/media/fleet/commanders.png') }}" alt="/" />
+				<img class="right" src="{{ asset('build/media/orbitalbase/dock2.png') }}" alt="/" />
 			</div>
 			<div class="fix-body">
 				<div class="body">
 					<div class="list-ship squadron">
 						{% for i in range(0, 11) %}
 							<a href="#" class="empty" data-ship-id="{{ i }}">
-								<img src="{{ asset('media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
+								<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
 								<span class="text">
 									<span class="quantity">0</span>
 									<span>{{ get_ship_info(i, 'codeName') }}</span>
@@ -101,7 +101,7 @@
 					<div class="list-ship dock">
 						{% for i in range(0, 11) %}
 							<a href="#" {% if dock_storage[i] == 0 %}class="empty"{% endif %} data-ship-id="{{ i }}">
-								<img src="{{ asset('media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
+								<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
 								<span class="text">
 									<span class="quantity">{{ dock_storage[i] }}</span>
 									<span>{{ get_ship_info(i, 'codeName') }}</span>

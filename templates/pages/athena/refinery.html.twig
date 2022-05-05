@@ -3,7 +3,7 @@
 {% block content %}
 	<div class="component building">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/refinery.png') }}" alt="" />
+			<img src="{{ asset('build/media/orbitalbase/refinery.png') }}" alt="" />
 			<h2>
 				{{ get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::REFINERY'), 'frenchName') }}
 			</h2>
@@ -22,7 +22,7 @@
 						{% if refining_bonus > 0 %}
 							<span class="bonus">+{{ ((production * refining_bonus) / 100)|number }}</span>
 						{% endif %}
-						<img alt="ressources" src="{{ asset('media/resources/resource.png') }}" class="icon-color">
+						<img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">
 					</span>
 				</div>
 
@@ -61,7 +61,7 @@
 								{%- if refining_bonus > 0 -%}
 									<span class="bonus">+{{ ((production * refining_bonus) / 100)|number }}</span>
 								{%- endif -%}
-								<img class="icon-color" src="{{ asset('media/resources/resource.png') }}" alt="crédits" />
+								<img class="icon-color" src="{{ asset('build/media/resources/resource.png') }}" alt="crédits" />
 							</span>
 						</li>
 					{% endfor %}

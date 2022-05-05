@@ -11,46 +11,46 @@
 					<td class="hb lt" title="coût de construction en ressource">coût</td>
 					<td>
 						{{ get_ship_info(ship_number, 'resourcePrice')|number }}
-						<img src="{{ asset('media/resources/resource.png') }}" alt="ressource" class="icon-color" />
+						<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="icon-color" />
 					</td>
 				</tr>
 				<tr>
 					<td class="hb lt" title="temps de construction (heures:minutes:secondes)">temps</td>
 					<td>
 						{{ get_ship_info(ship_number, 'time')|lite_seconds }}
-						<img src="{{ asset('media/resources/time.png') }}" alt="relève" class="icon-color" />
+						<img src="{{ asset('build/media/resources/time.png') }}" alt="relève" class="icon-color" />
 					</td>
 				</tr>
 				<tr>
 					<td class="hb lt" title="points-équivalent-vaisseau, définit la taille qu\'occupe ce vaisseau dans une escadrille">pev</td>
 					<td>
 						{{ get_ship_info(ship_number, 'pev') }}
-						<img src="{{ asset('media/resources/pev.png') }}" alt="pev" class="icon-color" />
+						<img src="{{ asset('build/media/resources/pev.png') }}" alt="pev" class="icon-color" />
 					</td>
 				</tr>
 				<tr>
 					<td class="hb lt" title="nombre de ressources que le vaisseau peut transporter">soute</td>
 					<td>
 						{{ (get_ship_info(ship_number, 'pev') * 250)|number }}
-						<img src="{{ asset('media/resources/resource.png') }}" alt="ressource" class="icon-color" />
+						<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="icon-color" />
 					</td>
 				</tr>
 				<tr>
 					<td class="hb lt" title="nombre de crédit par relève que coûte le vaisseau affecté à un commandant">entretien en affectation</td>
 					<td>
 						{{ get_ship_info(ship_number, 'cost')|number }}
-						<img src="{{ asset('media/resources/credit.png') }}" alt="ressource" class="icon-color" />
+						<img src="{{ asset('build/media/resources/credit.png') }}" alt="ressource" class="icon-color" />
 						/
-						<img src="{{ asset('media/resources/time.png') }}" alt="relève" class="icon-color" />
+						<img src="{{ asset('build/media/resources/time.png') }}" alt="relève" class="icon-color" />
 					</td>
 				</tr>
 				<tr>
 					<td class="hb lt" title="nombre de crédit par relève que coûte le vaisseau à quai ou en vente au marché">entretien à quai</td>
 					<td>
 						{{ (get_ship_info(ship_number, 'cost') * constant('App\\Modules\\Athena\\Resource\\ShipResource::COST_REDUCTION'))|number }}
-						<img src="{{ asset('media/resources/credit.png') }}" alt="ressource" class="icon-color" />
+						<img src="{{ asset('build/media/resources/credit.png') }}" alt="ressource" class="icon-color" />
 						/
-						<img src="{{ asset('media/resources/time.png') }}" alt="relève" class="icon-color" />
+						<img src="{{ asset('build/media/resources/time.png') }}" alt="relève" class="icon-color" />
 					</td>
 				</tr>
 			</table></div>
@@ -76,7 +76,7 @@
 
 				<span class="label">attaque</span>
 				<span class="value">
-					<img src="{{ asset('media/resources/attack.png') }}" class="icon-color" />
+					<img src="{{ asset('build/media/resources/attack.png') }}" class="icon-color" />
 					{{ values|join(' + ') }}
 				</span>
 				<span class="progress-bar">
@@ -92,7 +92,7 @@
 				<div class="skill-box">
 					<span class="label">défense</span>
 					<span class="value">
-						<img src="{{ asset('media/resources/defense.png') }}" class="icon-color" />
+						<img src="{{ asset('build/media/resources/defense.png') }}" class="icon-color" />
 						{{ get_ship_info(ship_number, 'defense') }}
 						{{ bonus }}
 					</span>
@@ -106,7 +106,7 @@
 			<div class="skill-box">
 				<span class="label">maniabilité</span>
 				<span class="value">
-					<img src="{{ asset('media/resources/speed.png') }}" class="icon-color" />
+					<img src="{{ asset('build/media/resources/speed.png') }}" class="icon-color" />
 					{{ get_ship_info(ship_number, 'speed') }}
 					{{ bonus }}
 				</span>
@@ -119,7 +119,7 @@
 			<div class="skill-box">
 				<span class="label">coque</span>
 				<span class="value">
-					<img src="{{ asset('media/resources/life.png') }}" class="icon-color" />
+					<img src="{{ asset('build/media/resources/life.png') }}" class="icon-color" />
 					{{ get_ship_info(ship_number, 'life') }}
 				</span>
 				<span class="progress-bar"><span class="content" style="width: {{ get_ship_info(ship_number, 'life')|percent(life) }}%;"></span></span>

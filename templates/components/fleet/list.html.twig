@@ -11,7 +11,7 @@
 
 			{% for base in obsets %}
 				<div class="set-fleet">
-					<img src="{{ asset('media/map/place/place' ~ base.info.img ~ '.png') }}" alt="{{ base.info.name }}" class="place" />
+					<img src="{{ asset('build/media/map/place/place' ~ base.info.img ~ '.png') }}" alt="{{ base.info.name }}" class="place" />
 
 					<h2>
 						{{- get_base_type_info(base.info.type, 'name') }}
@@ -25,18 +25,18 @@
 						<div class="item color{{ commander.playerColor }}">
 							<div class="left">
 								{% if commander.rPlayer != current_player.id %}
-									<img src="{{ asset('media/map/action/shield.png') }}" alt="" class="status" />
+									<img src="{{ asset('build/media/map/action/shield.png') }}" alt="" class="status" />
 								{% elseif commander.isAffected %}
-									<img src="{{ asset('media/map/action/anchor.png') }}" alt="" class="status" />
+									<img src="{{ asset('build/media/map/action/anchor.png') }}" alt="" class="status" />
 								{% elseif commander.isMoving %}
 									{% if commander.isTransferring %}
-										<img src="{{ asset('media/map/action/move.png') }}" alt="" class="status" />
+										<img src="{{ asset('build/media/map/action/move.png') }}" alt="" class="status" />
 									{% elseif commander.isLooting %}
-										<img src="{{ asset('media/map/action/loot.png') }}" alt="" class="status" />
+										<img src="{{ asset('build/media/map/action/loot.png') }}" alt="" class="status" />
 									{% elseif commander.isInvading %}
-										<img src="{{ asset('media/map/action/colo.png') }}" alt="" class="status" />
+										<img src="{{ asset('build/media/map/action/colo.png') }}" alt="" class="status" />
 									{% elseif commander.isComingBack %}
-										<img src="{{ asset('media/map/action/back.png') }}" alt="" class="status" />
+										<img src="{{ asset('build/media/map/action/back.png') }}" alt="" class="status" />
 									{% endif %}
 								{% endif %}
 								<span class="top">
@@ -83,18 +83,18 @@
 
 									<div class="progress-ship" data-progress-current-time="{{ spent_time }}" data-progress-total-time="{{ total_time }}" data-progress-reverse="{{ (reversed ? 'true' : 'false') }}">
 										<div class="bar" style="width: {{ spent_time|percent(total_time, false) }}%;">
-											<img src="{{ asset('media/map/fleet/ship' ~ (reversed ? '-reversed' : '') ~ '.png') }}" alt="" class="ship" />
+											<img src="{{ asset('build/media/map/fleet/ship' ~ (reversed ? '-reversed' : '') ~ '.png') }}" alt="" class="ship" />
 											<span class="time">{{ remaining_time|lite_seconds }}</span>
 										</div>
 									</div>
 								{% else %}
-									<img src="{{ asset('media/map/fleet/ship.png') }}" alt="" class="ship" />
+									<img src="{{ asset('build/media/map/fleet/ship.png') }}" alt="" class="ship" />
 								{% endif %}
 							</div>
 
 							{% if commander.isMoving %}
 								<div class="right">
-									<img src="{{ asset('media/map/place/place1-' ~ get_planet_size(commander.isComingBack ? commander.startPlacePop : commander.destinationPlacePop) ~ '.png') }}" alt="" class="cover" />'
+									<img src="{{ asset('build/media/map/place/place1-' ~ get_planet_size(commander.isComingBack ? commander.startPlacePop : commander.destinationPlacePop) ~ '.png') }}" alt="" class="cover" />'
 									<span class="top">
 										<a href="{{ path('map', {'placeId': reversed ? commander.rStartPlace : commander.rDestinationPlace }) }}">
 											{{- (reversed ? commander.rStartPlace : commander.rDestinationPlace) -}}

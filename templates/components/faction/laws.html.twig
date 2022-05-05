@@ -8,7 +8,7 @@
 			{% for law in effective_laws %}
 				<div class="build-item">
 					<div class="name">
-						<img src="{{ asset('media/faction/law/common.png') }}" alt="">
+						<img src="{{ asset('build/media/faction/law/common.png') }}" alt="">
 						<strong>{{ get_law_info(law.type, 'name') }}</strong>
 					</div>
 				</div>
@@ -23,7 +23,7 @@
 			{% for law in voting_laws %}
 				<div class="build-item">
 					<div class="name">
-						<img src="{{ asset('media/faction/law/common.png') }}" alt="">
+						<img src="{{ asset('build/media/faction/law/common.png') }}" alt="">
 						<strong>{{ get_law_info(law.type, 'name') }}</strong>
 					</div>
 				</div>
@@ -38,7 +38,7 @@
 			{% for bonus in faction.bonusText %}
 				<div class="build-item">
 					<div class="name">
-						<img src="{{ asset('media/' ~ bonus.path) }}" alt="" />
+						<img src="{{ asset('build/media/' ~ bonus.path) }}" alt="" />
 						<strong>{{ bonus.title }}</strong>
 						<em>{{ bonus.desc|raw }}</em>
 					</div>

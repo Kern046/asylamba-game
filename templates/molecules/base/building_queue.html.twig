@@ -7,7 +7,7 @@
 	<a href="{{ path('cancel_building_queue', { 'identifier': building_queue.buildingNumber }) }}"
 	   class="button hb lt"
 	   title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">×</a>
-	<img class="picto" src="{{ asset('media/orbitalbase/' ~ get_building_info(building_queue.buildingNumber, 'imageLink') ~ '.png') }}" alt="" />
+	<img class="picto" src="{{ asset('build/media/orbitalbase/' ~ get_building_info(building_queue.buildingNumber, 'imageLink') ~ '.png') }}" alt="" />
 	<strong>
 		{{ get_building_info(building_queue.buildingNumber, 'frenchName') }}
 		 <span class="level">niv. {{ building_queue.targetLevel }}</span>

@@ -19,7 +19,7 @@
 				{% if department_minister is not same as(false) %}
 					<div class="player">
 						<a href="{{ path('embassy', {'player': department_minister.id}) }}">
-							<img src="{{ asset('media/avatar/small/' ~ department_minister.avatar ~ '.png') }}" alt="{{ department_minister.name }}"  class="picto" />
+							<img src="{{ asset('build/media/avatar/small/' ~ department_minister.avatar ~ '.png') }}" alt="{{ department_minister.name }}"  class="picto" />
 						</a>
 						<span class="title">{{ statuses[department_minister.status - 1] }}</span>
 						<strong class="name">{{ department_minister.name }}</strong>

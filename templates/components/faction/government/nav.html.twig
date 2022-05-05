@@ -8,38 +8,38 @@
 	<div class="fix-body">
 		<div class="body">
 			<a href="{{ path('faction_government', {'mode': 'law'}) }}" class="nav-element {% if 'law' == mode %}active{% endif %}">
-				<img src="{{ asset('media/faction/law/common.png') }}" alt="" />
+				<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
 				<strong>Lois</strong>
 				<em>Promulger de nouvelles lois</em>
 			</a>
 
 			<a href="{{ path('faction_government', {'mode': 'news'}) }}" class="nav-element {% if 'news' == mode %}active{% endif %}">
-				<img src="{{ asset('media/faction/law/common.png') }}" alt="" />
+				<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
 				<strong>Annonces</strong>
 				<em>Gestion des annonces</em>
 			</a>
 
 			<a href="{{ path('faction_government', {'mode': 'message'}) }}" class="nav-element {% if 'message' == mode %}active{% endif %}">
-				<img src="{{ asset('media/faction/law/common.png') }}" alt="" />
+				<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
 				<strong>Messages groupés</strong>
 				<em>Envoi de messages aux membres de la faction</em>
 			</a>
 
 			<a href="{{ path('faction_government', {'mode': 'description'}) }}" class="nav-element {% if 'description' == mode %}active{% endif %}">
-				<img src="{{ asset('media/faction/law/common.png') }}" alt="" />
+				<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
 				<strong>Description</strong>
 				<em>Edition de la description publique</em>
 			</a>
 
 			<a href="{{ path('faction_government', {'mode': 'credit'}) }}" class="nav-element {% if 'credit' == mode %}active{% endif %}">
-				<img src="{{ asset('media/faction/law/common.png') }}" alt="" />
+				<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
 				<strong>Gestion des finances</strong>
 				<em>Envoi de crédits aux membres de la faction</em>
 			</a>
 
 			{% if current_player.isRuler %}
 				<a href="{{ path('faction_government', {'mode': 'manage'}) }}" class="nav-element {% if 'manage' == mode %}active{% endif %}">
-					<img src="{{ asset('media/faction/law/common.png') }}" alt="" />
+					<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
 					<strong>Gouvernement</strong>
 					<em>Gestion de votre gouvernement</em>
 				</a>

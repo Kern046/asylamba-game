@@ -10,12 +10,12 @@
 		<div class="box left">
 			<a href="#" class="resource-link sh" data-target="tools-refinery">
 				{{ current_base.resourcesStorage|number }}
-				<img class="icon-color" src="{{ asset('media/resources/resource.png') }}" alt="ressources" />
+				<img class="icon-color" src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" />
 			</a>
 
 			{% set building_queues_count = current_base.buildingQueues|length %}
 			<a href="#" class="square sh" data-target="tools-generator">
-				<img src="{{ asset('media/orbitalbase/generator.png') }}" alt="" />
+				<img src="{{ asset('build/media/orbitalbase/generator.png') }}" alt="" />
 				{% if building_queues_count > 0 %}
 					<span class="number">{{ building_queues_count }}</span>
 				{% endif %}
@@ -23,21 +23,21 @@
 
 			{% set technology_queues_count = current_base.technoQueues|length %}
 			<a href="#" class="square sh" data-target="tools-technosphere">
-				<img src="{{ asset('media/orbitalbase/technosphere.png') }}" alt="" />
+				<img src="{{ asset('build/media/orbitalbase/technosphere.png') }}" alt="" />
 				{% if technology_queues_count > 0 %}
 					<span class="number">{{ technology_queues_count }}</span>
 				{% endif %}
 			</a>
 
 			<a href="#" class="square sh" data-target="tools-dock1">
-				<img src="{{ asset('media/orbitalbase/dock1.png') }}" alt="" />
+				<img src="{{ asset('build/media/orbitalbase/dock1.png') }}" alt="" />
 				{% if current_dock1_ship_queues|length > 0 %}
 					<span class="number">{{ current_dock1_ship_queues|length }}</span>
 				{% endif %}
 			</a>
 
 			<a href="#" class="square sh" data-target="tools-dock2">
-				<img src="{{ asset('media/orbitalbase/dock2.png') }}" alt="" />
+				<img src="{{ asset('build/media/orbitalbase/dock2.png') }}" alt="" />
 				{% if current_dock2_ship_queues|length > 0 %}
 					<span class="number">{{ current_dock2_ship_queues|length }}</span>
 				{% endif %}
@@ -48,7 +48,7 @@
 		<div class="box right">
 			{% set incoming_commanders_count = incoming_commanders|length %}
 			<a href="#" class="square sh" data-target="tools-incoming-attack">
-				<img src="{{ asset('media/common/nav-fleet-defense.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-fleet-defense.png') }}" alt="" />
 				{% if incoming_commanders_count > 0 %}
 					<span class="number">{{ incoming_commanders_count }}</span>
 				{% endif %}
@@ -56,7 +56,7 @@
 
 			{% set outgoing_commanders_count = outgoing_commanders|length %}
 			<a href="#" class="square sh" data-target="tools-outgoing-attack">
-				<img src="{{ asset('media/common/nav-fleet-attack.png') }}" alt="" />
+				<img src="{{ asset('build/media/common/nav-fleet-attack.png') }}" alt="" />
 				{% if outgoing_commanders_count > 0 %}
 					<span class="number">{{ outgoing_commanders_count }}</span>
 				{% endif %}
@@ -64,7 +64,7 @@
 
 			<span class="resource-link" style="width: 120px;">
 				{{ current_player.credit|number }}
-				 <img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+				 <img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 			</span>
 		</div>
 
@@ -88,7 +88,7 @@
 						{% if refining_bonus > 0 %}
 							<span class="bonus">+{{ ((production * refining_bonus) / 100)|number }}</span>
 						{% endif %}
-						 <img alt="ressources" src="{{ asset('media/resources/resource.png') }}" class="icon-color">
+						 <img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">
 					</span>
 				</div>
 
@@ -116,7 +116,7 @@
 							 data-progress-current-time="{{ queue_duration }}"
 							 data-progress-total-time="{{ queue_time }}"
 						>
-							<img class="picto" src="{{ asset('media/orbitalbase/' ~ queue|queue_picture ~ '.png') }}" alt="" />
+							<img class="picto" src="{{ asset('build/media/orbitalbase/' ~ queue|queue_picture ~ '.png') }}" alt="" />
 							<strong>
 								{{ queue|queue_name }}
 								<span class="level">niv. {{ queue.targetLevel }}</span>
@@ -152,7 +152,7 @@
 							 data-progress-current-time="{{ queue|queue_duration }}"
 							 data-progress-total-time="{{ queue.quantity * queue|ship_queue_time }}"
 						>
-							<img class="picto" src="{{ asset('media/ship/picto/' ~ queue|ship_queue_picture ~ '.png') }}" alt="" />
+							<img class="picto" src="{{ asset('build/media/ship/picto/' ~ queue|ship_queue_picture ~ '.png') }}" alt="" />
 							<strong>
 								{{ queue.quantity }} {{ queue|ship_queue_name ~ queue.quantity|plural }}
 							</strong>
@@ -185,7 +185,7 @@
 							 data-progress-current-time="{{ queue|queue_duration }}"
 							 data-progress-total-time="{{ queue.quantity * queue|ship_queue_time }}"
 						>
-							<img class="picto" src="{{ asset('media/ship/picto/' ~ queue|ship_queue_picture ~ '.png') }}" alt="" />
+							<img class="picto" src="{{ asset('build/media/ship/picto/' ~ queue|ship_queue_picture ~ '.png') }}" alt="" />
 							<strong>
 								{{ queue.quantity }} {{ queue|ship_queue_name ~ queue.quantity|plural }}
 							</strong>
@@ -218,7 +218,7 @@
 							 data-progress-current-time="{{ queue|queue_duration }}"
 							 data-progress-total-time="{{ queue|technology_queue_time }}"
 						>
-							<img class="picto" src="{{ asset('media/technology/picto/' ~ queue|queue_picture ~ '.png') }}" alt="" />
+							<img class="picto" src="{{ asset('build/media/technology/picto/' ~ queue|queue_picture ~ '.png') }}" alt="" />
 							<strong>
 								{{ queue|queue_name }}
 								{% if queue|is_unblocking_technology %}
@@ -253,7 +253,7 @@
 								data-progress-current-time="{{ commander|travel_remaining_time }}"
 								data-progress-total-time="{{ commander|travel_total_time }}"
 							>
-								<img class="picto" src="{{ asset('media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
+								<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
 								<strong>{{ commander_rank }} {{ commander.name }}</strong>
 								<em>
 									{{ commander|mission_label }}
@@ -285,7 +285,7 @@
 								 data-progress-current-time="{{ commander|travel_remaining_time }}"
 								 data-progress-total-time="{{ commander|travel_total_time }}"
 							>
-								<img class="picto" src="{{ asset('media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
+								<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
 								<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
 								<em>
 									{{ commander|mission_label }}

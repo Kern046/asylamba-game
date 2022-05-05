@@ -1,6 +1,6 @@
 <div class="component new-message market-sell">
 	<div class="head skin-4 sh">
-		<img src="{{ asset('media/resources/resource.png') }}" alt="ressource" class="main" />
+		<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="main" />
 		<h2>Envoi de ressources</h2>
 		<em>à une autre base</em>
 	</div>
@@ -21,13 +21,13 @@
 					<div class="label-box">
 						<span class="label">Ressources</span>
 						<span class="value">{{ current_base.resourcesStorage|number }}</span>
-						<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}">
+						<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}">
 						</div>
 
 					<div class="label-box sf-quantity">
 						<label for="send-resources-quantity" class="label">Quantité</label>
 						<input id="send-resources-quantity" class="value" type="text" name="quantity" autocomplete="off" />
-						<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}">
+						<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}">
 					</div>
 
 					<hr />
@@ -35,7 +35,7 @@
 					<div class="label-box sf-comship">
 						<span class="label">Vaisseaux</span>
 						<span class="value"></span>
-						<img class="icon-color" alt="vaisseaux transports" src="{{ asset('media/resources/transport.png') }}">
+						<img class="icon-color" alt="vaisseaux transports" src="{{ asset('build/media/resources/transport.png') }}">
 					</div>
 
 					<hr />
@@ -49,7 +49,7 @@
 
 <div class="component new-message market-sell">
 	<div class="head skin-4">
-		<img src="{{ asset('media/orbitalbase/dock2.png') }}" alt="vaisseaux" class="main" />
+		<img src="{{ asset('build/media/orbitalbase/dock2.png') }}" alt="vaisseaux" class="main" />
 		<h2>Envoi de vaisseaux</h2>
 		<em>à une autre base</em>
 	</div>
@@ -65,7 +65,7 @@
 					{% if ship_quantity > 0 %}
 						<div class="queue sh" data-target="sell-ships-{{ ship_number }}">
 							<div class="item">
-								<img class="picto" src="{{ asset('media/ship/picto/ship' ~ ship_number ~ '.png') }}" alt="" />
+								<img class="picto" src="{{ asset('build/media/ship/picto/ship' ~ ship_number ~ '.png') }}" alt="" />
 								<strong>{{ get_ship_info(ship_number, 'codeName') }}</strong>
 								<em>{{ get_ship_info(ship_number, 'name') }}</em>
 								<em>{{ get_ship_info(ship_number, 'pev') }} pev</em>
@@ -96,7 +96,7 @@
 							<div class="label-box sf-comship">
 								<span class="label">Vaisseaux</span>
 								<span class="value"></span>
-								<img class="icon-color" alt="vaisseaux transports" src="{{ asset('media/resources/transport.png') }}">
+								<img class="icon-color" alt="vaisseaux transports" src="{{ asset('build/media/resources/transport.png') }}">
 								</div>
 
 							<hr />

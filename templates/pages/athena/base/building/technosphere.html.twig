@@ -5,7 +5,7 @@
 
 	<div class="component techno">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/technosphere.png') }}" alt="" />
+			<img src="{{ asset('build/media/orbitalbase/technosphere.png') }}" alt="" />
 			<h2>{{ get_building_info(technosphere_building_number, 'frenchName') }}</h2>
 			<em>niveau {{ current_base.levelTechnosphere }}</em>
 		</div>
@@ -34,7 +34,7 @@
 						<a href="{{ path('cancel_technology_queue', {'identifier': queue.technology }) }}"
 						   class="button hb lt"
 						   title="annuler la recherche (attention, vous ne récupérerez que {{ technology_resource_refund * 100 }}% du montant investi)">×</a>
-						<img class="picto" src="{{ asset('media/technology/picto/' ~ queue|queue_picture ~ '.png') }}" alt="" />
+						<img class="picto" src="{{ asset('build/media/technology/picto/' ~ queue|queue_picture ~ '.png') }}" alt="" />
 						<strong>{{ queue|queue_name }}
 							{% if queue|is_unblocking_technology %}
 							 	<span class="level">niv. {{ queue.targetLevel }}</span>

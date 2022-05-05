@@ -3,7 +3,7 @@
 {% block content %}
 	<div class="component building">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/commercialplateforme.png') }}" alt="" />
+			<img src="{{ asset('build/media/orbitalbase/commercialplateforme.png') }}" alt="" />
 			<h2>
 				{{ get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::COMMERCIAL_PLATEFORME'), 'frenchName') }}
 			</h2>
@@ -12,19 +12,19 @@
 		<div class="fix-body">
 			<div class="body">
 				<a href="{{ path('trade_market', { mode: 'market' }) }}" class="nav-element {% if mode == 'market' %}active{% endif %}">
-					<img src="{{ asset('media/orbitalbase/commercialplateforme.png') }}" alt="" />
+					<img src="{{ asset('build/media/orbitalbase/commercialplateforme.png') }}" alt="" />
 					<strong>Place du commerce</strong>
 					<em>Achetez sur le marché</em>
 				</a>
 
 				<a href="{{ path('trade_market', { mode: 'sell' }) }}" class="nav-element {% if mode == 'sell' %}active{% endif %}">
-					<img src="{{ asset('media/orbitalbase/commercialplateforme.png') }}" alt="" />
+					<img src="{{ asset('build/media/orbitalbase/commercialplateforme.png') }}" alt="" />
 					<strong>Salle des ventes</strong>
 					<em>Vendez sur le marché</em>
 				</a>
 			<hr />
 				<a href="{{ path('trade_market', { mode: 'resource' }) }}" class="nav-element {% if mode == 'resource' %}active{% endif %}">
-					<img src="{{ asset('media/orbitalbase/commercialplateforme.png') }}" alt="" />
+					<img src="{{ asset('build/media/orbitalbase/commercialplateforme.png') }}" alt="" />
 					<strong>Halle de transfert</strong>
 					<em>Envoyez des ressources et des vaisseaux</em>
 				</a>

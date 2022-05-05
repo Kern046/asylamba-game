@@ -11,15 +11,15 @@
 				<table>
 					<tr>
 						<td class="hb lt" title="coût de recherche en ressource">coût en ressource</td>
-						<td>' . Format::numberFormat($resource) . ' <img src="{{ asset('media/resources/resource.png') }}" alt="ressource" class="icon-color" /></td>
+						<td>' . Format::numberFormat($resource) . ' <img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="icon-color" /></td>
 					</tr>
 					<tr>
 						<td class="hb lt" title="coût de recherche en crédit">coût en crédit</td>
-						<td>' . Format::numberFormat($credit) . ' <img src="{{ asset('media/resources/credit.png') }}" alt="credit" class="icon-color" /></td>
+						<td>' . Format::numberFormat($credit) . ' <img src="{{ asset('build/media/resources/credit.png') }}" alt="credit" class="icon-color" /></td>
 					</tr>
 					<tr>
 						<td class="hb lt" title="temps de recherche (heures:minutes:secondes)">temps</td>
-						<td>' . Chronos::secondToFormat($time, 'lite') . ' <img src="{{ asset('media/resources/time.png') }}" alt="relève" class="icon-color" /></td>
+						<td>' . Chronos::secondToFormat($time, 'lite') . ' <img src="{{ asset('build/media/resources/time.png') }}" alt="relève" class="icon-color" /></td>
 					</tr>
 					<tr>
 						<td class="hb lt" title="points que rapporte la recherche de la technologie au joueur">points</td>
@@ -34,7 +34,7 @@
 				Technosphère, niv. ' . $technosphere . '<br />
 				foreach ($researchList as $research) {
 				echo $research[0] . ', niv. ' . $research[1];
-				echo $research[2] ? '<img class="requierement" src="{{ asset('media/resources/check.png') }}" alt="" />' : NULL;
+				echo $research[2] ? '<img class="requierement" src="{{ asset('build/media/resources/check.png') }}" alt="" />' : NULL;
 				<br />
 				}
 				</p>

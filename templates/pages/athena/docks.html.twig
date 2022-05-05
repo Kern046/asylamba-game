@@ -3,7 +3,7 @@
 {% block content %}
 	<div class="component">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/dock' ~ dock_type ~ '.png') }}" alt="" />
+			<img src="{{ asset('build/media/orbitalbase/dock' ~ dock_type ~ '.png') }}" alt="" />
 			<h2>{{ get_building_info(building_number, 'frenchName') }}</h2>
 			<em>niveau {{ dock_level }}</em>
 		</div>
@@ -32,7 +32,7 @@
 									<a href="{{ path('cancel_ship_queue', { 'id': queue.id, 'dock': dock_type }) }}"
 									   class="button hb lt"
 									   title="annuler la commande (attention, vous ne récupérerez que {{ ship_resource_refund * 100 }}% du montant investi)">×</a>
-									<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(queue.shipNumber, 'imageLink') ~ '.png') }}" alt="" />
+									<img class="picto" src="{{ asset('build/media/ship/picto/' ~ get_ship_info(queue.shipNumber, 'imageLink') ~ '.png') }}" alt="" />
 									<strong>{{ queue.quantity }} {{ get_ship_info(queue.shipNumber, 'codeName') ~ queue.quantity|plural }}</strong>
 
 									<em><span class="progress-text">{{ remaining_time|lite_seconds }}</span></em>
@@ -109,7 +109,7 @@
 						{% for i in ships_range %}
 							<div class="queue sh" data-target="sell-ships-{{ i }}">
 								<div class="item">
-									<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
+									<img class="picto" src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
 									<strong>
 										<span class="big">{{ storage[i] }}</span>
 										{{ get_ship_info(i, 'codeName') ~ storage[i]|plural }}
@@ -137,7 +137,7 @@
 								<div class="label-box sf-min-price">
 									<span class="label">Ressources</span>
 									<span class="value"></span>
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/resource.png') }}">
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/resource.png') }}">
 								</div>
 
 								<hr />
@@ -148,9 +148,9 @@
 						<div class="number-box">
 							<span class="label">capacité du hangar</span>
 							<span class="value">
-								{{ in_storage }} <img class="icon-color" alt="" src="{{ asset('media/resources/pev.png') }}">
+								{{ in_storage }} <img class="icon-color" alt="" src="{{ asset('build/media/resources/pev.png') }}">
 								/
-								{{ total_space}} <img class="icon-color" alt="" src="{{ asset('media/resources/pev.png') }}">
+								{{ total_space}} <img class="icon-color" alt="" src="{{ asset('build/media/resources/pev.png') }}">
 							</span>
 							{% set percent = in_storage|percent(total_space) %}
 							<span class="progress-bar hb bl" title="remplissage : {{ percent|number }}%">

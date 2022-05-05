@@ -42,17 +42,17 @@
 						<td>{{ level_data.note|raw }}</td>
 						<td>
 							{{ level_data.resourcePrice }}
-							<img src="{{ asset('media/resources/resource.png') }}" alt="ressources" class="icon-color" />
+							<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" class="icon-color" />
 						</td>
 						<td>
 							{{ level_data.time }}
-							<img src="{{ asset('media/resources/time.png') }}" alt="relève" class="icon-color" />
+							<img src="{{ asset('build/media/resources/time.png') }}" alt="relève" class="icon-color" />
 						</td>
 						{% for stat_data in level_data.stats %}
 							<td>
 								{{ stat_data.stat }}
 								{% if stat_data.image is defined %}
-									<img src="{{ asset('media/resources/' ~ stat_data.image ~ '.png') }}" alt="{{ stat_data.alt }}" class="icon-color" />
+									<img src="{{ asset('build/media/resources/' ~ stat_data.image ~ '.png') }}" alt="{{ stat_data.alt }}" class="icon-color" />
 								{% endif %}
 							</td>
 						{% endfor %}

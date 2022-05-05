@@ -1,5 +1,5 @@
 <div class="player faction color{{ faction_ranking.rFaction }} {% if current_player.rColor == faction_ranking.rFaction %}active{% endif %}">
-	<img src="{{ asset('media/faction/flag/flag-' ~ faction_ranking.rFaction ~ '.png') }}" alt="{{ faction_ranking.rFaction }}" class="picto" />
+	<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_ranking.rFaction ~ '.png') }}" alt="{{ faction_ranking.rFaction }}" class="picto" />
 
 	<span class="title">{{ get_faction_info(faction_ranking.rFaction, 'government') }}</span>
 	<strong class="name">{{ get_faction_info(faction_ranking.rFaction, 'popularName') }}</strong>

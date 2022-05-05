@@ -6,7 +6,7 @@
 
 	<div class="component building">
 	<div class="head skin-1">
-		<img src="{{ asset('media/orbitalbase/recycling.png') }}" alt="" />
+		<img src="{{ asset('build/media/orbitalbase/recycling.png') }}" alt="" />
 		<h2>{{ get_building_info(building_number, 'frenchName') }}</h2>
 		<em>Niveau {{ current_base.levelRecycling }}</em>
 	</div>
@@ -29,14 +29,14 @@
 				<span class="label">en ressources</span>
 				<span class="value">
 					{{ recycler_capacity|number }}
-					<img alt="ressources" src="{{ asset('media/resources/resource.png') }}" class="icon-color">
+					<img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">
 				</span>
 			</div>
 			<div class="number-box grey">
 				<span class="label">en crédits</span>
 				<span class="value">
 					{{ (recycler_capacity * 10)|number }}
-					<img alt="crédits" src="{{ asset('media/resources/credit.png') }}" class="icon-color">
+					<img alt="crédits" src="{{ asset('build/media/resources/credit.png') }}" class="icon-color">
 				</span>
 			</div>
 
@@ -63,7 +63,7 @@
 
 					<div class="build-item base-type">
 						<div class="name">
-							<img src="{{ asset('media/orbitalbase/recycler.png') }}" alt="">
+							<img src="{{ asset('build/media/orbitalbase/recycler.png') }}" alt="">
 							<strong>Mission<br /> {{ mission_data.mission_id }}</strong>
 						</div>
 
@@ -120,7 +120,7 @@
 							<span class="label">Soute totale de la mission</span>
 							<span class="value">
 								{{ (mission.recyclerQuantity * recycler_capacity)|number }}
-								<img alt="ressources" src="{{ asset('media/resources/resource.png') }}" class="icon-color">
+								<img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">
 							</span>
 						</li>
 						<li>

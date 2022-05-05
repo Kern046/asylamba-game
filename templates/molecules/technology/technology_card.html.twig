@@ -1,7 +1,7 @@
 <div class="build-item {% if not data.technosphere_requirements or not data.research_requirements %}disable{% endif %} {% if data.is_over %}closed{% endif %}">
 	<div class="name">
 		<a href="#" class="addInfoPanel hb lt info" title="plus d'informations" data-techno-id="{{ data.identifier }}" data-info-type="techno">+</a>
-		<img src="{{ asset('media/technology/picto/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" alt="" />
+		<img src="{{ asset('build/media/technology/picto/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" alt="" />
 		<strong>
 			{{ get_technology_info(data.identifier, 'name') }}
 			{% if not data.is_unblocking_technology and data.technology_level != 0 %}
@@ -13,7 +13,7 @@
 		{% endif %}
 	</div>
 	<div class="ship-illu">
-		<img class="illu" src="{{ asset('media/technology/img/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" />
+		<img class="illu" src="{{ asset('build/media/technology/img/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" />
 	</div>
 
 	{% if not data.technosphere_requirements %}
@@ -47,11 +47,11 @@
 		{% else %}
 			{% set card_content %}
 				<span class="final-cost">{{ get_technology_info(data.identifier, 'resource', data.next_level)|number }}</span>
-				<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}">,
+				<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}">,
 				<span class="final-cost">{{ get_technology_info(data.identifier, 'credit', data.next_level)|number }}</span>
-				<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}"> et
+				<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}"> et
 				<span class="final-time">{{ data.time_to_build|lite_seconds }}</span>
-				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+				<img class="icon-color" alt="relèves" src="{{ asset('build/media/resources/time.png') }}">
 			{% endset %}
 			{% if not data.queue_requirements %}
 				<span class="button disable">

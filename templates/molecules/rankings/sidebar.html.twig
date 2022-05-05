@@ -3,7 +3,7 @@
 	<div class="overflow">
 		<a href="{{ path('player_rankings') }}" class="item {% if app.request.get('_route') == 'player_rankings' %}active{% endif %}">
 			<span class="picto">
-				<img src="{{ asset('media/rank/player.png') }}" alt="" />
+				<img src="{{ asset('build/media/rank/player.png') }}" alt="" />
 			</span>
 			<span class="content skin-1">
 				<span>Classement des joueurs</span>
@@ -12,7 +12,7 @@
 
 		<a href="{{ path('faction_rankings') }}" class="item {% if app.request.get('_route') == 'faction_rankings' %}active{% endif %}">
 			<span class="picto">
-				<img src="{{ asset('media/rank/faction.png') }}" alt="" />
+				<img src="{{ asset('build/media/rank/faction.png') }}" alt="" />
 			</span>
 			<span class="content skin-1">
 				<span>Classement des factions</span>

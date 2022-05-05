@@ -1,6 +1,6 @@
 <div class="build-item {% if not building_data.real_level %}disable{% endif %}">
 	<div class="name">
-		<img src="{{ asset('media/orbitalbase/' ~ get_building_info(building_number, 'imageLink') ~ '.png') }}" alt="" />
+		<img src="{{ asset('build/media/orbitalbase/' ~ get_building_info(building_number, 'imageLink') ~ '.png') }}" alt="" />
 		<strong>{{ get_building_info(building_number, 'frenchName') }}</strong>
 		{% if building_data.level > 0 %}
 			<span class="level hb lt" title="niveau actuel">{{ building_data.level }}</span>
@@ -13,11 +13,11 @@
 	</div>
 	{% set price %}
 		{{ get_building_info(building_number, 'level', (building_data.next_level), 'resourcePrice')|number(-1) }}
-		<img src="{{ asset('media/resources/resource.png') }}" alt="ressources" class="icon-color" />
+		<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" class="icon-color" />
 	{% endset %}
 	{% set time %}
 		{{ get_building_info(building_number, 'level', (building_data.next_level), 'time')|lite_seconds }}
-		<img src="{{ asset('media/resources/time.png') }}" alt="relèves" class="icon-color" />
+		<img src="{{ asset('build/media/resources/time.png') }}" alt="relèves" class="icon-color" />
 	{% endset %}
 
 	{% if building_data.building_requirements is not same as(true) %}

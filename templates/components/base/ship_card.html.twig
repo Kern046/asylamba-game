@@ -6,13 +6,13 @@
 	 data-ship-identifier="{{ ship_number }}"
 	 data-maxship="{{ ship_data.max_ships }}">
 	<div class="name">
-		<img src="{{ asset('media/ship/picto/' ~ get_ship_info(ship_number, 'imageLink') ~ '.png') }}" alt="" />
+		<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(ship_number, 'imageLink') ~ '.png') }}" alt="" />
 		<strong>{{ get_ship_info(ship_number, 'codeName') }}</strong>
 		<em>{{ get_ship_info(ship_number, 'name') }}</em>
 		<a href="#" class="addInfoPanel info hb lt" title="plus d'info" data-ship-id="{{ ship_number }}" data-info-type="ship">+</a>
 	</div>
 	<div class="ship-illu">
-		<img src="{{ asset('media/ship/img/' ~ (ship_number + 1)|format_number({min_integer_digit:'2'}) ~ '-' ~ current_player.rColor|format_number({min_integer_digit:'2'}) ~ '.png') }}" alt="" />
+		<img src="{{ asset('build/media/ship/img/' ~ (ship_number + 1)|format_number({min_integer_digit:'2'}) ~ '-' ~ current_player.rColor|format_number({min_integer_digit:'2'}) ~ '.png') }}" alt="" />
 	</div>
 
 	{% if ship_data.has_technology_requirements is not same as(true) %}
@@ -26,9 +26,9 @@
 	{% else %}
 		{% set ship_cost %}
 			<span class="final-cost">{{ get_ship_info(ship_number, 'resourcePrice')|number }}</span>
-			<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}"> et
+			<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}"> et
 			<span class="final-time">{{ get_ship_info(ship_number, 'time')|lite_seconds }}</span>
-			<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+			<img class="icon-color" alt="relèves" src="{{ asset('build/media/resources/time.png') }}">
 		{% endset %}
 		{# @TODO replace this and the JS management of the links update with a proper form #}
 		{% if not ship_data.has_ship_queue_requirements %}
@@ -49,9 +49,9 @@
 			<a href="{{ absolute_url(path('build_ships', { 'ship': ship_number, 'quantity': ship_data.max_ships })) }}" class="button">
 				construire {% if is_heavy_shipyard %}1{% else %}<span class="final-number">{{ ship_data.max_ships }}</span>{% endif %} {{ get_ship_info(ship_number, 'codeName') }} pour<br />
 				<span class="final-cost">{{ (get_ship_info(ship_number, 'resourcePrice') * (is_heavy_shipyard ? 1 : ship_data.max_ships))|number }}</span>
-				<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}"> et
+				<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}"> et
 				<span class="final-time">{{ (get_ship_info(ship_number, 'time') * (is_heavy_shipyard ? 1 : ship_data.max_ships))|lite_seconds }}</span>
-				<img class="icon-color" alt="relèves" src="{{ asset('media/resources/time.png') }}">
+				<img class="icon-color" alt="relèves" src="{{ asset('build/media/resources/time.png') }}">
 			</a>
 		{% endif %}
 	{% endif %}
