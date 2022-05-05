@@ -7,9 +7,9 @@
 			{% endif %}
 		</h2>
 		{% if app.session.get('inscription').exist('avatar') %}
-			<img src="{{ asset('media/avatar/big/' ~ app.session.get('inscription').get('avatar') ~ '.png') }}" alt="" />
+			<img src="{{ asset('build/media/avatar/big/' ~ app.session.get('inscription').get('avatar') ~ '.png') }}" alt="" />
 		{% else %}
-			<img src="{{ asset('media/avatar/big/empty.png') }}" alt="" />
+			<img src="{{ asset('build/media/avatar/big/empty.png') }}" alt="" />
 		{% endif %}
 		<span class="level">1</span>
 		<span class="experience">

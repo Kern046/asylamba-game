@@ -1,7 +1,7 @@
 {% apply spaceless %}
 	<div class="component financial">
 		<div class="head skin-1">
-			<img src="{{ asset('media/financial/taxout.png') }}" alt="" />
+			<img src="{{ asset('build/media/financial/taxout.png') }}" alt="" />
 			<h2>Redevances</h2>
 			<em>Redevances aux factions</em>
 		</div>
@@ -17,7 +17,7 @@
 							<span class="label">{{ base.name }} [{{ base.tax }}% de taxe]</span>
 							<span class="value">
 								{{- base_tax_out|number -}}
-								<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 							</span>
 						</li>
 					{% endfor %}
@@ -26,7 +26,7 @@
 						<span class="label">total de la redevance</span>
 						<span class="value">
 							{{- investments_data.totalTaxOut|number -}}
-							<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 						</span>
 					</li>
 				</ul>

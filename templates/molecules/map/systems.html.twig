@@ -10,7 +10,7 @@
 			data-y-position="{{ system.yPosition }}"
 			style="top: {{ system.yPosition * galaxy_configuration.scale - 10 }}px; left: {{ system.xPosition * galaxy_configuration.scale - 10 }}px"
 		>
-			<img src="{{ asset('media/map/systems/t' ~ system.typeOfSystem ~ 'c' ~ system.rColor ~ '.png') }}"
+			<img src="{{ asset('build/media/map/systems/t' ~ system.typeOfSystem ~ 'c' ~ system.rColor ~ '.png') }}"
 				 {% if has_bases_in %}class="own"{% endif%}
 				alt="" />
 		</a>

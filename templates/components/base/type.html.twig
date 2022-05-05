@@ -11,7 +11,7 @@
 		<div class="body">
 			<div class="build-item base-type">
 				<div class="name">
-					<img src="{{ asset('media/orbitalbase/base-type-' ~ current_base.typeOfBase ~ '.jpg') }}" alt="{{ current_base|base_type }}">
+					<img src="{{ asset('build/media/orbitalbase/base-type-' ~ current_base.typeOfBase ~ '.jpg') }}" alt="{{ current_base|base_type }}">
 					<strong>{{ current_base.name }}</strong>
 					<em>{{ current_base|base_type }}</em>
 				</div>
@@ -19,19 +19,19 @@
 
 				<div class="list-choice">
 					<button class="item-1 {% if current_base.typeOfBase == type_neutral %}done{% endif %}">
-						<img src="{{ asset('media/orbitalbase/base-type-0.jpg') }}" alt="{{ get_base_type_info(type_neutral, 'name') }}">
+						<img src="{{ asset('build/media/orbitalbase/base-type-0.jpg') }}" alt="{{ get_base_type_info(type_neutral, 'name') }}">
 						</button>
 
 					<button class="item-2 {% if current_base.typeOfBase == type_commercial %}done{% endif %}">
-						<img src="{{ asset('media/orbitalbase/base-type-1.jpg') }}" alt="{{ get_base_type_info(type_commercial, 'name') }}">
+						<img src="{{ asset('build/media/orbitalbase/base-type-1.jpg') }}" alt="{{ get_base_type_info(type_commercial, 'name') }}">
 						</button>
 
 					<button class="item-3 {% if current_base.typeOfBase == type_military %}done{% endif %}">
-						<img src="{{ asset('media/orbitalbase/base-type-2.jpg') }}" alt="{{ get_base_type_info(type_military, 'name') }}">
+						<img src="{{ asset('build/media/orbitalbase/base-type-2.jpg') }}" alt="{{ get_base_type_info(type_military, 'name') }}">
 						</button>
 
 					<button class="item-4 {% if current_base.typeOfBase == type_capital %}done{% endif %}">
-						<img src="{{ asset('media/orbitalbase/base-type-3.jpg') }}" alt="{{ get_base_type_info(type_capital, 'name') }}">
+						<img src="{{ asset('build/media/orbitalbase/base-type-3.jpg') }}" alt="{{ get_base_type_info(type_capital, 'name') }}">
 						</button>
 					</div>
 				<div class="list-desc">
@@ -49,14 +49,14 @@
 							<a href="{{ path('change_base_type', { 'id': current_base.id, 'type': type_commercial }) }}" class="button">
 								<span class="text">Evoluer en {{ get_base_type_info(type_commercial, 'name') }}<br />
 									{{ get_base_type_info(type_commercial, 'price')|number }}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 								</span>
 							</a>
 						{% elseif current_base.typeOfBase == type_military and current_player.credit >= get_base_type_info(type_commercial, 'price') %}
 							<a href="{{ path('change_base_type', { 'id': current_base.id, 'type': type_commercial }) }}" class="button confirm" data-confirm-label="Transformer cette base supprimera toute la file de construction. Vos missions de recyclage seront également annulées.">
 								<span class="text">Transformer en {{ get_base_type_info(type_commercial, 'name') }}<br />
 									{{ get_base_type_info(type_commercial, 'price')|number }}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 								</span>
 							</a>
 						{% elseif current_base.typeOfBase == type_commercial or current_base.typeOfBase == type_capital %}
@@ -65,7 +65,7 @@
 							<span class="button disable">
 								<span class="text">Evoluer en {{ get_base_type_info(type_commercial, 'name') }}<br />
 									{{ get_base_type_info(type_commercial, 'price')|number }}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 								</span>
 							</span>
 						{% endif %}
@@ -86,14 +86,14 @@
 							<a href="{{ path('change_base_type', {'type': type_military}) }}" class="button">
 								<span class="text">Evoluer en {{ get_base_type_info(type_military, 'name') }}<br />
 									{{- get_base_type_info(type_military, 'price')|number -}}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 								</span>
 							</a>
 						{% elseif current_base.typeOfBase == type_commercial and current_player.credit >= get_base_type_info(type_military, 'price') %}
 							<a href="{{ path('change_base_type', {'type': type_military}) }}" class="button confirm" data-confirm-label="Transformer cette base supprimera toute la file de construction.">
 								<span class="text">Evoluer en {{ get_base_type_info(type_military, 'name') }}<br />
 									{{- get_base_type_info(type_military, 'price')|number -}}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 								</span>
 							</a>
 						{% elseif current_base.typeOfBase == type_military or current_base.typeOfBase == type_capital %}
@@ -102,7 +102,7 @@
 							<span class="button disable">
 								<span class="text">Evoluer en {{ get_base_type_info(type_military, 'name') }}<br />
 									{{- get_base_type_info(type_military, 'price')|number -}}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 								</span>
 							</span>
 						{% endif %}
@@ -123,7 +123,7 @@
 							<a href="{{ path('change_base_type', {'baseId': current_base.id, 'type': type_capital }) }}" class="button">
 								<span class="text">Evoluer en {{ get_base_type_info(type_capital, 'name') }}<br />
 									{{- total_price|number -}}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}"></span>
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}"></span>
 								</a>
 							{% else %}
 								<span class="button disable">
@@ -137,7 +137,7 @@
 								<span class="button disable">
 									<span class="text">Evoluer en {{ get_base_type_info(type_capital, 'name') }}<br />
 									{{- total_price|number -}}
-									<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}"></span>
+									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}"></span>
 								</span>
 							{% else %}
 							<span class="button disable">

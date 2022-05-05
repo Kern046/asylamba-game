@@ -17,7 +17,7 @@
 										{% if investments_data.totalTaxInBonus > 0 %}
 											<span class="bonus">+{{- investments_data.totalTaxInBonus|number -}}</span>
 										{% endif %}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 									</li>
 								<li>
@@ -27,7 +27,7 @@
 										{% if investments_data.totalRouteIncomeBonus > 0 %}
 											<span class="bonus">+{{- investments_data.totalRouteIncomeBonus|number -}}</span>
 										{% endif %}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								<li class="empty"></li>
@@ -37,7 +37,7 @@
 									<span class="label">total des recettes</span>
 									<span class="value">
 										{{- investments_data.total_income|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								{% if investments_data.gains < 0 %}
@@ -45,7 +45,7 @@
 										<span class="label">perte</span>
 										<span class="value">
 											{{- investments_data.gains|abs|number -}}
-											<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+											<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 										</span>
 									</li>
 								{% endif %}
@@ -60,7 +60,7 @@
 									<span class="label">investissements planétaires</span>
 									<span class="value">
 										{{- investments_data.totalInvest|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								<li>
@@ -70,7 +70,7 @@
 									<span class="label">investissements universitaires</span>
 									<span class="value">
 										{{- investments_data.totalInvestUni|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 
 									<form action="{{ path('update_university_investments') }}" method="POST" id="invest-uni">
@@ -84,28 +84,28 @@
 									<span class="label">salaire des commandants</span>
 									<span class="value">
 										{{- investments_data.totalFleetFees|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								<li>
 									<span class="label">entretien des vaisseaux</span>
 									<span class="value">
 										{{- investments_data.totalShipsFees|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								<li>
 									<span class="label">redevances aux factions</span>
 									<span class="value">
 										{{- investments_data.totalTaxOut|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								<li class="strong">
 									<span class="label">total des charges</span>
 									<span class="value">
 										{{- investments_data.total_expenses|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								{% if investments_data.gains >= 0 %}
@@ -113,7 +113,7 @@
 										<span class="label">bénéfice</span>
 										<span class="value">
 											{{- investments_data.gains|number -}}
-											<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+											<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 										</span>
 									</li>
 								{% endif %}
@@ -129,21 +129,21 @@
 									<span class="label">crédits en possession</span>
 									<span class="value">
 										{{- current_player.credit|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								<li>
 									<span class="label">bénéfice</span>
 									<span class="value">
 										{{- investments_data.gains|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 								<li class="strong">
 									<span class="label">prévision à la prochaine relève</span>
 									<span class="value">
 										{{- investments_data.remains|number -}}
-										<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+										<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 									</span>
 								</li>
 							</ul>

@@ -6,7 +6,7 @@
 		<div class="body">
 			{% for f in factions %}
 				<a href="{{ path('embassy', {'faction': f.id}) }}" class="nav-element {% if faction.id == f.id %}active{% endif %}">
-					<img src="{{ asset('media/avatar/small/color-' ~ f.id ~ '.png') }}" alt="" />
+					<img src="{{ asset('build/media/avatar/small/color-' ~ f.id ~ '.png') }}" alt="" />
 					<strong>{{ get_faction_info(f.id, 'officialName') }}</strong>
 					<em>Ambassade des {{ get_faction_info(f.id, 'demonym')|capitalize }}</em>
 				</a>

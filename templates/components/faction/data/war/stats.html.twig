@@ -22,7 +22,7 @@
 				<span class="label">PEV totaux</span>
 				<span class="value">
 					{{ total_pev|number }}
-				 	<img class="icon-color" src="{{ asset('media/resources/pev.png') }}" alt="pev">
+				 	<img class="icon-color" src="{{ asset('build/media/resources/pev.png') }}" alt="pev">
 				</span>
 				<span class="group-link">
 					<a href="#" title="PEV affectés à des commandants actifs" class="hb lt">?</a>
@@ -33,7 +33,7 @@
 				<span class="label">PEV moyens par officier</span>
 				<span class="value">
 					{{ commander_stats.nb is defined and commander_stats.nb != 0 ? (total_pev/commander_stats.nb)|number : 0 }}
-					<img class="icon-color" src="{{ asset('media/resources/pev.png') }}" alt="pev">
+					<img class="icon-color" src="{{ asset('build/media/resources/pev.png') }}" alt="pev">
 				</span>
 			</div>
 
@@ -42,7 +42,7 @@
 				{# @TODO loop through ship models more properly #}
 				{% for i in 0..11 %}
 					<li>
-						<img class="picto" src="{{ asset('media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
+						<img class="picto" src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
 						<span class="label">{{ get_ship_info(i, 'name') }} &laquo;{{ get_ship_info(i, 'codeName') }}&raquo;</span>
 						<span class="value">{{ (fleet_stats['nbs' ~ i] ?? 0)|number }}</span>
 					</li>

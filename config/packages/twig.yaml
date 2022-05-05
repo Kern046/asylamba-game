@@ -4,7 +4,6 @@ twig:
     globals:
         app_subname: '%app_subname%'
         app_description: '%app_description%'
-        color_style: '%color_style%'
 
 when@test:
     twig:

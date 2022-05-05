@@ -1,11 +1,9 @@
 FROM php:8.1-fpm-alpine
 
 # Install SUPERVISOR and dependencies
-RUN apk update
+RUN apk add --update rabbitmq-c-dev icu-dev nodejs npm
 
-RUN apk add rabbitmq-c-dev icu-dev
-
-# Install PHP etxensions
+# Install PHP extensions
 RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
 	&& docker-php-ext-configure intl \
     && docker-php-ext-install pdo_mysql intl opcache \

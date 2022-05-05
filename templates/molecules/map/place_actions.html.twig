@@ -5,26 +5,26 @@
 	<div class="top">
 		{% if place.typeOfPlace == 1 %}
 			<a href="#" class="actionbox-sh {% if can_player_attack_place(current_player, place) == false %}grey{% endif %}" data-target="1">
-				<img src="{{ asset('media/map/action/loot.png') }}" alt="" />
+				<img src="{{ asset('build/media/map/action/loot.png') }}" alt="" />
 			</a>
 			<a href="#" class="actionbox-sh {% if can_player_attack_place(current_player, place) == false %}grey{% endif %}" data-target="2">
-				<img src="{{ asset('media/map/action/colo.png') }}" alt="" />
+				<img src="{{ asset('build/media/map/action/colo.png') }}" alt="" />
 			</a>
 
 			<a href="#" class="actionbox-sh {% if can_player_move_to_place(current_player, place, current_base) == false %}grey{% endif %}" data-target="3">
-				<img src="{{ asset('media/map/action/move.png') }}" alt="" />
+				<img src="{{ asset('build/media/map/action/move.png') }}" alt="" />
 			</a>
 
 			<a href="#" class="actionbox-sh {% if can_orbital_base_trade_with_place(current_base, place) == false %}grey{% endif %}" data-target="4">
-				<img src="{{ asset('media/map/action/rc.png') }}" alt="" />
+				<img src="{{ asset('build/media/map/action/rc.png') }}" alt="" />
 			</a>
 
 			<a href="#" class="actionbox-sh {% if can_spy(current_player, place) == false %}grey{% endif %}" data-target="5">
-				<img src="{{ asset('media/map/action/spy.png') }}" alt="" />
+				<img src="{{ asset('build/media/map/action/spy.png') }}" alt="" />
 			</a>
 		{% else %}
 			<a href="#" class="actionbox-sh {% if can_recycle(current_player, place)  == false %}grey{% endif %}" data-target="1">
-				<img src="{{ asset('media/orbitalbase/recycler.png') }}" alt="">
+				<img src="{{ asset('build/media/orbitalbase/recycler.png') }}" alt="">
 			</a>
 		{% endif %}
 	</div>
@@ -51,8 +51,8 @@
 								</div>
 							<div class="item move">
 								<strong class="name"></strong><br />
-								Temps de l'attaque : {{ travel_time }} <img src="{{ asset('media/resources/time.png') }}" class="icon-color" alt="" /><br />
-								Capacité de la soute : <span class="wedge"></span> <img src="{{ asset('media/resources/resource.png') }}" class="icon-color" alt="" /><br />
+								Temps de l'attaque : {{ travel_time }} <img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="" /><br />
+								Capacité de la soute : <span class="wedge"></span> <img src="{{ asset('build/media/resources/resource.png') }}" class="icon-color" alt="" /><br />
 								<a class="button" href="#" data-url="{{ path('loot', {'id': '{id}', 'placeId': place.id}) }}">
 									Lancer l'attaque
 								</a>
@@ -92,15 +92,15 @@
 							<div class="item move">
 								<strong class="name"></strong><br />
 								Temps de l'attaque : {{ travel_time }}
-								<img src="{{ asset('media/resources/time.png') }}" class="icon-color" alt="" /><br />
+								<img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="" /><br />
 
 								{% if place.rPlayer == 0 %}
 									Coût : <span class="price">{{ colonization_cost|number }}</span>
-									<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="" /><br />
+									<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="" /><br />
 									<a class="button" href="#" data-url="{{ path('colonize', {'id': '{id}', 'placeId': place.id}) }}">Lancer la colonisation</a>
 								{% else %}
 									Coût : <span class="price">{{ conquest_cost|number }}</span>
-									<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="" /><br />
+									<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="" /><br />
 									<a class="button" href="#" data-url="{{ path('conquer', {'id': '{id}', 'placeId': place.id}) }}">Lancer la conquête</a>
 								{% endif %}
 							</div>
@@ -130,7 +130,7 @@
 							</div>
 							<div class="item move">
 								<strong class="name"></strong><br />
-								Temps du déplacement : {{ travel_time}} <img src="{{ asset('media/resources/time.png') }}" class="icon-color" alt="" /><br />
+								Temps du déplacement : {{ travel_time}} <img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="" /><br />
 								{% if place.rPlayer != current_player.id %}
 									Attention, vous perdrez votre flotte !<br />
 								{% endif %}
@@ -160,13 +160,13 @@
 						{% set income = get_route_income(current_base, place, distance, route_sector_bonus, route_color_bonus) %}
 
 						<div class="rc">
-							<img src="{{ asset('media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" alt="" class="planet" />
+							<img src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" alt="" class="planet" />
 
 							<span class="label-box">
 								<span class="key">Revenu par relève</span>
 								<span class="val">
 									{{ income|number }}
-									<img src="{{ asset('media/resources/credit.png') }}" alt="" class="icon-color" />
+									<img src="{{ asset('build/media/resources/credit.png') }}" alt="" class="icon-color" />
 								</span>
 							</span>
 
@@ -174,7 +174,7 @@
 								<span class="key">Coût de construction</span>
 								<span class="val">
 									{{ price|number }}
-									<img src="{{ asset('media/resources/credit.png') }}" alt="" class="icon-color" />
+									<img src="{{ asset('build/media/resources/credit.png') }}" alt="" class="icon-color" />
 								</span>
 							</span>
 
@@ -220,7 +220,7 @@
 								<span class="label">{{ label }}</span>
 								<span class="price">
 									{{ price|number }}
-									<img src="{{ asset('media/resources/credit.png') }}" class="icon-color" alt="" />
+									<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="" />
 								</span>
 							</a>
 						{% endfor %}

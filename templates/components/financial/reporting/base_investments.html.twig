@@ -1,7 +1,7 @@
 {% apply spaceless %}
 	<div class="component financial">
 		<div class="head skin-1">
-			<img src="{{ asset('media/financial/invest.png') }}" alt="" />
+			<img src="{{ asset('build/media/financial/invest.png') }}" alt="" />
 			<h2>Investissements</h2>
 			<em>Investissements par planète</em>
 			</div>
@@ -20,7 +20,7 @@
 
 							<span class="value">
 								{{- base_invest|number -}}
-								<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 							</span>
 
 							<ul class="sub-list-type-1" id="invest-base-{{ base.id }}">
@@ -62,7 +62,7 @@
 						<span class="label">total des investissements</span>
 						<span class="value">
 							{{- investments_data.totalInvest|number -}}
-							<img class="icon-color" src="{{ asset('media/resources/credit.png') }}" alt="crédits" />
+							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 						</span>
 					</li>
 				</ul>

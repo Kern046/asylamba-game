@@ -1,0 +1,260 @@
+.component.list-fleet .set-fleet {
+	position: relative;
+	margin: 10px;
+	padding: 0 0 0 70px;
+	min-height: 80px;
+
+	img.place {
+		position: absolute;
+		top: -5px; left: -20px;
+		width: 80px;
+		background: #0A0A0A;
+		border-radius: 100%;
+		border: solid 1px #202020;
+	}
+
+	h2 {
+		padding: 10px 0; margin: 0;
+
+		a {
+			font-size: 13px;
+			color: white;
+			font-weight: normal;
+			text-decoration: none;
+		}
+	}
+
+	.item {
+		position: relative;
+		height: 60px;
+		background: #0A0A0A;
+		border: solid 1px #202020;
+		border-bottom: none;
+		width: 777px;
+
+		&:last-child {
+			border-bottom: solid 1px #202020;
+		}
+
+		a {
+			display: inline-block;
+			text-decoration: none;
+			color: #CCC;
+			border-bottom: solid 1px #202020;
+		}
+
+		.left {
+			position: absolute;
+			top: 0; left: 0;
+			width: 60px; height: 60px;
+			z-index: 1;
+
+			.top {
+				position: absolute;
+				left: 60px;
+				display: block;
+				width: 500px;
+				top: 10px;
+			}
+
+			.status {
+				width: 30px;
+				margin: 10px; padding: 5px;
+				border-radius: 100%;
+			}
+		}
+
+		.right {
+			position: absolute;
+			top: 0; right: 0;
+			width: 60px; height: 60px;
+			z-index: 1;
+
+			.top {
+				position: absolute;
+				right: 60px;
+				display: block;
+				width: 200px;
+				text-align: right;
+				top: 10px;
+			}
+
+			.cover {
+				width: 50px;
+				margin: 5px; padding: 0;
+				border-radius: 100%;
+			}
+		}
+
+		.center {
+			position: absolute;
+			top: 41px; left: 70px; right: 70px;
+
+			.ship {
+				position: absolute;
+				top: -10px; left: -11px; right: auto;
+			}
+
+			.progress-ship {
+				display: block;
+				width: 100%;
+				background: #4F4F4F;
+				height: 3px;
+
+				.bar {
+					position: relative;
+					display: block;
+					height: 3px;
+
+					.ship { top: -11px; right: -11px; left: auto; }
+
+					span {
+						position: absolute;
+						top: 4px; right: 15px;
+						font-size: 10px;
+					}
+				}
+			}
+		}
+
+		&.color1 .status { background: @medium-1; }
+		&.color2 .status { background: @medium-2; }
+		&.color3 .status { background: @medium-3; }
+		&.color4 .status { background: @medium-4; }
+		&.color5 .status { background: @medium-5; }
+		&.color6 .status { background: @medium-6; }
+		&.color7 .status { background: @medium-7; }
+		&.color8 .status { background: @medium-8; }
+		&.color9 .status { background: @medium-9; }
+		&.color10 .status { background: @medium-10; }
+		&.color11 .status { background: @medium-11; }
+		&.color12 .status { background: @medium-12; }
+
+		&.color1 .center .progress-ship .bar { background: @light-1; }
+		&.color2 .center .progress-ship .bar { background: @light-2; }
+		&.color3 .center .progress-ship .bar { background: @light-3; }
+		&.color4 .center .progress-ship .bar { background: @light-4; }
+		&.color5 .center .progress-ship .bar { background: @light-5; }
+		&.color6 .center .progress-ship .bar { background: @light-6; }
+		&.color7 .center .progress-ship .bar { background: @light-7; }
+		&.color8 .center .progress-ship .bar { background: @light-8; }
+		&.color9 .center .progress-ship .bar { background: @light-9; }
+		&.color10 .center .progress-ship .bar { background: @light-10; }
+		&.color11 .center .progress-ship .bar { background: @light-11; }
+		&.color12 .center .progress-ship .bar { background: @light-12; }
+	
+		&.color1 .center.reversed .progress-ship { background: @light-1; }
+		&.color2 .center.reversed .progress-ship { background: @light-2; }
+		&.color3 .center.reversed .progress-ship { background: @light-3; }
+		&.color4 .center.reversed .progress-ship { background: @light-4; }
+		&.color5 .center.reversed .progress-ship { background: @light-5; }
+		&.color6 .center.reversed .progress-ship { background: @light-6; }
+		&.color7 .center.reversed .progress-ship { background: @light-7; }
+		&.color8 .center.reversed .progress-ship { background: @light-8; }
+		&.color9 .center.reversed .progress-ship { background: @light-9; }
+		&.color10 .center.reversed .progress-ship { background: @light-10; }
+		&.color11 .center.reversed .progress-ship { background: @light-11; }
+		&.color12 .center.reversed .progress-ship { background: @light-12; }
+
+		.center .progress-ship .bar {
+			background: @light;
+		}
+		.center.reversed .progress-ship { background: @light; }
+		.center.reversed .progress-ship .bar {
+			background: #4F4F4F; 
+		}
+
+		.show-commander {
+			position: absolute;
+			top: -1px; right: -30px;
+			width: 28px; height: 60px;
+			background: url('../../css-media/mover/small-right.png') no-repeat center #0A0A0A;
+			border: solid 1px #202020;
+
+			&:hover, &:focus{
+				background-color: #202020;
+			}
+                        
+                        &.active {
+				background-color: @medium;
+			}
+		}
+	}
+}
+
+.component.table-fleet table {
+	margin: 10px;
+	width: 880px;
+	border-collapse: collapse;
+
+	tr:nth-child(odd) {
+		background: black;
+		border-bottom: solid 1px #202020;
+	}
+
+	tr:nth-child(even) {
+		background: #0A0A0A;
+		border-bottom: solid 1px #202020;
+	}
+
+	tr:first-child {
+		background: transparent;
+	}
+
+	th, td {
+		height: 40px; width: 40px;
+		text-align: center;
+	}
+
+	td span {
+		&.zero-value {
+			color: #4F4F4F;
+		}
+	}
+
+	.base {
+		width: 100px;
+		text-align: left;
+		padding: 0 20px;
+
+		a { border: none; }
+		strong {
+			display: block;
+			font-size: 16px;
+		}
+	}
+
+	.large {
+		width: auto;
+		text-align: left;
+		padding: 0 10px;
+	}
+
+	.sep {
+		border-left: solid 1px @medium;
+	}
+
+	a {
+		color: white;
+		text-decoration: none;
+		border-bottom: solid 1px #4F4F4F;
+		display: inline-block;
+	}
+
+	th {
+		position: relative;
+		height: 70px;
+
+		span {
+			position: absolute;
+			bottom: 32px; left: -10px;
+			display: block;
+			text-align: left;
+			width: 60px;
+
+			-ms-transform: rotate(-90deg);
+			-webkit-transform: rotate(-90deg);
+			transform: rotate(-90deg);
+		}
+	}
+}

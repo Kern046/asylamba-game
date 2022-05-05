@@ -13,7 +13,7 @@
 				{% if get_law_info(i, 'department') == law_status %}
 					<div class="build-item base-type {% if not get_law_info(i, 'isImplemented') %}disabled{% endif %}">
 						<div class="name">
-							<img src="{{ asset('media/faction/law/common.png') }}" alt="">
+							<img src="{{ asset('build/media/faction/law/common.png') }}" alt="">
 							<strong>
 								{{ get_law_info(i, 'name') }}
 								{% if not get_law_info(i, 'isImplemented') %}

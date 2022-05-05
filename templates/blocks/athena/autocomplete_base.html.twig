@@ -1,6 +1,6 @@
 {% apply spaceless %}
 	{% for place in places %}
-		<img class="img" src="{{ asset('media/avatar/small/' ~ place.playerAvatar ~ '.png') }}" alt="{{ place.playerAvatar }}" />
+		<img class="img" src="{{ asset('build/media/avatar/small/' ~ place.playerAvatar ~ '.png') }}" alt="{{ place.playerAvatar }}" />
 		<span class="value-2">{{ place.playerName }}</span>
 		<span class="value-1"><span class="ac_value" data-id="{{ place.id }}">{{ place.baseName }}</span> (secteur {{ place.rSector }})</span>
 	{% endfor %}

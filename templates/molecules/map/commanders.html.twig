@@ -21,7 +21,7 @@
 			   data-wedge="{{ (constant('App\\Modules\\Ares\\Model\\Commander::COEFFLOOT') * commander.pev)|number }}"
 			>
 				<span class="picto">
-					<img src="{{ asset('media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
+					<img src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
 					<span class="number">{{ commander.level }}</span>
 				</span>
 				<span class="content skin-2">
@@ -49,7 +49,7 @@
 						{% for type in ships_by_type|keys %}
 							{% set quantity = ships_by_type[type] %}
 							<span class="ship">
-								<img src="{{ asset('media/ship/picto/ship' ~ type ~ '.png') }}" {% if quantity == 0 %}class="zero"{% endif %}/>
+								<img src="{{ asset('build/media/ship/picto/ship' ~ type ~ '.png') }}" {% if quantity == 0 %}class="zero"{% endif %}/>
 								<span class="number">{{ quantity }}</span>
 							</span>
 						{% endfor %}

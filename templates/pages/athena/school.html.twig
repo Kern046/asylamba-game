@@ -3,7 +3,7 @@
 {% block content %}
 	<div class="component school">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/school.png') }}" alt="" />
+			<img src="{{ asset('build/media/orbitalbase/school.png') }}" alt="" />
 			<h2>Ecole de Cmd.</h2>
 			<em>Formation des officiers</em>
 		</div>
@@ -13,7 +13,7 @@
 					<span class="label">investissements alloués à l'école</span>
 					<span class="value">
 						{{ current_base.iSchool|number }}
-						<img alt="crédits" src="{{ asset('media/resources/credit.png') }}" class="icon-color">
+						<img alt="crédits" src="{{ asset('build/media/resources/credit.png') }}" class="icon-color">
 					</span>
 					<span class="group-link">
 						<a title="modifier" class="hb lt" href="{{ path('financial_investments') }}">→</a>
@@ -31,7 +31,7 @@
 
 				<form action="{{ path('create_commander') }}" method="post" class="build-item">
 					<div class="name">
-						<img src="{{ asset('media/school/school-1.png') }}" alt="" />
+						<img src="{{ asset('build/media/school/school-1.png') }}" alt="" />
 						<strong>Former un nouvel officier</strong>
 					</div>
 					<input type="text" class="name-commander" name="name" value="{{ random_name }}" />
@@ -41,7 +41,7 @@
 							<span class="text">
 								trop d'officiers dans l'école<br/>
 								{{ commander_price }}
-								<img src="{{ asset('media/resources/credit.png') }}" alt="crédits" class="icon-color" />
+								<img src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" class="icon-color" />
 							</span>
 						</span>
 					{% elseif commander_price > current_player.credit %}
@@ -49,7 +49,7 @@
 							<span class="text">
 								vous ne disposez pas d'assez de crédit<br/>
 								{{ commander_price|number }}
-								<img src="{{ asset('media/resources/credit.png') }}" alt="crédits" class="icon-color" />
+								<img src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" class="icon-color" />
 							</span>
 						</span>
 					{% else %}
@@ -57,7 +57,7 @@
 							<span class="text">
 								créer l'officier pour<br/>
 								{{ commander_price|number }}
-								<img src="{{ asset('media/resources/credit.png') }}" alt="crédits" class="icon-color" />
+								<img src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" class="icon-color" />
 							</span>
 						</button>
 					{% endif %}
@@ -76,7 +76,7 @@
 					{% for commander in commanders %}
 						{% set missing_experience = get_commander_missing_experience(commander) %}
 						<div class="item">
-							<img class="picto" src="{{ asset('media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
+							<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
 							<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
 							<em>{{ commander.experience|number }} points d'expérience</em>
 							<em>~ {{ earned_experience|number }}xp/relève</em>
@@ -114,7 +114,7 @@
 					{% for commander in reserve_commanders %}
 						{% set missing_experience = get_commander_missing_experience(commander) %}
 						<div class="item">
-							<img class="picto" src="{{ asset('media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
+							<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
 							<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
 							<em>{{ commander.experience|number }} points d'expérience</em>
 							<span class="group-link">

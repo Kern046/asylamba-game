@@ -1,6 +1,6 @@
 <div class="component market-sell">
 	<div class="head skin-4 sh">
-		<img src="{{ asset('media/resources/resource.png') }}" alt="ressource" class="main" />
+		<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="main" />
 		<h2>Ressources</h2>
 		<em>mettre en vente</em>
 	</div>
@@ -18,13 +18,13 @@
 				<div class="label-box">
 					<span class="label">Ressources</span>
 					<span class="value">{{ current_base.resourcesStorage|number }}</span>
-					<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}">
+					<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}">
 				</div>
 
 				<div class="label-box sf-quantity">
 					<label for="sell-market-quantity-resources" class="label">Quantité</label>
 					<input id="sell-market-quantity-resources" class="value" type="text" name="quantity" autocomplete="off" />
-					<img class="icon-color" alt="ressources" src="{{ asset('media/resources/resource.png') }}">
+					<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}">
 				</div>
 
 				<hr />
@@ -32,13 +32,13 @@
 				<div class="label-box sf-min-price">
 					<span class="label">Prix minimum</span>
 					<span class="value" data-price-raw="0"></span>
-					<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+					<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 				</div>
 
 				<div class="label-box sf-price">
 					<label for="sell-market-price-resources" class="label">Prix</label>
 					<input id="sell-market-price-resources" class="value" type="text" name="price" autocomplete="off"/>
-					<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+					<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 				</div>
 
 				<hr />
@@ -46,7 +46,7 @@
 				<div class="label-box sf-comship">
 					<span class="label">Vaisseaux</span>
 					<span class="value"></span>
-					<img class="icon-color" alt="vaisseaux transports" src="{{ asset('media/resources/transport.png') }}">
+					<img class="icon-color" alt="vaisseaux transports" src="{{ asset('build/media/resources/transport.png') }}">
 				</div>
 
 				<hr />
@@ -59,7 +59,7 @@
 
 	<div class="component market-sell">
 		<div class="head skin-4">
-			<img src="{{ asset('media/orbitalbase/school.png') }}" alt="commandants" class="main" />
+			<img src="{{ asset('build/media/orbitalbase/school.png') }}" alt="commandants" class="main" />
 			<h2>Commandants</h2>
 			<em>mettre en vente</em>
 			</div>
@@ -68,7 +68,7 @@
 				{% for commander in base_commanders %}
 					<div class="queue">
 						<div class="item sh" data-target="sell-commander-{{ loop.index }}">
-							<img class="picto" src="{{ asset('media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
+							<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
 							<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
 							<em>{{ commander.experience|number }} points d'expérience</em>
 						</div>
@@ -84,19 +84,19 @@
 									commander.experience
 								) }}
 							</span>
-							<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+							<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 						</div>
 
 						<div class="label-box">
 							<label for="sell-market-price-commander" class="label">Prix</label>
 							<input id="sell-market-price-commander" class="value" type="text" name="price" value="{{ get_commander_price(commander, commander_current_rate) }}" autocomplete="off" />
-							<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+							<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 						</div>
 
 						<div class="label-box">
 							<span class="label">Vaisseaux</span>
 							<span class="value">1</span>
-							<img class="icon-color" alt="vaisseaux transports" src="{{ asset('media/resources/transport.png') }}">
+							<img class="icon-color" alt="vaisseaux transports" src="{{ asset('build/media/resources/transport.png') }}">
 						</div>
 
 						<hr />
@@ -116,7 +116,7 @@
 
 	<div class="component market-sell">
 		<div class="head skin-4">
-			<img src="{{ asset('media/orbitalbase/dock2.png') }}" alt="vaisseaux" class="main" />
+			<img src="{{ asset('build/media/orbitalbase/dock2.png') }}" alt="vaisseaux" class="main" />
 			<h2>Vaisseaux</h2>
 			<em>mettre en vente</em>
 		</div>
@@ -127,7 +127,7 @@
 					{% if ship_quantity > 0 %}
 						<div class="queue sh" data-target="sell-ships-{{ ship_number }}">
 							<div class="item">
-								<img class="picto" src="{{ asset('media/ship/picto/ship' ~ ship_number ~ '.png') }}" alt="" />
+								<img class="picto" src="{{ asset('build/media/ship/picto/ship' ~ ship_number ~ '.png') }}" alt="" />
 								<strong>{{ get_ship_info(ship_number, 'codeName') }}</strong>
 								<em>{{ get_ship_info(ship_number, 'name') }}</em>
 								<em>{{ get_ship_info(ship_number, 'pev') }} pev</em>
@@ -164,13 +164,13 @@
 							<div class="label-box sf-min-price">
 								<span class="label">Prix minimum</span>
 								<span class="value"></span>
-								<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+								<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 							</div>
 
 							<div class="label-box sf-price">
 								<label for="sell-market-price-ship" class="label">Prix</label>
 								<input id="sell-market-price-ship" class="value" type="text" name="price" autocomplete="off" />
-								<img class="icon-color" alt="crédits" src="{{ asset('media/resources/credit.png') }}">
+								<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">
 							</div>
 
 							<hr />
@@ -178,7 +178,7 @@
 							<div class="label-box sf-comship">
 								<span class="label">Vaisseaux</span>
 								<span class="value"></span>
-								<img class="icon-color" alt="vaisseaux transports" src="{{ asset('media/resources/transport.png') }}">
+								<img class="icon-color" alt="vaisseaux transports" src="{{ asset('build/media/resources/transport.png') }}">
 							</div>
 
 							<hr />

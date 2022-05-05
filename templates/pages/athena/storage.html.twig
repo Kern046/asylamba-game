@@ -3,7 +3,7 @@
 {% block content %}
 	<div class="component building">
 		<div class="head skin-1">
-			<img src="{{ asset('media/orbitalbase/storage.png') }}" alt="" />
+			<img src="{{ asset('build/media/orbitalbase/storage.png') }}" alt="" />
 			<h2>
 				{{ get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::STORAGE'), 'frenchName') }}
 			</h2>
@@ -50,7 +50,7 @@
 								{% if storage_bonus > 0 %}
 									<span class="bonus">+{{ (storage_space * storage_bonus / 100)|number }}</span>
 								{% endif %}
-								<img class="icon-color" src="{{ asset('media/resources/resource.png') }}" alt="ressources" />
+								<img class="icon-color" src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" />
 							</span>
 						</li>
 					{% endfor %}
