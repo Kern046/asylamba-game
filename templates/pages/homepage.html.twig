@@ -1,31 +1,51 @@
 {% extends 'layouts/base.html.twig' %}
 
 {% block body %}
-<h1>Kalaxiahahaha</h1>
+	<header class="mx-auto my-8 text-center">
+		<h1 class="font-sans text-4xl text-white uppercase">Kalaxia</h1>
+	</header>
 
-<div class="content">
-	<a href="{{ path('create_character', { 'bindKey': bind_key }) }}">
-		<em>Créer un</em>
-		<strong>Personnage lvl. 1</strong>
-		<img src="{{ asset('build/media/avatar/big/empty.png') }}" alt="" />
-	</a>
+	<!-- This example requires Tailwind CSS v2.0+ -->
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<!-- We've used 3xl here, but feel free to try other max-widths based on your needs -->
+		<div class="max-w-3xl mx-auto overflow-auto">
+			<!-- This example requires Tailwind CSS v2.0+ -->
+			<ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+				<li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
+					<a href="{{ path('create_character', { 'bindKey': bind_key, 'highMode': true }) }}">
+						<div class="flex-1 flex flex-col p-8">
+							<img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="{{ asset('build/media/avatar/big/empty.png') }}" alt="">
+							<h3 class="mt-6 text-gray-900 text-sm font-medium">Créer un personnage niveau 1</h3>
+						</div>
+					</a>
+				</li>
+				{% if high_mode %}
+					<li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
+						<a href="{{ path('create_character', { 'bindKey': bind_key, 'highMode': true }) }}">
+							<div class="flex-1 flex flex-col p-8">
+								<img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="{{ asset('build/media/avatar/big/empty.png') }}" alt="">
+								<h3 class="mt-6 text-gray-900 text-sm font-medium">Créer un personnage niveau 5</h3>
+							</div>
+						</a>
+					</li>
+				{% endif %}
 
-	{% if high_mode %}
-		<a href="{{ path('create_character', { 'bindKey': bind_key, 'highMode': true }) }}">
-			<em>Créer un</em>
-			<strong>Personnage lvl. 5</strong>
-			<img src="{{ asset('build/media/avatar/big/empty.png') }}" alt="" />
-			<span class="number">+5</span>
-		</a>
-	{% endif %}
+				{% for player in active_players %}
+					<li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
+						<a class="color{{ player.rColor }}" href="{{ path('connect', { 'bindKey': player_bind_keys[player.id] }) }}">
+							<div class="flex-1 flex flex-col p-8">
+								<span class="inline-block relative mx-auto">
+									<span class="absolute top-0 right-0 block h-6 w-6 transform -translate-y-1/2 translate-x-1/2 rounded-full ring-2 ring-white bg-gray-800 text-white inline-block text-center align-middle text-base">{{ player.level }}</span>
+									<img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="{{ asset('build/media/avatar/big/' ~ player.avatar ~ '.png') }}" alt="">
+								</span>
+								<span class="mt-6 text-gray-900 text-lg">{{ player.name }}</span>
+							</div>
+						</a>
+					</li>
 
-	{% for player in active_players %}
-		<a class="color{{ player.rColor }}" href="{{ path('connect', { 'bindKey': player_bind_keys[player.id] }) }}">
-			<em>Grade {{ player.level }}</em>
-			<strong>{{ player.name }}</strong>
-			<img src="{{ asset('build/media/avatar/big/' ~ player.avatar ~ '.png') }}" alt="" />
-			<span class="number">{{ player.level }}</span>
-		</a>
-	{% endfor %}
-</div>
+				{% endfor %}
+				<!-- More people... -->
+			</ul>
+		</div>
+	</div>
 {% endblock %}
