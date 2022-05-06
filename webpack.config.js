@@ -34,6 +34,11 @@ Encore
 	})
 
 	.enableLessLoader()
+	.enablePostCssLoader((options) => {
+		options.postcssOptions = {
+			config: './postcss.config.js'
+		}
+	})
 
 	// When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
 	.splitEntryChunks()
