@@ -70,8 +70,6 @@ Encore
 		config.corejs = 3;
 	})
 
-	.addStyleEntry('css/buffer/main', './assets/css/buffer/main.css')
-
 	// uncomment if you use TypeScript
 	//.enableTypeScriptLoader()
 
