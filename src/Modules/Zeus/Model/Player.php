@@ -30,7 +30,7 @@ class Player
 	public int $victory = 0;
 	public int $defeat = 0;
 	public int $stepTutorial = 1;
-	public bool $stepDone = false;
+	public int $stepDone = 0;
 	public int $iUniversity = 5000;
 	public int $partNaturalSciences = 25;
 	public int $partLifeSciences = 25;
