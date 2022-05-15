@@ -988,7 +988,7 @@ jQuery(document).ready(function($) {
 	})();
 
 	/* HIDE SPLASH-SCREEN */
-	$('.hide-slpash').live('click', function(e) {
+	$('.hide-splash').live('click', function(e) {
 		var dom = $('.splash-screen');
 		var mod = dom.find('.modal');
 

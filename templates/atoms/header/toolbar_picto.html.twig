@@ -1,0 +1,9 @@
+<a href="{{ href ?? path(route) }}"
+   class="relative flex items-center justify-center p-2 hover:bg-stone-700
+	{% if routes is defined and app.request.get('_route') in routes or route is defined and app.request.get('_route') == route %}
+		bg-stone-700 active
+	{% endif %}
+	"
+   title="{{ alt ?? route ?? '' }}">
+	{% block picto %}{% endblock %}
+</a>

@@ -1,0 +1,8 @@
+<div class="relative flex items-center justify-center p-2 hover:bg-stone-700 hover:cursor-pointer {{ extra_classes ?? '' }}">
+	<button type="button" aria-expanded="true" aria-haspopup="true" id="dropdown-{{ target }}">
+		{% block picto %}{% endblock picto %}
+	</button>
+	<div class="hidden absolute origin-top-right right-0" role="menu" aria-orientation="vertical" aria-labelledby="dropdown-{{ target }}" tabindex="-1">
+		{% block dropdown %}{% endblock dropdown %}
+	</div>
+</div>
