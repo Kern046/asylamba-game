@@ -31,107 +31,83 @@
 				<div id="global-toolbar"  class="relative flex justify-between">
 					<div class="relative z-10 px-2 flex grow lg:px-0">
 						<div class="flex-shrink-0 flex justify-left items-center bg-stone-900">
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'profile'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'fleet_headquarters', alt: 'amirauté'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414l5-5a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414 0zm0-6a1 1 0 010-1.414l5-5a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L10 5.414 5.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'map', alt: 'galaxie'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'financial_investments', routes: ['financial_investments', 'financial_transfers'], alt: 'finances'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7.858 5.485a1 1 0 00-1.715 1.03L7.633 9H7a1 1 0 100 2h1.834l.166.277V12H7a1 1 0 100 2h2v1a1 1 0 102 0v-1h2a1 1 0 100-2h-2v-.723l.166-.277H13a1 1 0 100-2h-.634l1.492-2.486a1 1 0 10-1.716-1.029L10.034 9h-.068L7.858 5.485z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'university', alt: 'université'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'faction_overview', alt: 'faction'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
+							<toolbar-picto href="{{ path('profile') }}" route="profile">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('fleet_headquarters') }}" route="fleet_headquarters" alt="amirauté">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414l5-5a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414 0zm0-6a1 1 0 010-1.414l5-5a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L10 5.414 5.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('map') }}" route="map" alt="galaxie">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('financial_investments') }}" route="financial_investments" :routes="['financial_investments', 'financial_transfers']" alt="finances">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7.858 5.485a1 1 0 00-1.715 1.03L7.633 9H7a1 1 0 100 2h1.834l.166.277V12H7a1 1 0 100 2h2v1a1 1 0 102 0v-1h2a1 1 0 100-2h-2v-.723l.166-.277H13a1 1 0 100-2h-.634l1.492-2.486a1 1 0 10-1.716-1.029L10.034 9h-.068L7.858 5.485z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('university') }}" route="university" alt="université">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+								</svg>
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('faction_overview') }}" route="faction_overview" alt="faction">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
 						</div>
 						<div class="w-10 h-full bg-stone-800"></div>
 						<div class="flex flex-shrink-0 justify-right items-center justify-self-end bg-stone-900">
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'player_rankings', alt: 'classements'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'embassy', alt: 'ambassades'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-.992 0l-7 4A1 1 0 003 8v7a1 1 0 100 2h14a1 1 0 100-2V8a1 1 0 00.496-1.868l-7-4zM6 9a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1zm3 1a1 1 0 012 0v3a1 1 0 11-2 0v-3zm5-1a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'list_conversations', alt: 'messagerie'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-										<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-									</svg>
-									{% if conversations_count > 0 %}
-										{{ include('atoms/header/badge.html.twig', { count: conversations_count}) }}
-									{% endif %}
-								{% endblock picto %}
-							{% endembed %}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'list_conversations', alt: 'new-notifications'} %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-									</svg>
-									{% if current_player_notifications|length > 0 %}
-										{{ include('atoms/header/badge.html.twig', { count: current_player_notifications|length}) }}
-									{% endif %}
-								{% endblock picto %}
-							{% endembed %}
+							<toolbar-picto href="{{ path('player_rankings') }}" route="player_rankings" alt="classements">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('embassy') }}" route="embassy" alt="ambassades">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-.992 0l-7 4A1 1 0 003 8v7a1 1 0 100 2h14a1 1 0 100-2V8a1 1 0 00.496-1.868l-7-4zM6 9a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1zm3 1a1 1 0 012 0v3a1 1 0 11-2 0v-3zm5-1a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('list_conversations') }}" route="list_conversations" alt="messagerie">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+									<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+								</svg>
+								{% if conversations_count > 0 %}
+									{{ include('atoms/header/badge.html.twig', { count: conversations_count}) }}
+								{% endif %}
+							</toolbar-picto>
+							<toolbar-picto href="{{ path('list_conversations') }}" route="list_conversations" alt="new-notifications">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+								</svg>
+								{% if current_player_notifications|length > 0 %}
+									{{ include('atoms/header/badge.html.twig', { count: current_player_notifications|length}) }}
+								{% endif %}
+							</toolbar-picto>
 						</div>
 					</div>
 
 					<div class="flex items-center">
 						<div class="flex items-center bg-stone-900">
 							{% if true == app.session.get('admin') %}
-								{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'admin'} %}
-									{% block picto %}
-										<img src="{{ asset('build/media/common/tool-admin.png') }}" alt="" />
-									{% endblock picto %}
-								{% endembed %}
+								<toolbar-picto href="{{ path('admin') }}" route="admin">
+									<img src="{{ asset('build/media/common/tool-admin.png') }}" alt="" />
+								</toolbar-picto>
 							{% endif %}
 
 							{# old logic : ((bool)$request->cookies->get('p' . Params::REDIRECT_CHAT, Params::$params[Params::REDIRECT_CHAT]) #}
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { href: 'https://discordapp.com/channels/132106417703354378/132106417703354378' } %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd" />
-									</svg>
-								{% endblock picto %}
-							{% endembed %}
+							<toolbar-picto href="https://discordapp.com/channels/132106417703354378/132106417703354378">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd" />
+								</svg>
+							</toolbar-picto>
 
 							{% embed 'atoms/header/toolbar_toggler.html.twig' with { target: 'tutorial', extra_classes: current_player.stepDone is same as(true) ? 'hide-splash active flashy' : '' } %}
 								{% block picto %}
@@ -198,13 +174,11 @@
 								{% endblock dropdown %}
 							{% endembed %}
 
-							{% embed 'atoms/header/toolbar_picto.html.twig' with { route: 'params', alt: 'paramètres' } %}
-								{% block picto %}
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
-									</svg>
-								{% endblock %}
-							{% endembed %}
+							<toolbar-picto href="{{ path('params') }}" route="params" alt="paramètres">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+									<path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+								</svg>
+							</toolbar-picto>
 
 							{% embed 'atoms/header/toolbar_toggler.html.twig' with { target: 'disconnect-box' } %}
 								{% block picto %}

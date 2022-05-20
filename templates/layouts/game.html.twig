@@ -3,7 +3,7 @@
 	<head>
 		<title>
 			{%- block title -%}
-				— {{ app_subname }} — Asylamba
+				— {{ app_subname }} — Kalaxia
 			{%- endblock title -%}
 		</title>
 
@@ -11,34 +11,41 @@
 		<meta name="description" content="{{ app_description }}" />
 
 		<link href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic" rel="stylesheet" type="text/css">
-		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('build/css/main.faction' ~ current_player_faction_id ~ '.css') }}" />
+		{% block stylesheets %}
+			{{ encore_entry_link_tags('css/main.faction' ~ current_player_faction_id) }}
+		{% endblock %}
 
 		<link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ current_player_faction_id ~ '.png') }}" />
-
 	</head>
 	<body class="color{{ current_player_faction_id }} no-scrolling" data-init-sftr="2">
 
-		{{ include('components/common/navbar.html.twig') }}
+		<div id="app">
+			{{ include('components/common/navbar.html.twig') }}
 
-		<div id="container">
-			{% block body %}{% endblock body %}
+			<div id="container">
+				{% block body %}{% endblock body %}
+			</div>
+
+			{{ include('components/common/toolbar.html.twig') }}
+			{{ include('components/common/alerts.html.twig') }}
 		</div>
 
-		{{ include('components/common/toolbar.html.twig') }}
-		{{ include('components/common/alerts.html.twig') }}
-
-		<script type="text/javascript" src="{{ asset('build/js/jquery1.8.2.min.js') }}"></script>
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				game = {
-					path: '{{ get_api_endpoint() }}/',
-					shipsName: [{{ get_ship_names()|join(',')|raw }}],
-					shipsPev: [{{ get_ship_pevs()|join(',') }}]
-				};
-			});
+		{% block javascripts %}
+			<script type="text/javascript" src="{{ asset('build/js/jquery1.8.2.min.js') }}"></script>
+			<script type="text/javascript">
+				jQuery(document).ready(function($) {
+					game = {
+						path: '{{ get_api_endpoint() }}/',
+						shipsName: [{{ get_ship_names()|join(',')|raw }}],
+						shipsPev: [{{ get_ship_pevs()|join(',') }}]
+					};
+				});
 			</script>
-		<script type="text/javascript" src="{{ asset('build/js/main.js') }}"></script>
-		<script type="text/javascript" src="{{ asset('build/js/main.desktop.js') }}"></script>
-		<script type="text/javascript" src="{{ asset('build/js/autocomplete.module.js') }}"></script>
+			<script type="text/javascript" src="{{ asset('build/js/main.js') }}"></script>
+			<script type="text/javascript" src="{{ asset('build/js/main.desktop.js') }}"></script>
+			<script type="text/javascript" src="{{ asset('build/js/autocomplete.module.js') }}"></script>
+
+			{{ encore_entry_script_tags('app') }}
+		{% endblock %}
 	</body>
 </html>

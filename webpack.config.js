@@ -1,4 +1,6 @@
+const webpack = require('webpack');
 const Encore = require('@symfony/webpack-encore');
+const path = require("path");
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -20,6 +22,8 @@ Encore
 	 * Each entry will result in one JavaScript file (e.g. app.js)
 	 * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
 	 */
+	.addEntry('app', './assets/js/app.js')
+
 	.copyFiles({
 		from: './assets/media-src',
 		to: './media/[path][name].[ext]',
@@ -60,6 +64,13 @@ Encore
 	// enables hashed filenames (e.g. app.abc123.css)
 	.enableVersioning(Encore.isProduction())
 
+	.addPlugin(
+		new webpack.DefinePlugin({
+			__VUE_OPTIONS_API__: true,
+			__VUE_PROD_DEVTOOLS__: false,
+		})
+	)
+
 	.configureBabel((config) => {
 		config.plugins.push('@babel/plugin-proposal-class-properties');
 	})
@@ -73,8 +84,14 @@ Encore
 	// uncomment if you use TypeScript
 	//.enableTypeScriptLoader()
 
-	// uncomment if you use React
-	//.enableReactPreset()
+	.enableVueLoader(() => {}, {
+		runtimeCompilerBuild: true,
+		useJsx: false,
+	})
+	.addLoader({
+		test: /\.(html|twig)$/,
+		loader: 'raw-loader',
+	})
 
 	// uncomment to get integrity="..." attributes on your script & link tags
 	// requires WebpackEncoreBundle 1.4 or higher
@@ -82,6 +99,13 @@ Encore
 
 	// uncomment if you're having problems with a jQuery plugin
 	//.autoProvidejQuery()
+
+	.configureDevServerOptions(options => {
+		options.allowedHosts = 'game.kalaxia.wip';
+		options.https = {
+			pfx: path.join(process.env.HOME, '.symfony5/certs/default.p12'),
+		};
+	})
 ;
 
 for (let i of Array(12).keys()) {
