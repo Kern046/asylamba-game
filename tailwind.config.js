@@ -1,6 +1,8 @@
 module.exports = {
 	content: [
-	  'templates/**/*.html.twig',
+		'templates/**/*.html.twig',
+		'assets/**/*.html',
+		'assets/**/*.vue',
 	],
 	theme: {
 		extend: {},
