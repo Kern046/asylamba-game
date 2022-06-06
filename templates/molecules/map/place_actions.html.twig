@@ -2,7 +2,7 @@
 
 {% apply spaceless %}
 <div class="column act">
-	<div class="top">
+	<div class="top flex items-center justify-between">
 		{% if place.typeOfPlace == 1 %}
 			<a href="#" class="actionbox-sh {% if can_player_attack_place(current_player, place) == false %}grey{% endif %}" data-target="1">
 				<img src="{{ asset('build/media/map/action/loot.png') }}" alt="" />

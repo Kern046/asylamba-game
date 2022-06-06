@@ -671,17 +671,13 @@ jQuery(document).ready(function($) {
 		// affiche la box
 		open: function() {
 			actionbox.opened = true;
-			actionbox.obj.animate({
-				bottom: 0
-			}, 300);
+			actionbox.obj.addClass('active');
 		},
 
 		// masque la box
 		close: function() {
 			actionbox.opened = false;
-			actionbox.obj.animate({
-				bottom: -300
-			}, 300);
+			actionbox.obj.removeClass('active');
 
 			$('.loadSystem.active').removeClass('active');
 		},
