@@ -45,14 +45,16 @@
 						{% endif %}
 						<hr />
 
-						{% set ships_by_type = commander.nbrShipByType %}
-						{% for type in ships_by_type|keys %}
-							{% set quantity = ships_by_type[type] %}
-							<span class="ship">
-								<img src="{{ asset('build/media/ship/picto/ship' ~ type ~ '.png') }}" {% if quantity == 0 %}class="zero"{% endif %}/>
-								<span class="number">{{ quantity }}</span>
-							</span>
-						{% endfor %}
+						<div class="flex flex-wrap">
+							{% set ships_by_type = commander.nbrShipByType %}
+							{% for type in ships_by_type|keys %}
+								{% set quantity = ships_by_type[type] %}
+								<div class="ship m-0.5">
+									<img src="{{ asset('build/media/ship/picto/ship' ~ type ~ '.png') }}" {% if quantity == 0 %}class="zero"{% endif %}/>
+									<span class="number">{{ quantity }}</span>
+								</div>
+							{% endfor %}
+						</div>
 					</span>
 				</span>
 			</a>

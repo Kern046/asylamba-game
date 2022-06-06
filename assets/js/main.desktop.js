@@ -27,10 +27,7 @@ jQuery(document).ready(function($) {
 			render.viewport.w = parseInt($('body').css('width'));
 
 			// hauteur du #conteneur
-			var hBar = parseInt($('#nav').css('height'));
-			var hContent = render.viewport.h - (2 * (hBar + 3));
-
-			$('#container').css('height', hContent);
+			var hContent = render.viewport.h;
 
 			// traitement des colonnes
 			$('.component').each(function(i) {
@@ -671,17 +668,13 @@ jQuery(document).ready(function($) {
 		// affiche la box
 		open: function() {
 			actionbox.opened = true;
-			actionbox.obj.animate({
-				bottom: 0
-			}, 300);
+			actionbox.obj.addClass('active');
 		},
 
 		// masque la box
 		close: function() {
 			actionbox.opened = false;
-			actionbox.obj.animate({
-				bottom: -300
-			}, 300);
+			actionbox.obj.removeClass('active');
 
 			$('.loadSystem.active').removeClass('active');
 		},
@@ -988,7 +981,7 @@ jQuery(document).ready(function($) {
 	})();
 
 	/* HIDE SPLASH-SCREEN */
-	$('.hide-slpash').live('click', function(e) {
+	$('.hide-splash').live('click', function(e) {
 		var dom = $('.splash-screen');
 		var mod = dom.find('.modal');
 

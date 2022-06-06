@@ -1,10 +1,13 @@
 module.exports = {
 	content: [
-	  'templates/**/*.html.twig',
-	  'assets/js/**/*.js',
+		'templates/**/*.html.twig',
+		'assets/**/*.html',
+		'assets/**/*.vue',
 	],
 	theme: {
 		extend: {},
 	},
-	plugins: [],
+	plugins: [
+		require('@tailwindcss/forms'),
+	],
 }
