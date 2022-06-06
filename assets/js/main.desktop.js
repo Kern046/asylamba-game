@@ -27,10 +27,7 @@ jQuery(document).ready(function($) {
 			render.viewport.w = parseInt($('body').css('width'));
 
 			// hauteur du #conteneur
-			var hBar = parseInt($('#nav').css('height'));
-			var hContent = render.viewport.h - (2 * (hBar + 3));
-
-			$('#container').css('height', hContent);
+			var hContent = render.viewport.h;
 
 			// traitement des colonnes
 			$('.component').each(function(i) {
