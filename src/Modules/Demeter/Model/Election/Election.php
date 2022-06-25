@@ -1,24 +1,17 @@
 <?php
 
-/**
- * election Forum.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 06.10.13
- */
-
 namespace App\Modules\Demeter\Model\Election;
+
+use App\Modules\Demeter\Model\Color;
+use Symfony\Component\Uid\Uuid;
 
 class Election
 {
-	public $id = 0;
-	public $rColor = 0;
-	public $dElection = 0;
+	public function __construct(
+		public Uuid $id,
+		public Color $faction,
+		public \DateTimeImmutable $dElection,
+	) {
 
-	public function getId()
-	{
-		return $this->id;
 	}
 }

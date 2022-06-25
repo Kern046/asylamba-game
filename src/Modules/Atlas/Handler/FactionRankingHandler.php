@@ -2,54 +2,49 @@
 
 namespace App\Modules\Atlas\Handler;
 
-use App\Classes\Entity\EntityManager;
-use App\Modules\Atlas\Manager\FactionRankingManager;
+use App\Modules\Atlas\Domain\Repository\FactionRankingRepositoryInterface;
+use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
+use App\Modules\Atlas\Domain\Repository\RankingRepositoryInterface;
 use App\Modules\Atlas\Manager\RankingManager;
 use App\Modules\Atlas\Message\FactionRankingMessage;
-use App\Modules\Atlas\Model\FactionRanking;
-use App\Modules\Atlas\Model\PlayerRanking;
-use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Atlas\Routine\FactionRoutine;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Gaia\Model\Sector;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class FactionRankingHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class FactionRankingHandler
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected ColorManager $colorManager,
-		protected FactionRankingManager $factionRankingManager,
-		protected RankingManager $rankingManager,
-		protected string $serverStartTime,
-		protected int $hoursBeforeStartOfRanking,
-		protected int $pointsToWin,
+		private ColorManager                      $colorManager,
+		private ColorRepositoryInterface          $colorRepository,
+		private FactionRankingRepositoryInterface $factionRankingRepository,
+		private PlayerRankingRepositoryInterface  $playerRankingRepository,
+		private RankingRepositoryInterface        $rankingRepository,
+		private SectorRepositoryInterface         $sectorRepository,
+		private RankingManager                    $rankingManager,
+		private string                            $serverStartTime,
+		private int                               $hoursBeforeStartOfRanking,
+		private int                               $pointsToWin,
 	) {
 	}
 
 	public function __invoke(FactionRankingMessage $message): void
 	{
-		if (true === $this->entityManager->getRepository(Ranking::class)->hasBeenAlreadyProcessed(false, true)) {
+		if (true === $this->rankingRepository->hasBeenAlreadyProcessed(false, true)) {
 			return;
 		}
 		$factionRoutine = new FactionRoutine();
 
-		$factions = $this->colorManager->getInGameFactions();
-		$playerRankingRepository = $this->entityManager->getRepository(PlayerRanking::class);
-		$factionRankingRepository = $this->entityManager->getRepository(FactionRanking::class);
-		$sectors = $this->entityManager->getRepository(Sector::class)->getAll();
-
-		$S_FRM1 = $this->factionRankingManager->getCurrentSession();
-		$this->factionRankingManager->newSession();
-		$this->factionRankingManager->loadLastContext();
+		$factions = $this->colorRepository->getInGameFactions();
+		$sectors = $this->sectorRepository->getAll();
 
 		$ranking = $this->rankingManager->createRanking(false, true);
 
 		foreach ($factions as $faction) {
-			$this->colorManager->updateInfos($faction);
-
-			$routesIncome = $factionRankingRepository->getRoutesIncome($faction);
-			$playerRankings = $playerRankingRepository->getFactionPlayerRankings($faction);
+			$routesIncome = $this->factionRankingRepository->getRoutesIncome($faction);
+			$playerRankings = $this->playerRankingRepository->getFactionPlayerRankings($faction);
 
 			$factionRoutine->execute($faction, $playerRankings, $routesIncome, $sectors);
 		}
@@ -57,17 +52,13 @@ class FactionRankingHandler implements MessageHandlerInterface
 		$winningFactionId = $factionRoutine->processResults(
 			$ranking,
 			$factions,
-			$this->factionRankingManager,
 			$this->serverStartTime,
 			$this->hoursBeforeStartOfRanking,
 			$this->pointsToWin,
 		);
 
-		$this->factionRankingManager->changeSession($S_FRM1);
-
 		if (null !== $winningFactionId) {
 			$this->rankingManager->processWinningFaction($winningFactionId);
 		}
-		$this->entityManager->flush();
 	}
 }

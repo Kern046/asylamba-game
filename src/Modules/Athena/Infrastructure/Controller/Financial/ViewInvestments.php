@@ -3,17 +3,17 @@
 namespace App\Modules\Athena\Infrastructure\Controller\Financial;
 
 use App\Classes\Library\Game;
-use App\Modules\Ares\Manager\CommanderManager;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
-use App\Modules\Athena\Manager\CommercialRouteManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Manager\TransactionManager;
+use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
-use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,39 +22,40 @@ use Symfony\Component\HttpFoundation\Response;
 class ViewInvestments extends AbstractController
 {
 	public function __construct(
-		private BonusApplierInterface $bonusApplier,
-		private CommercialRouteManager $commercialRouteManager,
+		private readonly BonusApplierInterface $bonusApplier,
+		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
+		private readonly PopulationTaxHandler $populationTaxHandler,
 	) {
 	}
 
 	public function __invoke(
 		Player $currentPlayer,
-		CommanderManager $commanderManager,
-		PlayerManager $playerManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		TransactionManager $transactionManager,
+		CommanderRepositoryInterface $commanderRepository,
+		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		TransactionRepositoryInterface $transactionRepository,
 	): Response {
 		$taxCoeff = $this->getParameter('zeus.player.tax_coeff');
 
-		$playerBases = $orbitalBaseManager->getPlayerBases($currentPlayer->getId());
+		$playerBases = $orbitalBaseRepository->getPlayerBases($currentPlayer);
 
-		$commanders = $commanderManager->getPlayerCommanders(
-			$currentPlayer->getId(),
+		$commanders = $commanderRepository->getPlayerCommanders(
+			$currentPlayer,
 			[Commander::AFFECTED, Commander::MOVING],
-			['c.rBase' => 'ASC'],
+			['c.base' => 'ASC'],
 		);
 
-		$transactions = $transactionManager->getPlayerPropositions($currentPlayer->getId(), Transaction::TYP_SHIP);
+		$transactions = $transactionRepository->getPlayerPropositions($currentPlayer, Transaction::TYP_SHIP);
 
 		$basesData = $this->getBasesData($playerBases, $taxCoeff);
 
 		return $this->render('pages/athena/financial/investments.html.twig', [
 			'commanders' => $commanders,
 			'commanders_by_base' => array_reduce($commanders, function ($carry, Commander $commander) {
-				if (!isset($carry[$commander->getRBase()])) {
-					$carry[$commander->getRBase()] = [];
+				$commanderBaseId = $commander->base->id->toRfc4122();
+				if (!isset($carry[$commanderBaseId])) {
+					$carry[$commanderBaseId] = [];
 				}
-				$carry[$commander->getRBase()][] = $commander;
+				$carry[$commanderBaseId][] = $commander;
 
 				return $carry;
 			}, []),
@@ -75,18 +76,16 @@ class ViewInvestments extends AbstractController
 
 	private function getBasesData(array $bases, int $taxCoeff): array
 	{
-		return array_reduce($bases, function (array $carry, OrbitalBase $base) use ($taxCoeff) {
-			$routesIncome = $this->commercialRouteManager->getBaseIncome($base);
-			$taxIncome = Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff);
+		return array_reduce($bases, function (array $carry, OrbitalBase $base) {
+			$routesIncome = $this->commercialRouteRepository->getBaseIncome($base);
+			$populationTax = $this->populationTaxHandler->getPopulationTax($base);
 
-			$carry[$base->getId()] = [
-				'tax_income' => $taxIncome,
-				'tax_income_bonus' => $this->bonusApplier->apply($taxIncome, PlayerBonusId::POPULATION_TAX),
-				'routes' => array_merge(
-					$this->commercialRouteManager->getByBase($base->getId()),
-					$this->commercialRouteManager->getByDistantBase($base->getId())
-				),
-				'routes_count' => $this->commercialRouteManager->countBaseActiveRoutes($base->getId()),
+			$carry[$base->id->toRfc4122()] = [
+				'tax_income' => $populationTax->initial,
+				'tax_income_bonus' => $populationTax->bonus,
+				// @TODO possible non pertinent retrieval of bases count. Why filtering by statement for the count and not for the retrieval ?
+				'routes' => $this->commercialRouteRepository->getBaseRoutes($base),
+				'routes_count' => $this->commercialRouteRepository->countBaseRoutes($base, [CommercialRoute::ACTIVE]),
 				'routes_income' => $routesIncome,
 				'routes_income_bonus' => $this->bonusApplier->apply($routesIncome, PlayerBonusId::COMMERCIAL_INCOME),
 			];
@@ -95,6 +94,14 @@ class ViewInvestments extends AbstractController
 		}, []);
 	}
 
+	/**
+	 * @param OrbitalBase[]      $playerBases
+	 * @param Commander[]        $commanders
+	 * @param Transaction[]      $transactions
+	 * @param array<string, int> $basesData
+	 *
+	 * @return array<string, int>
+	 */
 	private function getInvestmentsData(
 		Player $player,
 		array $playerBases,
@@ -116,25 +123,24 @@ class ViewInvestments extends AbstractController
 		];
 
 		foreach ($playerBases as $base) {
-			$taxIn = Game::getTaxFromPopulation($base->getPlanetPopulation(), $base->typeOfBase, $taxCoeff);
-			$taxInBonus = $this->bonusApplier->apply($taxIn, PlayerBonusId::POPULATION_TAX);
-			$data['totalTaxIn'] += $taxIn;
-			$data['totalTaxInBonus'] += $taxInBonus;
-			$data['totalTaxOut'] += ($taxIn + $taxInBonus) * $base->getTax() / 100;
-			$data['totalInvest'] += $base->getISchool() + $base->getIAntiSpy();
+			$populationTax = $this->populationTaxHandler->getPopulationTax($base);
+			$data['totalTaxIn'] += $populationTax->initial;
+			$data['totalTaxInBonus'] += $populationTax->bonus;
+			$data['totalTaxOut'] += $populationTax->total * $base->place->system->sector->tax / 100;
+			$data['totalInvest'] += $base->iSchool + $base->iAntiSpy;
 			$data['totalShipsFees'] += Game::getFleetCost($base->shipStorage, false);
 
 			// @TODO cout des trucs en vente
 
-			foreach ($basesData[$base->getId()]['routes'] as $route) {
-				if (CommercialRoute::ACTIVE == $route->getStatement()) {
-					$data['totalRouteIncome'] += $route->getIncome();
+			foreach ($basesData[$base->id->toRfc4122()]['routes'] as $route) {
+				if (CommercialRoute::ACTIVE == $route->statement) {
+					$data['totalRouteIncome'] += $route->income;
 				}
 			}
 		}
 
 		foreach ($commanders as $commander) {
-			$data['totalFleetFees'] += $commander->getLevel() * Commander::LVLINCOMECOMMANDER;
+			$data['totalFleetFees'] += $commander->level * Commander::LVLINCOMECOMMANDER;
 			$data['totalShipsFees'] += Game::getFleetCost($commander->getNbrShipByType());
 		}
 
@@ -158,7 +164,7 @@ class ViewInvestments extends AbstractController
 			+ $data['totalShipsFees'];
 
 		$data['gains'] = $data['total_income'] - $data['total_expenses'];
-		$data['remains'] = round($player->getCredit()) + round($data['gains']);
+		$data['remains'] = round($player->getCredits()) + round($data['gains']);
 
 		return $data;
 	}

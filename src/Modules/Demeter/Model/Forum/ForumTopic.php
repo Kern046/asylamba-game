@@ -1,36 +1,29 @@
 <?php
 
-/**
- * Topic Forum.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 06.10.13
- */
-
 namespace App\Modules\Demeter\Model\Forum;
+
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
 
 class ForumTopic
 {
-	public $id = 0;
-	public $title = '';
-	public $rPlayer = 0;
-	public $rForum = 0;
-	public $rColor = 0;
-	public $isUp = 0;
-	public $isClosed = 0;
-	public $isArchived = 0;
-	public $dCreation = '';
-	public $statement = 1;
-	public $dLastMessage = '';
+	public function __construct(
+		public Uuid $id,
+		public string $title,
+		public Player $player,
+		public int $forum,
+		public Color $faction,
+		// TODO check if this property is used
+		public int $statement = 1,
+		public bool $isUp = false,
+		public bool $isClosed = false,
+		public bool $isArchived = false,
+		public \DateTimeImmutable $createdAt = new \DateTimeImmutable(),
+		public \DateTimeImmutable $lastContributedAt = new \DateTimeImmutable(),
+		// si joueur renseigné lors du chargement
+		public Player|null $lastView = null,
+	) {
 
-	// si joueur renseigné lors du chargement
-	public $lastView = null;
-	public $nbMessage = 0;
-
-	public function getId()
-	{
-		return $this->id;
 	}
 }

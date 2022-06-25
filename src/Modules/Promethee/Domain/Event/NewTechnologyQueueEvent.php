@@ -45,7 +45,7 @@ class NewTechnologyQueueEvent implements TutorialEvent, TrackingEvent
 	{
 		return [
 			'technology_id' => $this->technologyQueue->technology,
-			'place_id' => $this->technologyQueue->rPlace,
+			'place_id' => $this->technologyQueue->place->id,
 			'target_level' => $this->technologyQueue->targetLevel,
 		];
 	}

@@ -2,8 +2,8 @@
 
 namespace App\Modules\Promethee\Infrastructure\Controller;
 
-use App\Classes\Entity\EntityManager;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +14,7 @@ class UpdateUniversityInvestments extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		EntityManager $entityManager,
+		EntityManagerInterface $entityManager,
 		string $category,
 		string $operation,
 	): Response {
@@ -33,7 +33,7 @@ class UpdateUniversityInvestments extends AbstractController
 			$this->decreaseInvestment($currentPlayer, $category, $payload['quantity']);
 		}
 
-		$entityManager->flush($currentPlayer);
+		$entityManager->flush();
 
 		return new Response('', Response::HTTP_NO_CONTENT);
 	}

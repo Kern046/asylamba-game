@@ -5,6 +5,8 @@ namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
 use App\Classes\Library\Utils;
+use App\Modules\Athena\Domain\Repository\RecyclingLogRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\RecyclingLogManager;
 use App\Modules\Athena\Manager\RecyclingMissionManager;
@@ -17,14 +19,14 @@ use Symfony\Component\HttpFoundation\Response;
 class ViewRecycling extends AbstractController
 {
 	public function __invoke(
-		OrbitalBase $currentBase,
-		OrbitalBaseHelper $orbitalBaseHelper,
-		RecyclingMissionManager $recyclingMissionManager,
-		RecyclingLogManager $recyclingLogManager,
+		OrbitalBase                         $currentBase,
+		OrbitalBaseHelper                   $orbitalBaseHelper,
+		RecyclingMissionRepositoryInterface $recyclingMissionRepository,
+		RecyclingLogRepositoryInterface     $recyclingLogRepository,
 	): Response {
 		// load recycling missions
-		$baseMissions = $recyclingMissionManager->getBaseActiveMissions($currentBase->rPlace);
-		$missionsLogs = $recyclingLogManager->getBaseActiveMissionsLogs($currentBase->rPlace);
+		$baseMissions = $recyclingMissionRepository->getBaseActiveMissions($currentBase);
+		$missionsLogs = $recyclingLogRepository->getBaseActiveMissionsLogs($currentBase);
 		$missionQuantity = count($baseMissions);
 
 		$totalRecyclers = $orbitalBaseHelper->getBuildingInfo(
@@ -59,7 +61,7 @@ class ViewRecycling extends AbstractController
 		$missionID = strtoupper(substr($missionID, 0, 3).'-'.substr($missionID, 3, 6).'-'.substr($missionID, 10, 2));
 
 		// @TODO Infamous patch
-		$percent = Utils::interval(Utils::now(), date('Y-m-d H:i:s', strtotime($mission->uRecycling) - $mission->cycleTime), 's') / $mission->cycleTime * 100;
+		$percent = Utils::interval(Utils::now(), date('Y-m-d H:i:s', strtotime($mission->endedAt->format('c')) - $mission->cycleTime), 's') / $mission->cycleTime * 100;
 		$travelTime = ($mission->cycleTime - RecyclingMission::RECYCLING_TIME) / 2;
 		$beginRECY = Format::percent($travelTime, $mission->cycleTime);
 		$endRECY = Format::percent($travelTime + RecyclingMission::RECYCLING_TIME, $mission->cycleTime);
@@ -71,7 +73,12 @@ class ViewRecycling extends AbstractController
 			'travel_time' => $travelTime,
 			'begin_recv' => $beginRECY,
 			'end_recv' => $endRECY,
-			'coords' => Game::formatCoord($mission->xSystem, $mission->ySystem, $mission->position, $mission->sectorId),
+			'coords' => Game::formatCoord(
+				$mission->target->system->xPosition,
+				$mission->target->system->yPosition,
+				$mission->target->position,
+				$mission->target->system->sector->identifier
+			),
 		];
 	}
 }

@@ -1,35 +1,30 @@
 <?php
 
-/**
- * TutorialHelper.
- *
- * @author Jacky Casas
- * @copyright Asylamba
- *
- * @update 25.04.14
- */
-
 namespace App\Modules\Zeus\Helper;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Session\SessionWrapper;
-use App\Modules\Athena\Manager\BuildingQueueManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
+use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
+use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Manager\TechnologyQueueManager;
-use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 
 class TutorialHelper
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected PlayerManager $playerManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected BuildingQueueManager $buildingQueueManager,
-		protected TechnologyQueueManager $technologyQueueManager,
-		protected TechnologyManager $technologyManager,
-		protected SessionWrapper $sessionWrapper
+		private readonly EntityManagerInterface $entityManager,
+		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
+		private readonly TechnologyQueueManager $technologyQueueManager,
+		private readonly TechnologyManager $technologyManager,
+		private readonly TechnologyRepositoryInterface $technologyRepository,
+		private readonly TechnologyQueueRepositoryInterface $technologyQueueRepository,
+		private readonly SessionWrapper $sessionWrapper,
+		private readonly BuildingLevelHandler $buildingLevelHandler,
 	) {
 	}
 
@@ -71,18 +66,18 @@ class TutorialHelper
 		$this->entityManager->flush($player);
 	}
 
-	public function isNextBuildingStepAlreadyDone($playerId, $buildingId, $level)
+	public function isNextBuildingStepAlreadyDone(Player $player, int $buildingId, int $level): bool
 	{
 		$nextStepAlreadyDone = false;
 
-		$playerBases = $this->orbitalBaseManager->getPlayerBases($playerId);
+		$playerBases = $this->orbitalBaseRepository->getPlayerBases($player);
 		foreach ($playerBases as $orbitalBase) {
-			if ($orbitalBase->getBuildingLevel($buildingId) >= $level) {
+			if ($this->buildingLevelHandler->getBuildingLevel($orbitalBase, $buildingId) >= $level) {
 				$nextStepAlreadyDone = true;
 				break;
 			} else {
 				// verify in the queue
-				$buildingQueues = $this->buildingQueueManager->getBaseQueues($orbitalBase->rPlace);
+				$buildingQueues = $this->buildingQueueRepository->getBaseQueues($orbitalBase);
 				foreach ($buildingQueues as $buildingQueue) {
 					if ($buildingQueue->buildingNumber == $buildingId and $buildingQueue->targetLevel >= $level) {
 						$nextStepAlreadyDone = true;
@@ -95,14 +90,14 @@ class TutorialHelper
 		return $nextStepAlreadyDone;
 	}
 
-	public function isNextTechnoStepAlreadyDone($playerId, $technoId, $level = 1)
+	public function isNextTechnoStepAlreadyDone(Player $player, int $technoId, int $level = 1): bool
 	{
-		$technology = $this->technologyManager->getPlayerTechnology($playerId);
+		$technology = $this->technologyRepository->getPlayerTechnology($player);
 		if ($technology->getTechnology($technoId) >= $level) {
 			return true;
 		}
 		// verify in the queue
-		if (($this->technologyQueueManager->getPlayerTechnologyQueue($playerId, $technoId)) !== null) {
+		if (null !== $this->technologyQueueRepository->getPlayerTechnologyQueue($player, $technoId)) {
 			return true;
 		}
 

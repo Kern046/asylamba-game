@@ -21,7 +21,9 @@ class UpdateUniversityInvestments extends AbstractController
 		}
 
 		if (500000 < $investment) {
-			throw new BadRequestHttpException('La limite maximale d\'investissement dans l\'Université est de 500\'000 crédits.');
+			throw new BadRequestHttpException(
+				'La limite maximale d\'investissement dans l\'Université est de 500\'000 crédits.',
+			);
 		}
 
 		$playerManager->updateUniversityInvestment($currentPlayer, $investment);

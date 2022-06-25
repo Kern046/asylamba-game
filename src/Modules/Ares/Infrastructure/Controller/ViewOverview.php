@@ -2,44 +2,38 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller;
 
-use App\Modules\Ares\Manager\CommanderManager;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
 class ViewOverview extends AbstractController
 {
-	public function __invoke(
-		Player $currentPlayer,
-		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-		CommanderManager $commanderManager,
-		OrbitalBaseManager $orbitalBaseManager,
-	): Response {
+	public function __construct(
+		private readonly CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		private readonly CommanderRepositoryInterface $commanderRepository,
+		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+	) {
+	}
+
+	public function __invoke(Player $currentPlayer): Response
+	{
 		return $this->render('pages/ares/fleet/overview.html.twig', [
-			'obsets' => $this->getObsets(
-				$currentPlayerBasesRegistry,
-				$currentPlayer,
-				$commanderManager,
-				$orbitalBaseManager
-			),
+			'obsets' => $this->getObsets($currentPlayer),
 		]);
 	}
 
-	private function getObsets(
-		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-		Player $currentPlayer,
-		CommanderManager $commanderManager,
-		OrbitalBaseManager $orbitalBaseManager,
-	): array {
+	private function getObsets(Player $currentPlayer): array
+	{
 		// set d'orbitale base
 		$obsets = [];
-		foreach ($currentPlayerBasesRegistry->all() as $orbitalBase) {
+		foreach ($this->currentPlayerBasesRegistry->all() as $orbitalBase) {
 			$obsets[] = [
 				'info' => [
-					'id' => $orbitalBase->getId(),
+					'id' => $orbitalBase->id->toRfc4122(),
 					'name' => $orbitalBase->name,
 					'type' => $orbitalBase->typeOfBase,
 				],
@@ -47,21 +41,25 @@ class ViewOverview extends AbstractController
 		}
 
 		// commander manager : yours
-		$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::AFFECTED, Commander::MOVING], ['c.rBase' => 'DESC']);
+		$commanders = $this->commanderRepository->getPlayerCommanders(
+			$currentPlayer,
+			[Commander::AFFECTED, Commander::MOVING],
+			['c.base' => 'DESC'],
+		);
 
 		for ($i = 0; $i < count($obsets); ++$i) {
 			foreach ($commanders as $commander) {
-				if ($commander->rBase == $obsets[$i]['info']['id']) {
+				if ($commander->base->id->toRfc4122() === $obsets[$i]['info']['id']) {
 					$obsets[$i]['fleets'][] = $commander;
 				}
 			}
 		}
 		// ship in dock
-		$playerBases = $orbitalBaseManager->getPlayerBases($currentPlayer->getId());
+		$playerBases = $this->orbitalBaseRepository->getPlayerBases($currentPlayer);
 
 		for ($i = 0; $i < count($obsets); ++$i) {
 			foreach ($playerBases as $orbitalBase) {
-				if ($orbitalBase->rPlace == $obsets[$i]['info']['id']) {
+				if ($orbitalBase->id->toRfc4122() == $obsets[$i]['info']['id']) {
 					$obsets[$i]['dock'] = $orbitalBase->shipStorage;
 				}
 			}

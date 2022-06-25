@@ -24,8 +24,8 @@ class MixpanelListener
 	{
 		$player = $event->player;
 
-		$this->mixpanel->people->set($player->getId(), [
-			'faction_id' => $player->getRColor(),
+		$this->mixpanel->people->set($player->id, [
+			'faction_id' => $player->faction->id,
 		]);
 	}
 

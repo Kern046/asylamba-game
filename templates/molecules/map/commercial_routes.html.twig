@@ -7,10 +7,10 @@
 			{% set class = route.statement == constant('App\\Modules\\Athena\\Model\\CommercialRoute::ACTIVE') ? 'active' : 'standby' %}
 
 			<line class="commercialRoute {{ class }}"
-				  x1="{{ route.sy1x * galaxy_configuration.scale }}"
-				  x2="{{ route.sy2x * galaxy_configuration.scale }}"
-				  y1="{{ route.sy1y * galaxy_configuration.scale }}"
-				  y2="{{ route.sy2y * galaxy_configuration.scale }}" />
+				  x1="{{ route.originBase.place.system.xPosition * galaxy_configuration.scale }}"
+				  x2="{{ route.destinationBase.place.system.xPosition * galaxy_configuration.scale }}"
+				  y1="{{ route.originBase.place.system.yPosition * galaxy_configuration.scale }}"
+				  y2="{{ route.destinationBase.place.system.yPosition * galaxy_configuration.scale }}" />
 		{% endfor %}
 	</svg>
 </div>

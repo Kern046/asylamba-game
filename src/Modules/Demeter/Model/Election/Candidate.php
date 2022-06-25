@@ -1,34 +1,22 @@
 <?php
 
-/**
- * Candidate Forum.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 06.10.13
- */
-
 namespace App\Modules\Demeter\Model\Election;
+
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
 
 class Candidate
 {
-	public $id = 0;
-	public $rElection = 0;
-	public $rPlayer = 0;
-	public $name = '';
-	public $avatar = '';
-	public $factionPoint = 0;
-	public $status = 0;
-	public $chiefChoice = 0;
-	public $treasurerChoice = 0;
-	public $warlordChoice = 0;
-	public $ministerChoice = 0;
-	public $program = '';
-	public $dPresentation = '';
-
-	public function getId()
-	{
-		return $this->id;
+	public function __construct(
+		public Uuid $id,
+		public Election $election,
+		public Player $player,
+		public int $chiefChoice,
+		public int $treasurerChoice,
+		public int $warlordChoice,
+		public int $ministerChoice,
+		public string $program,
+		public \DateTimeImmutable $createdAt,
+	) {
 	}
 }

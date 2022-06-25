@@ -61,12 +61,12 @@ class Format
 	 * arg : $decimal *
 	 *     : int => nombre de chiffre après la virgule
 	 */
-	public static function numberFormat($number, $decimals = 0)
+	public static function numberFormat(int|float $number, int $decimals = 0): string
 	{
 		return self::number($number, $decimals);
 	}
 
-	public static function number($number, $decimals = 0)
+	public static function number(int|float $number, int $decimals = 0): string
 	{
 		if (-2 == $decimals and $number > 999999) {
 			return number_format(ceil($number / 1000000), $decimals, ',', ' ').' Mio';
@@ -79,7 +79,7 @@ class Format
 
 	public static function percent(int|float $number, int|float $base, bool $ceil = true): float
 	{
-		return min(100, (0 == $base)
+		return min(100, (0 === intval(round($base)))
 			? 0
 			: (
 				$ceil

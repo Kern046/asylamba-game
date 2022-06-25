@@ -41,8 +41,8 @@ class PlannedLootEvent implements TutorialEvent, TrackingEvent
 	public function getTrackingData(): array
 	{
 		return [
-			'start_place_id' => $this->commander->rStartPlace,
-			'destination_place_id' => $this->commander->rDestinationPlace,
+			'start_place_id' => $this->commander->startPlace,
+			'destination_place_id' => $this->commander->destinationPlace,
 			'commander_id' => $this->commander->id,
 		];
 	}

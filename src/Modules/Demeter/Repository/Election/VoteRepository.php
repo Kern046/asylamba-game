@@ -2,122 +2,35 @@
 
 namespace App\Modules\Demeter\Repository\Election;
 
-use App\Classes\Entity\AbstractRepository;
+use App\Modules\Demeter\Domain\Repository\Election\VoteRepositoryInterface;
+use App\Modules\Demeter\Model\Election\Election;
 use App\Modules\Demeter\Model\Election\Vote;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
 
-class VoteRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<Vote>
+ */
+class VoteRepository extends DoctrineRepository implements VoteRepositoryInterface
 {
-	/**
-	 * @param int $playerId
-	 * @param int $electionId
-	 *
-	 * @return Vote
-	 */
-	public function getPlayerVote($playerId, $electionId)
+	public function __construct(ManagerRegistry $registry)
 	{
-		$statement = $this->connection->prepare('SELECT * FROM vote WHERE rElection = :election_id AND rPlayer = :player_id');
-		$statement->execute(['election_id' => $electionId, 'player_id' => $playerId]);
-
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		if (($v = $this->unitOfWork->getObject(Vote::class, $row['id'])) !== null) {
-			return $v;
-		}
-		$vote = $this->format($row);
-		$this->unitOfWork->addObject($vote);
-
-		return $vote;
+		parent::__construct($registry, Vote::class);
 	}
 
-	/**
-	 * @param int $electionId
-	 *
-	 * @return array
-	 */
-	public function getElectionVotes($electionId)
+	public function getPlayerVote(Player $player, Election $election): Vote|null
 	{
-		$statement = $this->connection->prepare('SELECT * FROM vote WHERE rElection = :election_id');
-		$statement->execute(['election_id' => $electionId]);
-
-		$data = [];
-		while (($row = $statement->fetch()) !== false) {
-			if (($v = $this->unitOfWork->getObject(Vote::class, $row['id'])) !== null) {
-				$data[] = $v;
-				continue;
-			}
-			$vote = $this->format($row);
-			$this->unitOfWork->addObject($vote);
-			$data[] = $vote;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @param Vote $vote
-	 */
-	public function insert($vote)
-	{
-		$statement = $this->connection->prepare(
-			'INSERT INTO vote SET
-			rCandidate = :candidate_id,
-			rPlayer = :player_id,
-			rElection = :election_id,
-			dVotation = :voted_at'
-		);
-		$statement->execute([
-			'candidate_id' => $vote->rCandidate,
-			'player_id' => $vote->rPlayer,
-			'election_id' => $vote->rElection,
-			'voted_at' => $vote->dVotation,
-		]);
-		$vote->id = $this->connection->lastInsertId();
-	}
-
-	/**
-	 * @param Vote $vote
-	 */
-	public function update($vote)
-	{
-		$statement = $this->connection->prepare(
-			'UPDATE vote SET
-				rCandidate = :candidate_id,
-				rPlayer = :player_id,
-				dVotation = :voted_at
-			WHERE id = :id'
-		);
-		$statement->execute([
-			'candidate_id' => $vote->rCandidate,
-			'player_id' => $vote->rPlayer,
-			'voted_at' => $vote->dVotation,
-			'id' => $vote->id,
+		return $this->findOneBy([
+			'player' => $player,
+			'election' => $election,
 		]);
 	}
 
-	/**
-	 * @param Vote $vote
-	 */
-	public function remove($vote)
+	public function getElectionVotes(Election $election): array
 	{
-		$statement = $this->connection->prepare('DELETE FROM vote WHERE id = :id');
-		$statement->execute(['id' => $vote->id]);
-	}
-
-	/**
-	 * @param array $data
-	 *
-	 * @return Vote
-	 */
-	public function format($data)
-	{
-		$vote = new Vote();
-		$vote->id = (int) $data['id'];
-		$vote->rCandidate = (int) $data['rCandidate'];
-		$vote->rPlayer = (int) $data['rPlayer'];
-		$vote->relection = (int) $data['rElection'];
-		$vote->dVotation = $data['dVotation'];
-
-		return $vote;
+		return $this->findBy([
+			'election' => $election,
+		]);
 	}
 }

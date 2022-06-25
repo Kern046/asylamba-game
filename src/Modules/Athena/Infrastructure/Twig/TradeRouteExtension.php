@@ -24,7 +24,7 @@ class TradeRouteExtension extends AbstractExtension
 			new TwigFunction('get_route_price', function (float $distance) {
 				$price = Game::getRCPrice($distance);
 
-				if (ColorResource::NEGORA == $this->currentPlayerRegistry->get()->rColor) {
+				if (ColorResource::NEGORA === $this->currentPlayerRegistry->get()->faction->identifier) {
 					// bonus if the player is from Negore
 					$price -= round($price * ColorResource::BONUS_NEGORA_ROUTE / 100);
 				}
@@ -38,8 +38,8 @@ class TradeRouteExtension extends AbstractExtension
 				float $routeSectorBonus,
 				float $routeColorBonus,
 			) {
-				$bonusA = ($defaultBase->sector != $place->rSector) ? $routeSectorBonus : 1;
-				$bonusB = ($this->currentPlayerRegistry->get()->rColor) != $place->playerColor ? $routeColorBonus : 1;
+				$bonusA = ($defaultBase->place->system->sector->id !== $place->system->sector->id) ? $routeSectorBonus : 1;
+				$bonusB = $this->currentPlayerRegistry->get()->faction->id !== $place->player->faction->id ? $routeColorBonus : 1;
 
 				return Game::getRCIncome($distance, $bonusA, $bonusB);
 			}),

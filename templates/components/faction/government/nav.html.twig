@@ -1,5 +1,5 @@
 {% set mode = app.request.query.get('mode', 'law') %}
-{% set statuses = get_faction_info(faction.id, 'status') %}
+{% set statuses = get_faction_info(faction.identifier, 'status') %}
 
 <div class="component nav">
 	<div class="head skin-1">

@@ -1,0 +1,83 @@
+<doctrine-mapping xmlns="https://doctrine-project.org/schemas/orm/doctrine-mapping"
+				  xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+				  xsi:schemaLocation="https://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+	<entity name="App\Modules\Ares\Model\Commander" table="commander">
+		<id name="id" column="id" type="uuid" />
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player">
+			<join-column nullable="true" />
+		</many-to-one>
+		<many-to-one field="base" target-entity="App\Modules\Athena\Model\OrbitalBase">
+			<join-column nullable="true" />
+		</many-to-one>
+		<many-to-one field="startPlace" target-entity="App\Modules\Gaia\Model\Place">
+			<join-column nullable="true" />
+		</many-to-one>
+		<many-to-one field="destinationPlace" target-entity="App\Modules\Gaia\Model\Place">
+			<join-column nullable="true" />
+		</many-to-one>
+		<one-to-many field="squadrons" target-entity="App\Modules\Ares\Model\Squadron" mapped-by="commander" />
+
+		<field name="name" column="name" type="string" length="45" />
+		<field name="comment" column="comment" type="text" nullable="true" />
+		<field name="sexe" column="sexe" type="smallint">
+			<options>
+				<option name="default">1</option>
+			</options>
+		</field>
+		<field name="age" column="age" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">20</option>
+			</options>
+		</field>
+		<field name="avatar" column="avatar" type="string" length="20" />
+		<field name="level" column="level" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">1</option>
+			</options>
+		</field>
+		<field name="experience" column="experience" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">1</option>
+			</options>
+		</field>
+		<field name="palmares" column="palmares" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="statement" column="statement" type="smallint">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="line" column="line" type="smallint" nullable="true">
+			<options>
+				<option name="unsigned">true</option>
+			</options>
+		</field>
+		<field name="departedAt" type="datetime_immutable" nullable="true" />
+		<field name="arrivedAt" type="datetime_immutable" nullable="true" />
+		<field name="enlistedAt" type="datetime_immutable" nullable="true" />
+		<field name="assignedAt" type="datetime_immutable" nullable="true" />
+		<field name="diedAt" type="datetime_immutable" nullable="true" />
+		<field name="updatedAt" type="datetime_immutable" nullable="true" />
+		<field name="resources" column="resources" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+				<option name="default">0</option>
+			</options>
+		</field>
+		<field name="travelType" column="travelType" type="smallint" nullable="true">
+			<options>
+				<option name="unsigned">true</option>
+			</options>
+		</field>
+	</entity>
+</doctrine-mapping>

@@ -2,64 +2,74 @@
 
 namespace App\Modules\Atlas\Repository;
 
-use App\Classes\Entity\AbstractRepository;
-use App\Classes\Library\Utils;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Ares\Model\Report;
+use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
 use App\Modules\Atlas\Model\PlayerRanking;
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
 
-class PlayerRankingRepository extends AbstractRepository
+class PlayerRankingRepository extends DoctrineRepository implements PlayerRankingRepositoryInterface
 {
-	public function getFactionPlayerRankings(Color $faction)
+	public function __construct(ManagerRegistry $registry)
 	{
-		$statement = $this->connection->prepare(
-			'SELECT p.id as player_id, p.rColor as player_faction_id, pr.id as player_ranking_id, pr.general as player_general_ranking 
-			FROM player p
-			RIGHT JOIN playerRanking pr ON pr.rPlayer = p.id
-			WHERE p.rColor = :faction_id'
-		);
-		$statement->execute(['faction_id' => $faction->getId()]);
-
-		return $this->formatPlayerData($statement);
+		parent::__construct($registry, PlayerRanking::class);
 	}
 
-	public function getAttackersButcherRanking()
+	public function getFactionPlayerRankings(Color $faction): array
 	{
-		return $this->connection->query(
-			'SELECT
-				p.id AS player,
-				(SUM(pevInBeginA) - SUM(`pevAtEndA`)) AS lostPEV,
-				(SUM(pevInBeginD) - SUM(`pevAtEndD`)) AS destroyedPEV
-			FROM report AS r
-			RIGHT JOIN player AS p
-				ON p.id = r.rPlayerAttacker
-			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
-			GROUP BY p.id
-			ORDER BY p.id'
-		);
+		$qb = $this->createQueryBuilder('pr');
+
+		$qb
+			->join('pr.player', 'p')
+			->where('p.faction = :faction')
+			->setParameter('faction', $faction);
+
+		return $qb->getQuery()->getResult();
 	}
 
-	public function getDefendersButcherRanking()
+	public function getAttackersButcherRanking(): array
 	{
-		return $this->connection->query(
-			'SELECT
-				p.id AS player,
-				(SUM(pevInBeginD) - SUM(`pevAtEndD`)) AS lostPEV,
-				(SUM(pevInBeginA) - SUM(`pevAtEndA`)) AS destroyedPEV,
-				((SUM(pevInBeginD) - SUM(`pevAtEndD`)) - (SUM(pevInBeginA) - SUM(`pevAtEndA`))) AS score
-			FROM report AS r
-			RIGHT JOIN player AS p
-				ON p.id = r.rPlayerDefender
-			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
-			GROUP BY p.id
-			ORDER BY p.id'
-		);
+		$qb = $this->getEntityManager()->createQueryBuilder();
+
+		$qb->select([
+			'p.id as player_id',
+			'(SUM(r.attackerPevAtBeginning) - SUM(r.attackerPevAtEnd)) AS lostPEV',
+			'(SUM(r.defenderPevAtBeginning) - SUM(r.defenderPevAtEnd)) AS destroyedPEV',
+		])
+			->from(Report::class, 'r')
+			->leftJoin('r.player', 'p')
+			->where($qb->expr()->in('p.statement', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]))
+			->groupBy('p.id')
+			->orderBy('p.id', 'ASC');
+
+		return $qb->getQuery()->getResult();
 	}
 
-	public function getPlayersResources()
+	public function getDefendersButcherRanking(): array
 	{
-		return $this->connection->query(
+		$qb = $this->getEntityManager()->createQueryBuilder();
+
+		$qb->select([
+			'p.id as player_id',
+			'(SUM(r.pevInBeginD) - SUM(r.pevAtEndD)) AS lostPEV',
+			'(SUM(r.pevInBeginA) - SUM(r.pevAtEndA)) AS destroyedPEV',
+			'(SUM(r.pevInBeginD) - SUM(r.pevAtEndD) - SUM(r.pevInBeginA) - SUM(r.pevAtEndA)) AS score',
+		])
+			->from(Report::class, 'r')
+			->leftJoin('r.player', 'p')
+			->where($qb->expr()->in('p.statement', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]))
+			->groupBy('p.id')
+			->orderBy('p.id', 'ASC');
+
+		return $qb->getQuery()->getResult();
+	}
+
+	public function getPlayersResources(): array
+	{
+		return $this->getEntityManager()->getConnection()->query(
 			'SELECT p.id AS player,
 				ob.levelRefinery AS levelRefinery,
 				pl.coefResources AS coefResources
@@ -72,9 +82,9 @@ class PlayerRankingRepository extends AbstractRepository
 		);
 	}
 
-	public function getPlayersResourcesData()
+	public function getPlayersResourcesData(): array
 	{
-		return $this->connection->query(
+		return $this->getEntityManager()->getConnection()->query(
 			'SELECT 
 				p.id AS player,
 				SUM(ob.resourcesStorage) AS sumResources
@@ -86,9 +96,9 @@ class PlayerRankingRepository extends AbstractRepository
 		);
 	}
 
-	public function getPlayersGeneralData()
+	public function getPlayersGeneralData(): array
 	{
-		return $this->connection->query(
+		return $this->getEntityManager()->getConnection()->query(
 			'SELECT 
 				p.id AS player,
 				SUM(ob.points) AS points,
@@ -113,9 +123,9 @@ class PlayerRankingRepository extends AbstractRepository
 		);
 	}
 
-	public function getPlayersArmiesData()
+	public function getPlayersArmiesData(): array
 	{
-		return $this->connection->query(
+		return $this->getEntityManager()->getConnection()->query(
 			'SELECT 
 				p.id AS player,
 				SUM(sq.ship0) as s0,
@@ -140,9 +150,9 @@ class PlayerRankingRepository extends AbstractRepository
 		);
 	}
 
-	public function getPlayersPlanetData()
+	public function getPlayersPlanetData(): array
 	{
-		return $this->connection->query(
+		return $this->getEntityManager()->getConnection()->query(
 			'SELECT 
 				p.id AS player,
 				COUNT(ob.rPlace) AS sumPlanets
@@ -154,9 +164,9 @@ class PlayerRankingRepository extends AbstractRepository
 		);
 	}
 
-	public function getPlayersTradeRoutes()
+	public function getPlayersTradeRoutes(): array
 	{
-		return $this->connection->query(
+		return $this->getEntityManager()->getConnection()->query(
 			'SELECT 
 				p.id AS player,
 				SUM(income) AS income
@@ -171,83 +181,20 @@ class PlayerRankingRepository extends AbstractRepository
 		);
 	}
 
-	public function getPlayersLinkedTradeRoutes()
+	public function getPlayersLinkedTradeRoutes(): array
 	{
-		return $this->connection->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
 				p.id AS player,
 				SUM(income) AS income
 			FROM `commercialRoute` AS c
 			LEFT JOIN orbitalBase AS o
-				ON o.rPlace = c.rOrbitalBaseLinked
+				ON o.place = c.destinationBase
 				RIGHT JOIN player AS p
-					ON p.id = o.rPlayer
+					ON p.id = o.player
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
-		);
-	}
-
-	public function insert($ranking)
-	{
-	}
-
-	public function insertDataAnalysis(Player $player, PlayerRanking $playerRanking, $resources, $planetNumber)
-	{
-		$statement = $this->connection->prepare(
-			'INSERT INTO 
-			DA_PlayerDaily(rPlayer, credit, experience, level, victory, defeat, status, resources, fleetSize, nbPlanet, planetPoints, rkGeneral, rkFighter, rkProducer, rkButcher, rkTrader, dStorage)
-			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-		);
-		$statement->execute([
-			$player->id,
-			$player->credit,
-			$player->experience,
-			$player->level,
-			$player->victory,
-			$player->defeat,
-			$player->status,
-			$resources,
-			$pr->armies,
-			$planetNumber,
-			$pr->general / $planetNumber,
-			$pr->general,
-			$pr->fight,
-			$pr->resources,
-			$pr->butcher,
-			$pr->trader,
-			Utils::now(),
-		]);
-	}
-
-	public function update($ranking)
-	{
-	}
-
-	public function remove($ranking)
-	{
-	}
-
-	public function formatPlayerData($statement)
-	{
-		$results = [];
-		$currentPlayer = null;
-		while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-			if (!$currentPlayer instanceof Player || $currentPlayer->getId() !== (int) $row['player_id']) {
-				$currentPlayer =
-					(new Player())
-					->setId((int) $row['player_id'])
-					->setRColor((int) $row['player_faction_id'])
-				;
-			}
-			$results[] =
-				(new PlayerRanking())
-				->setId((int) $row['player_ranking_id'])
-				->setPlayer($currentPlayer)
-				->setGeneral((int) $row['player_general_ranking'])
-			;
-		}
-
-		return $results;
+		)->fetchAllAssociative();
 	}
 }

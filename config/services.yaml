@@ -9,6 +9,7 @@ imports:
     - { resource: ../src/Modules/Hermes/Resource/config/config.yml }
     - { resource: ../src/Modules/Promethee/Resource/config/config.yml }
     - { resource: ../src/Modules/Zeus/Resource/config/config.yml }
+
 parameters:
     # définition des ROOT
     app_root: '%env(APP_ROOT)%'
@@ -166,91 +167,10 @@ services:
         resource: '../src/Shared/Infrastructure/Controller/'
         tags: ['controller.service_arguments']
 
-    App\Classes\Database\Database:
-        public: true
-        arguments:
-            $host: "%database_host%"
-            $name: "%database_name%"
-            $user: "%database_user%"
-            $password: "%database_password%"
-
-    App\Classes\Database\DatabaseAdmin:
-        arguments:
-            $host: "%database_host%"
-            $name: "%database_name%"
-            $user: "%database_admin_user%"
-            $password: "%database_admin_password%"
-
-    Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection:
-        factory: ['Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection', 'fromDsn']
-        arguments: ['%env(RABBITMQ_DSN)%']
-
-    Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpReceiver: ~
-
-    App\Classes\Messenger\SendersLocator:
-        factory: ['App\Classes\Messenger\SendersLocator', 'instanciate']
-
-    messenger.default_bus:
-        class: Symfony\Component\Messenger\MessageBus
-        factory: ['App\Classes\Messenger\BusFactory', 'createBus']
-        arguments:
-            $handlersLocator: '@messenger.default_bus.messenger.handlers_locator'
-            $enableLogs: '%messenger_logs%'
-        tags:
-            - { name: 'messenger.bus' }
-
-    Symfony\Component\Messenger\MessageBusInterface:
-        alias: 'messenger.default_bus'
-
-    Symfony\Component\Messenger\Worker:
-        public: true
-        arguments:
-            $receivers: ['@Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpReceiver']
-
-    App\Classes\Library\Session\SessionWrapper: ~
-
     App\Classes\Scheduler\CyclicActionScheduler:
         public: true
         arguments:
             $dailyScriptHour: "%daily_script_hour%"
-
-    App\Classes\Router\Router:
-        arguments:
-            $appRoot: '%app_root%'
-            $rootPath: '%kernel.project_dir%'
-            $getOutRoot: "%getout_root%"
-            $actionPath: '%action%'
-            $ajaxPath: '%ajax%'
-            $connectionPath: '%connection%'
-            $registrationPath: '%inscription%'
-            $bufferPath: '%buffer%'
-            $apiPath: '%api%'
-            $templatePath: '%template%'
-            $scriptPath: '%script%'
-            $pagesPath: '%pages%'
-            $eventPath: '%event%'
-
-    App\Classes\Library\Http\RequestFactory: ~
-
-    App\Classes\Library\Http\ResponseFactory:
-
-    App\Classes\Daemon\ClientManager:
-        arguments:
-            $sessionLifetime: "%session_lifetime%"
-
-    App\Classes\Templating\Renderer: ~
-
-    App\Classes\Entity\EntityManager:
-        public: true
-
-    App\Classes\Logger\ConsoleLogger: ~
-
-    App\Classes\Logger\FileLogger:
-        arguments:
-            $logDirectory: "%log_directory%"
-            $logRotation: "%log_rotation%"
-
-    Psr\Log\LoggerInterface: '@App\Classes\Logger\ConsoleLogger'
 
     App\Classes\Library\Parser:
         arguments:
@@ -268,19 +188,12 @@ services:
             $serverKey: "%security_server_key%"
             $iv: "%security_iv%"
 
-    App\Classes\Memory\MemoryManager: ~
-
     App\Classes\Redis\RedisManager:
         arguments:
             $host: '%env(REDIS_HOST)%'
             $port: '%env(int:REDIS_PORT)%'
             $password: '%env(default::REDIS_PASSWORD)%'
             $timeout: "%redis_timeout%"
-
-    App\Classes\EventSubscriber\ExceptionSubscriber:
-        arguments:
-            $templatePath: '%template%'
-        tags: ['kernel.event_subscriber']
 
     App\Shared\Infrastructure\EventListener\MixpanelListener:
         arguments:

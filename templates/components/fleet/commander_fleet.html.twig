@@ -37,7 +37,8 @@
 														<em>---</em>
 													</span>
 												{% else %}
-													{% set pev = commander.getSquadron(k).pev %}
+													{% set squadron = commander.getSquadron(k) %}
+													{% set pev = squadron is not null ? squadron.pev : 0 %}
 													{% if pev == 0 %}
 														{% set full = 'full0' %}
 													{% elseif pev < 50 %}
@@ -50,7 +51,7 @@
 
 													<span class="block squadron {{ full }}"
 														data-squadron-id="{{ nbr - 1 }}"
-														data-squadron-ships="[{{ commander.getSquadron(k).arrayOfShips|join(',') }}]"
+														data-squadron-ships="{{ (squadron is not null ? squadron.getShips() : range(0, 11)|map(v => 0))|json_encode() }}"
 														data-squadron-pev="{{ pev }}"
 													>
 														<strong>{{ nbr }}</strong>
@@ -79,7 +80,7 @@
 
 	{% if commander.isAffected %}
 		<div class="component commander-fleet baseTransfer"
-			data-base="{{ commander.rBase }}"
+			data-base="{{ commander.base.id }}"
 			data-commander="{{ commander.id }}">
 			<div class="head skin-3">
 				<img class="left" src="{{ asset('build/media/fleet/commanders.png') }}" alt="/" />
@@ -100,10 +101,11 @@
 					</div>
 					<div class="list-ship dock">
 						{% for i in range(0, 11) %}
-							<a href="#" {% if dock_storage[i] == 0 %}class="empty"{% endif %} data-ship-id="{{ i }}">
+							{% set storage = dock_storage[i] ?? 0 %}
+							<a href="#" {% if storage == 0 %}class="empty"{% endif %} data-ship-id="{{ i }}">
 								<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
 								<span class="text">
-									<span class="quantity">{{ dock_storage[i] }}</span>
+									<span class="quantity">{{ storage }}</span>
 									<span>{{ get_ship_info(i, 'codeName') }}</span>
 								</span>
 							</a>

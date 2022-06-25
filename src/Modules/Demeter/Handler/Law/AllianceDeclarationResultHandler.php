@@ -2,35 +2,34 @@
 
 namespace App\Modules\Demeter\Handler\Law;
 
-use App\Classes\Entity\EntityManager;
 use App\Modules\Athena\Manager\CommercialRouteManager;
-use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Law\LawManager;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
 use App\Modules\Demeter\Message\Law\AllianceDeclarationResultMessage;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Law\Law;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class AllianceDeclarationResultHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class AllianceDeclarationResultHandler
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected ColorManager $colorManager,
-		protected CommercialRouteManager $commercialRouteManager,
-		protected LawManager $lawManager,
+		private ColorRepositoryInterface $colorRepository,
+		private CommercialRouteManager $commercialRouteManager,
+		private LawRepositoryInterface $lawRepository,
 	) {
 	}
 
 	public function __invoke(AllianceDeclarationResultMessage $message): void
 	{
-		$law = $this->lawManager->get($message->getLawId());
-		$color = $this->colorManager->get($law->getFactionId());
-		$enemyColor = $this->colorManager->get($law->options['rColor']);
+		$law = $this->lawRepository->get($message->getLawId());
+		$color = $law->faction;
+		$enemyColor = $this->colorRepository->get($law->options['rColor']);
 
 		$color->colorLink[$law->options['rColor']] = Color::ALLY;
 		$law->statement = Law::OBSOLETE;
 		$this->commercialRouteManager->freezeRoute($color, $enemyColor);
-		$this->entityManager->flush($color);
-		$this->entityManager->flush($law);
+		$this->colorRepository->save($color);
+		$this->lawRepository->save($law);
 	}
 }

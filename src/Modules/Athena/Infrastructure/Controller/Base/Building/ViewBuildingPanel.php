@@ -5,6 +5,7 @@ namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 use App\Classes\Library\Chronos;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
+use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
@@ -15,6 +16,7 @@ class ViewBuildingPanel extends AbstractController
 {
 	public function __invoke(
 		OrbitalBase $currentBase,
+		BuildingLevelHandler $buildingLevelHandler,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		int $identifier,
 	): Response {
@@ -22,7 +24,7 @@ class ViewBuildingPanel extends AbstractController
 			throw $this->createNotFoundException('This building does not exist');
 		}
 
-		$currentLevel = $currentBase->getBuildingLevel($identifier);
+		$currentLevel = $buildingLevelHandler->getBuildingLevel($currentBase, $identifier);
 		$max = $orbitalBaseHelper->getBuildingInfo($identifier, 'maxLevel', OrbitalBase::TYP_CAPITAL);
 
 		$noteQuantity = 0;

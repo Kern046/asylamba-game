@@ -10,6 +10,7 @@ use App\Modules\Demeter\Manager\Election\ElectionManager;
 use App\Modules\Demeter\Manager\Election\VoteManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Vote;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,25 +22,24 @@ class VoteForCandidate extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		ColorManager $colorManager,
 		VoteManager $voteManager,
-		PlayerManager $playerManager,
+		PlayerRepositoryInterface $playerRepository,
 		ElectionManager $electionManager,
 		CandidateManager $candidateManager,
 		int $electionId,
 		int $candidateId,
 	): Response {
-		$leader = $playerManager->getFactionLeader($currentPlayer->getRColor());
+		$leader = $playerRepository->getFactionLeader($currentPlayer->getRColor());
 
 		if (0 == $candidateId) {
 			$candidateId = $leader->id;
 		}
 
 		if (($election = $electionManager->get($electionId)) !== null) {
-			if (($candidateManager->getByElectionAndPlayer($election, $playerManager->get($candidateId))) !== null || $leader->id == $candidateId) {
+			if (($candidateManager->getByElectionAndPlayer($election, $playerRepository->get($candidateId))) !== null || $leader->id == $candidateId) {
 				if ($election->rColor == $currentPlayer->getRColor()) {
 					if (($voteManager->getPlayerVote($currentPlayer, $election)) === null) {
-						$faction = $colorManager->get($currentPlayer->getRColor());
+						$faction = $currentPlayer->getRColor();
 
 						if (Color::ELECTION == $faction->electionStatement) {
 							$vote = new Vote();

@@ -2,6 +2,8 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
+use App\Modules\Ares\Model\Ship;
+use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Helper\ShipHelper;
 use App\Modules\Athena\Manager\ShipQueueManager;
@@ -9,6 +11,7 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Model\Technology;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
@@ -26,40 +29,40 @@ class ViewDocks extends AbstractController
 		OrbitalBase $currentBase,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		Player $currentPlayer,
-		ShipQueueManager $shipQueueManager,
-		TechnologyManager $technologyManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
+		ShipQueueRepositoryInterface $shipQueueRepository,
+		TechnologyRepositoryInterface $technologyRepository,
 		ShipHelper $shipHelper,
 		string $dockType,
 	): Response {
 		$playerBonuses = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses;
 
 		if (OrbitalBase::DOCK_TYPE_MANUFACTURE === $dockType) {
-			$dockLevel = $currentBase->getLevelDock1();
+			$dockLevel = $currentBase->levelDock1;
 			$buildingNumber = OrbitalBaseResource::DOCK1;
 			$dockSpeedBonus = $playerBonuses->get(PlayerBonusId::DOCK1_SPEED);
-			$shipsRange = range(0, 5);
+			$shipsRange = range(Ship::TYPE_PEGASE, Ship::TYPE_MEDUSE);
 			$dockType = 1;
 		} elseif (OrbitalBase::DOCK_TYPE_SHIPYARD === $dockType) {
-			$dockLevel = $currentBase->getLevelDock2();
+			$dockLevel = $currentBase->levelDock2;
 			$buildingNumber = OrbitalBaseResource::DOCK2;
 			$dockSpeedBonus = $playerBonuses->get(PlayerBonusId::DOCK2_SPEED);
-			$shipsRange = range(6, 11);
+			$shipsRange = range(Ship::TYPE_GRIFFON, Ship::TYPE_PHENIX);
 			$dockType = 2;
 		} else {
 			throw new BadRequestHttpException('Invalid dock type');
 		}
-		$shipQueues = $shipQueueManager->getByBaseAndDockType($currentBase->getRPlace(), $dockType);
+		$shipQueues = $shipQueueRepository->getByBaseAndDockType($currentBase, $dockType);
 		$nbShipQueues = count($shipQueues);
-		$technology = $technologyManager->getPlayerTechnology($currentPlayer->getId());
+		$technology = $technologyRepository->getPlayerTechnology($currentPlayer);
 
 		// place dans le hangar
 		$totalSpace = $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'storageSpace');
-		$storage = $currentBase->getShipStorage();
+		$storage = $currentBase->shipStorage;
 		$inStorage = 0;
 
 		foreach ($shipsRange as $m) {
-			$inStorage += ShipResource::getInfo($m, 'pev') * $storage[$m];
+			$inStorage += ShipResource::getInfo($m, 'pev') * ($storage[$m] ?? 0);
 		}
 
 		$inQueue = 0;
@@ -117,12 +120,12 @@ class ViewDocks extends AbstractController
 
 		foreach ($range as $i) {
 			// calcul du nombre de vaisseaux max
-			$maxShipResource = floor($currentBase->getResourcesStorage() / ShipResource::getInfo($i, 'resourcePrice'));
-			if (ColorResource::EMPIRE === $currentPlayer->getRColor() && in_array($i, [ShipResource::CERBERE, ShipResource::PHENIX])) {
+			$maxShipResource = floor($currentBase->resourcesStorage / ShipResource::getInfo($i, 'resourcePrice'));
+			if (ColorResource::EMPIRE === $currentPlayer->faction->identifier && in_array($i, [ShipResource::CERBERE, ShipResource::PHENIX])) {
 				// bonus if the player is from the Empire
 				$resourcePrice = ShipResource::getInfo($i, 'resourcePrice');
 				$resourcePrice -= round($resourcePrice * ColorResource::BONUS_EMPIRE_CRUISER / 100);
-				$maxShipResource = floor($currentBase->getResourcesStorage() / $resourcePrice);
+				$maxShipResource = floor($currentBase->resourcesStorage / $resourcePrice);
 			}
 			$maxShipResource = ($maxShipResource < 100) ? $maxShipResource : 99;
 			$maxShipPev = $totalSpace - $inStorage - $inQueue;

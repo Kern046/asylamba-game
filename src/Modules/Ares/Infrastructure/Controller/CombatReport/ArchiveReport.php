@@ -2,31 +2,30 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\CombatReport;
 
-use App\Classes\Entity\EntityManager;
-use App\Modules\Ares\Manager\ReportManager;
+use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
 use App\Modules\Ares\Model\Report;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class ArchiveReport extends AbstractController
 {
 	public function __invoke(
 		Player $currentPlayer,
-		ReportManager $reportManager,
-		EntityManager $entityManager,
-		int $id
+		ReportRepositoryInterface $reportRepository,
+		Uuid $id
 	): Response {
-		if (($report = $reportManager->get($id)) !== null) {
-			if ($currentPlayer->getId() == $report->rPlayerAttacker) {
-				if (Report::STANDARD == $report->statementAttacker) {
+		if (($report = $reportRepository->get($id)) !== null) {
+			if ($currentPlayer->id === $report->rPlayerAttacker) {
+				if (Report::STANDARD === $report->statementAttacker) {
 					$report->statementAttacker = Report::ARCHIVED;
 				} else {
 					$report->statementAttacker = Report::STANDARD;
 				}
-			} elseif ($currentPlayer->getId() == $report->rPlayerDefender) {
+			} elseif ($currentPlayer->id === $report->rPlayerDefender) {
 				if (Report::STANDARD == $report->statementDefender) {
 					$report->statementDefender = Report::ARCHIVED;
 				} else {
@@ -38,7 +37,7 @@ class ArchiveReport extends AbstractController
 		} else {
 			throw new NotFoundHttpException('Ce rapport n\'existe pas.');
 		}
-		$entityManager->flush();
+		$reportRepository->save($report);
 
 		return $this->redirectToRoute('fleet_archives');
 	}

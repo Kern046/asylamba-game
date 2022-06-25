@@ -2,62 +2,75 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
-use App\Classes\Exception\FormException;
+use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
 use App\Modules\Ares\Domain\Event\Fleet\SquadronUpdateEvent;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
+use App\Modules\Ares\Domain\Repository\SquadronRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
-use App\Modules\Ares\Model\Commander;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class UpdateSquadron extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		OrbitalBaseManager $orbitalBaseManager,
+		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		CommanderManager $commanderManager,
+		CommanderArmyHandler $commanderArmyHandler,
+		CommanderRepositoryInterface $commanderRepository,
+		SquadronRepositoryInterface $squadronRepository,
 		EventDispatcherInterface $eventDispatcher,
-		EntityManager $entityManager,
-		int $id,
+		EntityManagerInterface $entityManager,
+		Uuid $id,
 		int $squadronId,
 	): Response {
 		$payload = $request->toArray();
 
 		if (empty($payload['army']) || empty($payload['base_id'])) {
-			throw new FormException('Pas assez d\'informations pour assigner un vaisseau.');
+			throw new BadRequestHttpException('Pas assez d\'informations pour assigner un vaisseau.');
 		}
 
 		$newSquadron = array_map(fn ($el) => $el > 0 ? (int) $el : 0, $payload['army']);
 
 		if (12 !== count($newSquadron)) {
-			throw new FormException('Pas assez d\'informations pour assigner un vaisseau.');
+			throw new BadRequestHttpException('Pas assez d\'informations pour assigner un vaisseau.');
 		}
 
-		$commander = $commanderManager->get($id);
-		$base = $orbitalBaseManager->get($payload['base_id']);
-
-		if (null === $commander || null === $base || $commander->rBase !== $base->getId() || Commander::AFFECTED !== $commander->statement) {
-			throw new ErrorException('Erreur dans les références du commandant ou de la base.');
+		$commander = $commanderRepository->get($id) ?? throw $this->createNotFoundException('Commander not found');
+		if (!Uuid::isValid($payload['base_id'])) {
+			throw new BadRequestHttpException('Invalid UUID given for base ID');
 		}
+
+		$base = $orbitalBaseRepository->get(Uuid::fromString($payload['base_id'])) ?? throw $this->createNotFoundException('Base not found');
+
+		// TODO add check on belonging player for multifleet
+		if ($commander->base->id !== $base->id) {
+			throw new ConflictHttpException('This commander is not located on this base');
+		}
+
+		if (!$commander->isAffected()) {
+			throw new BadRequestHttpException('This commander is not in orbit.');
+		}
+
+		$commanderArmyHandler->setArmy($commander);
 		$squadron = $commander->getSquadron($squadronId);
 
-		if (false === $squadron) {
-			throw new ErrorException('Erreur dans les références du commandant ou de la base.');
-		}
+		$squadronSHIP = $squadron->getShips();
+		$baseSHIP = $base->getShipStorage();
 
-		$squadronSHIP = $squadron->arrayOfShips;
-		$baseSHIP = $base->shipStorage;
-
-		foreach ($newSquadron as $i => $v) {
-			$baseSHIP[$i] -= ($v - $squadronSHIP[$i]);
-			$squadronSHIP[$i] = $v;
+		foreach ($newSquadron as $shipNumber => $quantity) {
+			$baseSHIP[$shipNumber] -= ($quantity - $squadronSHIP[$shipNumber]);
+			$squadronSHIP[$shipNumber] = $quantity;
 		}
 
 		// token de vérification
@@ -82,15 +95,16 @@ class UpdateSquadron extends AbstractController
 		}
 
 		if (!$baseOK || !$squadronOK || $totalPEV > 100) {
-			throw new ErrorException('Erreur dans la répartition des vaisseaux.');
+			throw new BadRequestHttpException('Erreur dans la répartition des vaisseaux.');
 		}
 
 		$base->shipStorage = $baseSHIP;
-		$commander->getSquadron($squadronId)->arrayOfShips = $squadronSHIP;
+		$squadron->setShips($squadronSHIP);
 
-		$entityManager->flush();
+		$orbitalBaseRepository->save($base);
+		$squadronRepository->save($squadron);
 
-		$eventDispatcher->dispatch(new SquadronUpdateEvent($commander, $commander->getSquadron($squadronId), $currentPlayer));
+		$eventDispatcher->dispatch(new SquadronUpdateEvent($commander, $squadron, $currentPlayer));
 
 		return new Response('', Response::HTTP_NO_CONTENT);
 	}

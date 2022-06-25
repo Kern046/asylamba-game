@@ -2,6 +2,8 @@
 
 namespace App\Modules\Atlas\Message;
 
-class FactionRankingMessage
+use App\Shared\Domain\Message\AsyncMessage;
+
+class FactionRankingMessage implements AsyncMessage
 {
 }

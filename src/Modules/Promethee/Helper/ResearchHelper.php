@@ -2,18 +2,18 @@
 
 namespace App\Modules\Promethee\Helper;
 
-use App\Classes\Exception\ErrorException;
+use App\Modules\Promethee\Model\Research;
 use App\Modules\Promethee\Resource\ResearchResource;
 
-class ResearchHelper
+readonly class ResearchHelper
 {
 	public function __construct(
-		protected int $researchCoeff,
-		protected int $researchMaxDiff
+		private float $researchCoeff,
+		private int $researchMaxDiff
 	) {
 	}
 
-	public function isAResearch($research)
+	public function isAResearch(int $research): bool
 	{
 		return in_array($research, ResearchResource::$availableResearch);
 	}
@@ -28,13 +28,13 @@ class ResearchHelper
 					return false;
 				}
 				if ('price' == $sup) {
-					return $this->researchPrice($research, $level) * $this->researchCoeff;
+					return intval(round($this->researchPrice($research, $level) * $this->researchCoeff));
 				}
 			} else {
-				throw new ErrorException('Wrong second argument for method getInfo() from ResearchResource');
+				throw new \RuntimeException('Wrong second argument for method getInfo() from ResearchResource');
 			}
 		} else {
-			throw new ErrorException('This research doesn\'t exist !');
+			throw new \RuntimeException('This research doesn\'t exist !');
 		}
 
 		return false;
@@ -62,82 +62,36 @@ class ResearchHelper
 		}
 	}
 
-	private function researchPrice($research, $level)
+	public function researchPrice(int $research, int $level): int
 	{
-		switch ($research) {
-			case 0 :
-				if (1 == $level) {
-					return 100;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-					// ancienne : return round((-4451.2 * pow($level, 3)) + (138360 * pow($level, 2)) - (526711 * $level) + 589669);
-				}
-				break;
-			case 1 :
-				if (1 == $level) {
-					return 3000;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 2 :
-				if (1 == $level) {
-					return 7000;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 3 :
-				if (1 == $level) {
-					return 200;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 4 :
-				if (1 == $level) {
-					return 9000;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 5 :
-				if (1 == $level) {
-					return 200;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 6 :
-				if (1 == $level) {
-					return 9000;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 7 :
-				if (1 == $level) {
-					return 200;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 8 :
-				if (1 == $level) {
-					return 4000;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			case 9 :
-				if (1 == $level) {
-					return 6000;
-				} else {
-					return round((0.0901 * pow($level, 5)) - (12.988 * pow($level, 4)) + (579.8 * pow($level, 3)) - (5735.8 * pow($level, 2)) + (28259 * $level) - 25426);
-				}
-				break;
-			default:
-				return false;
-		}
+		return (1 === $level)
+			? $this->getDefaultResearchPrice($research)
+			: $this->calculateLevelPrice($level);
+	}
+
+	private function calculateLevelPrice(int $level): int
+	{
+		return round(
+			(0.0901 * pow($level, 5))
+			- (12.988 * pow($level, 4))
+			+ (579.8 * pow($level, 3))
+			- (5735.8 * pow($level, 2))
+			+ (28259 * $level)
+			- 25426
+		);
+	}
+
+	private function getDefaultResearchPrice(int $research): int
+	{
+		return match ($research) {
+			Research::MATH => 100,
+			Research::PHYS => 3000,
+			Research::CHEM => 7000,
+			Research::LAW, Research::ECONO, Research::NETWORK => 200,
+			Research::COMM, Research::PSYCHO => 9000,
+			Research::ALGO => 4000,
+			Research::STAT => 6000,
+			default => throw new \RuntimeException(sprintf('Invalid research identifier given: %d', $research)),
+		};
 	}
 }

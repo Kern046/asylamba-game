@@ -2,8 +2,10 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
@@ -22,31 +24,30 @@ class ViewSpatioport extends AbstractController
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		OrbitalBase $currentBase,
 		CommercialRouteManager $commercialRouteManager,
+		CommercialRouteRepositoryInterface $commercialRouteRepository,
 		ColorManager $colorManager,
+		ColorRepositoryInterface $colorRepository,
 	): Response {
 		$mode = $request->query->get('mode', 'list');
 
-		$inGameFactions = $colorManager->getInGameFactions();
+		$inGameFactions = $colorRepository->getInGameFactions();
 
 		return $this->render('pages/athena/spatioport.html.twig', [
-			'routes' => array_merge(
-				$commercialRouteManager->getByBase($currentBase->getId()),
-				$commercialRouteManager->getByDistantBase($currentBase->getId())
-			),
+			'routes' => $commercialRouteRepository->getBaseRoutes($currentBase),
 			'routes_data' => $commercialRouteManager->getBaseCommercialData($currentBase),
 			'player_commercial_income_bonus' => $currentPlayerBonusRegistry
 				->getPlayerBonus()->bonuses->get(PlayerBonusId::COMMERCIAL_INCOME),
 			'negora_commercial_bonus' => ColorResource::BONUS_NEGORA_ROUTE,
-			'is_player_from_negora' => ColorResource::NEGORA === $currentPlayer->getRColor(),
+			'is_player_from_negora' => ColorResource::NEGORA === $currentPlayer->faction->identifier,
 			'in_game_factions' => $inGameFactions,
 			'mode' => $mode,
 			'search_results' => ('search' === $mode && 'POST' === $request->getMethod())
-				? $commercialRouteManager->searchCandidates(
-					$currentPlayer->getId(),
+				? $commercialRouteRepository->searchCandidates(
+					$currentPlayer,
 					$currentBase,
 					array_reduce($inGameFactions, function (array $carry, Color $faction) use ($request) {
-						if ($request->request->has('faction-'.$faction->getId())) {
-							$carry[] = $faction->getId();
+						if ($request->request->has('faction-'.$faction->identifier)) {
+							$carry[] = $faction->identifier;
 						}
 
 						return $carry;

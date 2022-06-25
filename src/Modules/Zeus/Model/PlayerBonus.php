@@ -12,6 +12,7 @@
 namespace App\Modules\Zeus\Model;
 
 use App\Classes\Container\StackList;
+use App\Modules\Demeter\Model\Color;
 use App\Modules\Promethee\Model\Technology;
 
 class PlayerBonus
@@ -19,12 +20,12 @@ class PlayerBonus
 	public int $rPlayer;
 	public Technology $technology;
 	public StackList $bonuses;
-	public int $playerColor;
+	public Color $playerColor;
 
 	public function __construct(Player $player, Technology $technology)
 	{
 		$this->rPlayer = $player->id;
-		$this->playerColor = $player->rColor;
+		$this->playerColor = $player->faction;
 		$this->technology = $technology;
 		$this->bonuses = new StackList();
 	}

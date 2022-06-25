@@ -2,31 +2,27 @@
 
 namespace App\Modules\Athena\Handler\Building;
 
-use App\Classes\Daemon\ClientManager;
-use App\Classes\Entity\EntityManager;
-use App\Classes\Library\Flashbag;
-use App\Classes\Library\Format;
-use App\Classes\Library\Session\SessionWrapper;
+use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
+use App\Modules\Athena\Application\Handler\OrbitalBasePointsHandler;
+use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\BuildingQueueManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Message\Building\BuildingQueueMessage;
-use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Zeus\Manager\PlayerManager;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class BuildingQueueHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class BuildingQueueHandler
 {
 	public function __construct(
-		protected BuildingQueueManager $buildingQueueManager,
-		protected PlayerManager $playerManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected OrbitalBaseHelper $orbitalBaseHelper,
-		protected EntityManager $entityManager,
-		protected SessionWrapper $sessionWrapper,
-		protected ClientManager $clientManager,
-		protected LoggerInterface $logger,
+		private PlayerManager                    $playerManager,
+		private OrbitalBasePointsHandler         $orbitalBasePointsHandler,
+		private OrbitalBaseRepositoryInterface   $orbitalBaseRepository,
+		private BuildingQueueRepositoryInterface $buildingQueueRepository,
+		private OrbitalBaseHelper                $orbitalBaseHelper,
+		private BuildingLevelHandler             $buildingLevelHandler,
+		private LoggerInterface                  $logger,
 	) {
 	}
 
@@ -35,20 +31,14 @@ class BuildingQueueHandler implements MessageHandlerInterface
 		$this->logger->info('Handle building completion for queue {queueId}', [
 			'queueId' => $message->getBuildingQueueId(),
 		]);
-		if (null === ($queue = $this->buildingQueueManager->get($message->getBuildingQueueId()))) {
+		if (null === ($queue = $this->buildingQueueRepository->get($message->getBuildingQueueId()))) {
 			return;
 		}
-		$orbitalBase = $this->orbitalBaseManager->get($queue->rOrbitalBase);
-		$player = $this->playerManager->get($orbitalBase->rPlayer);
-		// update builded building
-		$orbitalBase->setBuildingLevel($queue->buildingNumber, ($orbitalBase->getBuildingLevel($queue->buildingNumber) + 1));
-		// update the points of the orbitalBase
-		$earnedPoints = $this->orbitalBaseManager->updatePoints($orbitalBase);
-		$this->entityManager->getRepository(OrbitalBase::class)->increaseBuildingLevel(
-			$orbitalBase,
-			$this->orbitalBaseHelper->getBuildingInfo($queue->buildingNumber, 'column'),
-			$earnedPoints
-		);
+		$orbitalBase = $queue->base;
+		$player = $orbitalBase->player;
+		$this->buildingLevelHandler->increaseBuildingLevel($orbitalBase, $queue->buildingNumber, $queue->targetLevel);
+		$this->orbitalBasePointsHandler->updatePoints($orbitalBase);
+		$this->orbitalBaseRepository->save($orbitalBase);
 		// increase player experience
 		$experience = $this->orbitalBaseHelper->getBuildingInfo($queue->buildingNumber, 'level', $queue->targetLevel, 'points');
 		$this->playerManager->increaseExperience($player, $experience);
@@ -58,9 +48,7 @@ class BuildingQueueHandler implements MessageHandlerInterface
 		//			$session->addFlashbag('Construction de votre <strong>' . $this->orbitalBaseHelper->getBuildingInfo($queue->buildingNumber, 'frenchName') . ' niveau ' . $queue->targetLevel . '</strong> sur <strong>' . $orbitalBase->name . '</strong> terminée. Vous gagnez ' . $experience . ' point' . Format::addPlural($experience) . ' d\'expérience.', Flashbag::TYPE_GENERATOR_SUCCESS);
 		//			$this->sessionWrapper->save($session);
 		//		}
-		// delete queue in database
-		$this->entityManager->remove($queue);
-		$this->entityManager->flush($queue);
+		$this->buildingQueueRepository->remove($queue);
 		$this->logger->info('Construction done');
 	}
 }

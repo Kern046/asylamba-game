@@ -1,73 +1,69 @@
 <?php
 
-/**
- * Commander.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 13.02.14_
- */
-
 namespace App\Modules\Ares\Model;
 
+use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Gaia\Model\Place;
+use App\Modules\Zeus\Model\Player;
 use App\Shared\Domain\Model\TravellerInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Uid\Uuid;
 
-class Commander implements TravellerInterface
+class Commander implements TravellerInterface, \JsonSerializable
 {
-	public $id = 0;
-	public $name = '';
-	public $experience = 0;
-	public $avatar = '';
-	public $rPlayer = 0;
-	public $rBase = 0;
-	public $comment = '';
-	public $sexe = 0;
-	public $age = 0;
-	public $level = 0;
-	public $uExperience = 0;
-	public $palmares = 0;
-	public $statement = Commander::INSCHOOL;
-	public $line = 1;
-	public $dCreation = '';
-	public $dAffectation = '';
-	public $dDeath = '';
-
-	// variables de jointure quelconque
-	public $oBName = '';
-	public $playerName = '';
-	public $playerColor = 0;
-
 	// variables de combat
-	public $squadronsIds = [];
-	public $armyInBegin = [];
-	public $armyAtEnd = [];
-	public $pevInBegin = 0;
-	public $earnedExperience = 0;
-	public $winner = false;
-	public $isAttacker = null;
+	/** @var list<int> */
+	public array $squadronsIds = [];
+	/** @var list<list<int>> */
+	public array $armyAtEnd = [];
+	public int $earnedExperience = 0;
+	public bool $winner = false;
+	public bool|null $isAttacker = null;
+	public bool $hasArmySetted = false;
 
 	// variables de déplacement
-	public $dStart = '';
-	public $dArrival = '';
-	public $resources = 0;
-	public $travelType = 0;
-	public $travelLength = 0;
-	public $rStartPlace = 0;
-	public $rDestinationPlace = 0;
-	public $startPlaceName = '';
-	public $startPlacePop = 0;
-	public $destinationPlaceName = '';
-	public $destinationPlacePop = 0;
+	public \DateTimeImmutable|null $departedAt = null;
+	public \DateTimeImmutable|null $arrivedAt = null;
+	public int $resources = 0;
+	public int|null $travelType = null;
+	public Place|null $startPlace = null;
+	public Place|null $destinationPlace = null;
 	// Tableau d'objets squadron
-	public $army = [];
+	/**
+	 * @var list<Squadron>
+	 */
+	public array $army = [];
+	public bool $isVirtual = false;
 
-	public $uCommander = '';
-	public $hasToU = true;
-	public $hasArmySetted = false;
-	public $uMethodCtced = false;
-	public $lastUMethod = null;
+	public function __construct(
+		public Uuid $id,
+		public string $name,
+		public string $avatar,
+		public Player|null $player,
+		public OrbitalBase|null $base,
+		public \DateTimeImmutable $enlistedAt,
+		public int $experience = 0,
+		public int $sexe = 0,
+		public int $age = 0,
+		public int $level = 0,
+		public int $uExperience = 0,
+		public int $palmares = 0,
+		public int $statement = Commander::INSCHOOL,
+		public int $line = 1,
+		public string|null $comment = null,
+		/** @var Collection<Squadron> */
+		public Collection $squadrons = new ArrayCollection(),
+		public \DateTimeImmutable|null $assignedAt = null,
+		public \DateTimeImmutable|null $diedAt = null,
+		public \DateTimeImmutable|null $updatedAt = null,
+		public bool $hasToU = true,
+		public bool $uMethodCtced = false,
+		bool $isVirtual = false,
+	) {
+		$this->isVirtual = $isVirtual;
+	}
 
 	public const COEFFSCHOOL = 100;
 	public const COEFFEARNEDEXP = 50;
@@ -109,345 +105,7 @@ class Commander implements TravellerInterface
 	public const DISTANCEMAX = 30;
 
 	// Const de lineCoord
-	public static $LINECOORD = [1, 1, 1, 2, 2, 1, 2, 3, 3, 1, 2, 3, 4, 4, 2, 3, 4, 5, 5, 3, 4, 5, 6, 6, 4, 5, 6, 7, 7, 5, 6, 7];
-
-	/**
-	 * @param int $id
-	 *
-	 * @return $this
-	 */
-	public function setId($id)
-	{
-		$this->id = $id;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getId()
-	{
-		return $this->id;
-	}
-
-	/**
-	 * @param string $name
-	 *
-	 * @return $this
-	 */
-	public function setName($name)
-	{
-		$this->name = $name;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	/**
-	 * @param string $avatar
-	 *
-	 * @return $this
-	 */
-	public function setAvatar($avatar)
-	{
-		$this->avatar = $avatar;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getAvatar()
-	{
-		return $this->avatar;
-	}
-
-	/**
-	 * @param int $rPlayer
-	 *
-	 * @return $this
-	 */
-	public function setRPlayer($rPlayer)
-	{
-		$this->rPlayer = $rPlayer;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getRPlayer()
-	{
-		return $this->rPlayer;
-	}
-
-	/**
-	 * @param string $playerName
-	 *
-	 * @return $this
-	 */
-	public function setPlayerName($playerName)
-	{
-		$this->playerName = $playerName;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getPlayerName()
-	{
-		return $this->playerName;
-	}
-
-	/**
-	 * @param int $playerColor
-	 *
-	 * @return $this
-	 */
-	public function setPlayerColor($playerColor)
-	{
-		$this->playerColor = $playerColor;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getPlayerColor()
-	{
-		return $this->playerColor;
-	}
-
-	/**
-	 * @param int $rBase
-	 *
-	 * @return $this
-	 */
-	public function setRBase($rBase)
-	{
-		$this->rBase = $rBase;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getRBase()
-	{
-		return $this->rBase;
-	}
-
-	/**
-	 * @param string $comment
-	 *
-	 * @return $this
-	 */
-	public function setComment($comment)
-	{
-		$this->comment = $comment;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getComment()
-	{
-		return $this->comment;
-	}
-
-	/**
-	 * @param int $sexe
-	 *
-	 * @return $this
-	 */
-	public function setSexe($sexe)
-	{
-		$this->sexe = $sexe;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getSexe()
-	{
-		return $this->sexe;
-	}
-
-	/**
-	 * @param int $age
-	 *
-	 * @return $this
-	 */
-	public function setAge($age)
-	{
-		$this->age = $age;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getAge()
-	{
-		return $this->age;
-	}
-
-	/**
-	 * @param int $level
-	 *
-	 * @return $this
-	 */
-	public function setLevel($level)
-	{
-		$this->level = $level;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getLevel()
-	{
-		return $this->level;
-	}
-
-	/**
-	 * @param int $experience
-	 *
-	 * @return $this
-	 */
-	public function setExperience($experience)
-	{
-		$this->experience = $experience;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getExperience()
-	{
-		return $this->experience;
-	}
-
-	/**
-	 * @param int $earnedExperience
-	 *
-	 * @return $this
-	 */
-	public function setEarnedExperience($earnedExperience)
-	{
-		$this->earnedExperience = $earnedExperience;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getEarnedExperience()
-	{
-		return $this->earnedExperience;
-	}
-
-	/**
-	 * @param string $updatedAt
-	 *
-	 * @return $this
-	 */
-	public function setUpdatedAt($updatedAt)
-	{
-		$this->uCommander = $updatedAt;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getUpdatedAt()
-	{
-		return $this->uCommander;
-	}
-
-	/**
-	 * @param int $palmares
-	 *
-	 * @return $this
-	 */
-	public function setPalmares($palmares)
-	{
-		$this->palmares = $palmares;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getPalmares()
-	{
-		return $this->palmares;
-	}
-
-	/**
-	 * @param int $travelType
-	 */
-	public function setTravelType($travelType)
-	{
-		$this->travelType = $travelType;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getTravelType()
-	{
-		return $this->travelType;
-	}
-
-	/**
-	 * @param int $travelLength
-	 *
-	 * @return Commander
-	 */
-	public function setTravelLength($travelLength)
-	{
-		$this->travelLength = $travelLength;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getTravelLength()
-	{
-		return $this->travelLength;
-	}
+	public static array $LINECOORD = [1, 1, 1, 2, 2, 1, 2, 3, 3, 1, 2, 3, 4, 4, 2, 3, 4, 5, 5, 3, 4, 5, 6, 6, 4, 5, 6, 7, 7, 5, 6, 7];
 
 	public function isMoving(): bool
 	{
@@ -462,6 +120,21 @@ class Commander implements TravellerInterface
 	public function isInSchool(): bool
 	{
 		return self::INSCHOOL === $this->statement;
+	}
+
+	public function isInReserve(): bool
+	{
+		return self::RESERVE === $this->statement;
+	}
+
+	public function isDead(): bool
+	{
+		return self::DEAD === $this->statement;
+	}
+
+	public function isOnSale(): bool
+	{
+		return self::ONSALE === $this->statement;
 	}
 
 	public function isTransferring(): bool
@@ -489,400 +162,18 @@ class Commander implements TravellerInterface
 		return self::DEAD !== $this->statement;
 	}
 
-	/**
-	 * @param int $startPlaceId
-	 *
-	 * @return Commander
-	 */
-	public function setStartPlaceId($startPlaceId)
+	public function findSquadron(int $position): Squadron|null
 	{
-		$this->rStartPlace = $startPlaceId;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getStartPlaceId()
-	{
-		return $this->rStartPlace;
-	}
-
-	/**
-	 * @param int $rDestinationPlace
-	 *
-	 * @return $this
-	 */
-	public function setRPlaceDestination($rDestinationPlace)
-	{
-		$this->rDestinationPlace = $rDestinationPlace;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getRPlaceDestination()
-	{
-		return $this->rDestinationPlace;
-	}
-
-	/**
-	 * @param int $resources
-	 *
-	 * @return $this
-	 */
-	public function setResources($resources)
-	{
-		$this->resources = $resources;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getResources()
-	{
-		return $this->resources;
-	}
-
-	/**
-	 * @param int $statement
-	 *
-	 * @return $this
-	 */
-	public function setStatement($statement)
-	{
-		$this->statement = $statement;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getStatement()
-	{
-		return $this->statement;
-	}
-
-	/**
-	 * @param string $dCreation
-	 *
-	 * @return $this
-	 */
-	public function setDCreation($dCreation)
-	{
-		$this->dCreation = $dCreation;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDCreation()
-	{
-		return $this->dCreation;
-	}
-
-	/**
-	 * @param string $dAffectation
-	 *
-	 * @return $this
-	 */
-	public function setDAffectation($dAffectation)
-	{
-		$this->dAffectation = $dAffectation;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDAffectation()
-	{
-		return $this->dAffectation;
-	}
-
-	/**
-	 * @param string $startedAt
-	 *
-	 * @return \App\Modules\Ares\Model\Commander
-	 */
-	public function setStartedAt($startedAt)
-	{
-		$this->dStart = $startedAt;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getStartedAt()
-	{
-		return $this->dStart;
-	}
-
-	/**
-	 * @param string $arrivalDate
-	 *
-	 * @return $this
-	 */
-	public function setArrivalDate($arrivalDate)
-	{
-		$this->dArrival = $arrivalDate;
-
-		return $this;
-	}
-
-	public function getArrivalDate(): string
-	{
-		return $this->dArrival;
-	}
-
-	public function getDepartureDate(): string
-	{
-		return $this->dStart;
-	}
-
-	/**
-	 * @param string $dDeath
-	 *
-	 * @return $this
-	 */
-	public function setDDeath($dDeath)
-	{
-		$this->dDeath = $dDeath;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDDeath()
-	{
-		return $this->dDeath;
-	}
-
-	/**
-	 * @param int $lengthTravel
-	 *
-	 * @return $this
-	 */
-	public function setLengthTravel($lengthTravel)
-	{
-		$this->lengthTravel = $lengthTravel;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getLengthTravel()
-	{
-		return $this->lengthTravel;
-	}
-
-	/**
-	 * @param string $oBName
-	 *
-	 * @return $this
-	 */
-	public function setBaseName($oBName)
-	{
-		$this->oBName = $oBName;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getBaseName()
-	{
-		return $this->oBName;
-	}
-
-	/**
-	 * @param string $doName
-	 *
-	 * @return $this
-	 */
-	public function setDestinationPlaceName($doName)
-	{
-		$this->destinationPlaceName = $doName;
-
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDestinationPlaceName()
-	{
-		return $this->destinationPlaceName;
-	}
-
-	/**
-	 * @param array $squadronsIds
-	 *
-	 * @return $this
-	 */
-	public function setSquadronsIds($squadronsIds)
-	{
-		$this->squadronsIds = $squadronsIds;
-
-		return $this;
-	}
-
-	/**
-	 * @param int $squadronId
-	 *
-	 * @return $this
-	 */
-	public function addSquadronId($squadronId)
-	{
-		$this->squadronsIds[] = $squadronId;
-
-		return $this;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getSquadronsIds()
-	{
-		return $this->squadronsIds;
-	}
-
-	/**
-	 * @param array $armyInBegin
-	 *
-	 * @return $this
-	 */
-	public function setArmyInBegin($armyInBegin)
-	{
-		$this->armyInBegin = $armyInBegin;
-
-		return $this;
-	}
-
-	/**
-	 * @param array $army
-	 *
-	 * @return $this
-	 */
-	public function addArmyInBegin($army)
-	{
-		$this->armyInBegin[] = $army;
-
-		return $this;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getArmyInBegin()
-	{
-		return $this->armyInBegin;
-	}
-
-	/**
-	 * @param bool $isAttacker
-	 *
-	 * @return $this
-	 */
-	public function setIsAttacker($isAttacker)
-	{
-		$this->isAttacker = $isAttacker;
-
-		return $this;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function getIsAttacker()
-	{
-		return $this->isAttacker;
-	}
-
-	public function setArmy()
-	{
-		if (!$this->hasArmySetted) {
-			for ($i = 0; $i < count($this->squadronsIds) and $i < 25; ++$i) {
-				$this->army[$i] = new Squadron(
-					$this->armyInBegin[$i],
-					$this->squadronsIds[$i],
-					self::$LINECOORD[$i],
-					$i,
-					$this->id
-				);
-			}
-			$this->setPevInBegin();
-			$this->hasArmySetted = true;
-		}
-	}
-
-	public function getArmy()
-	{
-		$this->setArmy();
-
-		return $this->army;
-	}
-
-	public function setPevInBegin()
-	{
-		$pev = 0;
-		foreach ($this->armyInBegin as $squadron) {
-			for ($i = 0; $i < 12; ++$i) {
-				$pev += $squadron[$i] * ShipResource::getInfo($i, 'pev');
-			}
-		}
-		$this->pevInBegin = $pev;
-	}
-
-	public function getPevInBegin()
-	{
-		return $this->pevInBegin;
-	}
-
-	public function getPev()
-	{
-		$pev = 0;
-		foreach ($this->armyInBegin as $squadron) {
-			for ($i = 0; $i < 12; ++$i) {
-				$pev += $squadron[$i] * ShipResource::getInfo($i, 'pev');
+		foreach ($this->squadrons as $squadron) {
+			if ($squadron->position === $position) {
+				return $squadron;
 			}
 		}
 
-		return $pev;
+		return null;
 	}
 
-	public function setArmyAtEnd()
-	{
-		$this->setArmy();
-		$i = 0;
-		foreach ($this->army as $squadron) {
-			$this->armyAtEnd[$i] = $squadron->getArrayOfShips();
-			++$i;
-		}
-	}
-
-	public function getArmyAtEnd()
-	{
-		return $this->armyAtEnd;
-	}
-
-	public function getFormatLineCoord()
+	public function getFormatLineCoord(): array
 	{
 		$return = [];
 
@@ -893,47 +184,51 @@ class Commander implements TravellerInterface
 		return $return;
 	}
 
-	public function getSizeArmy()
+	public function getSizeArmy(): int
 	{
 		return count($this->squadronsIds);
 	}
 
-	public function getPevToLoot()
+	public function getSquadron(int $i): Squadron|null
 	{
-		$pev = 0;
-		foreach ($this->armyAtEnd as $squadron) {
-			for ($i = 0; $i < 12; ++$i) {
-				$pev += $squadron[$i] * ShipResource::getInfo($i, 'pev');
-			}
+		if ($i > 11) {
+			throw new \LogicException('Squadron ID cannot be greater than 11');
 		}
 
-		if (0 != $pev) {
-			return $pev;
-		} else {
-			return $this->getPev();
-		}
+		return $this->squadrons->get($i) ?? $this->army[$i] ?? null;
 	}
 
-	public function getSquadron($i)
+	/**
+	 * @return array<int, int>
+	 */
+	public function getNbrShipByType(): array
 	{
-		$this->setArmy();
-		if (!empty($this->army[$i])) {
-			return $this->army[$i];
-		} else {
-			return false;
-		}
-	}
+		$array = array_fill(0, ShipResource::countAvailableShips(), 0);
 
-	// renvoie un tableau de nombre de vaisseaux
-	public function getNbrShipByType()
-	{
-		$array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-		foreach ($this->armyInBegin as $squadron) {
+		foreach ($this->army as $squadron) {
 			for ($i = 0; $i < 12; ++$i) {
-				$array[$i] += $squadron[$i];
+				$array[$i] += $squadron->getShipQuantity($i);
 			}
 		}
 
 		return $array;
+	}
+
+	public function getDepartureDate(): \DateTimeImmutable|null
+	{
+		return $this->departedAt;
+	}
+
+	public function getArrivalDate(): \DateTimeImmutable|null
+	{
+		return $this->arrivedAt;
+	}
+
+	public function jsonSerialize(): array
+	{
+		return [
+			'id' => $this->id,
+			'name' => $this->name,
+		];
 	}
 }

@@ -2,40 +2,37 @@
 
 namespace App\Modules\Atlas\Handler;
 
-use App\Classes\Entity\EntityManager;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Atlas\Manager\PlayerRankingManager;
+use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
+use App\Modules\Atlas\Domain\Repository\RankingRepositoryInterface;
 use App\Modules\Atlas\Manager\RankingManager;
 use App\Modules\Atlas\Message\PlayerRankingMessage;
-use App\Modules\Atlas\Model\PlayerRanking;
-use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Atlas\Routine\PlayerRoutine;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class PlayerRankingHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class PlayerRankingHandler
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected PlayerManager $playerManager,
-		protected PlayerRankingManager $playerRankingManager,
-		protected RankingManager $rankingManager,
-		protected OrbitalBaseHelper $orbitalBaseHelper,
-		protected bool $dataAnalysis,
+		private RankingManager                   $rankingManager,
+		private RankingRepositoryInterface       $rankingRepository,
+		private PlayerRepositoryInterface        $playerRepository,
+		private PlayerRankingRepositoryInterface $playerRankingRepository,
+		private OrbitalBaseHelper                $orbitalBaseHelper,
+		private bool                             $dataAnalysis,
 	) {
 	}
 
 	public function __invoke(PlayerRankingMessage $message): void
 	{
-		if (true === $this->entityManager->getRepository(Ranking::class)->hasBeenAlreadyProcessed(true, false)) {
+		if (true === $this->rankingRepository->hasBeenAlreadyProcessed(true, false)) {
 			return;
 		}
 		$playerRoutine = new PlayerRoutine($this->dataAnalysis);
 
-		$players = $this->playerManager->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
-
-		$playerRankingRepository = $this->entityManager->getRepository(PlayerRanking::class);
+		$players = $this->playerRepository->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
 
 		// $S_PRM1 = $this->playerRankingManager->getCurrentSession();
 		// $this->playerRankingManager->newSession();
@@ -45,22 +42,20 @@ class PlayerRankingHandler implements MessageHandlerInterface
 
 		$playerRoutine->execute(
 			$players,
-			$playerRankingRepository->getPlayersResources(),
-			$playerRankingRepository->getPlayersResourcesData(),
-			$playerRankingRepository->getPlayersGeneralData(),
-			$playerRankingRepository->getPlayersArmiesData(),
-			$playerRankingRepository->getPlayersPlanetData(),
-			$playerRankingRepository->getPlayersTradeRoutes(),
-			$playerRankingRepository->getPlayersLinkedTradeRoutes(),
-			$playerRankingRepository->getAttackersButcherRanking(),
-			$playerRankingRepository->getDefendersButcherRanking(),
+			$this->playerRankingRepository->getPlayersResources(),
+			$this->playerRankingRepository->getPlayersResourcesData(),
+			$this->playerRankingRepository->getPlayersGeneralData(),
+			$this->playerRankingRepository->getPlayersArmiesData(),
+			$this->playerRankingRepository->getPlayersPlanetData(),
+			$this->playerRankingRepository->getPlayersTradeRoutes(),
+			$this->playerRankingRepository->getPlayersLinkedTradeRoutes(),
+			$this->playerRankingRepository->getAttackersButcherRanking(),
+			$this->playerRankingRepository->getDefendersButcherRanking(),
 			$this->orbitalBaseHelper
 		);
 
 		$playerRoutine->processResults($ranking, $players, $this->playerRankingManager, $playerRankingRepository);
 
 		// $this->playerRankingManager->changeSession($S_PRM1);
-
-		$this->entityManager->flush();
 	}
 }

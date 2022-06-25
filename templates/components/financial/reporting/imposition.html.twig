@@ -9,10 +9,11 @@
 			<div class="body">
 				<ul class="list-type-1">
 					{% for base in player_bases %}
-						{% set base_tax_income = bases_data[base.id].tax_income %}
-						{% set base_tax_income_bonus = bases_data[base.id].tax_income_bonus %}
+						{% set base_data = bases_data[base.id.toRfc4122()] %}
+						{% set base_tax_income = base_data.tax_income %}
+						{% set base_tax_income_bonus = base_data.tax_income_bonus %}
 						<li>
-							<span class="label">{{ base.name }} [{{ base.planetPopulation|number }} Mio hab.]</span>
+							<span class="label">{{ base.name }} [{{ base.place.population|number }} Mio hab.]</span>
 							<span class="value">
 								{{- base_tax_income|number -}}
 								{% if base_tax_income_bonus > 0 %}

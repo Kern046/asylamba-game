@@ -14,7 +14,7 @@ namespace App\Modules\Demeter\Resource;
 // id des forums : < 10 = pour tous les gens d'une faction, >= 10 < 20 = pour le gouvernement d'une fac, >= 20 pour les chefs de toutes les factions
 class LawResources
 {
-	private static $laws = [
+	private static array $laws = [
 		[
 			'id' => 1,
 			'bonusLaw' => false,
@@ -157,23 +157,20 @@ class LawResources
 			'shortDescription' => 'Permet d\'amender un joueur si celui-ci n\'obéit pas aux directives du gouvernement.',
 			'longDescription' => 'Il n\'y a aucune limite quant à l\'utilisation de cette loi, vous pouvez en faire un usage abusif.',
 			'image' => '',
-			'isImplemented' => true, ],
+			'isImplemented' => true,
+		],
 	];
 
-	public static function getInfo($id, $info)
+	public static function getInfo(int $id, string $info): mixed
 	{
-		if ($id <= self::size()) {
-			if (in_array($info, ['id', 'bonusLaw', 'devName', 'name', 'department', 'price', 'duration', 'bonus', 'shortDescription', 'longDescription', 'image', 'isImplemented'])) {
-				return self::$laws[$id - 1][$info];
-			} else {
-				return false;
-			}
-		} else {
-			return false;
+		$index = $id - 1;
+		if (!array_key_exists($index, self::$laws)) {
+			throw new \InvalidArgumentException('Invalid Law id');
 		}
+		return self::$laws[$index][$info] ?? throw new \InvalidArgumentException('Invalid law data key');
 	}
 
-	public static function size()
+	public static function size(): int
 	{
 		return count(self::$laws);
 	}

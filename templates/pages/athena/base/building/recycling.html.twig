@@ -69,17 +69,17 @@
 
 						<p class="desc">
 							La mission recycle la
-							<strong>{{ get_place_type(mission.typeOfPlace) }}</strong>
+							<strong>{{ get_place_type(mission.target.typeOfPlace) }}</strong>
 							située aux coordonnées
 							<strong>
-								<a href="{{ path('map', {'place': mission.rTarget}) }}">{{ mission_data.coords }}</a>
+								<a href="{{ path('map', {'place': mission.target.id }) }}">{{ mission_data.coords }}</a>
 							</strong>.<br /><br />
-							Il reste <strong>{{ (mission.resources * mission.coefResources / 100)|number }}</strong> ressources,
-							<strong>{{ (mission.resources * mission.coefHistory / 100)|number }}</strong> débris et
-							<strong>{{ (mission.resources * mission.population / 100)|number }}</strong> gaz nobles.
+							Il reste <strong>{{ (mission.target.resources * mission.target.coefResources / 100)|number }}</strong> ressources,
+							<strong>{{ (mission.target.resources * mission.target.coefHistory / 100)|number }}</strong> débris et
+							<strong>{{ (mission.target.resources * mission.target.population / 100)|number }}</strong> gaz nobles.
 						</p>
 
-						<p>Retour {{ mission.uRecycling|date|raw }}</p>
+						<p>Retour {{ mission.endedAt|date|raw }}</p>
 						<p>
 							<span class="progress-bar">
 								<span style="width:{{ mission_data.percent }}%;" class="content"></span>

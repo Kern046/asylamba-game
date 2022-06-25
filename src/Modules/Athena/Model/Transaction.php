@@ -1,15 +1,10 @@
 <?php
 
-/**
- * Transaction.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @update 19.11.13
- */
-
 namespace App\Modules\Athena\Model;
+
+use App\Modules\Ares\Model\Commander;
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
 
 class Transaction
 {
@@ -37,60 +32,41 @@ class Transaction
 	public const MAX_RATE_SHIP = 100;
 	public const MAX_RATE_COMMANDER = 100;
 
-	// attributes
-	public $id = 0;
-	public $rPlayer = 0;
-	public $rPlace = 0;
-	public $type;			// see const TYP_*
-	public $quantity;		// if ($type == TYP_RESOURCE) 	--> resource
-							// if ($type == TYP_SHIP) 		--> ship quantity
-							// if ($type == TYP_COMMANDER) 	--> experience
-	public $identifier;		// if ($type == TYP_RESOURCE) 	--> NULL
-							// if ($type == TYP_SHIP) 		--> shipId
-							// if ($type == TYP_COMMANDER) 	--> rCommander
-	public $price = 0;
-	public $commercialShipQuantity = 0;	// ship needed for the transport
-	public $statement = 0;
-	public $dPublication = '';
-	public $dValidation = null; 	// date of acceptance or cancellation
-	public $currentRate;	// 1 resource = x credits (for resources et ships)
-							// 1 experience = x credits
-
-	// additionnal attributes
-	public $playerName;
-	public $playerColor;
-	public $placeName;
-	public $sector;
-	public $sectorColor;
-	public $rSystem;
-	public $positionInSystem;
-	public $xSystem;
-	public $ySystem;
-
-	// attributes only for commanders
-	public $commanderName;
-	public $commanderLevel;
-	public $commanderVictory;
-	public $commanderExperience;
-	public $commanderAvatar;
-
-	public function getId()
-	{
-		return $this->id;
+	public function __construct(
+		public Uuid $id,
+		public Player $player,
+		public OrbitalBase|null $base,
+		public int $type,			// see const TYP_*
+		public int $quantity,		// if ($type == TYP_RESOURCE) 	--> resource
+		// if ($type == TYP_SHIP) 		--> ship quantity
+		// if ($type == TYP_COMMANDER) 	--> experience
+		public int $identifier,		// if ($type == TYP_RESOURCE) 	--> NULL
+		// if ($type == TYP_SHIP) 		--> shipId
+		// if ($type == TYP_COMMANDER) 	--> rCommander
+		public \DateTimeImmutable $publishedAt,
+		public float $currentRate,
+		public Commander|null $commander = null,
+		public int $price = 0,
+		public int $commercialShipQuantity = 0,	// ship needed for the transport
+		public int $statement = 0,
+		public \DateTimeImmutable|null $validatedAt = null,
+		// date of acceptance or cancellation
+		// 1 resource = x credits (for resources et ships)
+		// 1 experience = x credits
+	) {
 	}
 
-	public function getPriceToCancelOffer()
+	public function getPriceToCancelOffer(): int
 	{
-		// 5% of the price
 		return floor($this->price * self::PERCENTAGE_TO_CANCEL / 100);
 	}
 
-	public function getExperienceEarned()
+	public function getExperienceEarned(): int
 	{
 		return 1 + round($this->price / self::EXPERIENCE_DIVIDER);
 	}
 
-	public static function getResourcesIcon($quantity)
+	public static function getResourcesIcon(int $quantity): int
 	{
 		if (1000000 <= $quantity && $quantity < 5000000) {
 			return 5;
@@ -118,5 +94,20 @@ class Transaction
 	public function hasCommander(): bool
 	{
 		return self::TYP_COMMANDER === $this->type;
+	}
+
+	public function isProposed(): bool
+	{
+		return self::ST_PROPOSED === $this->statement;
+	}
+
+	public function isCompleted(): bool
+	{
+		return self::ST_COMPLETED === $this->statement;
+	}
+
+	public function isCancelled(): bool
+	{
+		return self::ST_CANCELED === $this->statement;
 	}
 }

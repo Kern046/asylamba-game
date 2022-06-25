@@ -2,9 +2,9 @@
 	{% set next_total_time = 0 %}
 
 	{% set available_queues = get_building_info(generator_building_number, 'level', current_base.levelGenerator, 'nbQueues') %}
-	{% set building_queues_count = current_base.buildingQueues|length %}
+	{% set building_queues_count = current_building_queues|length %}
 
-	{% for building_queue in current_base.buildingQueues %}
+	{% for building_queue in current_building_queues %}
 		{% set next_total_time = next_total_time + get_building_info(building_queue.buildingNumber, 'level', building_queue.targetLevel, 'time') %}
 
 		{{ include('molecules/base/building_queue.html.twig', {

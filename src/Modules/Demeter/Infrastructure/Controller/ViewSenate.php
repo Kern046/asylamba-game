@@ -15,14 +15,13 @@ class ViewSenate extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		ColorManager $colorManager,
 		LawManager $lawManager,
 	): Response {
 		if (!$currentPlayer->isParliamentMember()) {
 			throw $this->createAccessDeniedException('You must be a parliament member');
 		}
 
-		if (null === ($faction = $colorManager->get($currentPlayer->getRColor()))) {
+		if (null === ($faction = $currentPlayer->getRColor())) {
 			throw $this->createNotFoundException('Faction not found');
 		}
 

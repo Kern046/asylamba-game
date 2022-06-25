@@ -2,6 +2,7 @@
 
 namespace App\Modules\Zeus\Application\Handler\Bonus;
 
+use App\Modules\Shared\Application\PercentageApplier;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\PlayerBonus;
 
@@ -13,10 +14,12 @@ abstract class AbstractBonusApplier implements BonusApplierInterface
 
 	public function apply(float|int $initialValue, int $modifierId, PlayerBonus $playerBonus = null): float
 	{
-		$playerBonus = $playerBonus ?? $this->currentPlayerBonusRegistry->getPlayerBonus();
+		$playerBonus = $playerBonus
+			?? $this->currentPlayerBonusRegistry->getPlayerBonus()
+			?? throw new \LogicException('Could not retrieve player bonus');
 
 		$modifierValue = $playerBonus->bonuses->get($modifierId);
-		$modifiedValue = $initialValue * $modifierValue / 100;
+		$modifiedValue = PercentageApplier::toFloat($initialValue, $modifierValue);
 
 		$this->postApply($modifierId, $modifierValue, $initialValue, $modifiedValue);
 

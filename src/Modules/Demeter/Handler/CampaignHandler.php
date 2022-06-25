@@ -2,57 +2,57 @@
 
 namespace App\Modules\Demeter\Handler;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
+use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Election\ElectionManager;
 use App\Modules\Demeter\Message\BallotMessage;
 use App\Modules\Demeter\Message\CampaignMessage;
 use App\Modules\Demeter\Message\ElectionMessage;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Election;
-use App\Modules\Zeus\Manager\PlayerManager;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use App\Modules\Demeter\Resource\ColorResource;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Uid\Uuid;
 
-class CampaignHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+class CampaignHandler
 {
 	public function __construct(
-		protected ColorManager $colorManager,
-		protected PlayerManager $playerManager,
-		protected ElectionManager $electionManager,
-		protected MessageBusInterface $messageBus,
-		protected EntityManager $entityManager,
+		private readonly ColorManager $colorManager,
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly ElectionRepositoryInterface $electionRepository,
+		private readonly MessageBusInterface $messageBus,
+		private readonly NextElectionDateCalculator $nextElectionDateCalculator,
 	) {
 	}
 
 	public function __invoke(CampaignMessage $message): void
 	{
-		$faction = $this->colorManager->get($message->getFactionId());
-		$factionPlayers = $this->playerManager->getFactionPlayersByRanking($faction->getId());
-		$this->colorManager->updateStatus($faction, $factionPlayers);
+		$faction = $this->colorRepository->get($message->getFactionId());
+		$this->colorManager->updateStatus($faction);
 
-		$date = new \DateTime($faction->dLastElection);
-		$date->modify('+'.$faction->mandateDuration + Color::CAMPAIGNTIME.' second');
+		$election = new Election(
+			id: Uuid::v4(),
+			faction: $faction,
+			dElection: $this->nextElectionDateCalculator->getCampaignEndDate($faction),
+		);
 
-		$election = new Election();
-		$election->rColor = $faction->id;
-		$election->dElection = $date->format('Y-m-d H:i:s');
-
-		$this->electionManager->add($election);
+		$this->electionRepository->save($election);
 		$faction->electionStatement = Color::CAMPAIGN;
-		if (Color::DEMOCRATIC === $faction->regime) {
+		if ($faction->isDemocratic()) {
 			$this->messageBus->dispatch(
-				new ElectionMessage($faction->getId()),
+				new ElectionMessage($faction->id),
 				[DateTimeConverter::to_delay_stamp($election->dElection)],
 			);
-		} elseif (Color::THEOCRATIC === $faction->regime) {
+		} elseif ($faction->isTheocratic()) {
 			$this->messageBus->dispatch(
-				new BallotMessage($faction->getId()),
+				new BallotMessage($faction->id),
 				[DateTimeConverter::to_delay_stamp($election->dElection)],
 			);
 		}
-		$this->entityManager->flush($election);
-		$this->entityManager->flush($faction);
+		$this->electionRepository->save($election);
 	}
 }

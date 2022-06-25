@@ -4,7 +4,6 @@ namespace App\Modules\Athena\Infrastructure\Controller\Financial;
 
 use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Utils;
-use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Zeus\Manager\CreditTransactionManager;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\CreditTransaction;
@@ -21,7 +20,6 @@ class SendCreditsToFaction extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		PlayerManager $playerManager,
-		ColorManager $colorManager,
 		CreditTransactionManager $creditTransactionManager,
 		EntityManager $entityManager,
 	): Response {
@@ -31,11 +29,11 @@ class SendCreditsToFaction extends AbstractController
 			throw new BadRequestHttpException('envoi de crédits impossible - il faut envoyer un nombre entier positif');
 		}
 
-		if ($currentPlayer->getCredit() < $credit) {
+		if ($currentPlayer->getCredits() < $credit) {
 			throw new BadRequestHttpException('envoi de crédits impossible - vous ne pouvez pas envoyer plus que ce que vous possédez');
 		}
 
-		if (null === ($faction = $colorManager->get($currentPlayer->getRColor()))) {
+		if (null === ($faction = $currentPlayer->getRColor())) {
 			throw new NotFoundHttpException('envoi de crédits impossible - faction introuvable');
 		}
 		// make the transaction

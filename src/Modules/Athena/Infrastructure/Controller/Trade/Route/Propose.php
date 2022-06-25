@@ -2,28 +2,26 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
-use App\Classes\Exception\ErrorException;
-use App\Classes\Exception\FormException;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
-use App\Classes\Library\Utils;
-use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\CommercialRouteManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
-use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class Propose extends AbstractController
 {
@@ -31,105 +29,129 @@ class Propose extends AbstractController
 		Request $request,
 		OrbitalBase $currentBase,
 		Player $currentPlayer,
-		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-		ColorManager $colorManager,
-		OrbitalBaseManager $orbitalBaseManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
-		CommercialRouteManager $commercialRouteManager,
-		NotificationManager $notificationManager,
+		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		CommercialRouteRepositoryInterface $commercialRouteRepository,
+		NotificationRepositoryInterface $notificationRepository,
 		PlayerManager $playerManager,
 	): Response {
-		$baseFrom = $request->query->get('sourceBase');
-		$baseTo = $request->query->get('destinationBase');
+		$baseTo = $request->query->get('destinationBase') ?? throw new BadRequestHttpException('Missing destination base');
 
-		if (false !== $baseFrom and false !== $baseTo) {
-			if (null === ($proposerBase = $currentPlayerBasesRegistry->get($baseFrom))) {
-				throw $this->createNotFoundException('This base does not exist or does not belong to you');
-			}
-			$otherBase = $orbitalBaseManager->get($baseTo);
-
-			$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::SPATIOPORT, 'level', $proposerBase->getLevelSpatioport(), 'nbRoutesMax');
-
-			// Check if a route already exists between these two bases
-			$alreadyARoute = $commercialRouteManager->isAlreadyARoute($proposerBase->getId(), $otherBase->getId());
-
-			if (($commercialRouteManager->countBaseRoutes($proposerBase->getId()) < $nbrMaxCommercialRoute) && (!$alreadyARoute) && ($proposerBase->getLevelSpatioport() > 0) && ($otherBase->getLevelSpatioport() > 0)) {
-				$player = $playerManager->get($otherBase->getRPlayer());
-
-				$playerFaction = $colorManager->get($currentPlayer->rColor);
-				$otherFaction = $colorManager->get($player->rColor);
-
-				if (Color::ENEMY !== $playerFaction->colorLink[$player->rColor] && Color::ENEMY !== $otherFaction->colorLink[$currentPlayer->rColor]) {
-					if (null !== $proposerBase && null !== $otherBase && ($proposerBase->getRPlayer() != $otherBase->getRPlayer()) && null !== $player) {
-						$distance = Game::getDistance($proposerBase->getXSystem(), $otherBase->getXSystem(), $proposerBase->getYSystem(), $otherBase->getYSystem());
-						$bonusA = ($proposerBase->getSector() !== $otherBase->getSector()) ? $this->getParameter('athena.trade.route.sector_bonus') : 1;
-						$bonusB = ($currentPlayer->rColor !== $player->getRColor()) ? $this->getParameter('athena.trade.route.color_bonus') : 1;
-						$price = Game::getRCPrice($distance);
-						$income = Game::getRCIncome($distance, $bonusA, $bonusB);
-
-						if (1 == $distance) {
-							$imageLink = '1-'.rand(1, 3);
-						} elseif ($distance < 26) {
-							$imageLink = '2-'.rand(1, 3);
-						} elseif ($distance < 126) {
-							$imageLink = '3-'.rand(1, 3);
-						} else {
-							$imageLink = '4-'.rand(1, 3);
-						}
-
-						// compute bonus
-						if (in_array(ColorResource::COMMERCIALROUTEPRICEBONUS, $playerFaction->bonus)) {
-							$priceWithBonus = round($price - ($price * ColorResource::BONUS_NEGORA_ROUTE / 100));
-						} else {
-							$priceWithBonus = $price;
-						}
-
-						if ($currentPlayer->credit >= $priceWithBonus) {
-							// création de la route
-							$cr = new CommercialRoute();
-							$cr->setROrbitalBase($proposerBase->getId());
-							$cr->setROrbitalBaseLinked($otherBase->getId());
-							$cr->setImageLink($imageLink);
-							$cr->setDistance($distance);
-							$cr->setPrice($price);
-							$cr->setIncome($income);
-							$cr->setDProposition(Utils::now());
-							$cr->setDCreation(null);
-							$cr->setStatement(0);
-							$commercialRouteManager->add($cr);
-
-							// débit des crédits au joueur
-							$playerManager->decreaseCredit($currentPlayer, $priceWithBonus);
-
-							$n = new Notification();
-							$n->setRPlayer($otherBase->getRPlayer());
-							$n->setTitle('Proposition de route commerciale');
-							$n->addBeg()->addLnk('embassy/player-'.$currentPlayer->id, $currentPlayer->name);
-							$n->addTxt(' vous propose une route commerciale liant ');
-							$n->addLnk('map/place-'.$proposerBase->getRPlace(), $proposerBase->getName())->addTxt(' et ');
-							$n->addLnk('map/place-'.$otherBase->getRPlace(), $otherBase->getName())->addTxt('.');
-							$n->addSep()->addTxt('Les frais de l\'opération vous coûteraient '.Format::numberFormat($priceWithBonus).' crédits; Les gains estimés pour cette route sont de '.Format::numberFormat($income).' crédits par relève.');
-							$n->addSep()->addLnk('action/a-switchbase/base-'.$otherBase->getRPlace().'/page-spatioport', 'En savoir plus ?');
-							$n->addEnd();
-							$notificationManager->add($n);
-
-							$this->addFlash('success', 'Route commerciale proposée');
-
-							return $this->redirect($request->headers->get('referer'));
-						} else {
-							throw new ErrorException('impossible de proposer une route commerciale - vous n\'avez pas assez de crédits');
-						}
-					} else {
-						throw new ErrorException('impossible de proposer une route commerciale (2)');
-					}
-				} else {
-					throw new ErrorException('impossible de proposer une route commerciale à ce joueur, vos factions sont en guerre.');
-				}
-			} else {
-				throw new ErrorException('impossible de proposer une route commerciale (3)');
-			}
-		} else {
-			throw new FormException('pas assez d\'informations pour proposer une route commerciale');
+		if (!Uuid::isValid($baseTo)) {
+			throw new BadRequestHttpException('Invalid destination base ID');
 		}
+
+		$otherBase = $orbitalBaseRepository->get(Uuid::fromString($baseTo)) ?? throw $this->createNotFoundException('Destination base not found');
+
+		$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::SPATIOPORT, 'level', $currentBase->levelSpatioport, 'nbRoutesMax');
+
+		// Check if a route already exists between these two bases
+		$alreadyARoute = null !== $commercialRouteRepository->getExistingRoute($currentBase, $otherBase);
+
+		// TODO transform into validation constraint
+		if (($commercialRouteRepository->countBaseRoutes($currentBase) >= $nbrMaxCommercialRoute) || $alreadyARoute || $currentBase->levelSpatioport === 0 || $otherBase->levelSpatioport === 0) {
+			throw new ConflictHttpException('Impossible de proposer une route commerciale');
+		}
+		$player = $otherBase->player;
+
+		$playerFaction = $currentPlayer->faction;
+		$otherFaction = $player->faction;
+
+		// TODO move to validation constraint
+		if (Color::ENEMY === $playerFaction->relations[$otherFaction->identifier] || Color::ENEMY === $otherFaction->relations[$playerFaction->identifier]) {
+			throw new ConflictHttpException('impossible de proposer une route commerciale à ce joueur, vos factions sont en guerre.');
+		}
+		// TODO move to validation constraint
+		if ($currentBase->player->id === $otherBase->player->id) {
+			throw new ConflictHttpException('Vous ne pouvez pas créer de route commerciale avec votre propre planète');
+		}
+		$distance = Game::getDistance(
+			$currentBase->place->system->xPosition,
+			$otherBase->place->system->xPosition,
+			$currentBase->place->system->yPosition,
+			$otherBase->place->system->yPosition,
+		);
+		$bonusA = ($currentBase->place->system->sector->id !== $otherBase->place->system->sector->id) ? $this->getParameter('athena.trade.route.sector_bonus') : 1;
+		$bonusB = ($playerFaction->identifier !== $otherFaction->identifier) ? $this->getParameter('athena.trade.route.color_bonus') : 1;
+
+		$price = Game::getRCPrice($distance);
+		$income = Game::getRCIncome($distance, $bonusA, $bonusB);
+
+		if (1 == $distance) {
+			$imageLink = '1-'.rand(1, 3);
+		} elseif ($distance < 26) {
+			$imageLink = '2-'.rand(1, 3);
+		} elseif ($distance < 126) {
+			$imageLink = '3-'.rand(1, 3);
+		} else {
+			$imageLink = '4-'.rand(1, 3);
+		}
+
+		// TODO Refactor faction economic bonuses to merge with palyer bonus management
+		$factionBonus = ColorResource::getInfo($playerFaction->identifier, 'bonus');
+		// compute bonus
+		if (in_array(ColorResource::COMMERCIALROUTEPRICEBONUS, $factionBonus)) {
+			$priceWithBonus = round($price - ($price * ColorResource::BONUS_NEGORA_ROUTE / 100));
+		} else {
+			$priceWithBonus = $price;
+		}
+
+		if (!$currentPlayer->canAfford($priceWithBonus)) {
+			throw new ConflictHttpException('impossible de proposer une route commerciale - vous n\'avez pas assez de crédits');
+		}
+		// création de la route
+		$cr = new CommercialRoute(
+			id: Uuid::v4(),
+			originBase: $currentBase,
+			destinationBase: $otherBase,
+			imageLink: $imageLink,
+			distance: $distance,
+			price: $price,
+			income: $income,
+			proposedAt: new \DateTimeImmutable(),
+			acceptedAt: null,
+			statement: CommercialRoute::PROPOSED,
+		);
+		$commercialRouteRepository->save($cr);
+
+		// débit des crédits au joueur
+		$playerManager->decreaseCredit($currentPlayer, $priceWithBonus);
+
+		$notification = NotificationBuilder::new()
+			->setTitle('Proposition de route commerciale')
+			->setContent(NotificationBuilder::paragraph(
+				NotificationBuilder::link(
+					$this->generateUrl('embassy', ['player' => $currentPlayer->id]),
+					$currentPlayer->name,
+				),
+				' vous propose une route commerciale liant ',
+				NotificationBuilder::link(
+					$this->generateUrl('map', ['place' => $currentBase->place->id]),
+					$currentBase->name,
+				),
+				' et ',
+				NotificationBuilder::link(
+					$this->generateUrl('map', ['place' => $otherBase->place->id]),
+					$otherBase->name,
+				),
+				'.',
+				NotificationBuilder::divider(),
+				'Les frais de l\'opération vous coûteraient ',
+				Format::numberFormat($priceWithBonus),
+				' crédits; Les gains estimés pour cette route sont de ',
+				Format::numberFormat($income),
+				' crédits par relève.',
+				NotificationBuilder::divider(),
+				NotificationBuilder::link(
+					$this->generateUrl('switchbase', ['baseId' => $otherBase->id, 'page' => 'spatioport']),
+					'En savoir plus ?',
+				),
+			))
+			->for($player);
+		$notificationRepository->save($notification);
+
+		$this->addFlash('success', 'Route commerciale proposée');
+
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

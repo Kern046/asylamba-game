@@ -9,7 +9,6 @@ services:
         exclude:
             - '../../Message'
             - '../../Model'
-            - '../../Repository'
             - '../../Resource'
 
     App\Modules\Atlas\Handler\PlayerRankingHandler:

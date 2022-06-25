@@ -2,10 +2,11 @@
 
 namespace App\Modules\Promethee\Infrastructure\Controller;
 
+use App\Modules\Promethee\Domain\Repository\ResearchRepositoryInterface;
+use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Helper\ResearchHelper;
 use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Promethee\Manager\ResearchManager;
-use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,13 +15,14 @@ use Symfony\Component\HttpFoundation\Response;
 class ViewTechnologyPanel extends AbstractController
 {
 	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		TechnologyManager $technologyManager,
-		TechnologyHelper $technologyHelper,
-		ResearchManager $researchManager,
-		ResearchHelper $researchHelper,
-		int $identifier,
+		Request                       $request,
+		Player                        $currentPlayer,
+		TechnologyRepositoryInterface $technologyRepository,
+		TechnologyHelper              $technologyHelper,
+		ResearchRepositoryInterface   $researchRepository,
+		ResearchManager               $researchManager,
+		ResearchHelper                $researchHelper,
+		int                           $identifier,
 	): Response {
 		if (!$technologyHelper->isATechnology($identifier)) {
 			throw $this->createNotFoundException('This technology does not exist');
@@ -30,12 +32,8 @@ class ViewTechnologyPanel extends AbstractController
 			throw $this->createAccessDeniedException('You do not have access to this technology');
 		}
 
-		$technos = $technologyManager->getPlayerTechnology($currentPlayer->getId());
-		$S_RSM1 = $researchManager->getCurrentSession();
-		$researchManager->newSession();
-		$researchManager->load(['rPlayer' => $currentPlayer->getId()]);
-		$research = $researchManager->get();
-		$researchManager->changeSession($S_RSM1);
+		$technos = $technologyRepository->getPlayerTechnology($currentPlayer);
+		$research = $researchRepository->getPlayerResearch($currentPlayer);
 
 		$level = $technos->getTechnology($identifier);
 

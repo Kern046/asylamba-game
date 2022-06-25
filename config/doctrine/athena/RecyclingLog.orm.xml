@@ -1,0 +1,29 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Athena\Model\RecyclingLog" table="recyclingLog">
+		<id name="id" column="id" type="integer">
+			<options>
+				<option name="unsigned">true</option>
+			</options>
+		</id>
+
+		<many-to-one field="mission" target-entity="App\Modules\Athena\Model\RecyclingMission">
+			<join-column nullable="false" />
+		</many-to-one>
+
+		<field name="createdAt" type="datetime_immutable" />
+		<field name="resources" type="integer" />
+		<field name="credits" type="integer" />
+		<field name="ship0" type="integer" />
+		<field name="ship1" type="integer" />
+		<field name="ship2" type="integer" />
+		<field name="ship3" type="integer" />
+		<field name="ship4" type="integer" />
+		<field name="ship5" type="integer" />
+		<field name="ship6" type="integer" />
+		<field name="ship7" type="integer" />
+		<field name="ship8" type="integer" />
+		<field name="ship9" type="integer" />
+		<field name="ship10" type="integer" />
+		<field name="ship11" type="integer" />
+	</entity>
+</doctrine-mapping>

@@ -2,11 +2,10 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
-use App\Classes\Entity\EntityManager;
-use App\Modules\Athena\Manager\CommercialRouteManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Hermes\Manager\NotificationManager;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -14,21 +13,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class Cancel extends AbstractController
 {
 	public function __invoke(
 		Request $request,
-		CommercialRouteManager $commercialRouteManager,
-		PlayerManager $playerManager,
-		NotificationManager $notificationManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		EntityManager $entityManager,
-		OrbitalBase $currentBase,
 		Player $currentPlayer,
-		int $id,
+		CommercialRouteRepositoryInterface $commercialRouteRepository,
+		PlayerManager $playerManager,
+		NotificationRepositoryInterface $notificationRepository,
+		OrbitalBase $currentBase,
+		Uuid $id,
 	): Response {
-		$cr = $commercialRouteManager->getByIdAndBase($id, $currentBase->getId());
+		$cr = $commercialRouteRepository->getByIdAndBase($id, $currentBase);
 		if (null === $cr) {
 			throw $this->createNotFoundException('Commercial route not found');
 		}
@@ -36,28 +34,38 @@ class Cancel extends AbstractController
 			throw new ConflictHttpException('Commercial route has already been established');
 		}
 		$routeCancelRefund = $this->getParameter('athena.trade.route.cancellation_refund');
-		$proposerBase = $orbitalBaseManager->get($cr->getROrbitalBase());
-		$linkedBase = $orbitalBaseManager->get($cr->getROrbitalBaseLinked());
+		$proposerBase = $cr->originBase;
+		$linkedBase = $cr->destinationBase;
 
 		// rend 80% des crédits investis
-		$playerManager->increaseCredit($currentPlayer, round($cr->getPrice() * $routeCancelRefund));
+		$playerManager->increaseCredit($currentPlayer, round($cr->price * $routeCancelRefund));
 
 		// notification
-		$n = new Notification();
-		$n->setRPlayer($linkedBase->getRPlayer());
-		$n->setTitle('Route commerciale annulée');
-
-		$n->addBeg()->addLnk('embassy/player-'.$currentPlayer->getId(), $currentPlayer->getName())->addTxt(' a finalement retiré la proposition de route commerciale qu\'il avait faite entre ');
-		$n->addLnk('map/place-'.$linkedBase->getRPlace(), $linkedBase->getName())->addTxt(' et ');
-		$n->addLnk('map/place-'.$proposerBase->getRPlace(), $proposerBase->getName());
-		$n->addEnd();
-		$notificationManager->add($n);
+		$notification = NotificationBuilder::new()
+			->setTitle('Route commerciale annulée')
+			->setContent(NotificationBuilder::paragraph(
+				NotificationBuilder::link(
+					$this->generateUrl('embassy', ['player' => $currentPlayer->id]),
+					$currentPlayer->name,
+				),
+				' a finalement retiré la proposition de route commerciale faite entre ',
+				NotificationBuilder::link(
+					$this->generateUrl('map', ['place' => $linkedBase->place->id]),
+					$linkedBase->name,
+				),
+				' et ',
+				NotificationBuilder::link(
+					$this->generateUrl('map', ['place' => $proposerBase->place->id]),
+					$proposerBase->name,
+				),
+			))
+			->for($linkedBase->player);
+		$notificationRepository->save($notification);
 
 		// destruction de la route
-		$commercialRouteManager->remove($cr);
-		$this->addFlash('success', 'Route commerciale annulée. Vous récupérez les '.$routeCancelRefund * 100 .'% du montant investi.');
+		$commercialRouteRepository->remove($cr);
 
-		$entityManager->flush();
+		$this->addFlash('success', 'Route commerciale annulée. Vous récupérez les '.$routeCancelRefund * 100 .'% du montant investi.');
 
 		return $this->redirect($request->headers->get('referer'));
 	}

@@ -13,7 +13,7 @@
 	{% if default_position.system is not null %}
 		{% set no_ajax = true %}
 
-		<div id="action-box" style="bottom: 0px;">
+		<div id="action-box">
 			{{ include('components/map/system_details.html.twig', {
 				places,
 				no_ajax,

@@ -2,6 +2,8 @@
 
 namespace App\Modules\Zeus\Message;
 
-class PlayersCreditsUpdateMessage
+use App\Shared\Domain\Message\AsyncMessage;
+
+class PlayersCreditsUpdateMessage implements AsyncMessage
 {
 }

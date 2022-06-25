@@ -46,7 +46,7 @@ class NewShipQueueEvent implements TutorialEvent, TrackingEvent
 		return [
 			'ship_id' => $this->shipQueue->shipNumber,
 			'quantity' => $this->shipQueue->quantity,
-			'place_id' => $this->shipQueue->rOrbitalBase,
+			'place_id' => $this->shipQueue->base->id,
 		];
 	}
 }

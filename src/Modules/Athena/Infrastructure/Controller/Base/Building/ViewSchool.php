@@ -2,6 +2,7 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -20,15 +21,23 @@ class ViewSchool extends AbstractController
 		Request $request,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		OrbitalBase $currentBase,
-		CommanderManager $commanderManager,
+		CommanderRepositoryInterface $commanderRepository,
 	): Response {
 		$commanderInvestBonus = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::COMMANDER_INVEST);
 
 		$invest = $currentBase->iSchool * $commanderInvestBonus / 100;
 
 		return $this->render('pages/athena/school.html.twig', [
-			'commanders' => $commanderManager->getBaseCommanders($currentBase->getId(), [Commander::INSCHOOL], ['c.experience' => 'DESC']),
-			'reserve_commanders' => $commanderManager->getBaseCommanders($currentBase->getId(), ['c.statement' => Commander::RESERVE], ['c.experience' => 'DESC']),
+			'commanders' => $commanderRepository->getBaseCommanders(
+				$currentBase,
+				[Commander::INSCHOOL],
+				['experience' => 'DESC'],
+			),
+			'reserve_commanders' => $commanderRepository->getBaseCommanders(
+				$currentBase,
+				[Commander::RESERVE],
+				['experience' => 'DESC'],
+			),
 			'earned_experience' => $this->calculateEarnedExperience($invest),
 			'max_commanders_in_school' => PlaceResource::get($currentBase->typeOfBase, 'school-size'),
 			'random_name' => CheckName::randomize(),

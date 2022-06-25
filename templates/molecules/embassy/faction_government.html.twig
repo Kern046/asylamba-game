@@ -1,4 +1,4 @@
-{% set statuses = get_faction_info(faction.id, 'status') %}
+{% set statuses = get_faction_info(faction.identifier, 'status') %}
 
 <div class="component player rank">
 	<div class="head"></div>
@@ -6,7 +6,7 @@
 		<div class="body">
 			<h4>Gouvernement</h4>
 			{% for minister in government_members %}
-				<div class="player color{{ faction.id }}">
+				<div class="player color{{ faction.identifier }}">
 					<a href="{{ path('embassy', {'player': minister.id}) }}">
 						<img src="{{ asset('build/media/avatar/small/' ~ minister.avatar ~ '.png') }}" alt="{{ minister.name }}" class="picto" />
 					</a>
@@ -33,11 +33,11 @@
 			</div>
 			<div class="number-box grey">
 				<span class="label">Nombre de points des territoires contrôlés</span>
-				<span class="value">{{ faction.sectors|number }}</span>
+				<span class="value">{{ sectors_count }}</span>
 			</div>
 			<div class="number-box grey">
 				<span class="label">Nombre de joueurs actifs</span>
-				<span class="value">{{ faction.activePlayers|number }}</span>
+				<span class="value">{{ active_players_count }}</span>
 			</div>
 		</div>
 	</div>

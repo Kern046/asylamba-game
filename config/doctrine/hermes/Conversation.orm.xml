@@ -1,0 +1,13 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Hermes\Model\Conversation" table="conversation">
+		<id name="id" type="uuid" />
+
+		<one-to-many field="players" mapped-by="conversation" target-entity="App\Modules\Hermes\Model\ConversationUser" />
+
+		<field name="title" />
+		<field name="createdAt" type="datetime_immutable" />
+		<field name="lastMessageAt" type="datetime_immutable" nullable="true" />
+		<field name="messagesCount" type="smallint" />
+		<field name="type" type="smallint" />
+	</entity>
+</doctrine-mapping>

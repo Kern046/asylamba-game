@@ -2,42 +2,9 @@
 
 namespace App\Modules\Gaia\Resource;
 
-use App\Classes\Library\Utils;
-
 class SquadronResource
 {
-	public static function get($level, $aleaNbr)
-	{
-		while ($aleaNbr >= self::size()) {
-			$aleaNbr -= self::size();
-		}
-		if ($aleaNbr < 0) {
-			0 == $aleNbr;
-		}
-
-		$squadron = self::$squadrons[0][2];
-		for ($i = 0; $i < self::size(); $i++, $aleaNbr++) {
-			if ($aleaNbr >= self::size()) {
-				$aleaNbr = 0;
-			}
-
-			if (self::$squadrons[$aleaNbr][0] <= $level && self::$squadrons[$aleaNbr][1] >= $level) {
-				$squadron = self::$squadrons[$aleaNbr][2];
-				break;
-			}
-		}
-
-		$squadron[] = Utils::now();
-
-		return $squadron;
-	}
-
-	public static function size()
-	{
-		return count(self::$squadrons);
-	}
-
-	private static $squadrons = [
+	public static $squadrons = [
 	//	niv min, niv max, liste de vaisseaux
 
 	//	extrèmement petit officier (lvl 1)
@@ -48,7 +15,7 @@ class SquadronResource
 		[1, 1, [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
 
 	//	très petit officier (lvl 2-4)
-		[2, 2, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+		[2, 2, [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
 		[2, 2, [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
 		[2, 2, [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
 		[2, 2, [4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],

@@ -1,32 +1,22 @@
 <?php
 
-/**
- * news de faction.
- *
- * @author Noé Zufferey
- * @copyright Asylamba
- *
- * @update 09.01.15
- */
-
 namespace App\Modules\Demeter\Model\Forum;
+
+use App\Modules\Demeter\Model\Color;
+use Symfony\Component\Uid\Uuid;
 
 class FactionNews
 {
-	public const STANDARD = 0;
-	public const PINNED = 1;
+	public function __construct(
+		public Uuid $id,
+		public Color $faction,
+		public string $title,
+		public string $oContent,
+		public string $pContent,
+		public bool $pinned,
+		public int $statement,
+		public \DateTimeImmutable $createdAt,
+	) {
 
-	public $id = 0;
-	public $rFaction = 0;
-	public $title = 0;
-	public $oContent = 0;
-	public $pContent = 0;
-	public $pinned = 0;
-	public $statement = 0;
-	public $dCreation = '';
-
-	public function getId()
-	{
-		return $this->id;
 	}
 }

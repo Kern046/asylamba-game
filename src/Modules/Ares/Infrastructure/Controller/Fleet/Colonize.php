@@ -2,26 +2,29 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Game;
+use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
-use App\Modules\Demeter\Manager\ColorManager;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
-use App\Modules\Gaia\Manager\PlaceManager;
-use App\Modules\Gaia\Manager\SectorManager;
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Model\Place;
-use App\Modules\Promethee\Manager\TechnologyManager;
+use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class Colonize extends AbstractController
 {
@@ -30,95 +33,104 @@ class Colonize extends AbstractController
 		Player $currentPlayer,
 		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		ColorManager $colorManager,
+		CommanderArmyHandler $commanderArmyHandler,
+		ColorRepositoryInterface $colorRepository,
 		CommanderManager $commanderManager,
-		TechnologyManager $technologyManager,
-		PlaceManager $placeManager,
+		CommanderRepositoryInterface $commanderRepository,
+		TechnologyRepositoryInterface $technologyRepository,
+		PlaceRepositoryInterface $placeRepository,
 		PlayerManager $playerManager,
-		SectorManager $sectorManager,
-		EntityManager $entityManager,
-		int $id,
+		EntityManagerInterface $entityManager,
+		Uuid $id,
 	): Response {
 		// load the technologies
-		$technologies = $technologyManager->getPlayerTechnology($currentPlayer->getId());
+		$technologies = $technologyRepository->getPlayerTechnology($currentPlayer);
 
 		// check si technologie CONQUEST débloquée
-		if (1 == $technologies->getTechnology(TechnologyId::COLONIZATION)) {
-			// check si la technologie BASE_QUANTITY a un niveau assez élevé
-			$maxBasesQuantity = $technologies->getTechnology(TechnologyId::BASE_QUANTITY) + 1;
-
-			$coloQuantity = 0;
-			$commanders = $commanderManager->getPlayerCommanders($currentPlayer->getId(), [Commander::MOVING]);
-			foreach ($commanders as $commander) {
-				if (Commander::COLO == $commander->travelType) {
-					++$coloQuantity;
-				}
-			}
-			$totalBases = $currentPlayerBasesRegistry->count() + $coloQuantity;
-			if ($totalBases < $maxBasesQuantity) {
-				if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer = $currentPlayer->getId()) {
-					if (($place = $placeManager->get($request->query->getInt('placeId'))) !== null) {
-						if (Place::TERRESTRIAL == $place->typeOfPlace) {
-							$home = $placeManager->get($commander->getRBase());
-
-							$length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-							$duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
-
-							// compute price
-							$price = $totalBases * $this->getParameter('ares.coeff.colonization_cost');
-
-							// calcul du bonus
-							if (in_array(ColorResource::COLOPRICEBONUS, $colorManager->get($currentPlayer->getRColor())->bonus)) {
-								$price -= round($price * ColorResource::BONUS_CARDAN_COLO / 100);
-							}
-
-							if ($currentPlayer->getCredit() >= $price) {
-								if ($commander->getPev() > 0) {
-									if (Commander::AFFECTED == $commander->statement) {
-										$sector = $sectorManager->get($place->rSector);
-
-										$sectorColor = $colorManager->get($sector->rColor);
-										$isFactionSector = $sector->rColor == $commander->playerColor || Color::ALLY == $sectorColor->colorLink[$currentPlayer->getRColor()];
-
-										if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
-											$commander->destinationPlaceName = $place->baseName;
-											$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::COLO, $length, $duration);
-											// debit credit
-											$playerManager->decreaseCredit($currentPlayer, $price);
-
-											$entityManager->flush();
-
-											if ($request->query->has('redirect')) {
-												return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
-											}
-
-											return $this->redirect($request->headers->get('referer'));
-										} else {
-											throw new ErrorException('Cet emplacement est trop éloigné.');
-										}
-									} else {
-										throw new ErrorException('Cet officier est déjà en déplacement.');
-									}
-								} else {
-									throw new ErrorException('Vous devez affecter au moins un vaisseau à votre officier.');
-								}
-							} else {
-								throw new ErrorException('Vous n\'avez pas assez de crédits pour coloniser cette planète.');
-							}
-						} else {
-							throw new ErrorException('Ce lieu n\'est pas habitable.');
-						}
-					} else {
-						throw new ErrorException('Ce lieu n\'existe pas.');
-					}
-				} else {
-					throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
-				}
-			} else {
-				throw new ErrorException('Vous avez assez de conquête en cours ou un niveau administration étendue trop bas.');
-			}
-		} else {
-			throw new ErrorException('Vous devez développer votre technologie colonisation.');
+		if (1 !== $technologies->getTechnology(TechnologyId::COLONIZATION)) {
+			throw new ConflictHttpException('Vous devez développer votre technologie colonisation.');
 		}
+		// check si la technologie BASE_QUANTITY a un niveau assez élevé
+		$maxBasesQuantity = $technologies->getTechnology(TechnologyId::BASE_QUANTITY) + 1;
+
+		$coloQuantity = 0;
+		$commanders = $commanderRepository->getPlayerCommanders($currentPlayer, [Commander::MOVING]);
+		foreach ($commanders as $commander) {
+			if (Commander::COLO == $commander->travelType) {
+				++$coloQuantity;
+			}
+		}
+		$totalBases = $currentPlayerBasesRegistry->count() + $coloQuantity;
+		if ($totalBases >= $maxBasesQuantity) {
+			throw new ConflictHttpException('Vous avez assez de conquête en cours ou un niveau administration étendue trop bas.');
+		}
+
+		$commander = $commanderRepository->get($id) ?? throw $this->createNotFoundException('Commander not found');
+
+		// TODO Voter
+		if ($commander->player->id !== $currentPlayer->id) {
+			throw $this->createAccessDeniedException('Ce commandant ne vous appartient pas ou n\'existe pas.');
+		}
+		$placeId = $request->query->get('placeId') ?? throw new BadRequestHttpException('Missing place id');
+
+		if (!Uuid::isValid($placeId)) {
+			throw new BadRequestHttpException('Invalid place id');
+		}
+
+		$place = $placeRepository->get(Uuid::fromString($placeId)) ?? throw $this->createNotFoundException('Place not found');
+		if (Place::TERRESTRIAL !== $place->typeOfPlace) {
+			throw new ConflictHttpException('Ce lieu n\'est pas habitable.');
+		}
+
+		$home = $commander->base;
+
+		$length = Game::getDistance(
+			$home->place->system->xPosition,
+			$place->system->xPosition,
+			$home->place->system->yPosition,
+			$place->system->yPosition
+		);
+		$duration = Game::getTimeToTravel($home->place, $place, $currentPlayerBonusRegistry->getPlayerBonus());
+
+		// compute price
+		$price = $totalBases * $this->getParameter('ares.coeff.colonization_cost');
+
+		// calcul du bonus
+		$factionBonuses = ColorResource::getInfo($currentPlayer->faction->identifier, 'bonus');
+		if (in_array(ColorResource::COLOPRICEBONUS, $factionBonuses)) {
+			$price -= round($price * ColorResource::BONUS_CARDAN_COLO / 100);
+		}
+
+		if (!$currentPlayer->canAfford($price)) {
+			throw new ConflictHttpException('Vous n\'avez pas assez de crédits pour coloniser cette planète.');
+		}
+		if (0 === $commanderArmyHandler->getPev($commander)) {
+			throw new ConflictHttpException('Vous devez affecter au moins un vaisseau à votre officier.');
+		}
+		if (!$commander->isAffected()) {
+			throw new ConflictHttpException('Cet officier n\'est pas en orbite.');
+		}
+		$sector = $place->system->sector;
+
+		$sectorColor = $sector->faction;
+		$isFactionSector = $sector->faction?->id === $commander->player->faction->id
+			|| Color::ALLY === $sectorColor?->relations[$currentPlayer->faction->identifier];
+
+		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
+			throw new ConflictHttpException('Cet emplacement est trop éloigné.');
+		}
+		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $length, $duration);
+		// debit credit
+		$playerManager->decreaseCredit($currentPlayer, $price);
+
+		$entityManager->flush();
+
+		$this->addFlash('success', 'Flotte envoyée.');
+
+		if ($request->query->has('redirect')) {
+			return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
+		}
+
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

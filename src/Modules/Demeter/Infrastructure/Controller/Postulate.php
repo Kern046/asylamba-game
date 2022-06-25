@@ -26,7 +26,6 @@ class Postulate extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		ElectionManager $electionManager,
-		ColorManager $colorManager,
 		CandidateManager $candidateManager,
 		PlayerManager $playerManager,
 		ForumTopicManager $forumTopicManager,
@@ -49,7 +48,7 @@ class Postulate extends AbstractController
 					$ministerChoice = 1;
 
 					if ($currentPlayer->isParliamentMember()) {
-						$faction = $colorManager->get($currentPlayer->getRColor());
+						$faction = $currentPlayer->getRColor();
 
 						if (Color::CAMPAIGN == $faction->electionStatement) {
 							if (null !== $chiefChoice && false !== $treasurerChoice && false !== $warlordChoice && false !== $ministerChoice) {

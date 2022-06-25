@@ -25,7 +25,4 @@ services:
         exclude:
             - '../../Message'
             - '../../Model'
-            - '../../Repository'
             - '../../Resource'
-
-    App\Hermes\Domain\Repository\ConversationRepositoryInterface: '@App\Hermes\Infrastructure\Repository\ConversationRepository'

@@ -23,33 +23,34 @@
 			</div>
 		</div>
 
-		{% for faction in sorted_factions|filter(f => f.id != 0) %}
-			<div class="component inscription color{{ faction.id }}">
+		{% for faction_data in sorted_factions|filter(data => data.faction.identifier != 0) %}
+			{% set faction = faction_data.faction %}
+			<div class="component inscription color{{ faction.identifier }}">
 				<div class="head skin-1">
-					<img class="color{{ faction.id }}" src="{{ asset('build/media/ally/big/color' ~ faction.id ~ '.png') }}" alt="" />
-					<h2>{{ get_faction_info(faction.id, 'officialName') }}</h2>
-					<em>{{ get_faction_info(faction.id, 'government') }}</em>
+					<img class="color{{ faction.identifier }}" src="{{ asset('build/media/ally/big/color' ~ faction.identifier ~ '.png') }}" alt="" />
+					<h2>{{ get_faction_info(faction.identifier, 'officialName') }}</h2>
+					<em>{{ get_faction_info(faction.identifier, 'government') }}</em>
 				</div>
 				<div class="fix-body">
 					<div class="body">
 						<h4>A propos</h4>
-						<p>{{ get_faction_info(faction.id, 'desc1') }}</p>
+						<p>{{ get_faction_info(faction.identifier, 'desc1') }}</p>
 						<h4>Moeurs & autres</h4>
-						<p>{{ get_faction_info(faction.id, 'desc2') }}</p>
+						<p>{{ get_faction_info(faction.identifier, 'desc2') }}</p>
 						<h4>Guerre</h4>
-						<p>{{ get_faction_info(faction.id, 'desc3') }}</p>
+						<p>{{ get_faction_info(faction.identifier, 'desc3') }}</p>
 						<h4>Culture</h4>
-						<p>{{ get_faction_info(faction.id, 'desc4') }}</p>
+						<p>{{ get_faction_info(faction.identifier, 'desc4') }}</p>
 					</div>
 				</div>
 			</div>
 
-			<div class="component inscription color{{ faction.id }}">
+			<div class="component inscription color{{ faction.identifier }}">
 				<div class="head"></div>
 				<div class="fix-body">
 					<div class="body">
 						{% if not faction.isClosed %}
-							<a href="{{ path('create_character', {'step': 'profile', 'factionId': faction.id}) }}" class="chooseLink">
+							<a href="{{ path('create_character', {'step': 'profile', 'factionIdentifier': faction.identifier}) }}" class="chooseLink">
 								<strong>Choisir cette faction</strong>
 								{% if loop.index == 0 %}
 									<em>recommandée pour les joueurs débutants</em>
@@ -63,10 +64,11 @@
 								<em>De manière à équilibrer le jeu</em>
 							</span>
 						{% endif %}
-						<blockquote>"{{ get_faction_info(faction.id, 'devise') }}"</blockquote>
+						<blockquote>"{{ get_faction_info(faction.identifier, 'devise') }}"</blockquote>
 
 						<h4>Bonus & Malus de faction</h4>
-						{% for bonus in faction.bonusText %}
+						{% for bonus_identifier in get_faction_bonuses(faction.identifier) %}
+							{% set bonus = get_bonus_text(bonus_identifier) %}
 							<div class="build-item" style="margin: 25px 0;">
 								<div class="name">
 									<img src="{{ asset('build/media/' ~ bonus.path) }}" alt="" />

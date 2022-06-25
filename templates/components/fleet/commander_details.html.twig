@@ -31,19 +31,19 @@
 						</div>
 					<div class="number-box">
 						<span class="label">Vers</span>
-						<span class="value">{{ commander.destinationPlaceName }}</span>
+						<span class="value">{{ commander.destinationPlace.base.name ?? 'colonie rebelle' }}</span>
 					{% elseif commander.isLooting %}
 						<span class="value">Pillage</span>
 						</div>
 					<div class="number-box">
 						<span class="label">Cible</span>
-						<span class="value">{{ commander.destinationPlaceName }}</span>
+						<span class="value">{{ commander.destinationPlace.base.name ?? 'colonie rebelle' }}</span>
 					{% elseif commander.isInvading %}
 						<span class="value">Colonisation</span>
 						</div>
 					<div class="number-box">
 						<span class="label">Cible</span>
-						<span class="value">{{ commander.destinationPlaceName }}</span>
+						<span class="value">{{ commander.destinationPlace.base.name ?? 'colonie rebelle' }}</span>
 					{% elseif commander.isComingBack %}
 						<span class="value">Retour victorieux</span>
 						</div>

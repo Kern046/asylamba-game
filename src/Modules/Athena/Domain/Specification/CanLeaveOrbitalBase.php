@@ -12,7 +12,7 @@ class CanLeaveOrbitalBase implements Specification
 	 */
 	public function isSatisfiedBy($candidate): bool
 	{
-		$diff = (new \DateTime())->diff(new \DateTime($candidate->dCreation));
+		$diff = (new \DateTime())->diff($candidate->createdAt);
 
 		return $diff->format('%a') > 1 || $diff->format('%H') >= OrbitalBase::COOL_DOWN;
 	}

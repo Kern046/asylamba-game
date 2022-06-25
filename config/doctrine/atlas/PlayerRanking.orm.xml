@@ -1,0 +1,36 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Atlas\Model\PlayerRanking" table="playerRanking">
+		<id name="id" column="id" type="uuid" />
+
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player">
+			
+		</many-to-one>
+
+		<field name="general" type="smallint" />
+		<field name="generalPosition" type="smallint" />
+		<field name="generalVariation" type="smallint" />
+		<field name="experience" type="smallint" />
+		<field name="experiencePosition" type="smallint" />
+		<field name="experienceVariation" type="smallint" />
+		<field name="butcher" type="smallint" />
+		<field name="butcherDestroyedPEV" type="smallint" />
+		<field name="butcherLostPEV" type="smallint" />
+		<field name="butcherPosition" type="smallint" />
+		<field name="butcherVariation" type="smallint" />
+		<field name="trader" type="smallint" />
+		<field name="traderPosition" type="smallint" />
+		<field name="traderVariation" type="smallint" />
+		<field name="fight" type="smallint" />
+		<field name="victories" type="smallint" />
+		<field name="defeat" type="smallint" />
+		<field name="fightPosition" type="smallint" />
+		<field name="fightVariation" type="smallint" />
+		<field name="armies" type="smallint" />
+		<field name="armiesPosition" type="smallint" />
+		<field name="armiesVariation" type="smallint" />
+		<field name="resources" type="smallint" />
+		<field name="resourcesPosition" type="smallint" />
+		<field name="resourcesVariation" type="smallint" />
+		<field name="createdAt" type="datetime_immutable" />
+	</entity>
+</doctrine-mapping>

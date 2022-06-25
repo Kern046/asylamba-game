@@ -20,11 +20,11 @@
 					</h2>
 
 					{% for commander in base.fleets %}
-						{% set reversed = commander.rPlayer != current_player.id or commander.isComingBack %}
+						{% set reversed = commander.player.id != current_player.id or commander.isComingBack %}
 
-						<div class="item color{{ commander.playerColor }}">
+						<div class="item color{{ commander.player.faction.identifier }}">
 							<div class="left">
-								{% if commander.rPlayer != current_player.id %}
+								{% if commander.player.id != current_player.id %}
 									<img src="{{ asset('build/media/map/action/shield.png') }}" alt="" class="status" />
 								{% elseif commander.isAffected %}
 									<img src="{{ asset('build/media/map/action/anchor.png') }}" alt="" class="status" />
@@ -42,7 +42,7 @@
 								<span class="top">
 									{{ commander|commander_rank }} <strong>{{ commander.name }}</strong>
 
-									{% if commander.rPlayer != current_player.id %}
+									{% if commander.player.id != current_player.id %}
 										{% if commander.isLooting %}
 											tente de vous piller
 										{% elseif commander.isInvading %}
@@ -65,11 +65,11 @@
 									{% endif %}
 
 									&#8194;
-									{% if commander.rPlayer == current_player.id %}
-										{{ commander.pev|number ~ ' pev' }}
+									{% if commander.player.id == current_player.id %}
+										{{ commander|pev|number ~ ' pev' }}
 									{% endif %}
 
-									{% if commander.rPlayer == current_player.id and commander.isMoving and not commander.isComingBack %}
+									{% if commander.player.id == current_player.id and commander.isMoving and not commander.isComingBack %}
 										{{ '&#8195;'|raw }}<a class="confirm" href="{{ path('cancel_fleet_movement', {'id': commander.id}) }}">annuler la mission</a>
 									{% endif %}
 								</span>
@@ -94,20 +94,20 @@
 
 							{% if commander.isMoving %}
 								<div class="right">
-									<img src="{{ asset('build/media/map/place/place1-' ~ get_planet_size(commander.isComingBack ? commander.startPlacePop : commander.destinationPlacePop) ~ '.png') }}" alt="" class="cover" />'
+									<img src="{{ asset('build/media/map/place/place1-' ~ get_planet_size(commander.isComingBack ? commander.startPlace.population : commander.destinationPlace.population) ~ '.png') }}" alt="" class="cover" />'
 									<span class="top">
-										<a href="{{ path('map', {'placeId': reversed ? commander.rStartPlace : commander.rDestinationPlace }) }}">
-											{{- (reversed ? commander.rStartPlace : commander.rDestinationPlace) -}}
+										<a href="{{ path('map', {'placeId': reversed ? commander.startPlace.id : commander.destinationPlace.id }) }}">
+											{{- (reversed ? commander.startPlace.id : commander.destinationPlace.id) -}}
 										</a>
 
-										{% if commander.rPlayer != current_player.id %}
-											 (<a href="{{ path('embassy', {'playerId': commander.rPlayer}) }}' . $appRoot . 'embassy/player-' . $commander->rPlayer . '">' . $commander->playerName . '</a>)
+										{% if commander.player.id != current_player.id %}
+											 (<a href="{{ path('embassy', {'playerId': commander.player.id }) }}">{{ commander.player.name }}</a>)
 										{% endif %}
 									</span>
 								</div>
 							{% endif %}
 
-							{% if commander.rPlayer == current_player.id %}
+							{% if commander.player.id == current_player.id %}
 								<a href="{{ path('fleet_headquarters', {'commander': commander.id}) }}"
 								   class="show-commander {% if app.request.query.get('commander', null) == commander.id %}active{% endif %}">
 								</a>

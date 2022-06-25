@@ -3,13 +3,21 @@
 				  xsi:schemaLocation="https://doctrine-project.org/schemas/orm/doctrine-mapping
                           https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-	<entity name="App\Modules\Zeus\Model\Player" table="player">
+	<entity name="App\Modules\Zeus\Model\Player" table="player" repository-class="App\Modules\Zeus\Repository\PlayerRepository">
 		<id name="id" type="integer" column="id">
 			<generator strategy="AUTO" />
 			<options>
 				<option name="unsigned">true</option>
 			</options>
 		</id>
+
+		<many-to-one field="faction" target-entity="App\Modules\Demeter\Model\Color">
+			<join-column nullable="true" />
+		</many-to-one>
+
+		<many-to-one field="godFather" target-entity="App\Modules\Zeus\Model\Player">
+			<join-column nullable="true" />
+		</many-to-one>
 
 		<field name="bind" type="string" column="bind" length="50" nullable="true" />
 		<field name="name" type="string" column="name" length="25" unique="true" />
@@ -113,17 +121,9 @@
 				<option name="default">0</option>
 			</options>
 		</field>
-		<field name="dInscription" column="dInscription" type="datetime" nullable="true" />
-		<field name="dLastConnection" column="dLastConnection" type="datetime" nullable="true" />
-		<field name="dLastActivity" column="dLastActivity" type="datetime" nullable="true" />
-		<field name="uPlayer" column="uPlayer" type="datetime" nullable="true" />
-
-		<many-to-one field="rColor" target-entity="App\Modules\Demeter\Model\Color">
-			<join-column name="rColor" nullable="false" />
-		</many-to-one>
-
-		<many-to-one field="rGodfather" target-entity="App\Modules\Zeus\Model\Player">
-			<join-column name="rGodfather" nullable="true" />
-		</many-to-one>
+		<field name="dInscription" column="dInscription" type="datetime_immutable" nullable="true" />
+		<field name="dLastConnection" column="dLastConnection" type="datetime_immutable" nullable="true" />
+		<field name="dLastActivity" column="dLastActivity" type="datetime_immutable" nullable="true" />
+		<field name="uPlayer" column="uPlayer" type="datetime_immutable" nullable="true" />
 	</entity>
 </doctrine-mapping>

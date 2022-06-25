@@ -9,7 +9,7 @@
 			<div class="body">
 				<ul class="list-type-1">
 					{% for base in player_bases %}
-						{% set base_data = bases_data[base.id] %}
+						{% set base_data = bases_data[base.id.toRfc4122()] %}
 
 						<li>
 							{% if base_data['routes_count'] > 0 %}

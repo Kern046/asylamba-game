@@ -2,49 +2,46 @@
 
 namespace App\Modules\Gaia\EventListener;
 
-use App\Classes\Entity\EntityManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Event\PlaceOwnerChangeEvent;
-use App\Modules\Gaia\Manager\SystemManager;
-use App\Modules\Zeus\Manager\PlayerManager;
 
 class SystemListener
 {
 	public function __construct(
-		protected SystemManager $systemManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected PlayerManager $playerManager,
-		protected EntityManager $entityManager,
-		protected array $scores
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private readonly SystemRepositoryInterface $systemRepository,
+		private readonly array $scores
 	) {
 	}
 
-	public function onPlaceOwnerChange(PlaceOwnerChangeEvent $event)
+	public function onPlaceOwnerChange(PlaceOwnerChangeEvent $event): void
 	{
-		$system = $this->systemManager->get($event->getPlace()->rSystem);
-		$bases = $this->orbitalBaseManager->getSystemBases($system);
-		// Initialize the value in case no base is available (after leaving the last one)
-		$scores[$system->rColor] = 0;
+		$scores = [];
+		$system = $event->getPlace()->system;
+		$bases = $this->orbitalBaseRepository->getSystemBases($system);
 
 		foreach ($bases as $base) {
-			$player = $this->playerManager->get($base->rPlayer);
+			$factionIdentifier = $base->player->faction->identifier;
 
-			$scores[$player->rColor] =
-				(!empty($scores[$player->rColor]))
-				? $scores[$player->rColor] + $this->scores[$base->typeOfBase]
-				: $this->scores[$base->typeOfBase]
-			;
+			$scores[$factionIdentifier] = ($scores[$factionIdentifier] ?? 0) + $this->scores[$base->typeOfBase];
 		}
 		arsort($scores);
 		reset($scores);
 		$newColor = key($scores);
-		// NPC faction has no points
-		$scores[0] = 0;
-		if ($scores[$newColor] > 0 && $system->rColor !== $newColor && $scores[$newColor] > $scores[$system->rColor]) {
-			$system->rColor = $newColor;
+		$currentFactionIdentifier = $system->faction?->identifier;
+
+		if (null === $currentFactionIdentifier || (
+			$scores[$newColor] > 0
+			&& $currentFactionIdentifier !== $newColor
+			&& $scores[$newColor] > $scores[$currentFactionIdentifier]
+		)) {
+			$system->faction = $this->colorRepository->getOneByIdentifier($newColor);
 		} elseif (0 === $scores[$newColor]) {
-			$system->rColor = 0;
+			$system->faction = null;
 		}
-		$this->systemManager->changeOwnership($system);
+		$this->systemRepository->save($system);
 	}
 }

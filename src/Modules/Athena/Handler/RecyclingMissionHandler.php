@@ -2,12 +2,11 @@
 
 namespace App\Modules\Athena\Handler;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
 use App\Classes\Library\Utils;
+use App\Modules\Athena\Domain\Repository\RecyclingLogRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Manager\RecyclingLogManager;
-use App\Modules\Athena\Manager\RecyclingMissionManager;
 use App\Modules\Athena\Message\RecyclingMissionMessage;
 use App\Modules\Athena\Model\RecyclingLog;
 use App\Modules\Athena\Model\RecyclingMission;
@@ -18,30 +17,30 @@ use App\Modules\Gaia\Model\Place;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Manager\PlayerManager;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class RecyclingMissionHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class RecyclingMissionHandler
 {
 	public function __construct(
-		protected RecyclingMissionManager $recyclingMissionManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected PlaceManager $placeManager,
-		protected PlayerManager $playerManager,
-		protected NotificationManager $notificationManager,
-		protected RecyclingLogManager $recyclingLogManager,
-		protected EntityManager $entityManager,
-		protected MessageBusInterface $messageBus,
+		private OrbitalBaseManager                  $orbitalBaseManager,
+		private PlaceManager                        $placeManager,
+		private PlayerManager                       $playerManager,
+		private NotificationManager                 $notificationManager,
+		private RecyclingMissionRepositoryInterface $recyclingMissionRepository,
+		private RecyclingLogRepositoryInterface     $recyclingLogRepository,
+		private MessageBusInterface                 $messageBus,
 	) {
 	}
 
 	public function __invoke(RecyclingMissionMessage $message): void
 	{
-		$mission = $this->recyclingMissionManager->get($message->getRecyclingMissionId());
-		$orbitalBase = $this->orbitalBaseManager->get($mission->rBase);
-		$targetPlace = $this->placeManager->get($mission->rTarget);
+		$mission = $this->recyclingMissionRepository->get($message->getRecyclingMissionId());
+		$orbitalBase = $mission->base;
+		$targetPlace = $mission->target;
 
-		$player = $this->playerManager->get($orbitalBase->getRPlayer());
+		$player = $orbitalBase->player;
 		if (Place::EMPTYZONE != $targetPlace->typeOfPlace) {
 			// make the recycling : decrease resources on the target place
 			$totalRecycled = $mission->recyclerQuantity * RecyclingMission::RECYCLER_CAPACTIY;
@@ -70,7 +69,7 @@ class RecyclingMissionHandler implements MessageHandlerInterface
 			}
 
 			// if the sector change its color between 2 recyclings
-			if ($player->rColor != $targetPlace->sectorColor && ColorResource::NO_FACTION != $targetPlace->sectorColor) {
+			if ($player->faction != $targetPlace->sector->faction && ColorResource::NO_FACTION != $targetPlace->sector->faction) {
 				// stop the mission
 				$mission->statement = RecyclingMission::ST_DELETED;
 
@@ -178,12 +177,12 @@ class RecyclingMissionHandler implements MessageHandlerInterface
 			$rl->ship10 = $buyShip[10];
 			$rl->ship11 = $buyShip[11];
 			$rl->dLog = Utils::addSecondsToDate($mission->uRecycling, $mission->cycleTime);
-			$this->recyclingLogManager->add($rl);
+			$this->recyclingLogRepository->save($rl);
 
 			// give to the orbitalBase ($orbitalBase) and player what was recycled
 			$this->orbitalBaseManager->increaseResources($orbitalBase, $resourceRecycled);
 			for ($i = 0; $i < ShipResource::SHIP_QUANTITY; ++$i) {
-				$this->orbitalBaseManager->addShipToDock($orbitalBase, $i, $buyShip[$i]);
+				$orbitalBase->addShips($i, $buyShip[$i]);
 			}
 			$this->playerManager->increaseCredit($player, $creditRecycled);
 
@@ -199,7 +198,7 @@ class RecyclingMissionHandler implements MessageHandlerInterface
 			// update u
 			$mission->uRecycling = Utils::addSecondsToDate($mission->uRecycling, $mission->cycleTime);
 			// Schedule the next mission if there is still resources
-			if (RecyclingMission::ST_DELETED !== $mission->getStatement()) {
+			if (RecyclingMission::ST_DELETED !== $mission->statement) {
 				$this->messageBus->dispatch(
 					new RecyclingMissionMessage($mission->getId()),
 					[DateTimeConverter::to_delay_stamp($mission->uRecycling)]

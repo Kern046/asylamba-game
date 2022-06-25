@@ -1,22 +1,14 @@
 <?php
 
-/**
- * Color Manager.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 26.11.13
- */
-
 namespace App\Modules\Demeter\Manager;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
 use App\Classes\Library\Parser;
 use App\Classes\Library\Utils;
-use App\Modules\Demeter\Manager\Election\ElectionManager;
-use App\Modules\Demeter\Manager\Law\LawManager;
+use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
+use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Message\BallotMessage;
 use App\Modules\Demeter\Message\CampaignMessage;
 use App\Modules\Demeter\Message\ElectionMessage;
@@ -36,12 +28,18 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Demeter\Resource\LawResources;
-use App\Modules\Hermes\Manager\NotificationManager;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Model\Notification;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\SchedulerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class ColorManager implements SchedulerInterface
@@ -49,12 +47,16 @@ class ColorManager implements SchedulerInterface
 	protected PlayerManager $playerManager;
 
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected ElectionManager $electionManager,
-		protected LawManager $lawManager,
-		protected NotificationManager $notificationManager,
-		protected Parser $parser,
-		protected MessageBusInterface $messageBus,
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly ElectionRepositoryInterface $electionRepository,
+		private readonly PlayerRepositoryInterface $playerRepository,
+		private readonly LawRepositoryInterface $lawRepository,
+		private readonly NotificationRepositoryInterface $notificationRepository,
+		private readonly Parser $parser,
+		private readonly MessageBusInterface $messageBus,
+		private readonly UrlGeneratorInterface $urlGenerator,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly NextElectionDateCalculator $nextElectionDateCalculator,
 	) {
 	}
 
@@ -62,63 +64,6 @@ class ColorManager implements SchedulerInterface
 	public function setPlayerManager(PlayerManager $playerManager): void
 	{
 		$this->playerManager = $playerManager;
-	}
-
-	/**
-	 * @param int $id
-	 *
-	 * @return Color
-	 */
-	public function get($id)
-	{
-		$faction = $this->entityManager->getRepository(Color::class)->get($id);
-		// @TODO avoid duplicate messages
-		$this->uMethod($faction);
-
-		return $faction;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAll()
-	{
-		return $this->entityManager->getRepository(Color::class)->getAll();
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getInGameFactions()
-	{
-		return $this->entityManager->getRepository(Color::class)->getInGameFactions();
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getOpenFactions()
-	{
-		return $this->entityManager->getRepository(Color::class)->getOpenFactions();
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAllByActivePlayersNumber()
-	{
-		return $this->entityManager->getRepository(Color::class)->getAllByActivePlayersNumber();
-	}
-
-	/**
-	 * @return int
-	 */
-	public function add(Color $faction)
-	{
-		$this->entityManager->persist($faction);
-		$this->entityManager->flush($faction);
-
-		return $faction->id;
 	}
 
 	public function getParsedDescription(Color $color): string
@@ -137,138 +82,107 @@ class ColorManager implements SchedulerInterface
 		$this->scheduleBallot();
 	}
 
-	public function scheduleSenateUpdate()
+	public function scheduleSenateUpdate(): void
 	{
-		$factions = $this->entityManager->getRepository(Color::class)->getByRegimeAndElectionStatement(
-			[Color::ROYALISTIC],
-			[Color::MANDATE]
-		);
-		foreach ($factions as $faction) {
-			$date = new \DateTime($faction->dLastElection);
-			$date->modify('+'.$faction->mandateDuration.' second');
+		$factions = $this->colorRepository->getByRegimeAndElectionStatement([Color::REGIME_ROYALISTIC], [Color::MANDATE]);
 
+		foreach ($factions as $faction) {
 			$this->messageBus->dispatch(
-				new SenateUpdateMessage($faction->getId()),
-				[DateTimeConverter::to_delay_stamp($date->format('Y-m-d H:i:s'))],
+				new SenateUpdateMessage($faction->id),
+				[DateTimeConverter::to_delay_stamp($this->nextElectionDateCalculator->getSenateUpdateMessage($faction))],
 			);
 		}
 	}
 
-	public function scheduleCampaigns()
+	public function scheduleCampaigns(): void
 	{
-		$factions = $this->entityManager->getRepository(Color::class)->getByRegimeAndElectionStatement(
-			[Color::DEMOCRATIC, Color::THEOCRATIC],
+		$factions = $this->colorRepository->getByRegimeAndElectionStatement(
+			[Color::REGIME_DEMOCRATIC, Color::REGIME_THEOCRATIC],
 			[Color::MANDATE]
 		);
-		foreach ($factions as $faction) {
-			$date = new \DateTime($faction->dLastElection);
-			$date->modify('+'.$faction->mandateDuration.' second');
 
+		foreach ($factions as $faction) {
 			$this->messageBus->dispatch(
-				new CampaignMessage($faction->getId()),
-				[DateTimeConverter::to_delay_stamp($date->format('Y-m-d H:i:s'))],
+				new CampaignMessage($faction->id),
+				[DateTimeConverter::to_delay_stamp($this->nextElectionDateCalculator->getCampaignStartDate($faction))],
 			);
 		}
-		$factions = $this->entityManager->getRepository(Color::class)->getByRegimeAndElectionStatement(
-			[Color::ROYALISTIC],
-			[Color::ELECTION]
+		$factions = $this->colorRepository->getByRegimeAndElectionStatement(
+			[Color::REGIME_ROYALISTIC],
+			[Color::ELECTION],
 		);
 		foreach ($factions as $faction) {
-			$datetime = new \DateTime($faction->dLastElection);
-			$datetime->modify('+'.Color::PUTSCHTIME.' second');
-
 			$this->messageBus->dispatch(
-				new BallotMessage($faction->getId()),
-				[DateTimeConverter::to_delay_stamp($datetime->format('Y-m-d H:i:s'))],
+				new BallotMessage($faction->id),
+				[DateTimeConverter::to_delay_stamp($this->nextElectionDateCalculator->getPutschEndDate($faction))],
 			);
 		}
 	}
 
 	public function scheduleElections(): void
 	{
-		$factions = $this->entityManager->getRepository(Color::class)->getByRegimeAndElectionStatement(
-			[Color::DEMOCRATIC],
-			[Color::CAMPAIGN]
+		$factions = $this->colorRepository->getByRegimeAndElectionStatement(
+			[Color::REGIME_DEMOCRATIC],
+			[Color::CAMPAIGN],
 		);
 		foreach ($factions as $faction) {
-			$election = $this->electionManager->getFactionLastElection($faction->id);
 			$this->messageBus->dispatch(
-				new ElectionMessage($faction->getId()),
-				[DateTimeConverter::to_delay_stamp($election->dElection)],
+				new ElectionMessage($faction->id),
+				[DateTimeConverter::to_delay_stamp($this->nextElectionDateCalculator->getNextElectionDate($faction))],
 			);
 		}
 	}
 
-	public function scheduleBallot()
+	public function scheduleBallot(): void
 	{
 		$factions = array_merge(
-			$this->entityManager->getRepository(Color::class)->getByRegimeAndElectionStatement(
-				[Color::DEMOCRATIC],
-				[Color::ELECTION]
+			$this->colorRepository->getByRegimeAndElectionStatement(
+				[Color::REGIME_DEMOCRATIC],
+				[Color::ELECTION],
 			),
-			$this->entityManager->getRepository(Color::class)->getByRegimeAndElectionStatement(
-				[Color::THEOCRATIC],
-				[Color::CAMPAIGN, Color::ELECTION]
+			$this->colorRepository->getByRegimeAndElectionStatement(
+				[Color::REGIME_THEOCRATIC],
+				[Color::CAMPAIGN, Color::ELECTION],
 			)
 		);
 		foreach ($factions as $faction) {
-			$datetime = new \DateTime($faction->dLastElection);
-			$datetime->modify('+'.$faction->mandateDuration + Color::ELECTIONTIME + Color::CAMPAIGNTIME.' second');
-
 			$this->messageBus->dispatch(
-				new BallotMessage($faction->getId()),
-				[DateTimeConverter::to_delay_stamp($datetime->format('Y-m-d H:i:s'))]
+				new BallotMessage($faction->id),
+				[DateTimeConverter::to_delay_stamp($this->nextElectionDateCalculator->getBallotDate($faction))],
 			);
 		}
-		$this->entityManager->flush(Color::class);
 	}
 
-	// FONCTIONS STATICS
-	public function updateInfos(Color $faction)
+	public function sendSenateNotif(Color $color, bool $isFromChief = false): void
 	{
-		$faction->players = $this
-			->playerManager
-			->countByFactionAndStatements($faction->id, [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY])
-		;
-		$faction->activePlayers = $this
-			->playerManager
-			->countByFactionAndStatements($faction->id, [Player::ACTIVE])
-		;
-		$this->entityManager->flush($faction);
-	}
+		$parliamentMembers = $this->playerRepository->getParliamentMembers($color);
 
-	public function sendSenateNotif(Color $color, $fromChief = false)
-	{
-		$parliamentMembers = $this->playerManager->getParliamentMembers($color->id);
+		$notificationBuilder = NotificationBuilder::new()
+			->setTitle($isFromChief ? 'Loi appliquée' : 'Loi proposée')
+			->setContent(NotificationBuilder::paragraph(
+				$isFromChief
+					? sprintf(
+						'Votre %s a appliqué une loi.',
+						ColorResource::getInfo($color->id, 'status')[5]
+					)
+					: 'Votre gouvernement a proposé un projet de loi, en tant que membre du sénat,
+					il est de votre devoir de voter pour l\'acceptation ou non de ladite loi.',
+				NotificationBuilder::divider(),
+				NotificationBuilder::link(
+					$this->urlGenerator->generate('view_senate'),
+					$isFromChief ? 'voir les lois appliquées' : 'voir les lois en cours de vote',
+				),
+			));
 
 		foreach ($parliamentMembers as $parliamentMember) {
-			$notif = new Notification();
-			$notif->setRPlayer($parliamentMember->id);
-			if (false == $fromChief) {
-				$notif->setTitle('Loi proposée');
-				$notif->addBeg()
-					->addTxt('Votre gouvernement a proposé un projet de loi, en tant que membre du sénat, il est de votre devoir de voter pour l\'acceptation ou non de ladite loi.')
-					->addSep()
-					->addLnk('faction/view-senate', 'voir les lois en cours de vote')
-					->addEnd();
-			} else {
-				$notif->setTitle('Loi appliquée');
-				$notif->addBeg()
-					->addTxt('Votre '.ColorResource::getInfo($color->id, 'status')[5].' a appliqué une loi.')
-					->addSep()
-					->addLnk('faction/view-senate', 'voir les lois appliquées')
-					->addEnd();
-			}
-			$this->notificationManager->add($notif);
+			$this->notificationRepository->save($notificationBuilder->for($parliamentMember));
 		}
 	}
 
-	/**
-	 * @param array $factionPlayers
-	 */
-	public function updateStatus(Color $color, $factionPlayers)
+	public function updateStatus(Color $faction): void
 	{
-		$limit = round($color->players / 4);
+		$factionPlayers = $this->playerRepository->getFactionPlayersByRanking($faction);
+		$limit = round(count($factionPlayers) / 4);
 		// If there is less than 40 players in a faction, the limit is up to 10 senators
 		if ($limit < 10) {
 			$limit = 10;
@@ -278,47 +192,52 @@ class ColorManager implements SchedulerInterface
 			$limit = 40;
 		}
 
+		$senatePromoteNotificationBuilder = NotificationBuilder::new()
+			// TODO genders
+			->setTitle('Vous êtes sénateur')
+			->setContent(NotificationBuilder::paragraph(
+				'Vos actions vous ont fait gagner assez de prestige pour faire partie du sénat.',
+			));
+
+		$senateDemoteNotificationBuilder = NotificationBuilder::new()
+			->setTitle('Vous n\'êtes plus sénateur')
+			->setContent(NotificationBuilder::paragraph(
+				'Vous n\'avez plus assez de prestige pour rester dans le sénat.'
+			));
+
 		foreach ($factionPlayers as $key => $factionPlayer) {
-			if ($factionPlayer->status < Player::TREASURER) {
-				if ($key < $limit) {
-					if (Player::PARLIAMENT != $factionPlayer->status) {
-						$notif = new Notification();
-						$notif->setRPlayer($factionPlayer->id);
-						$notif->setTitle('Vous êtes sénateur');
-						$notif->dSending = Utils::now();
-						$notif->addBeg()
-							->addTxt('Vos actions vous ont fait gagner assez de prestige pour faire partie du sénat.');
-						$this->notificationManager->add($notif);
-					}
-					$factionPlayer->status = Player::PARLIAMENT;
-				} else {
-					if (Player::PARLIAMENT == $factionPlayer->status) {
-						$notif = new Notification();
-						$notif->setRPlayer($factionPlayer->id);
-						$notif->setTitle('Vous n\'êtes plus sénateur');
-						$notif->dSending = Utils::now();
-						$notif->addBeg()
-							->addTxt('Vous n\'avez plus assez de prestige pour rester dans le sénat.');
-						$this->notificationManager->add($notif);
-					}
-					$factionPlayer->status = Player::STANDARD;
+			if ($factionPlayer->isGovernmentMember()) {
+				continue;
+			}
+			if ($key < $limit) {
+				if (!$factionPlayer->isParliamentMember()) {
+					$this->notificationRepository->save($senatePromoteNotificationBuilder->for($factionPlayer));
 				}
+				$factionPlayer->status = Player::PARLIAMENT;
+			} else {
+				if ($factionPlayer->isParliamentMember()) {
+					$this->notificationRepository->save($senateDemoteNotificationBuilder->for($factionPlayer));
+				}
+				// TODO handle ministers
+				$factionPlayer->status = Player::STANDARD;
 			}
 		}
-		$this->entityManager->flush(Player::class);
+		$this->entityManager->flush();
 	}
 
-	public function uMethod(Color $color): void
+	public function uMethod(Color $faction): void
 	{
-		$laws = $this->lawManager->getByFactionAndStatements($color->id, [Law::VOTATION, Law::EFFECTIVE]);
+		$laws = $this->lawRepository->getByFactionAndStatements($faction, [Law::VOTATION, Law::EFFECTIVE]);
+
+		$now = new \DateTimeImmutable();
 
 		foreach ($laws as $law) {
-			if (Law::VOTATION == $law->statement && $law->dEndVotation < Utils::now()) {
+			if ($law->isBeingVoted() && $law->voteEndedAt < $now) {
 				$this->messageBus->dispatch(
-					new VoteMessage($law->getId()),
-					[DateTimeConverter::to_delay_stamp($law->dEndVotation)],
+					new VoteMessage($law->id),
+					[DateTimeConverter::to_delay_stamp($law->voteEndedAt)],
 				);
-			} elseif (Law::EFFECTIVE == $law->statement && $law->dEnd < Utils::now()) {
+			} elseif ($law->isEffective() && $law->endedAt < $now) {
 				$messageClass = match (LawResources::getInfo($law->type, 'bonusLaw')) {
 					true => BonusEndMessage::class,
 					false => match ($law->type) {
@@ -334,8 +253,8 @@ class ColorManager implements SchedulerInterface
 					}
 				};
 				$this->messageBus->dispatch(
-					new $messageClass($law->getId()),
-					[DateTimeConverter::to_delay_stamp($law->dEnd)],
+					new $messageClass($law->id),
+					[DateTimeConverter::to_delay_stamp($law->endedAt)],
 				);
 			}
 		}

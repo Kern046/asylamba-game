@@ -33,7 +33,6 @@ class CommanderTest extends \PHPUnit\Framework\TestCase
 			->setRBase(18)
 			->setBaseName('Zambia')
 			->setRPlaceDestination(23)
-			->setDestinationPlaceName('Planète rebelle')
 			->setIsAttacker(true)
 			->setPalmares(1)
 			->setStatement(Commander::MOVING)
@@ -57,7 +56,6 @@ class CommanderTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals(18, $commander->getRBase());
 		$this->assertEquals('Zambia', $commander->getBaseName());
 		$this->assertEquals(23, $commander->getRPlaceDestination());
-		$this->assertEquals('Planète rebelle', $commander->getDestinationPlaceName());
 		$this->assertTrue($commander->getIsAttacker());
 		$this->assertEquals(1, $commander->getPalmares());
 		$this->assertEquals(Commander::MOVING, $commander->getStatement());

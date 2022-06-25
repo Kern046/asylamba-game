@@ -1,240 +1,169 @@
 <?php
 
-/**
- * Squadron.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 13.02.14
- */
-
 namespace App\Modules\Ares\Model;
 
-use App\Modules\Ares\Manager\FightManager;
+use App\Modules\Athena\Resource\ShipResource;
+use Symfony\Component\Uid\Uuid;
 
-class Squadron
+class Squadron implements \JsonSerializable
 {
-	public $id = 0;
+	/** @var list<Ship> */
+	public array $ships = [];
+	public bool $areShipsInitialized = false;
 
-	public $lineCoord = 0;
-	public $nbrShips = 0;
-	public $rCommander = 0;
-	public $position = 0; // position dans le tableau de l'armée
-	public $arrayOfShips = [];
-	public $relId = 0;
-	public $dLastModification = '';
-
-	public $squadron = [];
-
-	// GETTER
-
-	public function getId()
-	{
-		return $this->id;
+	public function __construct(
+		public Uuid $id,
+		public Commander $commander,
+		public \DateTimeImmutable $createdAt,
+		public \DateTimeImmutable $updatedAt,
+		public int $lineCoord = 0,
+		public int $position = 0, // position dans le tableau de l'armée
+		public int|null $targetId = null,
+		public int $ship0 = 0,
+		public int $ship1 = 0,
+		public int $ship2 = 0,
+		public int $ship3 = 0,
+		public int $ship4 = 0,
+		public int $ship5 = 0,
+		public int $ship6 = 0,
+		public int $ship7 = 0,
+		public int $ship8 = 0,
+		public int $ship9 = 0,
+		public int $ship10 = 0,
+		public int $ship11 = 0,
+	) {
 	}
 
-	public function getLineCoord()
+	public function setShips(array $ships): static
 	{
-		return $this->lineCoord;
+		[
+			$this->ship0,
+			$this->ship1,
+			$this->ship2,
+			$this->ship3,
+			$this->ship4,
+			$this->ship5,
+			$this->ship6,
+			$this->ship7,
+			$this->ship8,
+			$this->ship9,
+			$this->ship10,
+			$this->ship11,
+		] = $ships;
+
+		return $this;
 	}
 
-	public function getNbrShips()
+	public function getShips(): array
 	{
-		return $this->nbrShips;
+		return [
+			$this->ship0,
+			$this->ship1,
+			$this->ship2,
+			$this->ship3,
+			$this->ship4,
+			$this->ship5,
+			$this->ship6,
+			$this->ship7,
+			$this->ship8,
+			$this->ship9,
+			$this->ship10,
+			$this->ship11,
+		];
 	}
 
-	public function getRCommander()
+	public function getShipQuantity(int $shipNumber): int
 	{
-		return $this->rCommander;
+		return match ($shipNumber) {
+			0 => $this->ship0,
+			1 => $this->ship1,
+			2 => $this->ship2,
+			3 => $this->ship3,
+			4 => $this->ship4,
+			5 => $this->ship5,
+			6 => $this->ship6,
+			7 => $this->ship7,
+			8 => $this->ship8,
+			9 => $this->ship9,
+			10 => $this->ship10,
+			11 => $this->ship11,
+			default => throw new \RuntimeException(sprintf('%d is not a valid ship number', $shipNumber)),
+		};
 	}
 
-	public function getPosition()
+	public function setShipQuantity(int $shipNumber, int $quantity): void
 	{
-		return $this->position;
+		match ($shipNumber) {
+			0 => $this->ship0 = $quantity,
+			1 => $this->ship1 = $quantity,
+			2 => $this->ship2 = $quantity,
+			3 => $this->ship3 = $quantity,
+			4 => $this->ship4 = $quantity,
+			5 => $this->ship5 = $quantity,
+			6 => $this->ship6 = $quantity,
+			7 => $this->ship7 = $quantity,
+			8 => $this->ship8 = $quantity,
+			9 => $this->ship9 = $quantity,
+			10 => $this->ship10 = $quantity,
+			11 => $this->ship11 = $quantity,
+			default => throw new \RuntimeException(sprintf('%d is not a valid ship number', $shipNumber)),
+		};
 	}
 
-	public function getSquadron()
+	public function getShipsCount(): int
 	{
-		return $this->squadron;
+		return count($this->ships);
 	}
 
-	public function getArrayOfShips()
-	{
-		return $this->arrayOfShips;
-	}
-
-	public function getDLastModification()
-	{
-		return $this->dLAstModification;
-	}
-
-	public function getShip($key)
-	{
-		return $this->squadron[$key];
-	}
-
-	public function getNbrShipByType($i)
-	{
-		return $this->arrayOfShips[$i];
-	}
-
-	public function getPev()
+	// Move this method in dedicated handler
+	public function getPev(): int
 	{
 		$pev = 0;
-		foreach ($this->squadron as $ship) {
-			$pev += $ship->getPev();
+		foreach ($this->getShips() as $shipNumber => $quantity) {
+			$pev += ShipResource::getInfo($shipNumber, 'pev') * $quantity;
 		}
 
 		return $pev;
 	}
 
-	private function getPv()
+	public function isEmpty(): bool
 	{
-		$pv = 0;
-		foreach ($this->squadron as $ship) {
-			$pv += $ship->getLife();
-		}
-
-		return $pv;
+		return 0 === $this->getPev();
 	}
 
-	private function howManyLostPv($squadron1, $squadron2)
+	public function destructShip(int $key): void
 	{
-		$lostPv = abs($squadron1->getPv() - $squadron2->getPv());
+		$ship = $this->ships[$key];
 
-		return $lostPv;
+		$this->setShipQuantity($ship->shipNumber, $this->getShipQuantity($ship->shipNumber) - 1);
+
+		unset($this->ships[$key]);
+
+		$this->ships = array_values($this->ships);
 	}
 
-	public function setId($id)
+	public function emptySquadron(): void
 	{
-		$this->id = $id;
+		$this->setShips(array_fill(0, 12, 0));
 	}
 
-	public function isEmpty()
+	public function jsonSerialize(): array
 	{
-		if (0 == $this->getPev()) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public function setRelId($id)
-	{
-		$this->relId = $id;
-	}
-
-	public function __construct($vector, $id, $lineCoord, $position, $rCommander, $isAttacker = null)
-	{
-		for ($i = 0; $i < 12; ++$i) {
-			$this->arrayOfShips[] = $vector[$i];
-		}
-
-		$this->dLastModification = $vector[12];
-		$this->lineCoord = $lineCoord;
-		$this->id = $id;
-		$this->rCommander = $rCommander;
-		$this->position = $position;
-
-		for ($i = 0; $i < 12; ++$i) {
-			for ($j = 0; $j < $vector[$i]; ++$j) {
-				$this->squadron[] = new Ship($i, $isAttacker);
-				$this->squadron[$this->nbrShips]->affectId($this->nbrShips);
-				++$this->nbrShips;
-			}
-		}
-	}
-
-	public function updateShip($shipNbrName, $nbr)
-	{
-		$this->arrayOfShips[$shipNbrName] += $nbr;
-	}
-
-	public function emptySquadron()
-	{
-		for ($i = 0; $i < 12; ++$i) {
-			$this->arrayOfShips[$i] = 0;
-		}
-	}
-
-	// méthodes de combat
-	public function engage($enemyCommander, $position, $idCommander, $nameCommander, $thisCommander)
-	{
-		$this->relId = $this->chooseEnemy($enemyCommander);
-		if (null !== $this->relId) {
-			$thisSquadronBefore = $this;
-			$enemySquadron = $enemyCommander->getSquadron($this->relId);
-
-			++LiveReport::$littleRound;
-			$this->fight($enemyCommander->getSquadron($this->relId));
-			LiveReport::$squadrons[] = [0, $this->position, 0, LiveReport::$littleRound, $this->rCommander, $this->arrayOfShips[0], $this->arrayOfShips[1], $this->arrayOfShips[2], $this->arrayOfShips[3], $this->arrayOfShips[4], $this->arrayOfShips[5], $this->arrayOfShips[6], $this->arrayOfShips[7], $this->arrayOfShips[8], $this->arrayOfShips[9], $this->arrayOfShips[10], $this->arrayOfShips[11]];
-			LiveReport::$squadrons[] = [0, $enemySquadron->position, 0, LiveReport::$littleRound, $enemySquadron->rCommander, $enemySquadron->arrayOfShips[0], $enemySquadron->arrayOfShips[1], $enemySquadron->arrayOfShips[2], $enemySquadron->arrayOfShips[3], $enemySquadron->arrayOfShips[4], $enemySquadron->arrayOfShips[5], $enemySquadron->arrayOfShips[6], $enemySquadron->arrayOfShips[7], $enemySquadron->arrayOfShips[8], $enemySquadron->arrayOfShips[9], $enemySquadron->arrayOfShips[10], $enemySquadron->arrayOfShips[11]];
-
-			$enemyCommander->getSquadron($this->relId)->setRelId($this->position);
-			$enemyCommander->getSquadron($this->relId)->fight($thisCommander->getSquadron($this->position));
-		}
-
-		return $enemyCommander;
-	}
-
-	private function chooseEnemy(Commander $enemyCommander)
-	{
-		$nbrShipsInLine = 0;
-		foreach ($enemyCommander->getArmy() as $enemySquadron) {
-			if ($enemySquadron->getLineCoord() * 3 <= FightManager::getCurrentLine()) {
-				$nbrShipsInLine += $enemySquadron->getNbrShips();
-			}
-		}
-		if (0 == $nbrShipsInLine) {
-			return null;
-		} elseif (null != $this->relId and $enemyCommander->getSquadron($this->relId)->getNbrShips() > 0) {
-			return $this->relId;
-		} else {
-			$aleaNbr = rand(0, count($enemyCommander->squadronsIds) - 1);
-			for ($i = 0; $i < $enemyCommander->getLevel(); ++$i) {
-				if ($enemyCommander->getSquadron($aleaNbr)->getLineCoord() * 3 <= FightManager::getCurrentLine() and $enemyCommander->getSquadron($aleaNbr)->getNbrShips() > 0) {
-					break;
-				} else {
-					if ($aleaNbr == count($enemyCommander->squadronsIds) - 1) {
-						$aleaNbr = 0;
-					} else {
-						++$aleaNbr;
-					}
-				}
-			}
-
-			return $aleaNbr;
-		}
-	}
-
-	public function fight($enemySquadron)
-	{
-		foreach ($this->squadron as $ship) {
-			if (0 == $enemySquadron->getNbrShips()) {
-				break;
-			}
-			$enemySquadron = $ship->engage($enemySquadron);
-		}
-	}
-
-	public function destructShip($key)
-	{
-		$this->deleteOffset($this->squadron[$key]->getNbrName());
-
-		$this->squadron[$key] = null;
-		$newSquadron = [];
-		foreach ($this->squadron as $offset) {
-			if (null != $offset) {
-				$newSquadron[] = $offset;
-			}
-		}
-		$this->squadron = $newSquadron;
-	}
-
-	private function deleteOffset($i)
-	{
-		--$this->arrayOfShips[$i];
-		--$this->nbrShips;
+		return [
+			'lineCoord' => $this->lineCoord,
+			'position' => $this->position,
+			'ship0' => $this->ship0,
+			'ship1' => $this->ship1,
+			'ship2' => $this->ship2,
+			'ship3' => $this->ship3,
+			'ship4' => $this->ship4,
+			'ship5' => $this->ship5,
+			'ship6' => $this->ship6,
+			'ship7' => $this->ship7,
+			'ship8' => $this->ship8,
+			'ship9' => $this->ship9,
+			'ship10' => $this->ship10,
+			'ship11' => $this->ship11,
+		];
 	}
 }

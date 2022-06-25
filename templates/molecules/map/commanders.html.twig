@@ -3,22 +3,20 @@
 <div id="subnav">
 	<div class="overflow">
 		{% for commander in local_commanders %}
-			{% set is_moving = commander.statement == constant('App\\Modules\\Ares\\Model\\Commander::MOVING') %}
-
 			{% if commander.line == 1 and break == false %}
 				<hr />
 				{% set break = true %}
 			{% endif %}
 
 			<a href="#"
-			   class="item {% if is_moving %}striped{% endif %} map-commander"
+			   class="item {% if commander.isMoving %}striped{% endif %} map-commander"
 			   data-id="{{ commander.id }}"
-			   data-color="{{ current_player.rColor }}"
+			   data-color="{{ current_player.faction.identifier }}"
 			   data-max-jump="{{ get_max_travel_distance() }}"
-			   data-available="{{ is_moving ? 'false' : 'true' }}"
+			   data-available="{{ commander.isMoving ? 'false' : 'true' }}"
 			   data-name="{{ commander|commander_rank }} {{ commander.name }}"
 			   {# @TODO move this logic in a dedicated service #}
-			   data-wedge="{{ (constant('App\\Modules\\Ares\\Model\\Commander::COEFFLOOT') * commander.pev)|number }}"
+			   data-wedge="{{ (constant('App\\Modules\\Ares\\Model\\Commander::COEFFLOOT') * commander|pev)|number }}"
 			>
 				<span class="picto">
 					<img src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
@@ -27,17 +25,17 @@
 				<span class="content skin-2">
 					<span class="sub-content">
 						{{ commander|commander_rank }} {{ commander.name }}<br/>
-						{{ commander.pev|number }} pev
+						{{ commander|pev|number }} pev
 						<hr />
-						{% if is_moving %}
+						{% if commander.isMoving %}
 							{# @TODO Implement translator to replace the switch #}
-							{% if commander.travelType == constant('App\\Modules\\Ares\\Model\\Commander::MOVE') %}
+							{% if commander.isTransferring %}
 								Déplacement
-							{% elseif commander.travelType == constant('App\\Modules\\Ares\\Model\\Commander::LOOT') %}
+							{% elseif commander.isLooting %}
 								Pillage
-							{% elseif commander.travelType == constant('App\\Modules\\Ares\\Model\\Commander::COLO') %}
+							{% elseif commander.isInvading %}
 								Colonisation
-							{% elseif commander.travelType == constant('App\\Modules\\Ares\\Model\\Commander::BACK') %}
+							{% elseif commander.isComingBack %}
 								Retour
 							{% endif %}
 						{% else %}

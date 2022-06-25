@@ -1,107 +1,35 @@
 <?php
 
-/**
- * Building Queue.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @update 10.02.14
- */
-
 namespace App\Modules\Athena\Model;
 
 use App\Shared\Domain\Model\QueueableInterface;
+use Symfony\Component\Uid\Uuid;
 
 class BuildingQueue implements QueueableInterface
 {
-	// ATTRIBUTES
-	public $id;
-	public $rOrbitalBase;
-	public $buildingNumber;
-	public $targetLevel;
-	public $dStart;
-	public $dEnd;
+	public function __construct(
+		public Uuid $id,
+		public OrbitalBase $base,
+		public int $buildingNumber,
+		public int $targetLevel,
+		public \DateTimeImmutable $startedAt,
+		public \DateTimeImmutable $endedAt,
+	) {
+			
+	}
 
-	public function getEndDate(): string
+	public function getStartDate(): \DateTimeImmutable
 	{
-		return $this->dEnd;
+		return $this->startedAt;
+	}
+
+	public function getEndDate(): \DateTimeImmutable
+	{
+		return $this->endedAt;
 	}
 
 	public function getResourceIdentifier(): int
 	{
 		return $this->buildingNumber;
-	}
-
-	public function getId()
-	{
-		return $this->id;
-	}
-
-	public function getROrbitalBase()
-	{
-		return $this->rOrbitalBase;
-	}
-
-	public function getBuildingNumber()
-	{
-		return $this->buildingNumber;
-	}
-
-	public function getTargetLevel()
-	{
-		return $this->targetLevel;
-	}
-
-	public function getDStart()
-	{
-		return $this->dStart;
-	}
-
-	public function getDEnd()
-	{
-		return $this->dEnd;
-	}
-
-	public function setId($id)
-	{
-		$this->id = $id;
-
-		return $this;
-	}
-
-	public function setROrbitalBase($rOrbitalBase)
-	{
-		$this->rOrbitalBase = $rOrbitalBase;
-
-		return $this;
-	}
-
-	public function setBuildingLevel($buildingLevel)
-	{
-		$this->buildingLevel = $buildingLevel;
-
-		return $this;
-	}
-
-	public function setTargetLevel($targetLevel)
-	{
-		$this->targetLevel = $targetLevel;
-
-		return $this;
-	}
-
-	public function setDStart($dStart)
-	{
-		$this->dStart = $dStart;
-
-		return $this;
-	}
-
-	public function setDEnd($dEnd)
-	{
-		$this->dEnd = $dEnd;
-
-		return $this;
 	}
 }

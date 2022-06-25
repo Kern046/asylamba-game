@@ -4,35 +4,45 @@ namespace App\Modules\Ares\Infrastructure\Controller;
 
 use App\Classes\Container\Params;
 use App\Classes\Library\Game;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class ViewHeadquarters extends AbstractController
 {
+	public function __construct(
+		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		private CommanderRepositoryInterface $commanderRepository,
+	) {
+
+	}
+
 	public function __invoke(
 		Request $request,
-		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		Player $currentPlayer,
-		CommanderManager $commanderManager,
-		OrbitalBaseManager $orbitalBaseManager,
 	): Response {
-		// @TODO demistify that part
-		if ($request->query->has('commander') && null !== ($commander = $commanderManager->get($request->query->get('commander')))) {
-			if ($commander->rPlayer === $currentPlayer->getId() && in_array($commander->getStatement(), [Commander::AFFECTED, Commander::MOVING])) {
-				$commanderBase = $orbitalBaseManager->get($commander->getRBase());
-			} else {
-				$commander = null;
+		$commander = $commanderBase = null;
+		if (null !== ($commanderId = $request->query->get('commander'))) {
+			if (!Uuid::isValid($commanderId)) {
+				throw new BadRequestHttpException('Invalid Commander ID');
 			}
+			$commander = $this->commanderRepository->get(Uuid::fromString($commanderId));
 		}
 
-		[$obsets, $commandersIds] = $this->getObsetsAndCommandersIds($request, $currentPlayer, $currentPlayerBasesRegistry, $commanderManager);
+		if (null !== $commander && $commander->player->id === $currentPlayer->id && in_array($commander->statement, [Commander::AFFECTED, Commander::MOVING])) {
+			$commanderBase = $commander->base;
+		}
+
+		[$obsets, $commandersIds] = $this->getObsetsAndCommandersIds($request, $currentPlayer);
 
 		return $this->render('pages/ares/fleet/headquarters.html.twig', [
 			'commander' => $commander ?? null,
@@ -46,19 +56,17 @@ class ViewHeadquarters extends AbstractController
 	private function getObsetsAndCommandersIds(
 		Request $request,
 		Player $currentPlayer,
-		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-		CommanderManager $commanderManager,
 	): array {
 		$session = $request->getSession();
 		$obsets = [];
-		foreach ($currentPlayerBasesRegistry->all() as $orbitalBase) {
-			if ($request->cookies->get('p'.Params::LIST_ALL_FLEET, Params::$params[Params::LIST_ALL_FLEET]) || $orbitalBase->getId() == $currentPlayerBasesRegistry->current()->getId()) {
+		foreach ($this->currentPlayerBasesRegistry->all() as $orbitalBase) {
+			if ($request->cookies->get('p'.Params::LIST_ALL_FLEET, Params::$params[Params::LIST_ALL_FLEET]) || $orbitalBase->id === $this->currentPlayerBasesRegistry->current()->id) {
 				$obsets[] = [
 					'info' => [
-						'id' => $orbitalBase->getId(),
+						'id' => $orbitalBase->id,
 						'name' => $orbitalBase->name,
 						'type' => $orbitalBase->typeOfBase,
-						'img' => '1-'.Game::getSizeOfPlanet($orbitalBase->getPlanetPopulation()),
+						'img' => '1-'.Game::getSizeOfPlanet($orbitalBase->place->population),
 					],
 					'fleets' => [],
 				];
@@ -75,19 +83,23 @@ class ViewHeadquarters extends AbstractController
 			}
 		}
 
-		$attackingCommanders = $commanderManager->getVisibleIncomingAttacks($currentPlayer->id);
+		$attackingCommanders = $this->commanderRepository->getIncomingAttacks($currentPlayer);
 		for ($i = 0; $i < count($obsets); ++$i) {
 			foreach ($attackingCommanders as $commander) {
-				if ($commander->rDestinationPlace == $obsets[$i]['info']['id']) {
+				if ($commander->destinationPlace->id === $obsets[$i]['info']['id']) {
 					$obsets[$i]['fleets'][] = $commander;
 				}
 			}
 		}
-		$commanders = $commanderManager->getPlayerCommanders($currentPlayer->id, [Commander::AFFECTED, Commander::MOVING], ['c.rBase' => 'DESC']);
+		$commanders = $this->commanderRepository->getPlayerCommanders(
+			$currentPlayer,
+			[Commander::AFFECTED, Commander::MOVING],
+			['c.base' => 'DESC'],
+		);
 
 		for ($i = 0; $i < count($obsets); ++$i) {
 			foreach ($commanders as $commander) {
-				if ($commander->rBase == $obsets[$i]['info']['id']) {
+				if ($commander->base->id === $obsets[$i]['info']['id']) {
 					$obsets[$i]['fleets'][] = $commander;
 				}
 			}

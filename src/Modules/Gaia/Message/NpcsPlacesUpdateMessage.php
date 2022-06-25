@@ -2,6 +2,8 @@
 
 namespace App\Modules\Gaia\Message;
 
-class NpcsPlacesUpdateMessage
+use App\Shared\Domain\Message\AsyncMessage;
+
+class NpcsPlacesUpdateMessage implements AsyncMessage
 {
 }
