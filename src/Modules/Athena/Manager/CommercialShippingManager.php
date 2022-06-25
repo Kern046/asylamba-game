@@ -1,171 +1,151 @@
 <?php
 
-/**
- * CommercialShippingManager.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @version 19.11.13
- **/
-
 namespace App\Modules\Athena\Manager;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
 use App\Classes\Library\DateTimeConverter;
-use App\Classes\Library\Session\SessionWrapper;
+use App\Classes\Library\Format;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Message\Trade\CommercialShippingMessage;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Shared\Application\SchedulerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class CommercialShippingManager implements SchedulerInterface
+readonly class CommercialShippingManager implements SchedulerInterface
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected NotificationManager $notificationManager,
-		protected MessageBusInterface $messageBus,
-		protected SessionWrapper $sessionWrapper,
-		protected string $mediaPath,
+		private OrbitalBaseManager $orbitalBaseManager,
+		private NotificationRepositoryInterface $notificationRepository,
+		private MessageBusInterface $messageBus,
+		private CommercialShippingRepositoryInterface $commercialShippingRepository,
 	) {
 	}
 
 	public function schedule(): void
 	{
-		$shippings = $this->entityManager->getRepository(CommercialShipping::class)->getMoving();
+		$shippings = $this->commercialShippingRepository->getMoving();
 
-		/** @var CommercialShipping $commercialShipping */
 		foreach ($shippings as $commercialShipping) {
 			$this->messageBus->dispatch(
-				new CommercialShippingMessage($commercialShipping->getId()),
-				[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivedAt())],
+				new CommercialShippingMessage($commercialShipping->id),
+				[DateTimeConverter::to_delay_stamp($commercialShipping->arrivalDate)],
 			);
 		}
-	}
-
-	public function get(int $id): ?CommercialShipping
-	{
-		return $this->entityManager->getRepository(CommercialShipping::class)->get($id);
-	}
-
-	public function getByTransactionId(int $id): ?CommercialShipping
-	{
-		return $this->entityManager->getRepository(CommercialShipping::class)->getByTransactionId($id);
-	}
-
-	public function getByBase(int $orbitalBaseId): array
-	{
-		return $this->entityManager->getRepository(CommercialShipping::class)->getByBase($orbitalBaseId);
 	}
 
 	public function add(CommercialShipping $commercialShipping): void
 	{
-		$this->entityManager->persist($commercialShipping);
-		$this->entityManager->flush($commercialShipping);
+		$this->commercialShippingRepository->save($commercialShipping);
 
-		if (CommercialShipping::ST_WAITING !== $commercialShipping->getStatement()) {
+		if (!$commercialShipping->isWaiting()) {
 			$this->messageBus->dispatch(
-				new CommercialShippingMessage($commercialShipping->getId()),
-				[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivedAt())],
+				new CommercialShippingMessage($commercialShipping->id),
+				[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivalDate())],
 			);
 		}
 	}
 
+	/**
+	 * TODO: add more data and links in notifications.
+	 */
 	public function deliver(
 		CommercialShipping $commercialShipping,
 		Transaction|null $transaction,
 		OrbitalBase $destOB,
 		Commander|null $commander
 	): void {
-		if (null !== $transaction and Transaction::ST_COMPLETED == $transaction->statement) {
+		if (null !== $transaction && $transaction->isCompleted()) {
 			switch ($transaction->type) {
 				case Transaction::TYP_RESOURCE:
 					$this->orbitalBaseManager->increaseResources($destOB, $transaction->quantity, true);
 
 					// notif pour l'acheteur
-					$n = new Notification();
-					$n->setRPlayer($destOB->getRPlayer());
-					$n->setTitle('Ressources reçues');
-					$n->addBeg()->addTxt('Vous avez reçu les '.$transaction->quantity.' ressources que vous avez achetées au marché.');
-					$n->addEnd();
-					$this->notificationManager->add($n);
+					$notification = NotificationBuilder::new()
+						->setTitle('Ressources reçues')
+						->setContent(NotificationBuilder::paragraph(
+							'Vous avez reçu les ',
+							$transaction->quantity,
+							' ressources que vous avez achetées au marché.',
+						))
+						->for($destOB->player);
+					$this->notificationRepository->save($notification);
 
 					break;
 				case Transaction::TYP_SHIP:
-					$this->orbitalBaseManager->addShipToDock($destOB, $transaction->identifier, $transaction->quantity);
+					$destOB->addShips($transaction->identifier, $transaction->quantity);
 
+					$pluralS = Format::plural($transaction->quantity);
+					$pluralX = Format::plural($transaction->quantity, 'x');
 					// notif pour l'acheteur
-					$n = new Notification();
-					$n->setRPlayer($destOB->getRPlayer());
-					if (null == $commercialShipping->resourceTransported) {
-						// transaction
-						if (1 == $transaction->quantity) {
-							$n->setTitle('Vaisseau reçu');
-							$n->addBeg()->addTxt('Vous avez reçu le vaisseau de type '.ShipResource::getInfo($transaction->identifier, 'codeName').' que vous avez acheté au marché.');
-							$n->addSep()->addTxt('Il a été ajouté à votre hangar.');
-						} else {
-							$n->setTitle('Vaisseaux reçus');
-							$n->addBeg()->addTxt('Vous avez reçu les '.$transaction->quantity.' vaisseaux de type '.ShipResource::getInfo($transaction->identifier, 'codeName').' que vous avez achetés au marché.');
-							$n->addSep()->addTxt('Ils ont été ajoutés à votre hangar.');
-						}
-					} else {
-						// ships sending
-						if (1 == $transaction->quantity) {
-							$n->setTitle('Vaisseau reçu');
-							$n->addBeg()->addTxt('Vous avez reçu le vaisseau de type '.ShipResource::getInfo($transaction->identifier, 'codeName').' envoyé par un marchand galactique.');
-							$n->addSep()->addTxt('Il a été ajouté à votre hangar.');
-						} else {
-							$n->setTitle('Vaisseaux reçus');
-							$n->addBeg()->addTxt('Vous avez reçu les '.$transaction->quantity.' vaisseaux de type '.ShipResource::getInfo($transaction->identifier, 'codeName').' envoyés par un marchand galactique.');
-							$n->addSep()->addTxt('Ils ont été ajoutés à votre hangar.');
-						}
-					}
-					$n->addEnd();
-					$this->notificationManager->add($n);
+					$notification = NotificationBuilder::new()
+						->setTitle('Vaisseau'.$pluralX.' reçu'.$pluralS)
+						->setContent(NotificationBuilder::paragraph(
+							'Vous avez reçu le',
+							$pluralS,
+							' vaisseau',
+							$pluralX,
+							' de type ',
+							ShipResource::getInfo($transaction->identifier, 'codeName'),
+							null === $commercialShipping->resourceTransported
+								? ' que vous avez acheté au marché.'
+								: ' envoyé'.$pluralS.' par un marchand galactique.',
+							NotificationBuilder::divider(),
+							1 === $transaction->quantity
+								? 'Il a été ajouté à votre hangar.'
+								: 'Ils ont été ajoutés à votre hangar.',
+						))
+						->for($destOB->player);
+					$this->notificationRepository->save($notification);
 					break;
 				case Transaction::TYP_COMMANDER:
-					$commander->setStatement(Commander::RESERVE);
-					$commander->setRPlayer($destOB->getRPlayer());
-					$commander->setRBase($commercialShipping->rBaseDestination);
+					$commander->statement = Commander::RESERVE;
+					$commander->player = $destOB->player;
+					$commander->base = $destOB;
 
 					// notif pour l'acheteur
-					$n = new Notification();
-					$n->setRPlayer($destOB->getRPlayer());
-					$n->setTitle('Commandant reçu');
-					$n->addBeg()->addTxt('Le commandant '.$commander->getName().' que vous avez acheté au marché est bien arrivé.');
-					$n->addSep()->addTxt('Il se trouve pour le moment dans votre école de commandement');
-					$n->addEnd();
-					$this->notificationManager->add($n);
+					$notification = NotificationBuilder::new()
+						->setTitle('Commandant reçu')
+						->setContent(NotificationBuilder::paragraph(
+							'Le commandant ',
+							$commander->name,
+							' que vous avez acheté au marché est bien arrivé.',
+							NotificationBuilder::divider(),
+							'Il se trouve pour le moment dans votre école de commandement',
+						))
+						->for($destOB->player);
+					$this->notificationRepository->save($notification);
 					break;
 				default:
-					throw new ErrorException('type de transaction inconnue dans deliver()');
+					throw new \LogicException('type de transaction inconnue dans deliver()');
 			}
 
 			$commercialShipping->statement = CommercialShipping::ST_MOVING_BACK;
-		} elseif (null === $transaction and null == $commercialShipping->rTransaction and null != $commercialShipping->resourceTransported) {
+		} elseif (null === $transaction && null === $commercialShipping->transaction && null !== $commercialShipping->resourceTransported) {
 			// resource sending
 
 			$this->orbitalBaseManager->increaseResources($destOB, $commercialShipping->resourceTransported, true);
 
 			// notif for the player who receive the resources
-			$n = new Notification();
-			$n->setRPlayer($destOB->getRPlayer());
-			$n->setTitle('Ressources reçues');
-			$n->addBeg()->addTxt('Vous avez bien reçu les '.$commercialShipping->resourceTransported.' ressources sur votre base orbitale '.$destOB->name.'.');
-			$n->addEnd();
-			$this->notificationManager->add($n);
+			$notification = NotificationBuilder::new()
+				->setTitle('Ressources reçues')
+				->setContent(NotificationBuilder::paragraph(
+					'Vous avez bien reçu les ',
+					$commercialShipping->resourceTransported,
+					' ressources sur votre base orbitale ',
+					$destOB->name,
+					'.',
+				))
+				->for($destOB->player);
+			$this->notificationRepository->save($notification);
 
 			$commercialShipping->statement = CommercialShipping::ST_MOVING_BACK;
 		} else {
-			throw new ErrorException('impossible de délivrer ce chargement');
+			throw new \RuntimeException('impossible de délivrer ce chargement');
 		}
 	}
 }

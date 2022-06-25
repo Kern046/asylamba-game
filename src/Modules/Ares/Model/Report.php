@@ -1,26 +1,11 @@
 <?php
 
-/**
- * Report.
- *
- * @author Noé Zufferey
- * @copyright Asylamba - le jeu
- *
- * @update 01.06.14
- */
-
-// TODO
-/*
-avatar
-name
-level
-exp avant le combat
-nbr victoires
-*/
-
 namespace App\Modules\Ares\Model;
 
 use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Gaia\Model\Place;
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
 
 class Report
 {
@@ -31,174 +16,152 @@ class Report
 	public const ILLEGAL = 0;
 	public const LEGAL = 1;
 
-	public $id = 0;
-	public $rPlayerAttacker = 0;
-	public $rPlayerDefender = 0;
-	public $rPlayerWinner = 0;
-	public $avatarA = '';
-	public $avatarD = '';
-	public $nameA = '';
-	public $nameD = '';
-	public $levelA = 0;
-	public $levelD = 0;
-	public $experienceA = 0;
-	public $experienceD = 0;
-	public $palmaresA = 0;
-	public $palmaresD = 0;
-	public $resources = 0;
-	public $expCom = 0;
-	public $expPlayerA = 0;
-	public $expPlayerD = 0;
-	public $rPlace = 0;
-	public $type = 0;
-	public $isLegal = 1;
-	public $hasBeenPunished = 0;
-	public $round = 0;
-	public $importance = 0;
-	public $pevInBeginA = 0;
-	public $pevInBeginD = 0;
-	public $pevAtEndA = 0;
-	public $pevAtEndD = 0;
-	public $statementAttacker = 0;
-	public $statementDefender = 0;
-	public $dFight = '';
-	public $placeName = '';
+	public array $attackerArmyInBegin = [];
+	public array $defenderArmyInBegin = [];
+	public array $attackerArmyAtEnd = [];
+	public array $defenderArmyAtEnd = [];
+	public array $fight = [];
+	public array $attackerTotalInBegin = [0,0,0,0,0,0,0,0,0,0,0,0];
+	public array $defenderTotalInBegin = [0,0,0,0,0,0,0,0,0,0,0,0];
+	public array $attackerTotalAtEnd = [0,0,0,0,0,0,0,0,0,0,0,0];
+	public array $defenderTotalAtEnd = [0,0,0,0,0,0,0,0,0,0,0,0];
+	public array $attackerDifference = [0,0,0,0,0,0,0,0,0,0,0,0];
+	public array $defenderDifference = [0,0,0,0,0,0,0,0,0,0,0,0];
+	public bool $armiesDone = false;
+	public int $attackerPevAtBeginning = 0;
+	public int $defenderPevAtBeginning = 0;
+	public int $attackerPevAtEnd = 0;
+	public int $defenderPevAtEnd = 0;
+	public int $attackerStatement = self::STANDARD;
+	public int $defenderStatement = self::STANDARD;
+	public bool $hasBeenPunished = false;
 
-	public $colorA = 0;
-	public $colorD = 0;
-	public $playerNameA = '';
-	public $playerNameD = '';
-
-	public $squadrons = [];
-
-	public $armyInBeginA = [];
-	public $armyInBeginD = [];
-	public $armyAtEndA = [];
-	public $armyAtEndD = [];
-
-	public $fight = [];
-
-	public $totalInBeginA = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	public $totalInBeginD = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	public $totalAtEndA = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	public $totalAtEndD = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	public $diferenceA = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	public $diferenceD = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-	private $setArmiesDone = false;
-
-	public function getId()
-	{
-		return $this->id;
+	public function __construct(
+		public Uuid $id,
+		public Player $attacker,
+		public Player|null $defender,
+		public Player|null $winner,
+		public Commander|null $attackerCommander,
+		public Commander|null $defenderCommander,
+		public Place $place,
+		public int $type,
+		public int $attackerLevel,
+		public int $defenderLevel,
+		public int $attackerExperience,
+		public int $defenderExperience,
+		public int $attackerPalmares,
+		public int $defenderPalmares,
+		public int $resources,
+		public int $attackerCommanderExperience,
+		public int $defenderCommanderExperience,
+		public int $earnedExperience,
+		public bool $isLegal,
+		public int $round,
+		public \DateTimeImmutable $foughtAt,
+		public array $squadrons,
+	) {
 	}
 
-	public function getTypeOfReport($playerColor)
+	public static function fromLiveReport(Place $place): static
 	{
-		$place = '<a href="/'.'map/place-'.$this->rPlace.'">'.$this->placeName.'</a>';
+		$report = new Report(
+			id: Uuid::v4(),
+			attacker: LiveReport::$rPlayerAttacker,
+			defender: LiveReport::$rPlayerDefender,
+			winner: LiveReport::$rPlayerWinner,
+			attackerCommander: LiveReport::$attackerCommander,
+			// Ensures we don't save a virtual commander
+			defenderCommander: null !== LiveReport::$rPlayerDefender ? LiveReport::$defenderCommander : null,
+			place: $place,
+			type: LiveReport::$type,
+			attackerLevel: LiveReport::$levelA,
+			defenderLevel: LiveReport::$levelD,
+			attackerExperience: LiveReport::$expPlayerA,
+			defenderExperience: LiveReport::$experienceD,
+			attackerPalmares: LiveReport::$palmaresA,
+			defenderPalmares: LiveReport::$palmaresD,
+			resources: LiveReport::$resources,
+			attackerCommanderExperience: LiveReport::$experienceA,
+			defenderCommanderExperience: LiveReport::$expPlayerD,
+			earnedExperience: LiveReport::$expCom,
+			isLegal: LiveReport::$isLegal,
+			round: LiveReport::$round,
+			foughtAt: LiveReport::$dFight,
+			squadrons: LiveReport::$squadrons,
+		);
+		$report->setArmies();
+		$report->setPev();
 
-		if ($this->colorA == $playerColor) {
-			if ($this->rPlayerWinner == $this->rPlayerAttacker) {
-				if (Commander::LOOT == $this->type) {
-					$title = 'Pillage de '.$place;
-					$img = 'loot.png';
-				} else {
-					$title = 0 == $this->rPlayerDefender
-						? 'Colonisation réussie'
-						: 'Conquête de '.$place;
-					$img = 'colo.png';
-				}
-			} else {
-				if (Commander::LOOT == $this->type) {
-					$title = 'Pillage raté de '.$place;
-					$img = 'loot.png';
-				} else {
-					$title = 0 == $this->rPlayerDefender
-						? 'Colonisation ratée'
-						: 'Conquête ratée de '.$place;
-					$img = 'colo.png';
-				}
-			}
-		} else {
-			if ($this->rPlayerWinner == $this->rPlayerDefender) {
-				$title = Commander::LOOT == $this->type
-					? 'Pillage repoussé'
-					: 'Conquête repoussée';
-				$img = 'shield.png';
-			} else {
-				$title = Commander::LOOT == $this->type
-					? 'Défense ratée lors d\'un pillage'
-					: 'Défense ratée lors d\'une conquête';
-				$img = 'shield.png';
-			}
-		}
-
-		return [$title, $img];
+		return $report;
 	}
 
-	public function setPev()
+	public function setPev(): void
 	{
 		for ($i = 0; $i < 12; ++$i) {
-			$this->pevInBeginA += ShipResource::getInfo($i, 'pev') * $this->totalInBeginA[$i];
-			$this->pevInBeginD += ShipResource::getInfo($i, 'pev') * $this->totalInBeginD[$i];
-			$this->pevAtEndA += ShipResource::getInfo($i, 'pev') * $this->totalAtEndA[$i];
-			$this->pevAtEndD += ShipResource::getInfo($i, 'pev') * $this->totalAtEndD[$i];
+			$this->attackerPevAtBeginning += ShipResource::getInfo($i, 'pev') * $this->attackerTotalInBegin[$i];
+			$this->defenderPevAtBeginning += ShipResource::getInfo($i, 'pev') * $this->defenderTotalInBegin[$i];
+			$this->attackerPevAtEnd += ShipResource::getInfo($i, 'pev') * $this->attackerTotalAtEnd[$i];
+			$this->defenderPevAtEnd += ShipResource::getInfo($i, 'pev') * $this->defenderTotalAtEnd[$i];
 		}
 	}
 
-	public function setArmies()
+	public function setArmies(): void
 	{
-		if (false == $this->setArmiesDone) {
+		if (!$this->armiesDone) {
 			// squadron(id, pos, rReport, round, rCommander, ship0, ..., ship11)
 
-			$rCommanderA = $this->squadrons[0][4];
-
 			foreach ($this->squadrons as $sq) {
+				// TODO Handle differently this weird way to get differences between armies
+				// First round: squadrons are added in the begin army
 				if (0 == $sq[3]) {
-					if ($sq[4] == $rCommanderA) {
-						$this->armyInBeginA[] = $sq;
+					if ($sq[4]->id === $this->attackerCommander->id) {
+						$this->attackerArmyInBegin[] = $sq;
 					} else {
-						$this->armyInBeginD[] = $sq;
+						$this->defenderArmyInBegin[] = $sq;
 					}
+				// Later rounds, the fight array seems to contain squadron duplicates for storing the state evolution
 				} elseif ($sq[3] > 0) {
 					$this->fight[] = $sq;
+				// End army is stored, Round value is -1 at this point
 				} else {
-					if ($sq[4] == $rCommanderA) {
-						$this->armyAtEndA[] = $sq;
+					if ($sq[4]->id === $this->attackerCommander->id) {
+						$this->attackerArmyAtEnd[] = $sq;
 					} else {
-						$this->armyAtEndD[] = $sq;
+						$this->defenderArmyAtEnd[] = $sq;
 					}
 				}
 			}
 
-			foreach ($this->armyInBeginA as $sq) {
+			// TODO Maybe we can stack differently the total ships.
+			foreach ($this->attackerArmyInBegin as $sq) {
 				for ($i = 5; $i <= 16; ++$i) {
-					$this->totalInBeginA[$i - 5] += $sq[$i];
+					$this->attackerTotalInBegin[$i - 5] += $sq[$i];
 				}
 			}
-			foreach ($this->armyInBeginD as $sq) {
+			foreach ($this->defenderArmyInBegin as $sq) {
 				for ($i = 5; $i <= 16; ++$i) {
-					$this->totalInBeginD[$i - 5] += $sq[$i];
+					$this->defenderTotalInBegin[$i - 5] += $sq[$i];
 				}
 			}
-			foreach ($this->armyAtEndA as $sq) {
+			foreach ($this->attackerArmyAtEnd as $sq) {
 				for ($i = 5; $i <= 16; ++$i) {
-					$this->totalAtEndA[$i - 5] += $sq[$i];
+					$this->attackerTotalAtEnd[$i - 5] += $sq[$i];
 				}
 			}
-			foreach ($this->armyAtEndD as $sq) {
+			foreach ($this->defenderArmyAtEnd as $sq) {
 				for ($i = 5; $i <= 16; ++$i) {
-					$this->totalAtEndD[$i - 5] += $sq[$i];
+					$this->defenderTotalAtEnd[$i - 5] += $sq[$i];
 				}
 			}
 
 			for ($i = 0; $i < 12; ++$i) {
-				$this->diferenceA[$i] = $this->totalInBeginA[$i] - $this->totalAtEndA[$i];
+				$this->attackerDifference[$i] = $this->attackerTotalInBegin[$i] - $this->attackerTotalAtEnd[$i];
 			}
 			for ($i = 0; $i < 12; ++$i) {
-				$this->diferenceD[$i] = $this->totalInBeginD[$i] - $this->totalAtEndD[$i];
+				$this->defenderDifference[$i] = $this->defenderTotalInBegin[$i] - $this->defenderTotalAtEnd[$i];
 			}
 
-			$this->setArmiesDone = true;
+			$this->armiesDone = true;
 		}
 	}
 }

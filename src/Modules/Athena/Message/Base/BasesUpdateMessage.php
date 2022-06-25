@@ -2,11 +2,8 @@
 
 namespace App\Modules\Athena\Message\Base;
 
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use App\Shared\Domain\Message\AsyncMessage;
 
-class BasesUpdateMessage implements MessageHandlerInterface
+class BasesUpdateMessage implements AsyncMessage
 {
-	public function __invoke(BasesUpdateMessage $message): void
-	{
-	}
 }

@@ -2,13 +2,13 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller;
 
-use App\Modules\Artemis\Manager\SpyReportManager;
-use App\Modules\Artemis\Model\SpyReport;
+use App\Modules\Artemis\Domain\Repository\SpyReportRepositoryInterface;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 
 class ViewSpyReports extends AbstractController
 {
@@ -16,41 +16,24 @@ class ViewSpyReports extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		PlaceManager $placeManager,
-		SpyReportManager $spyReportManager,
+		SpyReportRepositoryInterface $spyReportRepository,
 	): Response {
-		$focusedSpyReport = $this->getFocusedLastReport($request, $currentPlayer, $spyReportManager);
+		$spyReports = $spyReportRepository->getPlayerReports($currentPlayer);
 
-		return $this->render('pages/ares/fleet/spy_reports.html.twig', [
-			'spy_reports' => $this->getSpyReports($currentPlayer, $spyReportManager),
-			'focused_spy_report' => $focusedSpyReport,
-			'focused_spy_report_place' => $focusedSpyReport ? $placeManager->get($focusedSpyReport->rPlace) : null,
-		]);
-	}
-
-	private function getSpyReports(Player $currentPlayer, SpyReportManager $spyReportManager): array
-	{
-		$spyReportManager->newSession();
-		$spyReportManager->load(['rPlayer' => $currentPlayer->getId()], ['dSpying', 'DESC'], [0, 40]);
-
-		// listReport component
-		$spyreport_listSpy = [];
-		for ($i = 0; $i < $spyReportManager->size(); ++$i) {
-			$spyreport_listSpy[$i] = $spyReportManager->get($i);
-		}
-
-		return $spyreport_listSpy;
-	}
-
-	private function getFocusedLastReport(Request $request, Player $currentPlayer, SpyReportManager $spyReportManager): SpyReport|null
-	{
-		$spyReportManager->newSession();
+		$focusedSpyReport = null;
 
 		if ($request->query->has('report')) {
-			$spyReportManager->load(['id' => $request->query->get('report'), 'rPlayer' => $currentPlayer->getId()]);
-		} else {
-			$spyReportManager->load(['rPlayer' => $currentPlayer->getId()], ['dSpying', 'DESC'], [0, 1]);
+			$focusedSpyReport = $spyReportRepository->get(
+				Uuid::fromString($request->query->get('report'))
+			);
+		}
+		if (null === $focusedSpyReport || $focusedSpyReport->player->id !== $currentPlayer->id) {
+			$focusedSpyReport = $spyReports[0] ?? null;
 		}
 
-		return (1 == $spyReportManager->size()) ? $spyReportManager->get(0) : null;
+		return $this->render('pages/ares/fleet/spy_reports.html.twig', [
+			'spy_reports' => $spyReports,
+			'focused_spy_report' => $focusedSpyReport,
+		]);
 	}
 }

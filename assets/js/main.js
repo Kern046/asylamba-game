@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
 		speed: 300,
 
 		// ressources du modules
-		imgPath: game.path + 'media/alert/',
+		imgPath: game.path + 'build/media/alert/',
 		resources: {
 			'100': ['information', 'info.png'],
 			'error': ['erreur', 'error.png'],

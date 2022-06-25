@@ -2,7 +2,7 @@
 
 namespace App\Modules\Demeter\Infrastructure\Controller\News;
 
-use App\Classes\Entity\EntityManager;
+use App\Modules\Demeter\Domain\Repository\Forum\FactionNewsRepositoryInterface;
 use App\Modules\Demeter\Manager\Forum\FactionNewsManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,11 +15,11 @@ class Pin extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		EntityManager $entityManager,
 		FactionNewsManager $factionNewsManager,
+		FactionNewsRepositoryInterface $factionNewsRepository,
 		int $id
 	): Response {
-		$factionNews = $factionNewsManager->getFactionNews($currentPlayer->getRColor());
+		$factionNews = $factionNewsRepository->getFactionNews($currentPlayer->faction);
 		$newExists = false;
 		// This way of doing things remove all previous pins
 		foreach ($factionNews as $factionNew) {
@@ -33,7 +33,7 @@ class Pin extends AbstractController
 		if (true !== $newExists) {
 			throw new NotFoundHttpException('Cette annonce n\'existe pas.');
 		}
-		$entityManager->flush();
+		$factionNewsRepository->save($factionNew);
 
 		return $this->redirect($request->headers->get('referer'));
 	}

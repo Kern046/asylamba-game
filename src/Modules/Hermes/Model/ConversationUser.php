@@ -2,6 +2,9 @@
 
 namespace App\Modules\Hermes\Model;
 
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
+
 class ConversationUser
 {
 	// constante
@@ -13,30 +16,24 @@ class ConversationUser
 	public const CS_DISPLAY = 1;
 	public const CS_ARCHIVED = 2;
 
-	public $id = 0;
-	public $rConversation = 0;
-	public $rPlayer = 0;
-
-	public $convPlayerStatement = 0;
-	public $convStatement = 0;
-	public $dLastView = '';
-
-	public $playerColor = 0;
-	public $playerName = '';
-	public $playerAvatar = '';
-	public $playerStatus = 0;
-
-	public function getId()
-	{
-		return $this->id;
+	public function __construct(
+		public Uuid $id,
+		public Conversation $conversation,
+		public Player $player,
+		public \DateTimeImmutable $lastViewedAt,
+	
+		public int $playerStatus = self::US_STANDARD,
+		public int $conversationStatus = self::CS_DISPLAY,
+	) {
+			
 	}
 
-	public static function getPlayerStatement($statement)
+	public static function getPlayerStatement(int $statement): string
 	{
-		switch ($statement) {
-			case self::US_ADMIN: return 'gestionnaire'; break;
-			case self::US_STANDARD: return 'normal'; break;
-			default: return 'status inconnu'; break;
-		}
+		return match ($statement) {
+			self::US_ADMIN => 'gestionnaire',
+			self::US_STANDARD => 'normal',
+			default => 'status inconnu',
+		};
 	}
 }

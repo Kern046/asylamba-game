@@ -2,13 +2,16 @@
 
 namespace App\Modules\Athena\Message\Building;
 
-class BuildingQueueMessage
+use App\Shared\Domain\Message\AsyncMessage;
+use Symfony\Component\Uid\Uuid;
+
+class BuildingQueueMessage implements AsyncMessage
 {
-	public function __construct(private int $buildingQueueId)
+	public function __construct(private readonly Uuid $buildingQueueId)
 	{
 	}
 
-	public function getBuildingQueueId(): int
+	public function getBuildingQueueId(): Uuid
 	{
 		return $this->buildingQueueId;
 	}

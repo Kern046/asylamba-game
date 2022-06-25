@@ -2,7 +2,7 @@
 
 namespace App\Classes\Scheduler;
 
-use App\Modules\Ares\Message\CommandersExperienceMessage;
+use App\Modules\Ares\Message\CommandersSchoolExperienceMessage;
 use App\Modules\Athena\Message\Base\BasesUpdateMessage;
 use App\Modules\Atlas\Message\FactionRankingMessage;
 use App\Modules\Atlas\Message\PlayerRankingMessage;
@@ -23,7 +23,7 @@ class CyclicActionScheduler
 		],
 		self::TYPE_HOURLY => [
 			BasesUpdateMessage::class,
-			CommandersExperienceMessage::class,
+			CommandersSchoolExperienceMessage::class,
 			NpcsPlacesUpdateMessage::class,
 			PlayersCreditsUpdateMessage::class,
 			PlayersPlacesUpdateMessage::class,

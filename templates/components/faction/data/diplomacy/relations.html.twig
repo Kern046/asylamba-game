@@ -5,16 +5,16 @@
 	<div class="fix-body">
 		<div class="body">
 			{% for statement in diplomacy_statements|keys %}
-				{% set factions = faction.colorLink|filter((v, k) => k != 0 and k != faction.id and v == statement) %}
+				{% set factions = faction.relations|filter((v, k) => k != 0 and k != faction.identifier and v == statement) %}
 				<h4>{{ diplomacy_statements[statement] }}</h4>
 
-				{% for faction_id in factions|keys %}
-					<div class="player faction color{{ faction_id }}">
-						<a href="{{ path('embassy', {'faction': faction_id}) }}">
-							<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_id ~ '.png') }}" alt="" class="picto">
+				{% for faction_identifier in factions|keys %}
+					<div class="player faction color{{ faction_identifier }}">
+						<a href="{{ path('embassy', {'faction': faction_identifier}) }}">
+							<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_identifier ~ '.png') }}" alt="" class="picto">
 						</a>
-						<span class="title">{{ get_faction_info(faction_id, 'government') }}</span>
-						<strong class="name">{{ get_faction_info(faction_id, 'officialName') }}</strong>
+						<span class="title">{{ get_faction_info(faction_identifier, 'government') }}</span>
+						<strong class="name">{{ get_faction_info(faction_identifier, 'officialName') }}</strong>
 					</div>
 				{% endfor %}
 

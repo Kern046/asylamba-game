@@ -2,13 +2,16 @@
 
 namespace App\Modules\Ares\Message;
 
-class CommanderTravelMessage
+use App\Shared\Domain\Message\AsyncMessage;
+use Symfony\Component\Uid\Uuid;
+
+class CommanderTravelMessage implements AsyncMessage
 {
-	public function __construct(protected int $commanderId)
+	public function __construct(private readonly Uuid $commanderId)
 	{
 	}
 
-	public function getCommanderId(): int
+	public function getCommanderId(): Uuid
 	{
 		return $this->commanderId;
 	}

@@ -1,5 +1,5 @@
-{% set building_queues_count = current_base.buildingQueues|length %}
-{% set technology_queues_count = current_base.technoQueues|length %}
+{% set building_queues_count = current_building_queues|length %}
+{% set technology_queues_count = current_technology_queues|length %}
 {% set tutorial_step = current_player.stepTutorial %}
 
 {% apply spaceless %}
@@ -121,7 +121,7 @@
 													<div class="footer">
 														<a class="ajax-action" data-ajax-target="{{ path('archive_notification', {'id': notification.id }) }}">archiver</a> ou
 														<a class="ajax-action" data-ajax-target="{{ path('delete_notification', {'id': notification.id }) }}">supprimer</a><br />
-														— {{ notification.dSending|date|raw }}
+														— {{ notification.sentAt|date|raw }}
 													</div>
 												</div>
 											{% endfor %}
@@ -344,7 +344,7 @@
 									<h2>Générateur</h2>
 									<div class="overflow">
 										{% if building_queues_count > 0 %}
-											{% set queue = current_base.buildingQueues[0] %}
+											{% set queue = current_building_queues[0] %}
 											{% set queue_time = queue|building_queue_time %}
 											{% set queue_duration = queue|queue_duration %}
 											<div class="queue">
@@ -393,7 +393,7 @@
 									<h2>Technosphère</h2>
 									<div class="overflow">
 										{% if technology_queues_count > 0 %}
-											{% set queue = current_base.technoQueues[0] %}
+											{% set queue = current_technology_queues[0] %}
 											<div class="queue">
 												<div class="item active progress"
 													 data-progress-no-reload="true"

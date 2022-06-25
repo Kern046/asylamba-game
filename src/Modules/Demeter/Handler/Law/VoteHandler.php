@@ -2,28 +2,29 @@
 
 namespace App\Modules\Demeter\Handler\Law;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Utils;
-use App\Modules\Demeter\Manager\ColorManager;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
 use App\Modules\Demeter\Manager\Law\LawManager;
 use App\Modules\Demeter\Message\Law\VoteMessage;
 use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Demeter\Resource\LawResources;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class VoteHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class VoteHandler
 {
 	public function __construct(
-		protected ColorManager $colorManager,
-		protected LawManager $lawManager,
-		protected EntityManager $entityManager,
+		private ColorRepositoryInterface $colorRepository,
+		private LawRepositoryInterface $lawRepository,
+		private LawManager $lawManager,
 	) {
 	}
 
 	public function __invoke(VoteMessage $message): void
 	{
-		$law = $this->lawManager->get($message->getLawId());
-		$faction = $this->colorManager->get($law->getFactionId());
+		$law = $this->lawRepository->get($message->getLawId());
+		$faction = $law->faction;
 		$ballot = $this->lawManager->ballot($law);
 		if ($ballot) {
 			// accepter la loi
@@ -39,7 +40,7 @@ class VoteHandler implements MessageHandlerInterface
 			}
 			// envoyer un message
 		}
-		$this->entityManager->flush($law);
-		$this->entityManager->flush($faction);
+		$this->lawRepository->save($law);
+		$this->colorRepository->save($faction);
 	}
 }

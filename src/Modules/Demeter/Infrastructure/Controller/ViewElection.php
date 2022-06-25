@@ -3,7 +3,6 @@
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
 use App\Classes\Library\Utils;
-use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Manager\Election\CandidateManager;
 use App\Modules\Demeter\Manager\Election\ElectionManager;
 use App\Modules\Demeter\Manager\Election\VoteManager;
@@ -12,7 +11,7 @@ use App\Modules\Demeter\Manager\Forum\ForumTopicManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Candidate;
 use App\Modules\Demeter\Model\Election\Vote;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,14 +23,13 @@ class ViewElection extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		CandidateManager $candidateManager,
-		ColorManager $colorManager,
 		ElectionManager $electionManager,
 		VoteManager $voteManager,
-		PlayerManager $playerManager,
+		PlayerRepositoryInterface $playerRepository,
 		ForumTopicManager $forumTopicManager,
 		ForumMessageManager $forumMessageManager,
 	): Response {
-		$faction = $colorManager->get($currentPlayer->getRColor());
+		$faction = $currentPlayer->getRColor();
 
 		$election = $electionManager->getFactionLastElection($faction->id);
 
@@ -54,7 +52,7 @@ class ViewElection extends AbstractController
 
 				$data['player_vote'] = $voteManager->getPlayerVote($currentPlayer, $election);
 				$data['votes'] = $votes;
-				$data['faction_members'] = $playerManager->getFactionPlayers($faction->getId());
+				$data['faction_members'] = $playerRepository->getFactionPlayers($faction);
 
 				$candidate = ($request->query->has('candidate') && ($candidate = $candidateManager->get($request->query->get('candidate'))) !== null) ? $candidate : ([] !== $candidates ? $candidates[0] : null);
 

@@ -2,102 +2,34 @@
 
 namespace App\Modules\Demeter\Repository\Election;
 
-use App\Classes\Entity\AbstractRepository;
+use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
+use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Election;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
-class ElectionRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<Election>
+ */
+class ElectionRepository extends DoctrineRepository implements ElectionRepositoryInterface
 {
-	/**
-	 * @param int $id
-	 *
-	 * @return Election
-	 */
-	public function get($id)
+	public function __construct(ManagerRegistry $registry)
 	{
-		if (($e = $this->unitOfWork->getObject(Election::class, $id)) !== null) {
-			return $e;
-		}
-		$statement = $this->connection->prepare('SELECT * FROM election WHERE id = :id');
-		$statement->execute(['id' => $id]);
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		$election = $this->format($row);
-		$this->unitOfWork->addObject($election);
-
-		return $election;
+		parent::__construct($registry, Election::class);
 	}
 
-	/**
-	 * @param int $factionId
-	 *
-	 * @return Election
-	 */
-	public function getFactionLastElection($factionId)
+	public function get(Uuid $id): Election|null
 	{
-		$statement = $this->connection->prepare('SELECT * FROM election WHERE rColor = :faction_id ORDER BY id DESC LIMIT 1');
-		$statement->execute(['faction_id' => $factionId]);
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		if (($e = $this->unitOfWork->getObject(Election::class, $row['id'])) !== null) {
-			return $e;
-		}
-		$election = $this->format($row);
-		$this->unitOfWork->addObject($election);
-
-		return $election;
+		return $this->find($id);
 	}
 
-	/**
-	 * @param Election $election
-	 */
-	public function insert($election)
+	public function getFactionLastElection(Color $faction): Election|null
 	{
-		$statement = $this->connection->prepare(
-			'INSERT INTO election SET rColor = :faction_id, dElection = :date'
-		);
-		$statement->execute([
-			'faction_id' => $election->rColor,
-			'date' => $election->dElection,
+		return $this->findOneBy([
+			'faction' => $faction,
+		], [
+			'dElection' => 'DESC',
 		]);
-		$election->id = $this->connection->lastInsertId();
-	}
-
-	/**
-	 * @param Election $election
-	 */
-	public function update($election)
-	{
-		$statement = $this->connection->prepare('UPDATE election SET rColor = :faction_id, dElection = :date WHERE id = :id');
-		$statement->execute([
-			'faction_id' => $election->rColor,
-			'date' => $election->dElection,
-			'id' => $election->id,
-		]);
-	}
-
-	/**
-	 * @param Election $election
-	 */
-	public function remove($election)
-	{
-		$statement = $this->connection->prepare('DELETE FROM election WHERE id = :id');
-		$statement->execute(['id' => $id]);
-	}
-
-	/**
-	 * @param array $data
-	 *
-	 * @return Election
-	 */
-	public function format($data)
-	{
-		$election = new Election();
-		$election->id = (int) $data['id'];
-		$election->rColor = (int) $data['rColor'];
-		$election->dElection = $data['dElection'];
-
-		return $election;
 	}
 }

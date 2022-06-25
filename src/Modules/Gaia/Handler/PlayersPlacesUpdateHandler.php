@@ -2,47 +2,64 @@
 
 namespace App\Modules\Gaia\Handler;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Library\Utils;
-use App\Modules\Gaia\Manager\PlaceManager;
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Message\PlayersPlacesUpdateMessage;
 use App\Modules\Gaia\Model\Place;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use App\Shared\Application\Handler\DurationHandler;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class PlayersPlacesUpdateHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+class PlayersPlacesUpdateHandler
 {
 	public function __construct(
-		protected PlaceManager $placeManager,
-		protected EntityManager $entityManager,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly PlaceRepositoryInterface $placeRepository,
+		private readonly DurationHandler $durationHandler,
 	) {
 	}
 
 	public function __invoke(PlayersPlacesUpdateMessage $message): void
 	{
-		$places = $this->placeManager->getPlayerPlaces();
-		$now = Utils::now();
-		$repository = $this->entityManager->getRepository(Place::class);
-		$this->entityManager->beginTransaction();
+		$placesCount = $this->placeRepository->countPlayerPlaces();
+		$limit = 20;
 
-		foreach ($places as $place) {
-			if (0 === Utils::interval($place->uPlace, $now, 's')) {
-				continue;
+		for ($i = 0; $i < $placesCount; $i++) {
+			$places = $this->placeRepository->getPlayerPlaces($i, $limit);
+			$this->entityManager->beginTransaction();
+
+			foreach ($places as $place) {
+				$this->updatePlace($place);
 			}
-			// update time
-			$hours = Utils::intervalDates($now, $place->uPlace);
-			$place->uPlace = $now;
-			$initialResources = $place->resources;
-			$maxResources = ceil($place->population / Place::COEFFPOPRESOURCE) * Place::COEFFMAXRESOURCE * ($place->maxDanger + 1);
-			foreach ($hours as $hour) {
-				$place->resources += floor(Place::COEFFRESOURCE * $place->population);
-			}
-			$place->resources = abs($place->resources - $initialResources);
-			if ($place->resources > $maxResources) {
-				$place->resources = $maxResources;
-			}
-			$repository->updatePlace($place);
+
+			$this->entityManager->commit();
+			$this->entityManager->clear();
+
+			$i += $limit;
 		}
-		$this->entityManager->commit();
-		$this->entityManager->clear(Place::class);
+	}
+
+	private function updatePlace(Place $place): void
+	{
+		$now = new \DateTimeImmutable();
+		$hoursDiff = $this->durationHandler->getHoursDiff($place->updatedAt, $now);
+		if (0 === $hoursDiff) {
+			return;
+		}
+		// update time
+		$place->updatedAt = $now;
+		$initialResources = $place->resources;
+		// TODO factorize this calculation
+		$maxResources = ceil($place->population / Place::COEFFPOPRESOURCE)
+			* Place::COEFFMAXRESOURCE
+			* ($place->maxDanger + 1);
+		for ($i = 0; $i < $hoursDiff; $i++) {
+			$place->resources += floor(Place::COEFFRESOURCE * $place->population);
+		}
+		$place->resources = abs($place->resources - $initialResources);
+		if ($place->resources > $maxResources) {
+			$place->resources = $maxResources;
+		}
+		$this->placeRepository->save($place);
 	}
 }

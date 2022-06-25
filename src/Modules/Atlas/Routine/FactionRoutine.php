@@ -6,30 +6,32 @@ use App\Classes\Library\Utils;
 use App\Modules\Atlas\Model\FactionRanking;
 use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Gaia\Model\Sector;
+use Symfony\Component\Uid\Uuid;
 
 class FactionRoutine
 {
 	/**
 	 * Contains results of all alive factions.
 	 *
-	 * @var array
+	 * @var array<int, array<string, mixed>>
 	 */
-	protected $results = [];
-	/** @var bool * */
-	protected $isGameOver = false;
+	protected array $results = [];
+	protected bool $isGameOver = false;
 
 	/**
 	 * @param array $playerRankings
 	 * @param array $routesIncome
 	 * @param array $sectors
 	 */
-	public function execute(Color $faction, $playerRankings, $routesIncome, $sectors)
+	public function execute(Color $faction, array $playerRankings, array $routesIncome, array $sectors): void
 	{
-		$this->results[$faction->getId()] = [
+		$this->results[$faction->identifier] = [
 			'general' => 0,
 			'wealth' => 0,
 			'territorial' => 0,
-			'points' => $faction->rankingPoints, ];
+			'points' => $faction->rankingPoints,
+		];
 		if (1 == $faction->isWinner) {
 			$this->isGameOver = true;
 		}
@@ -38,14 +40,16 @@ class FactionRoutine
 		$this->calculateTerritorialRanking($faction, $sectors);
 	}
 
+	/**
+	 * @param list<Color> $factions
+	 */
 	public function processResults(
 		Ranking $ranking,
-		$factions,
-		$factionRankingManager,
-		$serverStartTime,
-		$hoursBeforeStartOfRanking,
-		$pointsToWin,
-	) {
+		array $factions,
+		string $serverStartTime,
+		int $hoursBeforeStartOfRanking,
+		int $pointsToWin,
+	): Color|null {
 		// ---------------- COMPUTING -------------------#
 
 		// copy the arrays
@@ -78,7 +82,7 @@ class FactionRoutine
 			$coefT = 0.5; // 20 15 10 5 0 ...
 
 			foreach ($factions as $faction) {
-				$factionId = $faction->id;
+				$factionId = $faction->identifier;
 				$additionalPoints = 0;
 
 				// general
@@ -109,14 +113,18 @@ class FactionRoutine
 		$rankings = [];
 
 		foreach ($factions as $faction) {
-			$factionId = $faction->getId();
-			$fr = new FactionRanking();
+			$factionId = $faction->identifier;
+			$fr = new FactionRanking(
+				id: Uuid::v4(),
+				faction: $faction,
+
+			);
 			$fr->rRanking = $ranking->getId();
 			$fr->rFaction = $factionId;
 
 			$firstRanking = true;
 			for ($i = 0; $i < $factionRankingManager->size(); ++$i) {
-				if ($factionRankingManager->get($i)->rFaction == $factionId) {
+				if ($factionRankingManager->get($i)->faction->id == $faction->id) {
 					$oldRanking = $factionRankingManager->get($i);
 					$firstRanking = false;
 					break;
@@ -196,16 +204,21 @@ class FactionRoutine
 		$this->results[$faction->getId()]['wealth'] = $income;
 	}
 
-	protected function calculateTerritorialRanking($faction, $sectors)
+	/**
+	 * @param Color $faction
+	 * @param list<Sector> $sectors
+	 * @return void
+	 */
+	protected function calculateTerritorialRanking(Color$faction, array $sectors): void
 	{
 		foreach ($sectors as $sector) {
-			if ($sector->rColor === $faction->getId()) {
-				$this->results[$sector->rColor]['territorial'] += $sector->points;
+			if ($sector->faction?->id === $faction->id) {
+				$this->results[$sector->faction->identifier]['territorial'] += $sector->points;
 			}
 		}
 	}
 
-	protected function cmpFactionGeneral($a, $b)
+	protected function cmpFactionGeneral(array $a, array $b): int
 	{
 		if ($a['general'] == $b['general']) {
 			return 0;
@@ -214,7 +227,7 @@ class FactionRoutine
 		return ($a['general'] > $b['general']) ? -1 : 1;
 	}
 
-	protected function cmpWealth($a, $b)
+	protected function cmpWealth(array $a, array $b): int
 	{
 		if ($a['wealth'] == $b['wealth']) {
 			return 0;
@@ -223,7 +236,7 @@ class FactionRoutine
 		return ($a['wealth'] > $b['wealth']) ? -1 : 1;
 	}
 
-	protected function cmpTerritorial($a, $b)
+	protected function cmpTerritorial(array $a, array $b): int
 	{
 		if ($a['territorial'] == $b['territorial']) {
 			return 0;
@@ -232,7 +245,7 @@ class FactionRoutine
 		return ($a['territorial'] > $b['territorial']) ? -1 : 1;
 	}
 
-	protected function cmpPoints($a, $b)
+	protected function cmpPoints(array $a, array $b): int
 	{
 		if ($a['points'] == $b['points']) {
 			return 0;
@@ -241,7 +254,7 @@ class FactionRoutine
 		return ($a['points'] > $b['points']) ? -1 : 1;
 	}
 
-	protected function setPositions($list, $attribute)
+	protected function setPositions(array $list, $attribute): array
 	{
 		$position = 1;
 		$index = 1;
@@ -258,7 +271,10 @@ class FactionRoutine
 		return $list;
 	}
 
-	public function getResults()
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function getResults(): array
 	{
 		return $this->results;
 	}

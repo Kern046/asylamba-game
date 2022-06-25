@@ -28,11 +28,11 @@ class TutorialStepValidationListener
 	#[AsEventListener]
 	public function onNewBuildingQueue(NewBuildingQueueEvent $event): void
 	{
-		$player = $event->player;
+		$player = $event->buildingQueue->base->player;
 		$buildingQueue = $event->buildingQueue;
-		$targetLevel = $buildingQueue->getTargetLevel();
+		$targetLevel = $buildingQueue->targetLevel;
 
-		$data = match ($buildingQueue->getBuildingNumber()) {
+		$data = match ($buildingQueue->buildingNumber) {
 			OrbitalBaseResource::GENERATOR => [
 				TutorialResource::GENERATOR_LEVEL_2 => 2,
 			],
@@ -60,7 +60,7 @@ class TutorialStepValidationListener
 		};
 
 		foreach ($data as $tutorialStep => $buildingNeededLevel) {
-			if ($tutorialStep === $player->getStepTutorial() && $targetLevel >= $buildingNeededLevel) {
+			if ($tutorialStep === $player->stepTutorial && $targetLevel >= $buildingNeededLevel) {
 				$this->tutorialHelper->setStepDone($player);
 
 				break;

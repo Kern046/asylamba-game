@@ -2,7 +2,6 @@
 
 namespace App\Shared\Infrastructure\Twig;
 
-use App\Classes\Library\Utils;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\BuildingQueue;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -11,6 +10,7 @@ use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Promethee\Model\TechnologyQueue;
+use App\Shared\Application\Handler\DurationHandler;
 use App\Shared\Domain\Model\QueueableInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -20,8 +20,9 @@ use Twig\TwigFunction;
 class QueueableExtension extends AbstractExtension
 {
 	public function __construct(
-		protected OrbitalBaseHelper $orbitalBaseHelper,
-		protected TechnologyHelper $technologyHelper,
+		private readonly OrbitalBaseHelper $orbitalBaseHelper,
+		private readonly TechnologyHelper $technologyHelper,
+		private readonly DurationHandler $durationHandler,
 	) {
 	}
 
@@ -37,7 +38,7 @@ class QueueableExtension extends AbstractExtension
 		return [
 			// @TODO migrate to a technology twig extension
 			new TwigFilter('is_unblocking_technology', fn (TechnologyQueue $technologyQueue) => (!$this->technologyHelper->isAnUnblockingTechnology($technologyQueue->technology))),
-			new TwigFilter('queue_duration', fn (QueueableInterface $queue) => Utils::interval(Utils::now(), $queue->getEndDate(), 's')),
+			new TwigFilter('queue_duration', fn (QueueableInterface $queue) => $this->durationHandler->getDurationRemainingTime($queue)),
 			new TwigFilter('queue_picture', fn (QueueableInterface $queue) => $this->getQueueHelper($queue)->getInfo($queue->getResourceIdentifier(), 'imageLink')),
 			new TwigFilter('queue_name', fn (QueueableInterface $queue) => $this->getQueueHelper($queue)->getInfo($queue->getResourceIdentifier(), $this->getQueueNameKey($queue))),
 			new TwigFilter('base_max_technology_queues', fn (OrbitalBase $orbitalBase) => $this->orbitalBaseHelper->getBuildingInfo(

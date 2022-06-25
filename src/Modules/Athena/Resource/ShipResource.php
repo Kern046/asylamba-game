@@ -61,9 +61,14 @@ class ShipResource
 			if (in_array($info, ['codeName', 'name', 'class', 'pev', 'life', 'speed', 'defense', 'attack', 'cost', 'time', 'resourcePrice', 'points', 'imageLink', 'techno', 'description'])) {
 				return self::$ship[$shipNumber][$info];
 			}
-			throw new \ErrorException('info inconnue dans getInfo de ShipResource');
+			throw new \InvalidArgumentException(sprintf('info inconnue dans getInfo de ShipResource: "%s"', $info));
 		}
-		throw new \ErrorException('shipId inconnu (entre 0 et 14) dans getInfo de ShipResource');
+		throw new \InvalidArgumentException(sprintf('shipId inconnu (entre 0 et 14) dans getInfo de ShipResource: %d', $shipNumber));
+	}
+
+	public static function countAvailableShips(): int
+	{
+		return count(self::$ship);
 	}
 
 	private static $ship = [

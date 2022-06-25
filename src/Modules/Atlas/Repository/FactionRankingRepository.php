@@ -2,43 +2,54 @@
 
 namespace App\Modules\Atlas\Repository;
 
-use App\Classes\Entity\AbstractRepository;
 use App\Modules\Athena\Model\CommercialRoute;
+use App\Modules\Atlas\Domain\Repository\FactionRankingRepositoryInterface;
+use App\Modules\Atlas\Model\FactionRanking;
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
-class FactionRankingRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<FactionRanking>
+ */
+class FactionRankingRepository extends DoctrineRepository implements FactionRankingRepositoryInterface
 {
-	public function getRoutesIncome(Color $faction)
+	public function __construct(ManagerRegistry $registry)
 	{
-		$qr = $this->connection->prepare(
-			'SELECT COUNT(cr.id) AS nb,
-				SUM(cr.income) AS income
-			FROM commercialRoute AS cr
-			LEFT JOIN orbitalBase AS ob1
-				ON cr.rOrbitalBase = ob1.rPlace
-				LEFT JOIN player AS pl1
-					ON ob1.rPlayer = pl1.id
-			LEFT JOIN orbitalBase AS ob2
-				ON cr.rOrbitalBaseLinked = ob2.rPlace
-				LEFT JOIN player AS pl2
-					ON ob2.rPlayer = pl2.id
-			WHERE (pl1.rColor = ? OR pl2.rColor = ?) AND cr.statement = ?'
-		);
-		// hint : en fait ça compte qu'une fois une route interfaction, mais chut
-		$qr->execute([$faction->getId(), $faction->getId(), CommercialRoute::ACTIVE]);
-
-		return $qr->fetch();
+		parent::__construct($registry, FactionRanking::class);
 	}
 
-	public function insert($ranking)
+	public function getRoutesIncome(Color $faction): array
 	{
+		$qb = $this->createQueryBuilder('fr');
+
+		$qb->select('COUNT(n.id) as nb, SUM(cr.income) as income')
+			->from(CommercialRoute::class, 'cr')
+			->join('cr.originBase', 'ob')
+			->join('ob.player', 'obp')
+			->join('cr.destinationBase', 'db')
+			->join('db.player', 'dbp')
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('obp.faction', ':faction'),
+				$qb->expr()->eq('dbp.faction', ':faction'),
+			))
+			->andWhere('cr.statement = :statement')
+			->setParameter('faction', $faction)
+			->setParameter('statement', CommercialRoute::ACTIVE);
+
+		return $qb->getQuery()->getScalarResult();
 	}
 
-	public function update($ranking)
+	public function getLastRanking(Color $faction): FactionRanking|null
 	{
-	}
+		$qb = $this->createQueryBuilder('fr');
 
-	public function remove($ranking)
-	{
+		$qb
+			->where('fr.faction = :faction')
+			->orderBy('fr.createdAt', 'DESC')
+			->setParameter('faction', $faction)
+			->setMaxResults(1);
+
+		return $qb->getQuery()->getOneOrNullResult();
 	}
 }

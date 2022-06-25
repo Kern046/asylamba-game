@@ -23,7 +23,7 @@
 							<img src="{{ asset('build/media/map/fleet/' ~ (commander.isAffected ? 'army' : 'army-away') ~ '.png') }}" alt="plein" />
 							<span class="info">
 								{{ commander|commander_rank }} <strong>{{ commander.name }}</strong><br />
-								{{ commander.pev  }} Pev
+								{{ commander|pev  }} Pev
 								{% if commander.isMoving() %}
 									<br />&#8594;
 									{# @TODO implement a shorter version #}
@@ -78,8 +78,8 @@
 					<img src="{{ asset('build/media/orbitalbase/place1-' ~ current_base|base_demography ~ '.png') }}" alt="planète" />
 
 					<div class="info bottom">
-						<strong>{{ (current_base.planetPopulation * 1000000)|number }}</strong> habitants<br />
-						<strong>{{ current_base.planetResources }}</strong> % coeff. ressource<br />
+						<strong>{{ (current_base.place.population * 1000000)|number }}</strong> habitants<br />
+						<strong>{{ current_base.place.coefResources }}</strong> % coeff. ressource<br />
 						<strong>{{ science_coeff }}</strong> % de bonus scientifique
 					</div>
 				</div>

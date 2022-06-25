@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class ExecuteHourlyTasks extends Command
 {
-	public function __construct(private CyclicActionScheduler $cyclicActionScheduler)
+	public function __construct(private readonly CyclicActionScheduler $cyclicActionScheduler)
 	{
 		parent::__construct();
 	}

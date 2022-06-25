@@ -28,18 +28,24 @@
 
 			{% if combat_reports|length > 0 %}
 				<div class="set-item">
+
 					{% for report in combat_reports %}
-						{% set report_data = report.typeOfReport(current_player.rColor) %}
+						{% set report_data = get_report_data(report) %}
 
 						<div class="item">
 							<div class="left">
 								{# @TODO Seems that previously a report could also use colorA #}
-								<img class="color{{ report.colorD }}" src="{{ asset('build/media/map/action/' ~ report_data.img) }}" alt="" />
+								<img class="color{{ report.defender.faction.identifier ?? '0' }}" src="{{ asset('build/media/map/action/' ~ report_data.img) }}" alt="" />
 							</div>
 
 							<div class="center">
-								<strong>{{ report_data.title }}</strong>
-								{{- report.dFight|date|raw -}}
+								<strong>
+									{{ report_data.title }}
+									de <a href="{{ path('map', {'place': report.place.id}) }}" >
+										{{  place.base.name ?? 'planète rebelle' }}
+									</a>
+								</strong>
+								{{- report.foughtAt|date|raw -}}
 							</div>
 
 							<div class="right">

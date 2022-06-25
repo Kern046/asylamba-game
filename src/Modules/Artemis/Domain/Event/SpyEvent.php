@@ -8,11 +8,11 @@ use App\Modules\Zeus\Resource\TutorialResource;
 use App\Shared\Domain\Event\TrackingEvent;
 use App\Shared\Domain\Event\TutorialEvent;
 
-class SpyEvent implements TutorialEvent, TrackingEvent
+readonly class SpyEvent implements TutorialEvent, TrackingEvent
 {
 	public function __construct(
-		public readonly SpyReport $spyReport,
-		public readonly Player $player
+		public SpyReport $spyReport,
+		public Player    $player
 	) {
 	}
 
@@ -39,10 +39,10 @@ class SpyEvent implements TutorialEvent, TrackingEvent
 	public function getTrackingData(): array
 	{
 		return [
-			'place_id' => $this->spyReport->rPlace,
-			'enemy_id' => $this->spyReport->rEnemy,
+			'place' => $this->spyReport->place,
+			'enemy' => $this->spyReport->targetPlayer,
 			'price' => $this->spyReport->price,
-			'success_percent' => $this->spyReport->success,
+			'success_rate' => $this->spyReport->successRate,
 		];
 	}
 }

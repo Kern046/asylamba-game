@@ -2,6 +2,10 @@
 
 namespace App\Modules\Hermes\Model;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Uid\Uuid;
+
 class Conversation
 {
 	public const CONVERSATION_BY_PAGE = 25;
@@ -9,22 +13,20 @@ class Conversation
 	public const TY_USER = 1;
 	public const TY_SYSTEM = 2;
 
-	public $id = 0;
-	public $title = null;
-	public $messages = 0;
-	public $type = 1;
-	public $dCreation = '';
-	public $dLastMessage = null;
-
-	public $players = [];
-
-	public function getId()
-	{
-		return $this->id;
+	public function __construct(
+		public Uuid $id,
+		public string $title,
+		public \DateTimeImmutable $createdAt,
+		public \DateTimeImmutable|null $lastMessageAt = null,
+		public int $messagesCount = 0,
+		public int $type = self::TY_USER,
+		public Collection $players = new ArrayCollection(),
+	) {
+			
 	}
 
-	public function getLastPage()
+	public function getLastPage(): int
 	{
-		return ceil($this->messages / ConversationMessage::MESSAGE_BY_PAGE);
+		return ceil($this->messagesCount / ConversationMessage::MESSAGE_BY_PAGE);
 	}
 }

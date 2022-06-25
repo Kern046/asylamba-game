@@ -1,3 +1,15 @@
+ares:
+    resource:
+        path: ../../src/Modules/Ares/Infrastructure/Controller/
+        namespace: App\Modules\Ares\Infrastructure\Controller
+    type: attribute
+
+zeus:
+    resource:
+        path: ../../src/Modules/Zeus/Infrastructure/Controller/
+        namespace: App\Modules\Zeus\Infrastructure\Controller
+    type: attribute
+
 homepage:
     path: /
     controller: App\Shared\Infrastructure\Controller\HomepageController

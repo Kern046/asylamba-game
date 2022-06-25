@@ -2,34 +2,30 @@
 
 namespace App\Modules\Atlas\Manager;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Utils;
 use App\Modules\Atlas\Model\Ranking;
-use App\Modules\Demeter\Manager\ColorManager;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
-use App\Modules\Hermes\Manager\ConversationManager;
-use App\Modules\Hermes\Manager\ConversationMessageManager;
 use App\Modules\Hermes\Model\ConversationMessage;
 use App\Modules\Hermes\Model\ConversationUser;
 
 class RankingManager
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected ColorManager $colorManager,
-		protected ConversationManager $conversationManager,
-		protected ConversationMessageManager $conversationMessageManager,
-		protected string $pointsToWin,
-		protected int $jeanMiId
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly string $pointsToWin,
+		private readonly int $jeanMiId,
 	) {
 	}
 
 	public function processWinningFaction($factionId)
 	{
-		$faction = $this->colorManager->get($factionId);
+		$faction = $this->colorRepository->get($factionId);
 		$faction->isWinner = Color::WIN;
+
+		// @TODO refactor below
+		return;
 
 		// envoyer un message de Jean-Mi
 		$winnerName = ColorResource::getInfo($faction->id, 'officialName');

@@ -3,11 +3,11 @@
 namespace App\Classes\Library;
 
 use App\Modules\Ares\Model\Commander;
-use App\Modules\Artemis\Model\SpyReport;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Gaia\Resource\PlaceResource;
+use App\Modules\Gaia\Model\Place;
+use App\Modules\Gaia\Model\System;
 use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Zeus\Model\PlayerBonusId;
 
@@ -46,7 +46,7 @@ class Game
 		}
 	}
 
-	public static function formatCoord($xCoord, $yCoord, $planetPosition = 0, $sectorLocation = 0)
+	public static function formatCoord(int $xCoord, int $yCoord, int $planetPosition = 0, int $sectorLocation = 0): string
 	{
 		if ($sectorLocation > 0) {
 			return '⟨'.$sectorLocation.'⟩ '.$xCoord.':'.$yCoord.':'.$planetPosition.'';
@@ -57,14 +57,14 @@ class Game
 		}
 	}
 
-	public static function resourceProduction($coeffRefinery, $coeffPlanet)
+	public static function resourceProduction(float $coeffRefinery, int $coeffPlanet): float
 	{
 		return $coeffRefinery * $coeffPlanet;
 	}
 
-	public static function getDistance($xa, $xb, $ya, $yb)
+	public static function getDistance(int $xa, int $xb, int $ya, int $yb): float
 	{
-		$distance = floor((sqrt((($xa - $xb) * ($xa - $xb)) + (($ya - $yb) * ($ya - $yb)))));
+		$distance = floor(sqrt((($xa - $xb) * ($xa - $xb)) + (($ya - $yb) * ($ya - $yb))));
 
 		return ($distance < 1) ? 1 : $distance;
 	}
@@ -77,52 +77,54 @@ class Game
 		return Commander::FLEETSPEED + $b;
 	}
 
-	public static function getMaxTravelDistance($bonus)
+	public static function getMaxTravelDistance($bonus): int
 	{
 		return Commander::DISTANCEMAX;
 	}
 
-	public static function getTimeToTravelCommercial($startPlace, $destinationPlace, $bonus = null)
+	public static function getTimeToTravelCommercial(Place $startPlace, Place $destinationPlace, $bonus = null): float
 	{
 		return round(self::getTimeToTravel($startPlace, $destinationPlace, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
 	}
 
-	public static function getTimeToTravel($startPlace, $destinationPlace, PlayerBonus $bonus = null)
+	public static function getTimeToTravel(Place $startPlace, Place $destinationPlace, PlayerBonus $bonus = null): float
 	{
 		// $startPlace and $destinationPlace are instance of Place
 		return self::getTimeTravel(
-			$startPlace->getRSystem(),
-			$startPlace->getPosition(),
-			$startPlace->getXSystem(),
-			$startPlace->getYSystem(),
-			$destinationPlace->getRSystem(),
-			$destinationPlace->getPosition(),
-			$destinationPlace->getXSystem(),
-			$destinationPlace->getYSystem(),
+			$startPlace->system,
+			$startPlace->position,
+			$destinationPlace->system,
+			$destinationPlace->position,
 			$bonus
 		);
 	}
 
-	public static function getTimeTravelCommercial($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, PlayerBonus|null $bonus = null)
+	public static function getTimeTravelCommercial(System $systemFrom, int $positionFrom, System $systemTo, int $positionTo, PlayerBonus|null $bonus = null): float
 	{
-		return round(self::getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
+		return round(self::getTimeTravel($systemFrom, $positionFrom, $systemTo, $positionTo, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
 	}
 
-	public static function getTimeTravel($systemFrom, $positionFrom, $xFrom, $yFrom, $systemTo, $positionTo, $xTo, $yTo, PlayerBonus|null $bonus = null)
+	public static function getTimeTravel(System $systemFrom, int $positionFrom, System $systemTo, int $positionTo, PlayerBonus|null $bonus = null): float
 	{
-		return $systemFrom == $systemTo
+		return $systemFrom->id === $systemTo->id
 			? Game::getTimeTravelInSystem($positionFrom, $positionTo)
-			: Game::getTimeTravelOutOfSystem($bonus, $xFrom, $yFrom, $xTo, $yTo);
+			: Game::getTimeTravelOutOfSystem(
+				$bonus,
+				$systemFrom->xPosition,
+				$systemFrom->yPosition,
+				$systemTo->xPosition,
+				$systemTo->yPosition,
+			);
 	}
 
-	public static function getTimeTravelInSystem($startPosition, $destinationPosition)
+	public static function getTimeTravelInSystem(int $startPosition, int $destinationPosition): float
 	{
 		$distance = abs($startPosition - $destinationPosition);
 
 		return round((Commander::COEFFMOVEINSYSTEM * $distance) * ((40 - $distance) / 50) + 180);
 	}
 
-	public static function getTimeTravelOutOfSystem(PlayerBonus|null $bonus, $startX, $startY, $destinationX, $destinationY)
+	public static function getTimeTravelOutOfSystem(PlayerBonus|null $bonus, int $startX, int $startY, int $destinationX, int $destinationY): float
 	{
 		$distance = self::getDistance($startX, $destinationX, $startY, $destinationY);
 		$time = Commander::COEFFMOVEOUTOFSYSTEM;
@@ -131,12 +133,12 @@ class Game
 		return $time;
 	}
 
-	public static function getRCPrice($distance)
+	public static function getRCPrice(float $distance): float
 	{
 		return $distance * CommercialRoute::COEF_PRICE;
 	}
 
-	public static function getRCIncome($distance, $bonusA = 1, $bonusB = 1)
+	public static function getRCIncome(float $distance, int $bonusA = 1, int $bonusB = 1): float
 	{
 		$income = CommercialRoute::COEF_INCOME_2 * sqrt($distance * CommercialRoute::COEF_INCOME_1);
 		$maxIncome = CommercialRoute::COEF_INCOME_2 * sqrt(100 * CommercialRoute::COEF_INCOME_1);
@@ -147,15 +149,7 @@ class Game
 		return round($income * $bonusA * $bonusB);
 	}
 
-	public static function getTaxFromPopulation($population, $typeOfBase, $taxCoeff)
-	{
-		$tax = ((180 * $population) + 1500) * $taxCoeff;
-		$tax *= PlaceResource::get($typeOfBase, 'tax');
-
-		return $tax;
-	}
-
-	public static function getAntiSpyRadius($investment, $mode = self::ANTISPY_DISPLAY_MODE)
+	public static function getAntiSpyRadius(int $investment, int $mode = self::ANTISPY_DISPLAY_MODE): float
 	{
 		return self::ANTISPY_DISPLAY_MODE == $mode
 			// en pixels : sert à l'affichage
@@ -164,40 +158,10 @@ class Game
 			: sqrt($investment / 3.14);
 	}
 
-	public static function antiSpyArea($startPlace, $destinationPlace, $arrivalDate)
+	public static function getAntiSpyEntryTime(Place $startPlace, Place $destinationPlace, \DateTimeImmutable $arrivalDate): array
 	{
 		// dans le même système
-		if ($startPlace->getRSystem() == $destinationPlace->getRSystem()) {
-			return self::ANTISPY_LITTLE_CIRCLE;
-		} else {
-			$duration = self::getTimeToTravel($startPlace, $destinationPlace);
-
-			$secRemaining = strtotime($arrivalDate) - strtotime(Utils::now());
-			$ratioRemaining = $secRemaining / $duration;
-
-			$distance = self::getDistance($startPlace->getXSystem(), $destinationPlace->getXSystem(), $startPlace->getYSystem(), $destinationPlace->getYSystem());
-			$distanceRemaining = $distance * $ratioRemaining;
-
-			$antiSpyRadius = self::getAntiSpyRadius($destinationPlace->getAntiSpyInvest(), 1);
-
-			if ($antiSpyRadius >= $distanceRemaining) {
-				if ($distanceRemaining < $antiSpyRadius / 3) {
-					return self::ANTISPY_LITTLE_CIRCLE;
-				} elseif ($distanceRemaining < $antiSpyRadius / 3 * 2) {
-					return self::ANTISPY_MIDDLE_CIRCLE;
-				} else {
-					return self::ANTISPY_BIG_CIRCLE;
-				}
-			} else {
-				return self::ANTISPY_OUT_OF_CIRCLE;
-			}
-		}
-	}
-
-	public static function getAntiSpyEntryTime($startPlace, $destinationPlace, $arrivalDate)
-	{
-		// dans le même système
-		if ($startPlace->getRSystem() == $destinationPlace->getRSystem()) {
+		if ($startPlace->system->id === $destinationPlace->system->id) {
 			return [true, true, true];
 		} else {
 			$duration = self::getTimeToTravel($startPlace, $destinationPlace);
@@ -205,10 +169,15 @@ class Game
 			$secRemaining = strtotime($arrivalDate) - strtotime(Utils::now());
 			$ratioRemaining = $secRemaining / $duration;
 
-			$distance = self::getDistance($startPlace->getXSystem(), $destinationPlace->getXSystem(), $startPlace->getYSystem(), $destinationPlace->getYSystem());
+			$distance = self::getDistance(
+				$startPlace->system->xPosition,
+				$destinationPlace->system->yPosition,
+				$startPlace->system->xPosition,
+				$destinationPlace->system->yPosition,
+			);
 			$distanceRemaining = $distance * $ratioRemaining;
 
-			$antiSpyRadius = self::getAntiSpyRadius($destinationPlace->getAntiSpyInvest(), 1);
+			$antiSpyRadius = self::getAntiSpyRadius($destinationPlace->base->iAntiSpy, 1);
 
 			if ($distanceRemaining < $antiSpyRadius / 3) {
 				return [true, true, true];
@@ -246,31 +215,19 @@ class Game
 		}
 	}
 
-	public static function getCommercialShipQuantityNeeded($transactionType, $quantity, $identifier = 0)
+	public static function getCommercialShipQuantityNeeded(int $transactionType, int $quantity, int $identifier = 0): int
 	{
-		switch ($transactionType) {
-			case Transaction::TYP_RESOURCE:
-				// 1000 ressources => 1 commercialShip
-				$needed = ceil($quantity / 1000);
-				break;
-			case Transaction::TYP_SHIP:
-				// 1 PEV => 1 commercialShip
-				if (ShipResource::isAShip($identifier) and $quantity > 0) {
-					$needed = $quantity * ShipResource::getInfo($identifier, 'pev');
-				} else {
-					$needed = false;
-				}
-				break;
-			case Transaction::TYP_COMMANDER:
-				// 1 commander => 1 commercialShip
-				$needed = 1;
-				break;
-			default:
-				$needed = false;
-				break;
-		}
-
-		return $needed;
+		return match ($transactionType) {
+			// 1000 ressources => 1 commercialShip
+			Transaction::TYP_RESOURCE => intval(ceil($quantity / 1000)),
+			// 1 PEV => 1 commercialShip
+			Transaction::TYP_SHIP => (ShipResource::isAShip($identifier) and $quantity > 0)
+				? $quantity * ShipResource::getInfo($identifier, 'pev')
+				: throw new \LogicException('Invalid ship or quantity'),
+			// 1 commander => 1 commercialShip
+			Transaction::TYP_COMMANDER => 1,
+			default => throw new \LogicException('Unknown transaction type'),
+		};
 	}
 
 	public static function calculateCurrentRate($currentRate, $transactionType, $quantity, $identifier, $price)
@@ -386,63 +343,7 @@ class Game
 		return round($price);
 	}
 
-	public static function getSpySuccess($antiSpy, $priceInvested)
-	{
-		// spy success must be between 0 and 100
-		$antiSpy = 0 == $antiSpy ? 1 : $antiSpy;
-		$ratio = $priceInvested / $antiSpy;
-		$percent = round($ratio * 33);
-		// ça veut dire qu'il payer 3x plus que ce que le gars investi pour tout voir
-		if ($percent > 100) {
-			$percent = 100;
-		}
-
-		return $percent;
-	}
-
-	public static function getTypeOfSpy($success, $antiSpy)
-	{
-		if ($antiSpy < 1000) {
-			return SpyReport::TYP_NOT_CAUGHT;
-		}
-
-		$percent = rand(0, 100);
-		if ($success < 40) {
-			if ($percent < 5) {
-				return SpyReport::TYP_NOT_CAUGHT;			// 5%
-			} elseif ($percent < 50) {
-				return SpyReport::TYP_ANONYMOUSLY_CAUGHT;	// 45%
-			} else {
-				return SpyReport::TYP_CAUGHT;				// 50%
-			}
-		} elseif ($success < 80) {
-			if ($percent < 30) {
-				return SpyReport::TYP_NOT_CAUGHT;			// 30%
-			} elseif ($percent < 60) {
-				return SpyReport::TYP_ANONYMOUSLY_CAUGHT;	// 30%
-			} else {
-				return SpyReport::TYP_CAUGHT;				// 40%
-			}
-		} elseif ($success < 100) {
-			if ($percent < 50) {
-				return SpyReport::TYP_NOT_CAUGHT;			// 50%
-			} elseif ($percent < 80) {
-				return SpyReport::TYP_ANONYMOUSLY_CAUGHT;	// 30%
-			} else {
-				return SpyReport::TYP_CAUGHT;				// 20%
-			}
-		} else { // success == 100
-			if ($percent < 70) {
-				return SpyReport::TYP_NOT_CAUGHT;			// 70%
-			} elseif ($percent < 90) {
-				return SpyReport::TYP_ANONYMOUSLY_CAUGHT;	// 20%
-			} else {
-				return SpyReport::TYP_CAUGHT;				// 10%
-			}
-		}
-	}
-
-	public static function getImprovementFromScientificCoef($coef)
+	public static function getImprovementFromScientificCoef(int $coef): int
 	{
 		// transform scientific coefficient of a place
 		// into improvement coefficient for the technosphere
@@ -451,15 +352,18 @@ class Game
 		} elseif ($coef >= 100) {
 			return 40;
 		} else {
-			return ceil(0.004 * $coef * $coef - 0.01 * $coef + 0.7);
+			return intval(ceil(0.004 * $coef * $coef - 0.01 * $coef + 0.7));
 		}
 	}
 
-	public static function getFleetCost($ships, $affected = true)
+	/**
+	 * @param array<int, int> $ships
+	 */
+	public static function getFleetCost(array $ships, bool $affected = true): int
 	{
 		$cost = 0;
 		for ($i = 0; $i < ShipResource::SHIP_QUANTITY; ++$i) {
-			$cost += ShipResource::getInfo($i, 'cost') * $ships[$i];
+			$cost += ShipResource::getInfo($i, 'cost') * ($ships[$i] ?? 0);
 		}
 		if (!$affected) {
 			$cost *= ShipResource::COST_REDUCTION;

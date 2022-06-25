@@ -6,28 +6,28 @@
 	</div>
 	<div class="fix-body">
 		<div class="body">
-			{% if report.rPlayerAttacker == report.rPlayerWinner %}
+			{% if report.attacker.id == (report.winner.id ?? null) %}
 				<div class="number-box">
 					<span class="value">Victoire</span>
 				</div>
 				<hr />
-				{% if report.rPlayerAttacker == current_player.id %}
+				{% if report.attacker.id == current_player.id %}
 					<div class="commander">
 						<a href="{{ path('fleet_headquarters') }}">
-							<img src="{{ asset('build/media/commander/medium/' ~ report.avatarA ~ '.png') }}" alt="{{ report.nameA }}" />
+							<img src="{{ asset('build/media/commander/medium/' ~ report.attackerCommander.avatar ~ '.png') }}" alt="{{ report.attackerCommander.name }}" />
 						</a>
-						{% set level = get_commander_level_up_from_report(report.levelA, report.experienceA + report.expCom) %}
+						{% set level = get_commander_level_up_from_report(report.attackerLevel, report.attackerCommanderExperience + report.earnedExperience) %}
 						<em>
-							{{ get_commander_rank(report.levelA) }}
+							{{ get_commander_rank(report.attackerLevel) }}
 							{% if level > 0 %}
 								<span class="bonus">a passé {{ level }} grade{{ level|plural }}</span>
 							{% endif %}
 						</em>
-						<strong>{{ report.nameA }}</strong>
-						<em>expérience : {{ report.experienceA|number }}
-							 <span class="bonus">+ {{ report.expCom|number }}</span>
+						<strong>{{ report.attacker.name }}</strong>
+						<em>expérience : {{ report.attackerCommanderExperience|number }}
+							 <span class="bonus">+ {{ report.earnedExperience|number }}</span>
 						</em>
-						<em>victoires : {{ report.palmaresA }} <span class="bonus">+ 1</span></em>
+						<em>victoires : {{ report.attackerPalmares }} <span class="bonus">+ 1</span></em>
 						<em>
 							<span class="bonus">{{- report.resources|number -}}</span>
 							ressource{{ report.resources|plural }} gagnée{{ report.resources|plural }}
@@ -35,9 +35,9 @@
 					</div>
 				{% else %}
 					<div class="commander">
-						<img src="{{ asset('build/media/commander/medium/' ~ report.avatarA ~'.png') }}" alt="{{ report.nameA }}" />
-						<em>{{ get_commander_rank(report.levelA) }}</em>
-						<strong>{{ report.nameA }}</strong>
+						<img src="{{ asset('build/media/commander/medium/' ~ report.attackerCommander.avatar ~'.png') }}" alt="{{ report.attackerCommander.name }}" />
+						<em>{{ get_commander_rank(report.attackerLevel) }}</em>
+						<strong>{{ report.attackerCommander.name }}</strong>
 						<em>expérience : ---</em>
 						<em>victoire : ---</em>
 						<em>&ensp;</em>
@@ -49,12 +49,12 @@
 					</div>
 				<hr />
 				<div class="commander">
-					<img src="{{ asset('build/media/fleet/memorial.png') }}" alt="{{ report.rPlayerDefender }}" />
-					<em>{{ get_commander_rank(report.levelA) }}</em>
-					<strong>{{ report.nameA }}</strong>
-					{% if report.rPlayerAttacker == current_player.id %}
-						<em>expérience : {{ report.experienceA|number }}</em>
-						<em>victoire : {{ report.palmaresA }}</em>
+					<img src="{{ asset('build/media/fleet/memorial.png') }}" alt="{{ report.defenderCommander.name ?? 'Rebelle' }}" />
+					<em>{{ get_commander_rank(report.attackerLevel) }}</em>
+					<strong>{{ report.attackerCommander.name }}</strong>
+					{% if report.attacker.id == current_player.id %}
+						<em>expérience : {{ report.attackerCommanderExperience|number }}</em>
+						<em>victoire : {{ report.attackerPalmares }}</em>
 						<em>&ensp;</em>
 					{% else %}
 						<em>expérience : ---</em>
@@ -65,9 +65,9 @@
 			{% endif %}
 
 			{{ include('molecules/fleet/combat_report_table.html.twig', {
-				'total_in_begin': report.totalInBeginA,
-				'difference': report.diferenceA,
-				'total_at_end': report.totalAtEndA,
+				'total_in_begin': report.attackerTotalInBegin,
+				'difference': report.attackerDifference,
+				'total_at_end': report.attackerTotalAtEnd,
 			}) }}
 		</div>
 	</div>
@@ -75,7 +75,7 @@
 
 <div class="component report">
 	<div class="head skin-1">
-		{% if report_defender is not defined or report_defender is null %}
+		{% if report_defender is null %}
 			<img src="{{ asset('build/media/commander/medium/t1-c0.png') }}" alt="Rebelle" />
 			<h2>Défenseur</h2>
 			<em>Rebelle</em>
@@ -87,37 +87,37 @@
 	</div>
 	<div class="fix-body">
 		<div class="body">
-			{% if defender_report.rPlayerDefender == report.rPlayerWinner %}
+			{% if defender_report.defender.id ?? null == report.winner.id ?? null %}
 				<div class="number-box">
 					<span class="value">Victoire</span>
 				</div>
 				<hr />
-				{% if report.rPlayerDefender == current_player.id %}
+				{% if report.defender.id ?? null == current_player.id %}
 				<div class="commander">
-					<a href="{{ path('fleet_headquarters') }}"><img src="{{ asset('build/media/commander/medium/' ~ report.avatarD ~ '.png') }}" alt="{{ report.nameD }}" /></a>
-					{% set level = get_commander_level_up_from_report(report.levelD, report.experienceD + report.expCom) %}
-					<em>{{ get_commander_rank(report.levelD) }}
+					<a href="{{ path('fleet_headquarters') }}"><img src="{{ asset('build/media/commander/medium/' ~ report.defenderCommander.avatar ?? 't3-c4' ~ '.png') }}" alt="{{ report.defenderCommander.name ?? 'Rebelle' }}" /></a>
+					{% set level = get_commander_level_up_from_report(report.defenderLevel, report.defenderCommanderExperience + report.earnedExperience) %}
+					<em>{{ get_commander_rank(report.defenderLevel) }}
 						{% if level > 0 %}
 							<span class="bonus">a passé {{ level }} grade</span>
 						{% endif %}
 					</em>
-					<strong>{{ report.nameD }}</strong>
+					<strong>{{ report.defenderCommander.name ?? 'Rebelle' }}</strong>
 					<em>
-						expérience : {{- report.experienceD|number -}}
-						<span class="bonus">+ {{ report.expCom|number }}</span>
+						expérience : {{- report.defenderCommanderExperience|number -}}
+						<span class="bonus">+ {{ report.earnedExperience|number }}</span>
 					</em>
-					<em>victoire : {{ report.palmaresD }} <span class="bonus">+ 1</span></em>
+					<em>victoire : {{ report.defenderPalmares }} <span class="bonus">+ 1</span></em>
 					<em>&ensp;</em>
 					</div>
 				{% else %}
 					<div class="commander">
-						<em>{{ get_commander_rank(report.levelD) }}</em>
-						{% if report.rPlayerDefender == 0 %}
-							<img src="{{ asset('build/media/commander/medium/t1-c0.png') }}" alt="{{ report.nameD }}" />
+						<em>{{ get_commander_rank(report.defenderLevel) }}</em>
+						{% if report.defender is null %}
+							<img src="{{ asset('build/media/commander/medium/t1-c0.png') }}" alt="Rebelle" />
 							<strong>Rebelle</strong>
 						{% else %}
-							<img src="{{ asset('build/media/commander/medium/' ~ report.avatarD ~ '.png') }}" alt="{{ report.nameD }}" />
-							<strong>{{ report.nameD }}</strong>
+							<img src="{{ asset('build/media/commander/medium/' ~ report.defenderCommander.avatar ~ '.png') }}" alt="{{ report.defenderCommander.name }}" />
+							<strong>{{ report.defenderCommander.name }}</strong>
 						{% endif %}
 						<em>expérience : ---</em>
 						<em>victoire : ---</em>
@@ -129,23 +129,23 @@
 					<span class="value">Défaite</span>
 					</div>
 				<hr />
-				{% if report.rPlayerDefender == current_player.id %}
+				{% if report.defender.id ?? null == current_player.id %}
 					<div class="commander">
-						<img src="{{ asset('build/media/fleet/memorial.png') }}" alt="{{ report.nameD }}" />
-						<em>{{ get_commander_rank(report.levelD) }}</em>
-						<strong>{{ report.nameD }}</strong>
-						<em>expérience : {{ report.experienceD|number }}</em>
-						<em>victoire : {{ report.palmaresD }}</em>
+						<img src="{{ asset('build/media/fleet/memorial.png') }}" alt="{{ report.defenderCommander.name }}" />
+						<em>{{ get_commander_rank(report.defenderLevel) }}</em>
+						<strong>{{ report.defenderCommander.name }}</strong>
+						<em>expérience : {{ report.defenderCommanderExperience|number }}</em>
+						<em>victoire : {{ report.defenderPalmares }}</em>
 						<em>&ensp;</em>
 					</div>
 				{% else %}
 					<div class="commander">
-						<img src="{{ asset('build/media/fleet/memorial.png') }}" alt="{{ report.nameD }}" />
-						<em>{{ get_commander_rank(report.levelD) }}</em>
-						{% if report.rPlayerDefender == 0 %}
+						<img src="{{ asset('build/media/fleet/memorial.png') }}" alt="{{ report.defenderCommander.name ?? 'Rebelle' }}" />
+						<em>{{ get_commander_rank(report.defenderLevel) }}</em>
+						{% if report.defender is null %}
 							<strong>Rebelle</strong>
 						{% else %}
-							<strong>{{ report.nameD }}</strong>
+							<strong>{{ report.defenderCommander.name }}</strong>
 						{% endif %}
 						<em>expérience : ---</em>
 						<em>victoire : ---</em>
@@ -174,9 +174,9 @@
 			}#}
 
 			{{ include('molecules/fleet/combat_report_table.html.twig', {
-				'total_in_begin': report.totalInBeginD,
-				'difference': report.diferenceD,
-				'total_at_end': report.totalAtEndD,
+				'total_in_begin': report.defenderTotalInBegin,
+				'difference': report.defenderDifference,
+				'total_at_end': report.defenderTotalAtEnd,
 			}) }}
 		</div>
 	</div>

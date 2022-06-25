@@ -2,36 +2,33 @@
 
 namespace App\Modules\Demeter\Handler\Law;
 
-use App\Classes\Entity\EntityManager;
-use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Law\LawManager;
+use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
 use App\Modules\Demeter\Message\Law\SectorNameResultMessage;
 use App\Modules\Demeter\Model\Law\Law;
-use App\Modules\Gaia\Manager\SectorManager;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class SectorNameResultHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class SectorNameResultHandler
 {
 	public function __construct(
-		protected ColorManager $colorManager,
-		protected EntityManager $entityManager,
-		protected LawManager $lawManager,
-		protected SectorManager $sectorManager,
+		private LawRepositoryInterface $lawRepository,
+		private SectorRepositoryInterface $sectorRepository,
 	) {
 	}
 
 	public function __invoke(SectorNameResultMessage $message): void
 	{
-		$law = $this->lawManager->get($message->getLawId());
-		$color = $this->colorManager->get($law->getFactionId());
-		$sector = $this->sectorManager->get($law->options['rSector']);
+		$law = $this->lawRepository->get($message->getLawId());
+		$faction = $law->faction;
+		$sector = $this->sectorRepository->get($law->options['rSector']);
 
-		if ($sector->rColor == $color->id) {
+		if ($sector->faction->id === $faction->id) {
 			$sector->name = $law->options['name'];
 		}
 		$law->statement = Law::OBSOLETE;
 
-		$this->entityManager->flush($sector);
-		$this->entityManager->flush($law);
+		$this->sectorRepository->save($sector);
+		$this->lawRepository->save($law);
 	}
 }

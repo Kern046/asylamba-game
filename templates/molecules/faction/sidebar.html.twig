@@ -10,7 +10,7 @@
 			</span>
 		</a>
 
-		{% if faction.hasOngoingElectionCampagin %}
+		{% if faction.hasOngoingElectionCampaign %}
 			<a href="{{ path('view_faction_election') }}" class="item {% if app.request.get('_route') == 'faction_election' %}active{% endif %}">
 				<span class="picto">
 					<img src="{{ asset('build/media/faction/nav/election.png') }}" alt="" />

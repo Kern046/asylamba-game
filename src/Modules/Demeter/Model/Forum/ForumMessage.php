@@ -11,6 +11,9 @@
 
 namespace App\Modules\Demeter\Model\Forum;
 
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
+
 class ForumMessage
 {
 	public const PUBLISHED = 1;
@@ -20,22 +23,16 @@ class ForumMessage
 	public const FORBIDDEN_PR0N = 5;
 	public const FORBIDDEN_RACISM = 6;
 
-	public $id = 0;
-	public $rPlayer = 0;
-	public $rTopic = 0;
-	public $oContent = '';
-	public $pContent = '';
-	public $statement = 0;
-	public $dCreation = '';
-	public $dLastModification = '';
+	public function __construct(
+		public Uuid $id,
+		public Player $player,
+		public ForumTopic $topic,
+		public string $oContent,
+		public string $pContent,
+		public int $statement,
+		public \DateTimeImmutable $createdAt,
+		public \DateTimeImmutable|null $updatedAt = null,
+	) {
 
-	public $playerName = '';
-	public $playerColor = '';
-	public $playerAvatar = '';
-	public $playerStatus = '';
-
-	public function getId()
-	{
-		return $this->id;
 	}
 }

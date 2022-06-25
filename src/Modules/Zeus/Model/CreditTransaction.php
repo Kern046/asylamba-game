@@ -1,83 +1,28 @@
 <?php
 
-/**
- * CreditTransaction.
- *
- * @author Jacky Casas
- * @copyright Asylamba
- *
- * @update 09.02.15
- */
-
 namespace App\Modules\Zeus\Model;
 
-use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Demeter\Model\Color;
+use Symfony\Component\Uid\Uuid;
 
-class CreditTransaction
+abstract class CreditTransaction
 {
-	public const TYP_PLAYER = 0;
-	public const TYP_FACTION = 1;
-	public const TYP_F_TO_P = 2; // faction to player
-
-	public $id = 0;
-	public $rSender = 0;
-	public $type = 0; // 0 = player, 1 = faction
-	public $rReceiver = 0;
-	public $amount = 0;
-	public $dTransaction = 0;
-	public $comment = '';
-
-	public $senderName = '';
-	public $senderAvatar = '';
-	public $senderStatus = '';
-	public $senderColor = '';
-
-	public $receiverName = '';
-	public $receiverAvatar = '';
-	public $receiverStatus = '';
-	public $receiverColor = '';
-
-	public function getFormatedReceiverLink()
-	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? '/embassy/player-'.$this->rReceiver
-			: '/embassy/faction-'.$this->rReceiver;
+	public function __construct(
+		public Uuid $id,
+		public int $amount,
+		public \DateTimeImmutable $createdAt,
+		public string|null $comment,
+	) {
+			
 	}
 
-	public function getFormatedReceiverName()
-	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? $this->receiverName
-			: ColorResource::getInfo($this->rReceiver, 'popularName');
-	}
+	abstract public function getFormatedReceiverLink(): string;
 
-	public function getFormatedReceiverAvatar()
-	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? $this->receiverAvatar
-			: 'color-'.$this->rReceiver;
-	}
+	abstract public function getFormatedReceiverName(): string;
 
-	public function getFormatedReceiverStatus()
-	{
-		if (CreditTransaction::TYP_PLAYER == $this->type) {
-			$status = ColorResource::getInfo($this->receiverColor, 'status');
+	abstract public function getFormatedReceiverAvatar(): string;
 
-			return $status[$this->receiverStatus - 1];
-		} else {
-			return ColorResource::getInfo($this->rReceiver, 'government');
-		}
-	}
+	abstract public function getFormatedReceiverStatus(): string;
 
-	public function getFormatedReceiverColor()
-	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? $this->receiverColor
-			: $this->rReceiver;
-	}
-
-	public function getId()
-	{
-		return $this->id;
-	}
+	abstract public function getFormatedReceiverColor(): Color;
 }

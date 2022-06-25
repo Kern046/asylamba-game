@@ -47,7 +47,7 @@ class SendCreditsToPlayer extends AbstractController
 			return $this->redirectToRoute('financial_transfers');
 		}
 
-		if ($credit > $sender->getCredit()) {
+		if ($credit > $sender->getCredits()) {
 			throw new BadRequestHttpException('Vous ne disposez pas du montant nécessaire');
 		}
 

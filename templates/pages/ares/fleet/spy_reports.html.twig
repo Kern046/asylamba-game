@@ -5,7 +5,7 @@
 	{% if focused_spy_report is not null %}
 		{{ include('components/fleet/spy_report.html.twig', {
 			'spy_report': focused_spy_report,
-			'place': focused_spy_report_place
+			'place': focused_spy_report.place
 		}) }}
 	{% else %}
 		{{ include('molecules/common/default.html.twig') }}

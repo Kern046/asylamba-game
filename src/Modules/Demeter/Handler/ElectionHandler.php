@@ -2,40 +2,36 @@
 
 namespace App\Modules\Demeter\Handler;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
-use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Election\ElectionManager;
+use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
 use App\Modules\Demeter\Message\BallotMessage;
 use App\Modules\Demeter\Message\ElectionMessage;
 use App\Modules\Demeter\Model\Color;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class ElectionHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+class ElectionHandler
 {
 	public function __construct(
-		protected ColorManager $colorManager,
-		protected ElectionManager $electionManager,
-		protected MessageBusInterface $messageBus,
-		protected EntityManager $entityManager,
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly NextElectionDateCalculator $nextElectionDateCalculator,
+		private readonly MessageBusInterface $messageBus,
 	) {
 	}
 
 	public function __invoke(ElectionMessage $message): void
 	{
-		$faction = $this->colorManager->get($message->getFactionId());
+		$faction = $this->colorRepository->get($message->getFactionId());
 		$faction->electionStatement = Color::ELECTION;
-		$election = $this->electionManager->getFactionLastElection($faction->getId());
-
-		$date = new \DateTime($election->dElection);
-		$date->modify('+'.Color::ELECTIONTIME.' second');
 
 		$this->messageBus->dispatch(
-			new BallotMessage($faction->getId()),
-			[DateTimeConverter::to_delay_stamp($date->format('Y-m-d H:i:s'))]
+			new BallotMessage($faction->id),
+			[DateTimeConverter::to_delay_stamp($this->nextElectionDateCalculator->getStartDate($faction))]
 		);
 
-		$this->entityManager->flush($faction);
+		$this->colorRepository->save($faction);
 	}
 }

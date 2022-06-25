@@ -12,7 +12,7 @@
 		<a href="#" class="addInfoPanel info hb lt" title="plus d'info" data-ship-id="{{ ship_number }}" data-info-type="ship">+</a>
 	</div>
 	<div class="ship-illu">
-		<img src="{{ asset('build/media/ship/img/' ~ (ship_number + 1)|format_number({min_integer_digit:'2'}) ~ '-' ~ current_player.rColor|format_number({min_integer_digit:'2'}) ~ '.png') }}" alt="" />
+		<img src="{{ asset('build/media/ship/img/' ~ (ship_number + 1)|format_number({min_integer_digit:'2'}) ~ '-' ~ current_player.faction.identifier|format_number({min_integer_digit:'2'}) ~ '.png') }}" alt="" />
 	</div>
 
 	{% if ship_data.has_technology_requirements is not same as(true) %}
@@ -43,7 +43,7 @@
 			</span>
 		{% else %}
 			{% if not is_heavy_shipyard %}
-				<input class="ship-pack" type="text" maxlength="2" name="quantity" value="{{ ship_data.max_ships }}" data-max-ship="{{ ship_data.max_ships }}" />
+				<input class="ship-pack text-stone-800" type="text" maxlength="2" name="quantity" value="{{ ship_data.max_ships }}" data-max-ship="{{ ship_data.max_ships }}" />
 			{% endif %}
 
 			<a href="{{ absolute_url(path('build_ships', { 'ship': ship_number, 'quantity': ship_data.max_ships })) }}" class="button">

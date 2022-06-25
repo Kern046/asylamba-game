@@ -2,6 +2,8 @@
 
 namespace App\Modules\Atlas\Message;
 
-class PlayerRankingMessage
+use App\Shared\Domain\Message\AsyncMessage;
+
+class PlayerRankingMessage implements AsyncMessage
 {
 }

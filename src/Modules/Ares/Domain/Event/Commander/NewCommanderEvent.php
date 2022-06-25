@@ -8,11 +8,11 @@ use App\Modules\Zeus\Resource\TutorialResource;
 use App\Shared\Domain\Event\TrackingEvent;
 use App\Shared\Domain\Event\TutorialEvent;
 
-class NewCommanderEvent implements TutorialEvent, TrackingEvent
+readonly class NewCommanderEvent implements TutorialEvent, TrackingEvent
 {
 	public function __construct(
-		public readonly Commander $commander,
-		public readonly Player $player,
+		public Commander $commander,
+		public Player $player,
 	) {
 	}
 
@@ -28,7 +28,7 @@ class NewCommanderEvent implements TutorialEvent, TrackingEvent
 
 	public function getTrackingPeopleId(): int
 	{
-		return $this->commander->rPlayer;
+		return $this->commander->player->id;
 	}
 
 	public function getTrackingEventName(): string
@@ -40,7 +40,7 @@ class NewCommanderEvent implements TutorialEvent, TrackingEvent
 	{
 		return [
 			'commander_id' => $this->commander->id,
-			'place_id' => $this->commander->rBase,
+			'base_id' => $this->commander->base->id,
 		];
 	}
 }

@@ -1,0 +1,12 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Hermes\Model\ConversationUser" table="conversationUser">
+		<id name="id" type="uuid"/>
+
+		<many-to-one field="conversation" target-entity="App\Modules\Hermes\Model\Conversation" inversed-by="players" />
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player" />
+
+		<field name="lastViewedAt" type="datetime_immutable" />
+		<field name="playerStatus" type="smallint" />
+		<field name="conversationStatus" type="smallint" />
+	</entity>
+</doctrine-mapping>

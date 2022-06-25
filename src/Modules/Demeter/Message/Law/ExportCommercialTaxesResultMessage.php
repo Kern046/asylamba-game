@@ -2,13 +2,16 @@
 
 namespace App\Modules\Demeter\Message\Law;
 
-class ExportCommercialTaxesResultMessage
+use App\Shared\Domain\Message\AsyncMessage;
+use Symfony\Component\Uid\Uuid;
+
+readonly class ExportCommercialTaxesResultMessage implements AsyncMessage
 {
-	public function __construct(protected int $lawId)
+	public function __construct(private Uuid $lawId)
 	{
 	}
 
-	public function getLawId(): int
+	public function getLawId(): Uuid
 	{
 		return $this->lawId;
 	}

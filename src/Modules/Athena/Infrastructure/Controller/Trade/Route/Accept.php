@@ -2,45 +2,43 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Format;
-use App\Classes\Library\Utils;
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\CommercialRouteManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
-use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class Accept extends AbstractController
 {
 	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		OrbitalBase $currentBase,
-		CommercialRouteManager $commercialRouteManager,
-		ColorManager $colorManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		OrbitalBaseHelper $orbitalBaseHelper,
-		PlayerManager $playerManager,
-		NotificationManager $notificationManager,
-		EntityManager $entityManager,
-		int $id,
+		Request                            $request,
+		Player                             $currentPlayer,
+		OrbitalBase                        $currentBase,
+		CommercialRouteRepositoryInterface $commercialRouteRepository,
+		OrbitalBaseHelper                  $orbitalBaseHelper,
+		PlayerManager                      $playerManager,
+		NotificationRepositoryInterface    $notificationRepository,
+		EntityManagerInterface             $entityManager,
+		Uuid                               $id,
 	): Response {
 		$routeExperienceCoeff = $this->getParameter('athena.trade.experience_coeff');
 
-		if (null === ($cr = $commercialRouteManager->getByIdAndDistantBase($id, $currentBase->getId()))) {
+		if (null === ($cr = $commercialRouteRepository->getByIdAndDistantBase($id, $currentBase))) {
 			throw $this->createNotFoundException('Commercial route not found');
 		}
 
@@ -48,25 +46,31 @@ class Accept extends AbstractController
 			throw new ConflictHttpException('Commercial route has already been established');
 		}
 
-		$proposerFaction = $colorManager->get($cr->playerColor1);
-		$acceptorFaction = $colorManager->get($cr->playerColor2);
+		$proposerFaction = $cr->originBase->player->faction;
+		$acceptorFaction = $cr->destinationBase->player->faction;
 
-		if (Color::ENEMY === $proposerFaction->colorLink[$cr->playerColor2] || Color::ENEMY === $acceptorFaction->colorLink[$cr->playerColor1]) {
+		if (Color::ENEMY === $proposerFaction->relations[$acceptorFaction->identifier] || Color::ENEMY === $acceptorFaction->relations[$proposerFaction->identifier]) {
 			throw new ConflictHttpException('You cannot accept this route: your two factions are at war');
 		}
-		$proposerBase = $orbitalBaseManager->get($cr->getROrbitalBase());
-		$acceptorBase = $orbitalBaseManager->get($cr->getROrbitalBaseLinked());
+		$proposerBase = $cr->originBase;
+		$acceptorBase = $cr->destinationBase;
 
-		$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::SPATIOPORT, 'level', $acceptorBase->getLevelSpatioport(), 'nbRoutesMax');
+		$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(
+			OrbitalBaseResource::SPATIOPORT,
+			'level',
+			$acceptorBase->levelSpatioport,
+			'nbRoutesMax',
+		);
 
-		if ($commercialRouteManager->countBaseActiveAndStandbyRoutes($acceptorBase->getId()) > $nbrMaxCommercialRoute) {
+		if ($commercialRouteRepository->countBaseRoutes($acceptorBase, [CommercialRoute::STANDBY, CommercialRoute::ACTIVE]) > $nbrMaxCommercialRoute) {
 			throw new ConflictHttpException('You do not have any slot left for a new route');
 		}
 		// compute bonus if the player is from Negore
-		if (ColorResource::NEGORA == $currentPlayer->rColor) {
-			$price = round($cr->getPrice() - ($cr->getPrice() * ColorResource::BONUS_NEGORA_ROUTE / 100));
+		// TODO move to BonusApplier logic
+		if (ColorResource::NEGORA === $currentPlayer->faction->identifier) {
+			$price = round($cr->price - ($cr->price * ColorResource::BONUS_NEGORA_ROUTE / 100));
 		} else {
-			$price = $cr->getPrice();
+			$price = $cr->price;
 		}
 
 		if ($currentPlayer->credit < $price) {
@@ -75,35 +79,51 @@ class Accept extends AbstractController
 		$playerManager->decreaseCredit($currentPlayer, $price);
 
 		// augmentation de l'expérience des deux joueurs
-		$exp = round($cr->getIncome() * $routeExperienceCoeff);
+		$exp = round($cr->income * $routeExperienceCoeff);
 		$playerManager->increaseExperience($currentPlayer, $exp);
-		$playerManager->increaseExperience($playerManager->get($proposerBase->getRPlayer()), $exp);
+		$playerManager->increaseExperience($proposerBase->player, $exp);
 
 		// activation de la route
-		$cr->setStatement(CommercialRoute::ACTIVE);
-		$cr->setDCreation(Utils::now());
+		$cr->statement = CommercialRoute::ACTIVE;
+		$cr->acceptedAt = new \DateTimeImmutable();
 
-		$n = new Notification();
-		$n->setRPlayer($proposerBase->getRPlayer());
-		$n->setTitle('Route commerciale acceptée');
-		$n->addBeg();
-		$n->addLnk('embassy/player-'.$currentPlayer->getId(), $currentPlayer->getName())->addTxt(' a accepté la route commerciale proposée entre ');
-		$n->addLnk('map/place-'.$acceptorBase->getRPlace(), $acceptorBase->getName())->addTxt(' et ');
-		$n->addLnk('map/place-'.$proposerBase->getRPlace(), $proposerBase->getName());
-		$n->addSep()->addTxt('Cette route vous rapporte '.Format::numberFormat($cr->getIncome()).' crédits par relève.');
-		$n->addBrk()->addBoxResource('xp', $exp, 'expérience gagnée', $this->getParameter('media'));
-		$n->addSep()->addLnk('action/a-switchbase/base-'.$proposerBase->getRPlace().'/page-spatioport', 'En savoir plus ?');
-		$n->addEnd();
-		$notificationManager->add($n);
+		$notification = NotificationBuilder::new()
+			->setTitle('Route commerciale acceptée')
+			->setContent(
+				NotificationBuilder::paragraph(
+					NotificationBuilder::link(
+						$this->generateUrl('embassy', ['player' => $currentPlayer->id]),
+						$currentPlayer->name,
+					),
+					' a accepté la route commerciale proposée entre ',
+					NotificationBuilder::link(
+						$this->generateUrl('map', ['place' => $acceptorBase->place->id]),
+						$acceptorBase->name,
+					),
+					' et ',
+					NotificationBuilder::link(
+						$this->generateUrl('map', ['place' => $proposerBase->place->id]),
+						$proposerBase->name,
+					),
+					'.',
+					NotificationBuilder::divider(),
+					'Cette route vous rapporte ',
+					Format::numberFormat($cr->income),
+					' crédits par relève.',
+				),
+				NotificationBuilder::paragraph(
+					NotificationBuilder::resourceBox('xp', $exp, 'expérience gagnée'),
+					NotificationBuilder::divider(),
+					NotificationBuilder::link(
+						$this->generateUrl('switchbase', ['baseId' => $proposerBase->id, 'page' => 'spatioport']),
+						'En savoir plus ?',
+					)
+				)
+			)
+			->for($proposerBase->player);
+		$notificationRepository->save($notification);
 
 		$entityManager->flush();
-		//							if (true === $this->getContainer()->getParameter('data_analysis')) {
-		//								$qr = $database->prepare('INSERT INTO
-		//							DA_CommercialRelation(`from`, `to`, type, weight, dAction)
-		//							VALUES(?, ?, ?, ?, ?)'
-		//								);
-		//								$qr->execute([$cr->playerId1, $cr->playerId2, 6, DataAnalysis::creditToStdUnit($cr->price), Utils::now()]);
-		//							}
 
 		$this->addFlash('success', 'Route commerciale acceptée, vous gagnez '.$exp.' points d\'expérience');
 

@@ -3,114 +3,37 @@
 namespace App\Modules\Gaia\Repository;
 
 use App\Classes\Entity\AbstractRepository;
+use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
+use App\Modules\Gaia\Model\Sector;
 use App\Modules\Gaia\Model\System;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
-class SystemRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<System>
+ */
+class SystemRepository extends DoctrineRepository implements SystemRepositoryInterface
 {
-	public function get($id)
+	public function __construct(ManagerRegistry $registry)
 	{
-		if (($s = $this->unitOfWork->getObject(System::class, $id)) !== null) {
-			return $s;
-		}
-		$statement = $this->connection->prepare('SELECT * FROM system WHERE id = :id');
-		$statement->execute(['id' => $id]);
-
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		$system = $this->format($row);
-		$this->unitOfWork->addObject($system);
-
-		return $system;
+		parent::__construct($registry, System::class);
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getAll()
+	public function get(Uuid $id): System|null
 	{
-		$statement = $this->connection->query('SELECT * FROM system');
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($s = $this->unitOfWork->getObject(System::class, $row['id'])) !== null) {
-				$data[] = $s;
-				continue;
-			}
-			$system = $this->format($row);
-			$this->unitOfWork->addObject($system);
-			$data[] = $system;
-		}
-
-		return $data;
+		return $this->find($id);
 	}
 
-	/**
-	 * @param int $sectorId
-	 *
-	 * @return array
-	 */
-	public function getSectorSystems($sectorId)
+	public function getAll(): array
 	{
-		$statement = $this->connection->prepare('SELECT * FROM system WHERE rSector = :sector_id');
-		$statement->execute(['sector_id' => $sectorId]);
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($s = $this->unitOfWork->getObject(System::class, $row['id'])) !== null) {
-				$data[] = $s;
-				continue;
-			}
-			$system = $this->format($row);
-			$this->unitOfWork->addObject($system);
-			$data[] = $system;
-		}
-
-		return $data;
+		return $this->findAll();
 	}
 
-	public function insert($system)
+	public function getSectorSystems(Sector $sector): array
 	{
-	}
-
-	/**
-	 * For the moment it's the same method as the one below but new fields shall be implemented soon.
-	 *
-	 * @param System $system
-	 */
-	public function update($system)
-	{
-		$statement = $this->connection->prepare('UPDATE system SET rColor = :faction_id WHERE id = :id');
-		$statement->execute([
-			'faction_id' => $system->rColor,
-			'id' => $system->id,
+		return $this->findBy([
+			'sector' => $sector,
 		]);
-	}
-
-	public function changeOwnership(System $system)
-	{
-		$statement = $this->connection->prepare(
-			'UPDATE system SET rColor = :faction_id WHERE id = :id'
-		);
-		$statement->execute([
-			'id' => $system->getId(),
-			'faction_id' => $system->getFactionId(),
-		]);
-	}
-
-	public function remove($system)
-	{
-	}
-
-	public function format($data)
-	{
-		$system = new System();
-		$system->id = $data['id'];
-		$system->rSector = $data['rSector'];
-		$system->rColor = $data['rColor'];
-		$system->xPosition = $data['xPosition'];
-		$system->yPosition = $data['yPosition'];
-		$system->typeOfSystem = $data['typeOfSystem'];
-
-		return $system;
 	}
 }

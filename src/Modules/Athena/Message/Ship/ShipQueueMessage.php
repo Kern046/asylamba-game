@@ -2,13 +2,16 @@
 
 namespace App\Modules\Athena\Message\Ship;
 
-class ShipQueueMessage
+use App\Shared\Domain\Message\AsyncMessage;
+use Symfony\Component\Uid\Uuid;
+
+class ShipQueueMessage implements AsyncMessage
 {
-	public function __construct(protected int $shipQueueId)
+	public function __construct(private readonly Uuid $shipQueueId)
 	{
 	}
 
-	public function getShipQueueId(): int
+	public function getShipQueueId(): Uuid
 	{
 		return $this->shipQueueId;
 	}

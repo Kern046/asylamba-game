@@ -2,7 +2,6 @@
 
 namespace App\Modules\Zeus\Model;
 
-use App\Classes\Exception\ErrorException;
 use App\Modules\Promethee\Model\TechnologyId;
 
 class PlayerBonusId
@@ -20,7 +19,7 @@ class PlayerBonusId
 	public const COMMANDER_INVEST = 10;
 	public const UNI_INVEST = 11;
 	public const ANTISPY_INVEST = 12;
-	public const SHIP_SPEED = 13; // vitesse de déplacement
+	public const SHIP_SPEED = 13;
 	public const SHIP_CONTAINER = 14;
 	public const BASE_QUANTITY = 15;
 	public const FIGHTER_SPEED = 16;
@@ -103,7 +102,7 @@ class PlayerBonusId
 			TechnologyId::DESTROYER_SPEED => self::DESTROYER_SPEED,
 			TechnologyId::DESTROYER_ATTACK => self::DESTROYER_ATTACK,
 			TechnologyId::DESTROYER_DEFENSE => self::DESTROYER_DEFENSE,
-			default => throw new ErrorException(sprintf('Technology with ID %d has no associated bonus', $technologyIdentifier)),
+			default => throw new \RuntimeException(sprintf('Technology with ID %d has no associated bonus', $technologyIdentifier)),
 		};
 	}
 }

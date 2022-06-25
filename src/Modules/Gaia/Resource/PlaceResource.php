@@ -4,7 +4,7 @@ namespace App\Modules\Gaia\Resource;
 
 class PlaceResource
 {
-	public static function get($type, $info)
+	public static function get(int $type, string $info): mixed
 	{
 		if (in_array($info, ['name', 'desc', 'price', 'school-size', 'tax', 'l-line', 'r-line', 'l-line-position', 'r-line-position'])) {
 			return self::$place[$type][$info];
@@ -13,7 +13,7 @@ class PlaceResource
 		}
 	}
 
-	private static $place = [
+	private static array $place = [
 		[
 			'name' => 'Colonie',
 			'desc' => 'Peu évoluée, la colonie vous donne accès aux bâtiments de base mais jusqu\'à un niveau peu élevé. Elle se trouvera généralement aux extrémités de votre empire et servira de relai pour l\'expansion de ce dernier.',

@@ -1,4 +1,4 @@
-FROM php:8.1-cli-alpine
+FROM php:8.2-cli-alpine
 
 # Install SUPERVISOR and dependencies
 RUN apk update

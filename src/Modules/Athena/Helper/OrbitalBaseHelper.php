@@ -3,6 +3,8 @@
 namespace App\Modules\Athena\Helper;
 
 use App\Classes\Library\Format;
+use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
+use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
@@ -12,8 +14,10 @@ use App\Modules\Zeus\Model\PlayerBonusId;
 class OrbitalBaseHelper
 {
 	public function __construct(
-		private BonusApplierInterface $bonusApplier,
-		protected TechnologyHelper $technologyHelper,
+		private readonly BonusApplierInterface $bonusApplier,
+		private readonly TechnologyHelper $technologyHelper,
+		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
+		private readonly BuildingLevelHandler $buildingLevelHandler,
 	) {
 	}
 
@@ -51,12 +55,12 @@ class OrbitalBaseHelper
 		$storageSpace = $this->getBuildingInfo(
 			OrbitalBaseResource::STORAGE,
 			'level',
-			$orbitalBase->getLevelStorage(),
+			$orbitalBase->levelStorage,
 			'storageSpace',
 		);
 		$storageSpace += $this->bonusApplier->apply($storageSpace, PlayerBonusId::REFINERY_STORAGE);
 
-		return Format::numberFormat($orbitalBase->getResourcesStorage() / $storageSpace * 100);
+		return Format::numberFormat($orbitalBase->resourcesStorage / $storageSpace * 100);
 	}
 
 	// @TODO Check for the need of this method ??
@@ -164,12 +168,18 @@ class OrbitalBaseHelper
 								return true;
 							}
 						} else {
+							$realGeneratorLevel = $this->buildingLevelHandler->getBuildingRealLevel(
+								$sup,
+								OrbitalBaseResource::GENERATOR,
+								$this->buildingQueueRepository->getBaseQueues($sup),
+							);
+
 							if (1 == $level and OrbitalBase::TYP_NEUTRAL == $sup->typeOfBase and in_array($buildingId, [OrbitalBaseResource::SPATIOPORT, OrbitalBaseResource::DOCK2])) {
 								return 'vous devez évoluer votre colonie pour débloquer ce bâtiment';
 							}
 							if ($level > OrbitalBaseResource::$building[$buildingId]['maxLevel'][$sup->typeOfBase]) {
 								return 'niveau maximum atteint';
-							} elseif ($level > ($sup->realGeneratorLevel - $diminution)) {
+							} elseif ($level > ($realGeneratorLevel - $diminution)) {
 								return 'le niveau du générateur n\'est pas assez élevé';
 							} else {
 								return true;

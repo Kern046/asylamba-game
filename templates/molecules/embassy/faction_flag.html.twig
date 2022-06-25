@@ -5,11 +5,11 @@
 	<div class="fix-body">
 		<div class="body">
 			<div class="center-box">
-				<span class="value">{{ get_faction_info(faction.id, 'officialName') }}</span>
-				<span class="label">{{ get_faction_info(faction.id, 'devise')|raw }}</span>
+				<span class="value">{{ get_faction_info(faction.identifier, 'officialName') }}</span>
+				<span class="label">{{ get_faction_info(faction.identifier, 'devise')|raw }}</span>
 			</div>
 
-			<div class="profil-flag color-{{ faction.id }}"><img src="{{ asset('build/media/ally/big/color' ~ faction.id ~ '.png') }}" alt=""></div>
+			<div class="profil-flag color-{{ faction.identifier }}"><img src="{{ asset('build/media/ally/big/color' ~ faction.identifier ~ '.png') }}" alt=""></div>
 		</div>
 	</div>
 </div>

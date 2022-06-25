@@ -2,6 +2,8 @@
 
 namespace App\Modules\Hephaistos\Message;
 
-class DailyRoutineMessage
+use App\Shared\Domain\Message\AsyncMessage;
+
+class DailyRoutineMessage implements AsyncMessage
 {
 }

@@ -2,9 +2,13 @@
 
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,43 +22,51 @@ class ViewEmbassy extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		ColorManager $colorManager,
+		ColorRepositoryInterface $colorRepository,
+		PlayerRepositoryInterface $playerRepository,
 		OrbitalBaseManager $orbitalBaseManager,
+		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		PlayerManager $playerManager,
+		SectorRepositoryInterface $sectorRepository,
 	): Response {
 		$data = [];
 
 		if (null !== ($playerId = $request->query->get('player'))) {
-			if (null === ($player = $playerManager->get($playerId)) || !in_array($player->getStatement(), [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY, Player::BANNED])) {
+			if (null === ($player = $playerRepository->find($playerId)) || !$player->isInGame()) {
 				throw new NotFoundHttpException('Player not found');
 			}
 
 			$data = [
 				'player' => $player,
-				'player_bases' => $orbitalBaseManager->getPlayerBases($playerId),
-				'is_current_player' => $playerId === $currentPlayer->getId(),
+				'player_bases' => $orbitalBaseRepository->getPlayerBases($player),
+				'is_current_player' => $playerId === $currentPlayer->id,
 			];
 		}
 
 		if (null !== ($factionId = $request->query->get('faction')) || null === $playerId) {
-			$factionId ??= $currentPlayer->getRColor();
+			$factionId ??= $currentPlayer->faction->id;
 
-			if (($faction = $colorManager->get($factionId)) !== null && $faction->isInGame) {
+			if (null !== ($faction = $colorRepository->find($factionId)) && $faction->isInGame) {
 				$data = [
 					'faction' => $faction,
 					'parsed_description' => $colorManager->getParsedDescription($faction),
-					'government_members' => $playerManager->getGovernmentMembers($faction->id),
+					'government_members' => $playerRepository->getGovernmentMembers($faction),
 					'diplomacy_statements' => [
 						Color::ENEMY => 'En guerre',
 						Color::ALLY => 'Allié',
 						Color::PEACE => 'Pacte de non-agression',
 						Color::NEUTRAL => 'Neutre',
 					],
+					'sectors_count' => $sectorRepository->countFactionSectors($faction),
+					'active_players_count' => $playerRepository->countByFactionAndStatements($faction, [Player::ACTIVE]),
 				];
 			} else {
 				throw new NotFoundHttpException('Faction not found');
 			}
 		}
 
-		return $this->render('pages/demeter/embassy.html.twig', array_merge($data, ['factions' => $colorManager->getInGameFactions()]));
+		return $this->render('pages/demeter/embassy.html.twig', array_merge($data, [
+			'factions' => $colorRepository->getInGameFactions(),
+		]));
 	}
 }

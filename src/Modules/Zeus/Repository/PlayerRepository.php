@@ -2,566 +2,263 @@
 
 namespace App\Modules\Zeus\Repository;
 
-use App\Classes\Entity\AbstractRepository;
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
-class PlayerRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<Player>
+ */
+class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInterface
 {
-	public function get($id)
+	public function __construct(ManagerRegistry $registry)
 	{
-		if (($p = $this->unitOfWork->getObject(Player::class, $id)) !== null) {
-			return $p;
-		}
-		$query = $this->connection->prepare('SELECT * FROM player WHERE id = :id');
-		$query->execute(['id' => $id]);
-
-		if (($row = $query->fetch()) === false) {
-			return null;
-		}
-		$player = $this->format($row);
-		$this->unitOfWork->addObject($player);
-
-		return $player;
+		parent::__construct($registry, Player::class);
 	}
 
-	public function getByName($name)
+	public function get(int $id): Player|null
 	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE name = :name');
-		$query->execute(['name' => $name]);
-
-		if (($row = $query->fetch()) === false) {
-			return null;
-		}
-		if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-			return $p;
-		}
-		$player = $this->format($row);
-		$this->unitOfWork->addObject($player);
-
-		return $player;
+		return $this->find($id);
 	}
 
-	public function getByBindKey($bindKey)
+	public function getByName(string $name): Player|null
 	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE bind = :bind_key');
-		$query->execute(['bind_key' => $bindKey]);
-
-		if (($row = $query->fetch()) === false) {
-			return null;
-		}
-		if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-			return $p;
-		}
-		$player = $this->format($row);
-		$this->unitOfWork->addObject($player);
-
-		return $player;
+		return $this->findOneBy(['name' => $name]);
 	}
 
-	public function getGodSons($playerId)
+	public function getByBindKey(string $bindKey): Player|null
 	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rGodFather = :god_father_id');
-		$query->execute(['god_father_id' => $playerId]);
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
+		return $this->findOneBy(['bind' => $bindKey]);
 	}
 
-	public function getByIdsAndStatements($ids, $statements)
+	public function getGodSons(Player $player): array
 	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE id IN ('.implode(',', $ids).') AND statement IN ('.implode(',', $statements).')');
-		$query->execute();
+		return $this->findBy(['rGodFather' => $player]);
+	}
 
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
+	public function getByIdsAndStatements(array $ids, array $statements): array
+	{
+		$qb = $this->createQueryBuilder('p');
 
-		return $data;
+		return $qb
+			->andWhere($qb->expr()->in('p.id', $ids))
+			->andWhere($qb->expr()->in('p.statement', $statements))
+			->getQuery()
+			->getResult();
+	}
+
+	public function getByStatements(array $statements): array
+	{
+		$qb = $this->createQueryBuilder('p');
+
+		return $qb
+			->andWhere($qb->expr()->in('p.statement', $statements))
+			->getQuery()
+			->getResult();
+	}
+
+	public function countActivePlayers(): int
+	{
+		return $this->createQueryBuilder('p')
+			->select('COUNT(p.id)')
+			->where('p.statement = :statement')
+			->setParameter('statement', Player::ACTIVE)
+			->getQuery()
+			->getSingleScalarResult();
+	}
+
+	public function countAllPlayers(): int
+	{
+		return $this->createQueryBuilder('p')
+			->select('COUNT(p.id)')
+			->where('p.statement = :statement')
+			->setParameter('statement', [Player::ACTIVE, Player::INACTIVE])
+			->getQuery()
+			->getSingleScalarResult();
+	}
+
+	public function countByFactionAndStatements(Color $faction, array $statements): int
+	{
+		return $this->createQueryBuilder('p')
+			->select('COUNT(p.id)')
+			->where('p.statement = :statement')
+			->andWhere('p.faction = :faction')
+			->setParameter('faction', $faction)
+			->setParameter('statement', $statements)
+			->getQuery()
+			->getSingleScalarResult();
+	}
+
+	public function getFactionAccount(Color $faction): Player
+	{
+		return $this->findOneBy([
+			'faction' => $faction,
+			'statement' => Player::DEAD,
+		], ['id' => 'ASC']);
 	}
 
 	/**
-	 * @param array $statements
+	 * @return list<Player>
 	 */
-	public function getByStatements($statements)
+	public function getFactionPlayers(Color $faction): array
 	{
-		$query = $this->connection->query('SELECT * FROM player WHERE statement IN ('.implode(',', $statements).')');
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
+		return $this->createQueryBuilder('p')
+			->where('p.faction = :faction')
+			->andWhere('p.statement != :statement')
+			->setParameters([
+				'faction' => $faction,
+				'statement' => Player::DEAD,
+			])
+			->getQuery()
+			->getResult();
 	}
 
 	/**
-	 * @return int
+	 * @return list<Player>
 	 */
-	public function countActivePlayers()
+	public function getFactionPlayersByRanking(Color $faction): array
 	{
-		$query = $this->connection->prepare('SELECT COUNT(*) as nb_players FROM player WHERE statement = :statement_active');
-		$query->execute(['statement_active' => Player::ACTIVE]);
-
-		return (int) $query->fetch()['nb_players'];
+		return $this->createQueryBuilder('p')
+			->where('p.faction = :faction')
+			->andWhere('p.statement != :statement')
+			->setParameters([
+				'faction' => $faction,
+				'statement' => Player::DEAD,
+			])
+			->orderBy('p.factionPoint', 'DESC')
+			->getQuery()
+			->getResult();
 	}
 
 	/**
-	 * @return int
+	 * @return list<Player>
 	 */
-	public function countAllPlayers()
+	public function getFactionPlayersByName(Color $faction): array
 	{
-		$query = $this->connection->prepare('SELECT COUNT(*) as nb_players FROM player WHERE statement IN (:statement_active, :statement_inactive)');
-		$query->execute(['statement_active' => Player::ACTIVE, 'statement_inactive' => Player::INACTIVE]);
-
-		return (int) $query->fetch()['nb_players'];
+		return $this->createQueryBuilder('p')
+			->where('p.faction = :faction')
+			->andWhere('p.statement = :statement')
+			->setParameters([
+				'faction' => $faction,
+				'statement' => [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY],
+			])
+			->orderBy('name', 'ASC')
+			->getQuery()
+			->getResult();
 	}
 
 	/**
-	 * @param int   $factionId
-	 * @param array $statements
-	 *
-	 * @return int
+	 * @return list<Player>
 	 */
-	public function countByFactionAndStatements($factionId, $statements)
+	public function getLastFactionPlayers(Color $faction): array
 	{
-		$query = $this->connection->prepare('SELECT COUNT(*) as nb_players FROM player WHERE rColor = :faction_id AND statement IN ('.implode(',', $statements).')');
-		$query->execute(['faction_id' => $factionId]);
-
-		return (int) $query->fetch()['nb_players'];
+		return $this->createQueryBuilder('p')
+			->where('p.faction = :faction')
+			->andWhere('p.statement != :statement')
+			->setParameters([
+				'faction' => $faction,
+				'statement' => Player::DEAD,
+			])
+			->orderBy('p.dInscription', 'DESC')
+			->setMaxResults(25)
+			->getQuery()
+			->getResult();
 	}
 
 	/**
-	 * @param int $factionId
-	 *
-	 * @return array
+	 * @return list<Player>
 	 */
-	public function getFactionPlayers($factionId)
+	public function getParliamentMembers(Color $faction): array
 	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND statement != :dead_statement');
-		$query->execute(['faction_id' => $factionId, 'dead_statement' => Player::DEAD]);
+		return $this->createQueryBuilder('p')
+			->where('p.faction = :faction')
+			->andWhere('p.status = :status')
+			->andWhere('p.statement != :statement')
+			->setParameters([
+				'faction' => $faction,
+				'status' => Player::PARLIAMENT,
+				'statement' => Player::DEAD,
+			])
+			->getQuery()
+			->getResult();
+	}
 
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
+	public function getGovernmentMember(Color $faction, int $status): Player|null
+	{
+		return $this->createQueryBuilder('p')
+			->where('p.faction = :faction')
+			->andWhere('p.status = :status')
+			->andWhere('p.statement != :statement')
+			->setParameters([
+				'faction' => $faction,
+				'status' => $status,
+				'statement' => Player::DEAD,
+			])
+			->getQuery()
+			->getOneOrNullResult();
 	}
 
 	/**
-	 * @param int $factionId
-	 *
-	 * @return array
+	 * @return list<Player>
 	 */
-	public function getFactionPlayersByRanking($factionId)
+	public function getGovernmentMembers(Color $faction): array
 	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND statement != :dead_statement ORDER BY factionPoint DESC');
-		$query->execute(['faction_id' => $factionId, 'dead_statement' => Player::DEAD]);
+		return $this->createQueryBuilder('p')
+			->where('p.faction = :faction')
+			->andWhere('p.status IN (:status)')
+			->andWhere('p.statement != :statement')
+			->setParameters([
+				'faction' => $faction,
+				'status' => [Player::TREASURER, Player::WARLORD, Player::MINISTER, Player::CHIEF],
+				'statement' => Player::DEAD,
+			])
+			->orderBy('p.status', 'DESC')
+			->getQuery()
+			->getResult();
+	}
 
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
+	public function getFactionLeader(Color $faction): Player
+	{
+		return $this->getGovernmentMember($faction, Player::CHIEF);
 	}
 
 	/**
-	 * @param int $factionId
-	 *
-	 * @return array
+	 * @return list<Player>
 	 */
-	public function getFactionPlayersByName($factionId)
+	public function getActivePlayers(): array
 	{
-		$query = $this->connection->prepare(
-			'SELECT * FROM player WHERE rColor = :faction_id AND statement IN ('.
-			implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
-			ORDER BY name ASC'
-		);
-		$query->execute(['faction_id' => $factionId]);
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
+		return $this->findBy([
+			'statement' => Player::ACTIVE,
+		]);
 	}
 
 	/**
-	 * @param int $factionId
-	 *
-	 * @return Player
+	 * @return list<Player>
 	 */
-	public function getFactionAccount($factionId)
-	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND status = :dead_status ORDER BY id ASC LIMIT 0,1');
-		$query->execute(['faction_id' => $factionId, 'dead_status' => Player::DEAD]);
-
-		if (($row = $query->fetch()) === false) {
-			return null;
-		}
-		if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-			return $p;
-		}
-		$player = $this->format($row);
-		$this->unitOfWork->addObject($player);
-
-		return $player;
-	}
-
-	/**
-	 * @param int $factionId
-	 *
-	 * @return array
-	 */
-	public function getLastFactionPlayers($factionId)
-	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND statement != :dead_statement ORDER BY dInscription DESC LIMIT 0,25');
-		$query->execute(['faction_id' => $factionId, 'dead_statement' => Player::DEAD]);
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @param int $factionId
-	 *
-	 * @return array
-	 */
-	public function getParliamentMembers($factionId)
-	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND status = :status');
-		$query->execute(['faction_id' => $factionId, 'status' => Player::PARLIAMENT]);
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
-	}
-
-	public function getGovernmentMember(int $factionId, int $status): Player|null
-	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND status = :status AND statement != :dead_statement');
-		$query->execute(['faction_id' => $factionId, 'status' => $status, 'dead_statement' => Player::DEAD]);
-
-		if (($row = $query->fetch()) === false) {
-			return null;
-		}
-		if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-			return $p;
-		}
-		$player = $this->format($row);
-		$this->unitOfWork->addObject($player);
-
-		return $player;
-	}
-
-	/**
-	 * @param int $factionId
-	 *
-	 * @return array
-	 */
-	public function getGovernmentMembers($factionId)
-	{
-		$query = $this->connection->prepare(
-			'SELECT * FROM player WHERE rColor = :faction_id AND statement != :dead_statement AND status IN ('.implode(',', [Player::TREASURER, Player::WARLORD, Player::MINISTER, Player::CHIEF]).') ORDER BY status DESC'
-		);
-		$query->execute(['faction_id' => $factionId, 'dead_statement' => Player::DEAD]);
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @param int $factionId
-	 *
-	 * @return Player
-	 */
-	public function getFactionLeader($factionId)
-	{
-		$query = $this->connection->prepare('SELECT * FROM player WHERE rColor = :faction_id AND status = :status AND statement != :dead_statement');
-		$query->execute(['faction_id' => $factionId, 'status' => Player::CHIEF, 'dead_statement' => Player::DEAD]);
-
-		if (($row = $query->fetch()) === false) {
-			return null;
-		}
-		if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-			return $p;
-		}
-		$player = $this->format($row);
-		$this->unitOfWork->addObject($player);
-
-		return $player;
-	}
-
-	public function getActivePlayers()
-	{
-		$query = $this->connection->prepare(
-			'SELECT * FROM player WHERE statement = :statement'
-		);
-		$query->execute(['statement' => Player::ACTIVE]);
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
-	}
-
 	public function search(string $search): array
 	{
-		$query = $this->connection->prepare(
-			'SELECT p.* FROM player AS p WHERE LOWER(name) LIKE LOWER(:search) ORDER BY experience DESC LIMIT 0,20'
-		);
-		$query->execute(['search' => "%$search%"]);
-
-		$data = [];
-		while ($row = $query->fetch()) {
-			if (($p = $this->unitOfWork->getObject(Player::class, (int) $row['id'])) !== null) {
-				$data[] = $p;
-				continue;
-			}
-			$player = $this->format($row);
-			$this->unitOfWork->addObject($player);
-			$data[] = $player;
-		}
-
-		return $data;
+		return $this->createQueryBuilder('p')
+			->where('LOWER(p.name) = LOWER(:search)')
+			->setParameter('search', $search)
+			->orderBy('p.experience', 'DESC')
+			->setMaxResults(20)
+			->getQuery()
+			->getResult();
 	}
 
-	/**
-	 * @param Player $player
-	 */
-	public function insert($player)
+	public function updatePlayerCredits(Player $player, int $credits): mixed
 	{
-		$query = $this->connection->prepare('INSERT INTO
-			player(bind, rColor, name, sex, description, avatar, status, rGodfather,
-			credit, uPlayer, experience, factionPoint, level, victory, defeat, stepTutorial,
-			stepDone, iUniversity, partNaturalSciences, partLifeSciences, partSocialPoliticalSciences,
-			partInformaticEngineering, dInscription, dLastConnection, dLastActivity, premium, statement)
-			VALUES(:bind, :faction_id, :name, :gender, :description, :avatar, :status,
-			:god_father_id, :credits, :u_player, :experience, :faction_points, :level,
-			:nb_victories, :nb_defeats, :tutorial_step, :tutorial_step_is_done, :university_investment,
-			:natural_science_investment, :life_science_investment, :social_political_science_investment,
-			:informatic_engineering_investment, :created_at, :last_connected_at, :last_acted_at, :is_premium, :statement)');
-		$query->execute([
-			'bind' => $player->getBind(),
-			'faction_id' => $player->getRColor(),
-			'name' => $player->getName(),
-			'gender' => $player->sex,
-			'description' => $player->description,
-			'avatar' => $player->getAvatar(),
-			'status' => $player->getStatus(),
-			'god_father_id' => $player->rGodfather,
-			'credits' => $player->getCredit(),
-			'u_player' => $player->uPlayer,
-			'experience' => $player->getExperience(),
-			'faction_points' => $player->factionPoint,
-			'level' => $player->getLevel(),
-			'nb_victories' => $player->getVictory(),
-			'nb_defeats' => $player->getDefeat(),
-			'tutorial_step' => $player->getStepTutorial(),
-			'tutorial_step_is_done' => (int) $player->stepDone,
-			'university_investment' => $player->iUniversity,
-			'natural_science_investment' => $player->partNaturalSciences,
-			'life_science_investment' => $player->partLifeSciences,
-			'social_political_science_investment' => $player->partSocialPoliticalSciences,
-			'informatic_engineering_investment' => $player->partInformaticEngineering,
-			'created_at' => $player->getDInscription(),
-			'last_connected_at' => $player->getDLastConnection(),
-			'last_acted_at' => $player->getDLastActivity(),
-			'is_premium' => $player->getPremium(),
-			'statement' => $player->getStatement(),
-		]);
-		$player->setId((int) $this->connection->lastInsertId());
-	}
-
-	/**
-	 * @param Player $player
-	 */
-	public function update($player)
-	{
-		$query = $this->connection->prepare('UPDATE player SET 
-			description = :description,
-			status = :status,
-			uPlayer = :u_player,
-			experience = :experience,
-			factionPoint = :faction_points,
-			level = :level,
-			victory = :nb_victories,
-			defeat = :nb_defeats,
-			stepTutorial = :tutorial_step,
-			stepDone = :tutorial_step_is_done,
-			partNaturalSciences = :natural_science_investment,
-			partLifeSciences = :life_science_investment,
-			partSocialPoliticalSciences = :social_political_investment,
-			partInformaticEngineering = :informatic_engineering_investment,
-			dLastConnection = :last_connected_at,
-			dLastActivity = :last_acted_at,
-			statement = :statement
-		WHERE id = :id');
-		$query->execute([
-			'description' => $player->description,
-			'status' => $player->getStatus(),
-			'u_player' => $player->uPlayer,
-			'experience' => $player->getExperience(),
-			'faction_points' => $player->factionPoint,
-			'level' => $player->getLevel(),
-			'nb_victories' => $player->getVictory(),
-			'nb_defeats' => $player->getDefeat(),
-			'tutorial_step' => $player->getStepTutorial(),
-			'tutorial_step_is_done' => (int) $player->stepDone,
-			'natural_science_investment' => $player->partNaturalSciences,
-			'life_science_investment' => $player->partLifeSciences,
-			'social_political_investment' => $player->partSocialPoliticalSciences,
-			'informatic_engineering_investment' => $player->partInformaticEngineering,
-			'last_connected_at' => $player->getDLastConnection(),
-			'last_acted_at' => $player->getDLastActivity(),
-			'statement' => $player->getStatement(),
-			'id' => $player->getId(),
-		]);
-	}
-
-	/**
-	 * @param int    $credits
-	 * @param string $operator
-	 */
-	public function updatePlayerCredits(Player $player, $credits, $operator)
-	{
-		$query = $this->connection->prepare("UPDATE player SET credit = credit $operator $credits, uPlayer = :updated_at WHERE id = :id");
-		$query->execute([
-			'updated_at' => $player->uPlayer,
-			'id' => $player->getId(),
-		]);
-	}
-
-	/**
-	 * @param int $playerId
-	 * @param int $investment
-	 */
-	public function updateUniversityInvestment($playerId, $investment)
-	{
-		$query = $this->connection->prepare('UPDATE player SET iUniversity = :investment WHERE id = :id');
-		$query->execute([
-			'investment' => $investment,
-			'id' => $playerId,
-		]);
-	}
-
-	public function remove($entity)
-	{
-	}
-
-	public function format($data)
-	{
-		$player = new Player();
-
-		$player->setId((int) $data['id']);
-		$player->setBind($data['bind']);
-		$player->setRColor((int) $data['rColor']);
-		$player->setName($data['name']);
-		$player->sex = $data['sex'];
-		$player->description = $data['description'];
-		$player->setAvatar($data['avatar']);
-		$player->setStatus((int) $data['status']);
-		$player->rGodfather = $data['rGodfather'];
-		$player->setCredit((int) $data['credit']);
-		$player->uPlayer = $data['uPlayer'];
-		$player->setExperience((int) $data['experience']);
-		$player->factionPoint = (int) $data['factionPoint'];
-		$player->setLevel((int) $data['level']);
-		$player->setVictory((int) $data['victory']);
-		$player->setDefeat((int) $data['defeat']);
-		$player->setStepTutorial((int) $data['stepTutorial']);
-		$player->stepDone = (bool) $data['stepDone'];
-		$player->iUniversity = (int) $data['iUniversity'];
-		$player->partNaturalSciences = (int) $data['partNaturalSciences'];
-		$player->partLifeSciences = (int) $data['partLifeSciences'];
-		$player->partSocialPoliticalSciences = (int) $data['partSocialPoliticalSciences'];
-		$player->partInformaticEngineering = (int) $data['partInformaticEngineering'];
-		$player->setDInscription($data['dInscription']);
-		$player->setDLastConnection($data['dLastConnection']);
-		$player->setDLastActivity($data['dLastActivity']);
-		$player->setPremium($data['premium']);
-		$player->setStatement($data['statement']);
-
-		return $player;
+		return $this->createQueryBuilder('p')
+			->update()
+			->set('p.credit', 'p.credit + :credits')
+			->where('p.id = :player_id')
+			->getQuery()
+			->execute([
+				'player_id' => $player->id,
+				'credits' => $credits,
+			]);
 	}
 }

@@ -2,41 +2,33 @@
 
 namespace App\Modules\Atlas\Repository;
 
-use App\Classes\Entity\AbstractRepository;
+use App\Modules\Atlas\Domain\Repository\RankingRepositoryInterface;
+use App\Modules\Atlas\Model\Ranking;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
-class RankingRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<Ranking>
+ */
+class RankingRepository extends DoctrineRepository implements RankingRepositoryInterface
 {
-	public function hasBeenAlreadyProcessed($isPlayer, $isFaction)
+	public function __construct(ManagerRegistry $registry)
 	{
-		$statement = $this->connection->prepare(
-			'SELECT * FROM ranking WHERE player = :is_player AND faction = :is_faction AND dRanking >= CURDATE()'
-		);
-		$statement->execute([
-			'is_player' => (int) $isPlayer,
-			'is_faction' => (int) $isFaction,
-		]);
-
-		return $statement->rowCount() > 0;
+		parent::__construct($registry, Ranking::class);
 	}
 
-	public function insert($ranking)
+	public function hasBeenAlreadyProcessed(bool $isPlayer, bool $isFaction): bool
 	{
-		// create a new ranking
-		$qr = $this->connection->prepare('INSERT INTO ranking(dRanking, player, faction) VALUES (:created_at, :is_player, :is_faction)');
-		$qr->execute([
-			'created_at' => $ranking->getCreatedAt(),
-			'is_player' => (int) $ranking->getIsPlayer(),
-			'is_faction' => (int) $ranking->getIsFaction(),
-		]);
+		$qb = $this->createQueryBuilder('r');
 
-		$ranking->setId($this->connection->lastInsertId());
-	}
+		$qb
+			->select('COUNT(r.id)')
+			->where('r.isPlayer = :is_player')
+			->andWhere('r.isFaction = :is_faction')
+			->andWhere('r.createdAt >= NOW()')
+			->setParameter('is_player', $isPlayer)
+			->setParameter('is_faction', $isFaction);
 
-	public function update($ranking)
-	{
-	}
-
-	public function remove($ranking)
-	{
+		return $qb->getQuery()->getSingleScalarResult() > 0;
 	}
 }

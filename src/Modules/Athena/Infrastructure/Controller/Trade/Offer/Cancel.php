@@ -5,7 +5,7 @@ namespace App\Modules\Athena\Infrastructure\Controller\Trade\Offer;
 use App\Classes\Entity\EntityManager;
 use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Utils;
-use App\Modules\Ares\Manager\CommanderManager;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialShippingManager;
@@ -30,7 +30,7 @@ class Cancel extends AbstractController
 		TransactionManager $transactionManager,
 		CommercialShippingManager $commercialShippingManager,
 		OrbitalBaseManager $orbitalBaseManager,
-		CommanderManager $commanderManager,
+		CommanderRepositoryInterface $commanderRepository,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		PlayerManager $playerManager,
 		EntityManager $entityManager,
@@ -43,7 +43,7 @@ class Cancel extends AbstractController
 		if (null !== $transaction and null !== $commercialShipping and Transaction::ST_PROPOSED == $transaction->statement and $transaction->rPlayer == $currentPlayer->getId()) {
 			$base = $orbitalBaseManager->get($transaction->rPlace);
 
-			if ($currentPlayer->getCredit() >= $transaction->getPriceToCancelOffer()) {
+			if ($currentPlayer->getCredits() >= $transaction->getPriceToCancelOffer()) {
 				$valid = true;
 
 				switch ($transaction->type) {
@@ -66,7 +66,7 @@ class Cancel extends AbstractController
 						$orbitalBaseManager->addShipToDock($base, $transaction->identifier, $transaction->quantity);
 						break;
 					case Transaction::TYP_COMMANDER:
-						$commander = $commanderManager->get($transaction->identifier);
+						$commander = $commanderRepository->find($transaction->identifier);
 						$commander->setStatement(Commander::RESERVE);
 						break;
 					default:

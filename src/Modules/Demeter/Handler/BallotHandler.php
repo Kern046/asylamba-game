@@ -2,74 +2,78 @@
 
 namespace App\Modules\Demeter\Handler;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
 use App\Classes\Library\Format;
 use App\Classes\Library\Utils;
-use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Election\CandidateManager;
-use App\Modules\Demeter\Manager\Election\ElectionManager;
-use App\Modules\Demeter\Manager\Election\VoteManager;
+use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\VoteRepositoryInterface;
 use App\Modules\Demeter\Message\BallotMessage;
 use App\Modules\Demeter\Message\CampaignMessage;
 use App\Modules\Demeter\Message\SenateUpdateMessage;
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Demeter\Model\Election\Candidate;
 use App\Modules\Demeter\Resource\ColorResource;
-use App\Modules\Hermes\Manager\ConversationManager;
-use App\Modules\Hermes\Manager\ConversationMessageManager;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
+use App\Modules\Hermes\Model\Conversation;
 use App\Modules\Hermes\Model\ConversationMessage;
 use App\Modules\Hermes\Model\ConversationUser;
 use App\Modules\Hermes\Model\Notification;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Uid\Uuid;
 
-class BallotHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class BallotHandler
 {
 	public function __construct(
-		protected ColorManager $colorManager,
-		protected ElectionManager $electionManager,
-		protected PlayerManager $playerManager,
-		protected VoteManager $voteManager,
-		protected ConversationManager $conversationManager,
-		protected ConversationMessageManager $conversationMessageManager,
-		protected CandidateManager $candidateManager,
-		protected MessageBusInterface $messageBus,
-		protected NotificationManager $notificationManager,
-		protected EntityManager $entityManager,
+		private ColorRepositoryInterface $colorRepository,
+		private PlayerRepositoryInterface $playerRepository,
+		private MessageBusInterface $messageBus,
+		private NotificationManager $notificationManager,
+		private NotificationRepositoryInterface $notificationRepository,
+		private ElectionRepositoryInterface $electionRepository,
+		private VoteRepositoryInterface $voteRepository,
+		private ConversationRepositoryInterface $conversationRepository,
+		private NextElectionDateCalculator $nextElectionDateCalculator,
 	) {
 	}
 
 	public function __invoke(BallotMessage $message): void
 	{
-		$faction = $this->colorManager->get($message->getFactionId());
-		if (null === ($election = $this->electionManager->getFactionLastElection($faction->id))) {
+		$faction = $this->colorRepository->get($message->getFactionId());
+		if (null === ($election = $this->electionRepository->getFactionLastElection($faction))) {
 			return;
 		}
 
-		$chiefId = (($leader = $this->playerManager->getFactionLeader($faction->id)) !== null) ? $leader->getId() : false;
+		$chiefId = (($leader = $this->playerRepository->getFactionLeader($faction)) !== null) ? $leader->id : false;
 
-		$votes = $this->voteManager->getElectionVotes($election);
+		$votes = $this->voteRepository->getElectionVotes($election);
 
+		/** @var array{candidate: Candidate, votesCount: int } $ballot */
 		$ballot = [];
 		$listCandidate = [];
 
 		foreach ($votes as $vote) {
-			if (array_key_exists($vote->rCandidate, $ballot)) {
-				++$ballot[$vote->rCandidate];
-			} else {
-				$ballot[$vote->rCandidate] = 1;
+			$candidateId = $vote->candidate->id->toBase32();
+			if (!array_key_exists($candidateId, $ballot)) {
+				$ballot[$candidateId] = [$vote->candidate, 0];
 			}
+			++$ballot[$candidateId][1];
 		}
 
 		if (!empty($ballot)) {
 			// @TODO optimize SQL queries
-			foreach ($ballot as $player => $vote) {
+			foreach ($ballot as $candidateId => [$candidate, $votesCount]) {
 				$listCandidate[] = [
-					'id' => $player,
-					'name' => $this->playerManager->get($player)->name,
+					'id' => $candidateId,
+					'name' => $candidate->player->name,
 					'vote' => $vote,
 				];
 			}
@@ -85,30 +89,23 @@ class BallotHandler implements MessageHandlerInterface
 		}
 		reset($listCandidate);
 
-		$convPlayerID = $this->playerManager->getFactionAccount($faction->id)->id;
+		$convPlayer = $this->playerRepository->getFactionAccount($faction);
 
-		$S_CVM = $this->conversationManager->getCurrentSession();
-		$this->conversationManager->newSession();
-		$this->conversationManager->load(
-			['cu.rPlayer' => $convPlayerID]
-		);
-		$conv = $this->conversationManager->get();
+		$conv = $this->conversationRepository->getOneByPlayer($convPlayer);
 
-		$this->conversationManager->changeSession($S_CVM);
-
-		if (Color::DEMOCRATIC == $faction->regime) {
+		if ($faction->isDemocratic()) {
 			if (count($ballot) > 0) {
 				arsort($ballot);
 				reset($ballot);
 
-				$governmentMembers = $this->playerManager->getGovernmentMembers($faction->getId());
-				$newChief = $this->playerManager->get(key($ballot));
+				$governmentMembers = $this->playerRepository->getGovernmentMembers($faction);
+				$newChief = $this->playerRepository->get(key($ballot));
 
-				$this->mandate($faction, $governmentMembers, $newChief, $chiefId, true, $conv, $convPlayerID, $listCandidate);
+				$this->mandate($faction, $governmentMembers, $newChief, $chiefId, true, $conv, $convPlayer, $listCandidate);
 			} else {
-				$this->mandate($faction, 0, 0, $chiefId, false, $conv, $convPlayerID, $listCandidate);
+				$this->mandate($faction, 0, 0, $chiefId, false, $conv, $convPlayer, $listCandidate);
 			}
-		} elseif (Color::ROYALISTIC == $faction->regime) {
+		} elseif ($faction->isRoyalistic()) {
 			if (count($ballot) > 0) {
 				arsort($ballot);
 				reset($ballot);
@@ -118,16 +115,16 @@ class BallotHandler implements MessageHandlerInterface
 				}
 
 				if (((current($ballot) / ($faction->activePlayers + 1)) * 100) >= Color::PUTSCHPERCENTAGE) {
-					$governmentMembers = $this->playerManager->getGovernmentMembers($faction->getId());
-					$newChief = $this->playerManager->get(key($ballot));
+					$governmentMembers = $this->playerRepository->getGovernmentMembers($faction);
+					$newChief = $this->playerRepository->get(key($ballot));
 					$this->mandate($faction, $governmentMembers, $newChief, $chiefId, true, $conv, $convPlayerID, $listCandidate);
 				} else {
-					$looser = $this->playerManager->get(key($ballot));
+					$looser = $this->playerRepository->get(key($ballot));
 					$this->mandate($faction, 0, $looser, $chiefId, false, $conv, $convPlayerID, $listCandidate);
 				}
 			}
 		} else {
-			if (($leader = $this->playerManager->getFactionLeader($faction->id)) !== null) {
+			if (($leader = $this->playerRepository->getFactionLeader($faction)) !== null) {
 				if (($candidate = $this->candidateManager->getByElectionAndPlayer($election, $leader)) !== null) {
 					if (0 == rand(0, 1)) {
 						$ballot = [];
@@ -142,8 +139,8 @@ class BallotHandler implements MessageHandlerInterface
 					next($ballot);
 				}
 
-				$governmentMembers = $this->playerManager->getGovernmentMembers($faction->getId());
-				$newChief = $this->playerManager->get(key($ballot));
+				$governmentMembers = $this->playerRepository->getGovernmentMembers($faction);
+				$newChief = $this->playerRepository->get(key($ballot));
 
 				$this->mandate($faction, $governmentMembers, $newChief, $chiefId, true, $conv, $convPlayerID, $listCandidate);
 			} else {
@@ -152,11 +149,18 @@ class BallotHandler implements MessageHandlerInterface
 		}
 	}
 
-	public function mandate(Color $color, $governmentMembers, $newChief, $idOldChief, $hadVoted, $conv, $convPlayerID, $candidate)
-	{
+	public function mandate(
+		Color $color,
+		$governmentMembers,
+		$newChief,
+		$idOldChief,
+		$hadVoted,
+		Conversation $conv,
+		Player $convPlayer,
+		array $candidates,
+	): void {
 		// préparation de la conversation
-		++$conv->messages;
-		$conv->dLastMessage = Utils::now();
+		$conv->lastMessageAt = new \DateTimeImmutable();
 
 		// désarchiver tous les users
 		$users = $conv->players;
@@ -175,42 +179,52 @@ class BallotHandler implements MessageHandlerInterface
 
 			$newChief->status = Player::CHIEF;
 
-			$color->dLastElection = Utils::now();
+			$color->lastElectionHeldAt = new \DateTimeImmutable();
 			$color->electionStatement = Color::MANDATE;
 
 			$statusArray = $color->status;
-			if (Color::DEMOCRATIC === $color->regime) {
-				$date = new \DateTime($color->dLastElection);
-				$date->modify('+'.$color->mandateDuration.' second');
-
+			if ($color->isDemocratic()) {
 				$this->messageBus->dispatch(
-					new CampaignMessage($color->getId()),
-					[DateTimeConverter::to_delay_stamp($date->format('Y-m-d H:i:s'))],
+					new CampaignMessage($color->id),
+					[DateTimeConverter::to_delay_stamp($this->nextElectionDateCalculator->getCampaignStartDate($color))],
 				);
-				$notif = new Notification();
-				$notif->dSending = Utils::now();
-				$notif->setRPlayer($newChief->id);
-				$notif->setTitle('Votre avez été élu');
-				$notif->addBeg()
-					->addTxt(' Le peuple vous a soutenu, vous avez été élu '.$statusArray[Player::CHIEF - 1].' de votre faction.');
-				$this->notificationManager->add($notif);
+				$notif = NotificationBuilder::new()
+					->setTitle('Votre avez été élu')
+					->setContent(NotificationBuilder::paragraph(sprintf(
+						'Le peuple vous a soutenu, vous avez été élu %s de votre faction.',
+						$statusArray[Player::CHIEF - 1],
+					)))
+					->for($newChief);
+				$this->notificationRepository->save($notif);
 
-				// création du message
-				$message = new ConversationMessage();
-				$message->rConversation = $conv->id;
-				$message->rPlayer = $convPlayerID;
-				$message->type = ConversationMessage::TY_STD;
-				$message->dCreation = Utils::now();
-				$message->dLastModification = null;
-				$message->content = 'La période électorale est terminée. Un nouveau dirigeant a été élu pour faire valoir la force de '.$color->popularName.' à travers la galaxie. Longue vie à <strong>'.(current($candidate)['name']).'</strong>.<br /><br />Voici les résultats des élections :<br /><br />';
-				foreach ($candidate as $player) {
-					$message->content .= $player['name'].' a reçu '.$player['vote'].' vote'.Format::plural($player['vote']).'<br />';
-				}
-				$this->conversationMessageManager->add($message);
-			} elseif (Color::ROYALISTIC === $color->regime) {
+				$message = new ConversationMessage(
+					id: Uuid::v4(),
+					conversation: $conv,
+					player: $convPlayer,
+					content: sprintf(
+						'La période électorale est terminée.
+						Un nouveau dirigeant a été élu pour faire valoir la force de %s à travers la galaxie.
+						Longue vie à <strong>%s</strong>.<br /><br />Voici les résultats des élections :<br /><br />
+						%s',
+						ColorResource::getInfo($color->identifier, 'popularName'),
+						current($candidates)['name'],
+						array_map(
+							fn ($player) => sprintf(
+								'%s a reçu %d vote%s<br />',
+								$player['name'],
+								$player['vote'],
+								Format::plural($player['vote']),
+							),
+							$candidates,
+						)
+					),
+					createdAt: new \DateTimeImmutable(),
+				);
+				$this->conversationRepository->save($message);
+			} elseif ($color->isRoyalistic()) {
 				$this->messageBus->dispatch(
 					new SenateUpdateMessage($color->getId()),
-					[DateTimeConverter::to_delay_stamp(date('Y-m-d H:i:s', (time() + $color->mandateDuration)))],
+					[DateTimeConverter::to_delay_stamp(date('Y-m-d H:i:s', time() + $color->mandateDuration))],
 				);
 				$notif = new Notification();
 				$notif->dSending = Utils::now();
@@ -233,24 +247,24 @@ class BallotHandler implements MessageHandlerInterface
 				}
 
 				// création du message
-				reset($candidate);
-				if (current($candidate)['id'] == $idOldChief) {
-					next($candidate);
+				reset($candidates);
+				if (current($candidates)['id'] == $idOldChief) {
+					next($candidates);
 				}
 				$message = new ConversationMessage();
 				$message->rConversation = $conv->id;
-				$message->rPlayer = $convPlayerID;
+				$message->rPlayer = $convPlayer;
 				$message->type = ConversationMessage::TY_STD;
 				$message->dCreation = Utils::now();
 				$message->dLastModification = null;
-				$message->content = 'Un putsch a réussi, un nouveau dirigeant va faire valoir la force de '.$color->popularName.' à travers la galaxie. Longue vie à <strong>'.(current($candidate)['name']).'</strong>.<br /><br />De nombreux membres de la faction ont soutenu le mouvement révolutionnaire :<br /><br />';
-				$message->content .= current($candidate)['name'].' a reçu le soutien de '.Format::number((current($candidate)['vote'] / ($color->activePlayers + 1)) * 100).'% de la population.'.'<br />';
+				$message->content = 'Un putsch a réussi, un nouveau dirigeant va faire valoir la force de '.$color->popularName.' à travers la galaxie. Longue vie à <strong>'.current($candidates)['name'].'</strong>.<br /><br />De nombreux membres de la faction ont soutenu le mouvement révolutionnaire :<br /><br />';
+				$message->content .= current($candidates)['name'].' a reçu le soutien de '.Format::number((current($candidates)['vote'] / ($color->activePlayers + 1)) * 100).'% de la population.<br />';
 				$this->conversationMessageManager->add($message);
 			} else {
 				$date = new \DateTime($color->dLastElection);
 				$date->modify('+'.$color->mandateDuration.' second');
 				$this->messageBus->dispatch(
-					new CampaignMessage($color->getId()),
+					new CampaignMessage($color->id),
 					[DateTimeConverter::to_delay_stamp($date->format('Y-m-d H:i:s'))],
 				);
 
@@ -264,18 +278,18 @@ class BallotHandler implements MessageHandlerInterface
 
 				$message = new ConversationMessage();
 				$message->rConversation = $conv->id;
-				$message->rPlayer = $convPlayerID;
+				$message->rPlayer = $convPlayer;
 				$message->type = ConversationMessage::TY_STD;
 				$message->dCreation = Utils::now();
 				$message->dLastModification = null;
-				$message->content = 'Les Oracles ont parlé, un nouveau dirigeant va faire valoir la force de '.$color->popularName.' à travers la galaxie. Longue vie à <strong>'.(current($candidate)['name']).'</strong>.<br /><br /><br /><br />';
+				$message->content = 'Les Oracles ont parlé, un nouveau dirigeant va faire valoir la force de '.$color->popularName.' à travers la galaxie. Longue vie à <strong>'.current($candidates)['name'].'</strong>.<br /><br /><br /><br />';
 				$this->conversationMessageManager->add($message);
 			}
 		} else {
 			$noChief = false;
-			if (($oldChief = $this->playerManager->get($idOldChief)) === null) {
+			if (($oldChief = $this->playerRepository->get($idOldChief)) === null) {
 				$noChief = true;
-				$oldChief = $this->playerManager->getByName($color->officialName);
+				$oldChief = $this->playerRepository->getByName($color->officialName);
 			}
 			/*			$date = new DateTime($this->dLastElection);
 						$date->modify('+' . $this->mandateDuration + self::ELECTIONTIME + self::CAMPAIGNTIME . ' second');
@@ -285,7 +299,7 @@ class BallotHandler implements MessageHandlerInterface
 			$color->electionStatement = Color::MANDATE;
 
 			switch ($color->regime) {
-				case Color::DEMOCRATIC:
+				case Color::REGIME_DEMOCRATIC:
 					$date = new \DateTime($color->dLastElection);
 					$date->modify('+'.$color->mandateDuration.' second');
 					$this->messageBus->dispatch(
@@ -305,7 +319,7 @@ class BallotHandler implements MessageHandlerInterface
 					// création du message
 					$message = new ConversationMessage();
 					$message->rConversation = $conv->id;
-					$message->rPlayer = $convPlayerID;
+					$message->rPlayer = $convPlayer;
 					$message->type = ConversationMessage::TY_STD;
 					$message->dCreation = Utils::now();
 					$message->dLastModification = null;
@@ -317,7 +331,7 @@ class BallotHandler implements MessageHandlerInterface
 					;
 					$this->conversationMessageManager->add($message);
 					break;
-				case Color::ROYALISTIC:
+				case Color::REGIME_ROYALISTIC:
 					$notif = new Notification();
 					$notif->dSending = Utils::now();
 					$notif->setRPlayer($newChief->id);
@@ -339,14 +353,14 @@ class BallotHandler implements MessageHandlerInterface
 					}
 					$message = new ConversationMessage();
 					$message->rConversation = $conv->id;
-					$message->rPlayer = $convPlayerID;
+					$message->rPlayer = $convPlayer;
 					$message->type = ConversationMessage::TY_STD;
 					$message->dCreation = Utils::now();
 					$message->dLastModification = null;
 					$message->content = 'Un coup d\'état a échoué. '.$oldChief->getName().' demeure le dirigeant de '.$color->popularName.'.';
 					$this->conversationMessageManager->add($message);
 					break;
-				case Color::THEOCRATIC:
+				case Color::REGIME_THEOCRATIC:
 					$date = new \DateTime($color->dLastElection);
 					$date->modify('+'.$color->mandateDuration.' second');
 					$this->messageBus->dispatch(
@@ -365,7 +379,7 @@ class BallotHandler implements MessageHandlerInterface
 					}
 					$message = new ConversationMessage();
 					$message->rConversation = $conv->id;
-					$message->rPlayer = $convPlayerID;
+					$message->rPlayer = $convPlayer;
 					$message->type = ConversationMessage::TY_STD;
 					$message->dCreation = Utils::now();
 					$message->dLastModification = null;

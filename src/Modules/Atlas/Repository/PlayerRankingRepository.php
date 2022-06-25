@@ -2,15 +2,21 @@
 
 namespace App\Modules\Atlas\Repository;
 
-use App\Classes\Entity\AbstractRepository;
-use App\Classes\Library\Utils;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
 use App\Modules\Atlas\Model\PlayerRanking;
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
 
-class PlayerRankingRepository extends AbstractRepository
+class PlayerRankingRepository extends DoctrineRepository implements PlayerRankingRepositoryInterface
 {
+	public function __construct(ManagerRegistry $registry)
+	{
+		parent::__construct($registry, PlayerRanking::class);
+	}
+
 	public function getFactionPlayerRankings(Color $faction)
 	{
 		$statement = $this->connection->prepare(
@@ -29,11 +35,11 @@ class PlayerRankingRepository extends AbstractRepository
 		return $this->connection->query(
 			'SELECT
 				p.id AS player,
-				(SUM(pevInBeginA) - SUM(`pevAtEndA`)) AS lostPEV,
-				(SUM(pevInBeginD) - SUM(`pevAtEndD`)) AS destroyedPEV
+				(SUM(attackerPevAtBeginning) - SUM(`attackerPevAtEnd`)) AS lostPEV,
+				(SUM(defenderPevAtBeginning) - SUM(`defenderPevAtEnd`)) AS destroyedPEV
 			FROM report AS r
 			RIGHT JOIN player AS p
-				ON p.id = r.rPlayerAttacker
+				ON p.id = r.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
@@ -171,83 +177,20 @@ class PlayerRankingRepository extends AbstractRepository
 		);
 	}
 
-	public function getPlayersLinkedTradeRoutes()
+	public function getPlayersLinkedTradeRoutes(): array
 	{
-		return $this->connection->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
 				p.id AS player,
 				SUM(income) AS income
 			FROM `commercialRoute` AS c
 			LEFT JOIN orbitalBase AS o
-				ON o.rPlace = c.rOrbitalBaseLinked
+				ON o.place = c.destinationBase
 				RIGHT JOIN player AS p
-					ON p.id = o.rPlayer
+					ON p.id = o.player
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
-		);
-	}
-
-	public function insert($ranking)
-	{
-	}
-
-	public function insertDataAnalysis(Player $player, PlayerRanking $playerRanking, $resources, $planetNumber)
-	{
-		$statement = $this->connection->prepare(
-			'INSERT INTO 
-			DA_PlayerDaily(rPlayer, credit, experience, level, victory, defeat, status, resources, fleetSize, nbPlanet, planetPoints, rkGeneral, rkFighter, rkProducer, rkButcher, rkTrader, dStorage)
-			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-		);
-		$statement->execute([
-			$player->id,
-			$player->credit,
-			$player->experience,
-			$player->level,
-			$player->victory,
-			$player->defeat,
-			$player->status,
-			$resources,
-			$pr->armies,
-			$planetNumber,
-			$pr->general / $planetNumber,
-			$pr->general,
-			$pr->fight,
-			$pr->resources,
-			$pr->butcher,
-			$pr->trader,
-			Utils::now(),
-		]);
-	}
-
-	public function update($ranking)
-	{
-	}
-
-	public function remove($ranking)
-	{
-	}
-
-	public function formatPlayerData($statement)
-	{
-		$results = [];
-		$currentPlayer = null;
-		while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-			if (!$currentPlayer instanceof Player || $currentPlayer->getId() !== (int) $row['player_id']) {
-				$currentPlayer =
-					(new Player())
-					->setId((int) $row['player_id'])
-					->setRColor((int) $row['player_faction_id'])
-				;
-			}
-			$results[] =
-				(new PlayerRanking())
-				->setId((int) $row['player_ranking_id'])
-				->setPlayer($currentPlayer)
-				->setGeneral((int) $row['player_general_ranking'])
-			;
-		}
-
-		return $results;
+		)->fetchAllAssociative();
 	}
 }

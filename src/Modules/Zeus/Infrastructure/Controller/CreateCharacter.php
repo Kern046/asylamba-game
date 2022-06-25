@@ -3,56 +3,78 @@
 namespace App\Modules\Zeus\Infrastructure\Controller;
 
 use App\Classes\Container\ArrayList;
-use App\Classes\Database\Database;
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Security;
-use App\Classes\Library\Utils;
 use App\Classes\Worker\API;
+use App\Modules\Ares\Model\Ship;
+use App\Modules\Athena\Application\Handler\OrbitalBasePointsHandler;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Demeter\Manager\ColorManager;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Gaia\Event\PlaceOwnerChangeEvent;
 use App\Modules\Gaia\Galaxy\GalaxyConfiguration;
 use App\Modules\Gaia\Manager\PlaceManager;
-use App\Modules\Gaia\Manager\SectorManager;
-use App\Modules\Hermes\Manager\ConversationManager;
-use App\Modules\Hermes\Manager\ConversationUserManager;
 use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\ConversationUser;
 use App\Modules\Hermes\Model\Notification;
+use App\Modules\Promethee\Domain\Repository\ResearchRepositoryInterface;
+use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Helper\ResearchHelper;
-use App\Modules\Promethee\Manager\ResearchManager;
-use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Model\Research;
-use App\Modules\Promethee\Model\TechnologyId;
+use App\Modules\Promethee\Model\Technology;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Helper\CheckName;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Uid\Uuid;
 
 class CreateCharacter extends AbstractController
 {
+	public function __construct(
+		private readonly API $api,
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly PlayerRepositoryInterface $playerRepository,
+		private readonly PlayerManager $playerManager,
+		private readonly GalaxyConfiguration $galaxyConfiguration,
+		private readonly NotificationManager $notificationManager,
+		private readonly TechnologyRepositoryInterface $technologyRepository,
+		private readonly ResearchHelper $researchHelper,
+		private readonly EventDispatcherInterface $eventDispatcher,
+		private readonly PlaceManager $placeManager,
+		private readonly OrbitalBasePointsHandler $orbitalBasePointsHandler,
+		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private readonly SectorRepositoryInterface $sectorRepository,
+		private readonly PlaceRepositoryInterface $placeRepository,
+		private readonly ResearchRepositoryInterface $researchRepository,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly Security $security,
+	) {
+	}
+
+	#[Route(
+		path: '/create-character/{step}/{highMode}',
+		name: 'create_character',
+		requirements: [
+			'step' => 'faction-choice|profile|place-choice|save',
+		],
+		defaults: [
+			'highMode' => false,
+			'step' => 'faction-choice',
+		],
+		methods: ['GET', 'POST'],
+	)]
 	public function __invoke(
 		Request $request,
-		API $api,
-		ColorManager $colorManager,
-		PlayerManager $playerManager,
-		SectorManager $sectorManager,
-		GalaxyConfiguration $galaxyConfiguration,
-		NotificationManager $notificationManager,
-		ResearchManager $researchManager,
-		ResearchHelper $researchHelper,
-		Database $database,
-		ConversationManager $conversationManager,
-		ConversationUserManager $conversationUserManager,
-		PlaceManager $placeManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		TechnologyManager $technologyManager,
-		EntityManager $entityManager,
-		Security $security,
 		string $step,
 		bool $highMode
 	): Response {
@@ -63,62 +85,24 @@ class CreateCharacter extends AbstractController
 		];
 
 		return match ($step) {
-			'faction-choice' => $this->renderFactionChoiceStep(
-				$request,
-				$api,
-				$colorManager,
-				$playerManager,
-				$security,
-				$highMode,
-				$globalParameters,
-			),
-			'profile' => $this->renderProfileStep(
-				$request,
-				$colorManager,
-				$globalParameters,
-			),
-			'place-choice' => $this->renderPlaceChoiceStep(
-				$request,
-				$galaxyConfiguration,
-				$playerManager,
-				$sectorManager,
-				$globalParameters,
-			),
-			'save' => $this->save(
-				$request,
-				$playerManager,
-				$sectorManager,
-				$api,
-				$notificationManager,
-				$researchManager,
-				$researchHelper,
-				$database,
-				$conversationManager,
-				$conversationUserManager,
-				$placeManager,
-				$orbitalBaseManager,
-				$technologyManager,
-				$entityManager,
-				$security,
-			),
+			'faction-choice' => $this->renderFactionChoiceStep($request, $highMode, $globalParameters),
+			'profile' => $this->renderProfileStep($request, $globalParameters),
+			'place-choice' => $this->renderPlaceChoiceStep($request, $globalParameters),
+			'save' => $this->save($request),
 		};
 	}
 
 	private function renderFactionChoiceStep(
 		Request $request,
-		API $api,
-		ColorManager $colorManager,
-		PlayerManager $playerManager,
-		Security $security,
 		bool $highMode,
 		array $globalParameters,
 	): Response {
 		$session = $request->getSession();
 		if ($request->query->has('bindKey')) {
 			// extraction du bindkey
-			$query = $security->uncrypt($request->query->get('bindKey'));
-			$bindkey = $security->extractBindKey($query);
-			$time = $security->extractTime($query);
+			$query = $this->security->uncrypt($request->query->get('bindKey'));
+			$bindkey = $this->security->extractBindKey($query);
+			$time = $this->security->extractTime($query);
 
 			// vérification de la validité du bindkey
 			if (abs((int) $time - time()) <= 300) {
@@ -135,15 +119,15 @@ class CreateCharacter extends AbstractController
 			if ('enabled' === $this->getParameter('apimode')) {
 				// utilisation de l'API
 
-				if ($api->userExist($session->get('prebindkey'))) {
-					if (null === $playerManager->getByBindKey($session->get('prebindkey'))) {
+				if ($this->api->userExist($session->get('prebindkey'))) {
+					if (null === $this->playerRepository->findOneBy(['bind' => $session->get('prebindkey')])) {
 						$session->set('inscription', new ArrayList());
 						$session->get('inscription')->add('bindkey', $session->get('prebindkey'));
-						$session->get('inscription')->add('portalPseudo', $api->data['userInfo']['pseudo']);
+						$session->get('inscription')->add('portalPseudo', $this->api->data['userInfo']['pseudo']);
 
 						// check du rgodfather
-						if (!empty($api->data['userInfo']['sponsorship'])) {
-							list($server, $player) = explode('#', $api->data['userInfo']['sponsorship']);
+						if (!empty($this->api->data['userInfo']['sponsorship'])) {
+							list($server, $player) = explode('#', $this->api->data['userInfo']['sponsorship']);
 
 							if ($server == $this->getParameter('server_id')) {
 								$session->set('rgodfather', $player);
@@ -165,15 +149,12 @@ class CreateCharacter extends AbstractController
 		}
 
 		return $this->render('pages/zeus/registration/faction_choice.html.twig', array_merge([
-			'sorted_factions' => $colorManager->getAllByActivePlayersNumber(),
+			'sorted_factions' => $this->colorRepository->getAllByActivePlayersNumber(),
 		], $globalParameters));
 	}
 
-	private function renderProfileStep(
-		Request $request,
-		ColorManager $colorManager,
-		array $globalParameters,
-	): Response {
+	private function renderProfileStep(Request $request, array $globalParameters): Response
+	{
 		$session = $request->getSession();
 		if (!$session->has('inscription')) {
 			return $this->redirect($this->getParameter('getout_root').'serveurs/message-forbiddenaccess');
@@ -182,16 +163,12 @@ class CreateCharacter extends AbstractController
 		// entre 1 et 7
 		// alliance pas défaites
 		// algorythme de fermeture automatique des alliances (auto-balancing)
-		$openFactions = $colorManager->getOpenFactions();
+		$openFactions = $this->colorRepository->getOpenFactions();
 
-		$ally = [];
+		$ally = array_map(fn (Color $faction) => $faction->identifier, $openFactions);
 
-		foreach ($openFactions as $openFaction) {
-			$ally[] = $openFaction->id;
-		}
-
-		if ($request->query->has('factionId') && in_array($request->query->get('factionId'), $ally)) {
-			$session->get('inscription')->add('ally', $request->query->get('factionId'));
+		if ($request->query->has('factionIdentifier') && in_array($request->query->get('factionIdentifier'), $ally)) {
+			$session->get('inscription')->add('ally', $request->query->get('factionIdentifier'));
 		} elseif (!$session->get('inscription')->exist('ally')) {
 			throw new BadRequestHttpException('faction inconnues ou non-sélectionnable');
 		}
@@ -204,14 +181,14 @@ class CreateCharacter extends AbstractController
 		], $globalParameters));
 	}
 
-	private function getAvatars(int $factionId, int $nbAvatars): array
+	private function getAvatars(int $factionIdentifier, int $nbAvatars): array
 	{
 		$avatars = [];
 		for ($i = 1; $i <= $nbAvatars; ++$i) {
 			if (!\in_array($i, [77, 19])) {
 				// @TODO simplify with str_pad function
 				$avatar = $i < 10 ? '00' : '0';
-				$avatar .= $i.'-'.$factionId;
+				$avatar .= $i.'-'.$factionIdentifier;
 				$avatars[] = $avatar;
 			}
 		}
@@ -220,16 +197,11 @@ class CreateCharacter extends AbstractController
 		return $avatars;
 	}
 
-	private function renderPlaceChoiceStep(
-		Request $request,
-		GalaxyConfiguration $galaxyConfiguration,
-		PlayerManager $playerManager,
-		SectorManager $sectorManager,
-		array $globalParameters,
-	): Response {
+	private function renderPlaceChoiceStep(Request $request, array $globalParameters): Response
+	{
 		$session = $request->getSession();
 		if ($session->has('inscription')) {
-			if (null === $playerManager->getByName($request->request->get('pseudo'))) {
+			if (null === $this->playerRepository->findOneBy(['name' => $request->request->get('pseudo')])) {
 				$check = new CheckName();
 
 				if ($request->request->has('pseudo') && $check->checkLength($request->request->get('pseudo')) && $check->checkChar($request->request->get('pseudo'))) {
@@ -252,30 +224,15 @@ class CreateCharacter extends AbstractController
 		}
 
 		return $this->render('pages/zeus/registration/place_choice.html.twig', array_merge([
-			'galaxy_configuration' => $galaxyConfiguration,
-			'sectors' => $sectorManager->getAll(),
+			'galaxy_configuration' => $this->galaxyConfiguration,
+			'sectors' => $this->sectorRepository->getAll(),
 		], $globalParameters));
 	}
 
-	private function save(
-		Request $request,
-		PlayerManager $playerManager,
-		SectorManager $sectorManager,
-		API $api,
-		NotificationManager $notificationManager,
-		ResearchManager $researchManager,
-		ResearchHelper $researchHelper,
-		Database $database,
-		ConversationManager $conversationManager,
-		ConversationUserManager $conversationUserManager,
-		PlaceManager $placeManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		TechnologyManager $technologyManager,
-		EntityManager $entityManager,
-		Security $security,
-	): Response {
+	private function save(Request $request): Response
+	{
 		$session = $request->getSession();
-		if (null === $session->get('bindkey') || null === $playerManager->getByBindKey($session->get('bindkey'))) {
+		if (null === $session->get('bindkey') || null === $this->playerRepository->getByBindKey($session->get('bindkey'))) {
 			if ($session->has('inscription')) {
 				$check = new CheckName();
 
@@ -283,12 +240,12 @@ class CreateCharacter extends AbstractController
 					if ($check->checkChar($request->request->get('base'))) {
 						$session->get('inscription')->add('base', $request->request->get('base'));
 
-						$sectors = $sectorManager->getAll();
+						$sectors = $this->sectorRepository->getAll();
 
 						$factionSectors = [];
 						foreach ($sectors as $sector) {
-							if ($sector->getRColor() == $session->get('inscription')->get('ally')) {
-								$factionSectors[] = $sector->getId();
+							if ($sector->faction?->identifier == $session->get('inscription')->get('ally')) {
+								$factionSectors[] = $sector->id;
 							}
 						}
 						if (in_array($request->request->get('sector'), $factionSectors)) {
@@ -309,60 +266,37 @@ class CreateCharacter extends AbstractController
 			return $this->redirect($this->getParameter('getout_root').'serveurs/message-forbiddenaccess');
 		}
 
-		return $this->persistPlayer(
-			$request,
-			$api,
-			$playerManager,
-			$notificationManager,
-			$researchManager,
-			$researchHelper,
-			$database,
-			$conversationManager,
-			$conversationUserManager,
-			$placeManager,
-			$orbitalBaseManager,
-			$technologyManager,
-			$entityManager,
-			$security,
-		);
+		return $this->persistPlayer($request);
 	}
 
-	private function persistPlayer(
-		Request $request,
-		API $api,
-		PlayerManager $playerManager,
-		NotificationManager $notificationManager,
-		ResearchManager $researchManager,
-		ResearchHelper $researchHelper,
-		Database $database,
-		ConversationManager $conversationManager,
-		ConversationUserManager $conversationUserManager,
-		PlaceManager $placeManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		TechnologyManager $technologyManager,
-		EntityManager $entityManager,
-		Security $security,
-	): Response {
+	private function persistPlayer(Request $request): Response
+	{
 		$session = $request->getSession();
 		try {
-			$entityManager->beginTransaction();
+			$this->entityManager->beginTransaction();
 
-			$faction = $session->get('inscription')->get('ally');
+			$faction = $this->colorRepository->getOneByIdentifier($session->get('inscription')->get('ally'))
+				?? throw new BadRequestHttpException('Invalid faction identifier');
 			// AJOUT DU JOUEUR EN BASE DE DONNEE
 			$player = new Player();
 
 			// ajout des variables inchangées
-			$player->setBind($session->get('inscription')->get('bindkey'));
-			$player->setRColor($session->get('inscription')->get('ally'));
-			$player->setName(trim($session->get('inscription')->get('pseudo')));
-			$player->setAvatar($session->get('inscription')->get('avatar'));
+			$player->bind = $session->get('inscription')->get('bindkey');
+			$player->faction = $faction;
+			$player->name = trim($session->get('inscription')->get('pseudo'));
+			$player->avatar = $session->get('inscription')->get('avatar');
+
+			$godFather = null;
 
 			if ($session->has('rgodfather')) {
-				$player->rGodfather = $session->get('rgodfather');
+				$godFather = $this->playerRepository->get($session->get('rgodfather'))
+					?? throw new BadRequestHttpException('Godfather not found');
+
+				$player->godfather = $godFather;
 			}
 
-			$player->setStatus(1);
-			$player->uPlayer = Utils::now();
+			$player->status = Player::STANDARD;
+			$player->uPlayer = new \DateTimeImmutable();
 
 			$player->victory = 0;
 			$player->defeat = 0;
@@ -378,43 +312,43 @@ class CreateCharacter extends AbstractController
 			// @TODO adapt this vlaue depending on the chosen avatar or player's choice
 			$player->sex = 1;
 
-			$player->setDInscription(Utils::now());
-			$player->setDLastConnection(Utils::now());
-			$player->setDLastActivity(Utils::now());
+			$player->dInscription = new \DateTimeImmutable();
+			$player->dLastConnection = new \DateTimeImmutable();
+			$player->dLastActivity = new \DateTimeImmutable();
 
-			$player->setPremium(0);
-			$player->setStatement(1);
+			$player->premium = 0;
+			$player->statement = Player::ACTIVE;
 
 			// ajout des variables dépendantes
 			if ($session->get('high-mode')) {
 				$player->credit = 10000000;
-				$player->setExperience(18000);
-				$player->setLevel(5);
+				$player->experience = 18000;
+				$player->level = 5;
 			} else {
 				$player->credit = 5000;
-				$player->setExperience(630);
-				$player->setLevel(1);
+				$player->experience = 630;
+				$player->level = 1;
 			}
 
-			$playerManager->add($player);
+			$this->playerRepository->save($player);
 
-			if ($session->has('rgodfather')) {
+			if (null !== $godFather) {
 				// send a message to the godfather
-				$n = new Notification();
-				$n->setRPlayer($player->rGodfather);
-				$n->setTitle('Votre filleul s\'est inscrit');
+				$n = new Notification(
+					id: Uuid::v4(),
+					player: $player->godfather,
+					title: 'Votre filleul s\'est inscrit',
+				);
 				$n->addBeg()->addTxt('Un de vos amis a créé un compte.')->addSep();
 				$n->addTxt('Vous pouvez le contacter, son nom de joueur est ');
 				$n->addLnk('embassy/player-'.$player->getId(), '"'.$player->name.'"')->addTxt('.');
 				$n->addBrk()->addTxt('Vous venez de gagner 1000 crédits. Vous en gagnerez 1 million de plus lorsqu\'il atteindra le niveau 3.');
 				$n->addEnd();
 
-				$notificationManager->add($n);
+				$this->notificationManager->add($n);
 
 				// add 1000 credits to the godfather
-				if (($godFather = $playerManager->get($player->rGodFather))) {
-					$playerManager->increaseCredit($godFather, 1000);
-				}
+				$this->playerManager->increaseCredit($godFather, 1000);
 
 				// remove godFather from session
 				$session->remove('rgodfather');
@@ -422,8 +356,18 @@ class CreateCharacter extends AbstractController
 
 			// INITIALISATION DES RECHERCHES
 			// rendre aléatoire
-			$rs = new Research();
-			$rs->rPlayer = $player->getId();
+			$rs = new Research(
+				Uuid::v4(),
+				player: $player,
+				naturalToPay: $this->researchHelper->getInfo(Research::MATH, 'level', 1, 'price'),
+				lifeToPay: $this->researchHelper->getInfo(Research::LAW, 'level', 1, 'price'),
+				socialToPay: $this->researchHelper->getInfo(Research::ECONO, 'level', 1, 'price'),
+				informaticToPay: $this->researchHelper->getInfo(Research::NETWORK, 'level', 1, 'price'),
+				naturalTech: Research::MATH,
+				lifeTech: Research::LAW,
+				socialTech: Research::ECONO,
+				informaticTech: Research::NETWORK,
+			);
 
 			if ($session->get('high-mode')) {
 				$rs->mathLevel = 15;
@@ -438,169 +382,160 @@ class CreateCharacter extends AbstractController
 				$rs->statLevel = 15;
 			}
 
-			$rs->naturalTech = Research::MATH;
-			$rs->lifeTech = Research::LAW;
-			$rs->socialTech = Research::ECONO;
-			$rs->informaticTech = Research::NETWORK;
-
-			$rs->naturalToPay = $researchHelper->getInfo($rs->naturalTech, 'level', 1, 'price');
-			$rs->lifeToPay = $researchHelper->getInfo($rs->lifeTech, 'level', 1, 'price');
-			$rs->socialToPay = $researchHelper->getInfo($rs->socialTech, 'level', 1, 'price');
-			$rs->informaticToPay = $researchHelper->getInfo($rs->informaticTech, 'level', 1, 'price');
-			$researchManager->add($rs);
-
-			// CREATION DE LA BASE ORBITALE
-			$ob = new OrbitalBase();
+			$this->researchRepository->save($rs);
 
 			// choix de la place
-			// @TODO Move to repository
-			$qr = $database->prepare(
-				'SELECT p.id FROM place AS p
-		INNER JOIN system AS sy ON p.rSystem = sy.id
-			INNER JOIN sector AS se ON sy.rSector = se.id
-		WHERE p.typeOfPlace = 1
-			AND se.id = ?
-			AND p.rPlayer IS NULL
-		ORDER BY p.population ASC
-		LIMIT 0, 30'
+			$sector = $this->sectorRepository->get(Uuid::fromString($session->get('inscription')->get('sector')))
+				?? throw new BadRequestHttpException('Sector not found');
+			$candidatePlaces = $this->placeRepository->findPlacesIdsForANewBase($sector);
+
+			$placeId = $candidatePlaces[rand(0, count($candidatePlaces) - 1)];
+			$place = $this->placeRepository->get($placeId);
+			// CREATION DE LA BASE ORBITALE
+			$ob = new OrbitalBase(
+				id: Uuid::v4(),
+				place: $place,
+				player: $player,
+				name: $session->get('inscription')->get('base'),
 			);
-			$qr->execute([$session->get('inscription')->get('sector')]);
-			$aw = $qr->fetchAll();
-
-			$placeId = $aw[rand(0, (count($aw) - 1))]['id'];
-
-			$ob->setRPlace($placeId);
-
-			$ob->setRPlayer($player->getId());
-			$ob->setName($session->get('inscription')->get('base'));
 
 			// création des premiers bâtiments
 			if ($session->get('high-mode')) {
 				// batiments haut-level
-				$ob->setLevelGenerator(35);
-				$ob->setLevelRefinery(35);
-				$ob->setLevelDock1(35);
-				$ob->setLevelDock2(10);
-				$ob->setLevelDock3(0);
-				$ob->setLevelTechnosphere(35);
-				$ob->setLevelCommercialPlateforme(10);
-				$ob->setLevelStorage(35);
-				$ob->setLevelRecycling(15);
-				$ob->setLevelSpatioport(10);
-				$ob->setResourcesStorage(3000000);
+				$ob->levelGenerator = 35;
+				$ob->levelRefinery = 35;
+				$ob->levelDock1 = 35;
+				$ob->levelDock2 = 10;
+				$ob->levelDock3 = 0;
+				$ob->levelTechnosphere = 35;
+				$ob->levelCommercialPlateforme = 10;
+				$ob->levelStorage = 35;
+				$ob->levelRecycling = 15;
+				$ob->levelSpatioport = 10;
+				$ob->resourcesStorage = 3000000;
 
 				// remplir le dock
-				$orbitalBaseManager->addShipToDock($ob, 1, 50);
-				$orbitalBaseManager->addShipToDock($ob, 2, 50);
-				$orbitalBaseManager->addShipToDock($ob, 3, 10);
-				$orbitalBaseManager->addShipToDock($ob, 4, 10);
-				$orbitalBaseManager->addShipToDock($ob, 5, 5);
-				$orbitalBaseManager->addShipToDock($ob, 6, 5);
-				$orbitalBaseManager->addShipToDock($ob, 7, 2);
-				$orbitalBaseManager->addShipToDock($ob, 8, 2);
-				$orbitalBaseManager->addShipToDock($ob, 9, 1);
-				$orbitalBaseManager->addShipToDock($ob, 10, 1);
-				$orbitalBaseManager->addShipToDock($ob, 11, 0);
-				$orbitalBaseManager->addShipToDock($ob, 12, 0);
+				$ob->addShips(Ship::TYPE_PEGASE, 50);
+				$ob->addShips(Ship::TYPE_SATYRE, 50);
+				$ob->addShips(Ship::TYPE_CHIMERE, 10);
+				$ob->addShips(Ship::TYPE_SIRENE, 10);
+				$ob->addShips(Ship::TYPE_DRYADE, 5);
+				$ob->addShips(Ship::TYPE_MEDUSE, 5);
+				$ob->addShips(Ship::TYPE_GRIFFON, 2);
+				$ob->addShips(Ship::TYPE_CYCLOPE, 2);
+				$ob->addShips(Ship::TYPE_MINOTAURE, 1);
+				$ob->addShips(Ship::TYPE_HYDRE, 1);
+				$ob->addShips(Ship::TYPE_CERBERE, 0);
+				$ob->addShips(Ship::TYPE_PHENIX, 0);
 			} else {
-				$ob->setLevelGenerator(1);
-				$ob->setLevelRefinery(1);
-				$ob->setLevelDock1(0);
-				$ob->setLevelDock2(0);
-				$ob->setLevelDock3(0);
-				$ob->setLevelTechnosphere(0);
-				$ob->setLevelCommercialPlateforme(0);
-				$ob->setLevelStorage(1);
-				$ob->setLevelRecycling(0);
-				$ob->setLevelSpatioport(0);
-				$ob->setResourcesStorage(1000);
+				$ob->levelGenerator = 1;
+				$ob->levelRefinery = 1;
+				$ob->levelDock1 = 0;
+				$ob->levelDock2 = 0;
+				$ob->levelDock3 = 0;
+				$ob->levelTechnosphere = 0;
+				$ob->levelCommercialPlateforme = 0;
+				$ob->levelStorage = 1;
+				$ob->levelRecycling = 0;
+				$ob->levelSpatioport = 0;
+				$ob->resourcesStorage = 1000;
 			}
 
-			$orbitalBaseManager->updatePoints($ob);
+			$this->orbitalBasePointsHandler->updatePoints($ob);
 
 			// initialisation des investissement
-			$ob->setISchool(500);
-			$ob->setIAntiSpy(500);
+			$ob->iSchool = 500;
+			$ob->iAntiSpy = 500;
 
 			// ajout de la base
-			$ob->uOrbitalBase = Utils::now();
-			$ob->setDCreation(Utils::now());
-			$orbitalBaseManager->add($ob);
+			$ob->updatedAt = new \DateTimeImmutable();
+			$ob->createdAt = new \DateTimeImmutable();
 
-			// ajout des techs haut-level
-			if ($session->get('high-mode')) {
-				$technologyManager->addTech($player->id, TechnologyId::COM_PLAT_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::DOCK2_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::DOCK3_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::RECYCLING_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SPATIOPORT_UNBLOCK, 1);
+			$this->createPlayerTechnology($player, $session->get('high-mode', false));
 
-				$technologyManager->addTech($player->id, TechnologyId::SHIP0_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP1_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP2_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP3_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP4_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP5_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP6_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP7_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP8_UNBLOCK, 1);
-				$technologyManager->addTech($player->id, TechnologyId::SHIP9_UNBLOCK, 1);
+			$this->orbitalBaseRepository->save($ob);
 
-				$technologyManager->addTech($player->id, TechnologyId::COLONIZATION, 1);
-				$technologyManager->addTech($player->id, TechnologyId::CONQUEST, 1);
-				$technologyManager->addTech($player->id, TechnologyId::BASE_QUANTITY, 4);
-			}
+			$this->placeManager->turnAsSpawnPlace($place, $player);
+
+			$this->entityManager->commit();
+
+			$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place), PlaceOwnerChangeEvent::NAME);
 
 			// modification de la place
-			$place = $placeManager->turnAsSpawnPlace($placeId, $player->getId());
 
 			// confirmation au portail
 			if ('enabled' === $this->getParameter('apimode')) {
-				$return = $api->confirmInscription($session->get('inscription')->get('bindkey'));
+				$return = $this->api->confirmInscription($session->get('inscription')->get('bindkey'));
 			}
 			// clear les sessions
 			$session->remove('inscription');
 			$session->remove('prebindkey');
 
 			// ajout aux conversation de faction et techniques
-			$readingDate = date('Y-m-d H:i:s', (strtotime(Utils::now()) - 20));
+			$readingDate = new \DateTimeImmutable();
 
-			if (($factionAccount = $playerManager->getFactionAccount($player->rColor)) !== null) {
-				$S_CVM = $conversationManager->getCurrentSession();
-				$conversationManager->newSession();
-				$conversationManager->load(
-					[
-					'cu.rPlayer' => [$this->getParameter('id_jeanmi'), $factionAccount->id],
-				],
-					[],
-					[0, 2]
-				);
-
-				for ($i = 0; $i < $conversationManager->size(); ++$i) {
-					$user = new ConversationUser();
-					$user->rConversation = $conversationManager->get($i)->id;
-					$user->rPlayer = $player->getId();
-					$user->convPlayerStatement = ConversationUser::US_STANDARD;
-					$user->convStatement = ConversationUser::CS_ARCHIVED;
-					$user->dLastView = $readingDate;
-
-					$conversationUserManager->add($user);
-				}
-
-				$conversationManager->changeSession($S_CVM);
-			}
-			$entityManager->commit();
+//			if (($factionAccount = $this->playerRepository->getFactionAccount($player->faction)) !== null) {
+//				$this->conversationManager->load(
+//					[
+//					'cu.rPlayer' => [$this->getParameter('id_jeanmi'), $factionAccount->id],
+//				],
+//					[],
+//					[0, 2]
+//				);
+//
+//				for ($i = 0; $i < $this->conversationManager->size(); ++$i) {
+//					$user = new ConversationUser(
+//						id: Uuid::v4(),
+//						conversation: '',
+//						player: $player,
+//						lastViewedAt: $readingDate,
+//						playerStatus: ConversationUser::US_STANDARD,
+//						conversationStatus: ConversationUser::CS_ARCHIVED,
+//					);
+//
+//					$this->conversationUserManager->add($user);
+//				}
+//			}
 			// redirection vers connection
 			return $this->redirectToRoute('connect', [
-				'bindKey' => $security->crypt($security->buildBindkey($player->getBind())),
+				'bindKey' => $this->security->crypt($this->security->buildBindkey($player->bind)),
 			]);
 		} catch (\Throwable $t) {
 			// @TODO handle this
+			throw $t;
 			dd($t);
 			// tentative de réparation de l'erreur
 			return $this->redirectToRoute('create_character', [
 				'step' => 'place-choice',
 			]);
 		}
+	}
+
+	private function createPlayerTechnology(Player $player, bool $isHighLevel): void
+	{
+		$technology = ($isHighLevel) ? new Technology(
+			id: Uuid::v4(),
+			player: $player,
+			comPlatUnblock: 1,
+			dock2Unblock: 1,
+			dock3Unblock: 1,
+			recyclingUnblock: 1,
+			spatioportUnblock: 1,
+			ship0Unblock: 1,
+			ship1Unblock: 1,
+			ship2Unblock: 1,
+			ship3Unblock: 1,
+			ship4Unblock: 1,
+			ship5Unblock: 1,
+			ship6Unblock: 1,
+			ship7Unblock: 1,
+			ship8Unblock: 1,
+			ship9Unblock: 1,
+			colonization: 1,
+			conquest: 1,
+			baseQuantity: 4,
+		) : new Technology(id: Uuid::v4(), player: $player);
+
+		$this->technologyRepository->save($technology);
 	}
 }

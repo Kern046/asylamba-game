@@ -2,30 +2,31 @@
 
 namespace App\Modules\Gaia\Manager;
 
-use App\Classes\Database\Database;
-
+// Process manually the sector factions
 class GalaxyColorManager
 {
+
+	protected array $system = [];
+	protected array $sector = [];
 	protected bool $mustApply = true;
 
 	public function __construct(
-		protected Database $database,
-		protected array $availableFactions,
-		protected int $limitConquestSector
+		private readonly array $availableFactions,
+		private readonly int $limitConquestSector
 	) {
 	}
 
-	public function apply()
+	public function apply(): void
 	{
 		$this->mustApply = true;
 	}
 
-	public function mustApply()
+	public function mustApply(): bool
 	{
 		return $this->mustApply;
 	}
 
-	public function applyAndSave()
+	public function applyAndSave(): void
 	{
 		$this->loadSystem();
 		$this->loadSector();
@@ -35,10 +36,7 @@ class GalaxyColorManager
 		$this->saveSector();
 	}
 
-	protected $system = [];
-	protected $sector = [];
-
-	public function loadSystem()
+	public function loadSystem(): void
 	{
 		$requestPart = '';
 		foreach ($this->availableFactions as $faction) {
@@ -71,7 +69,7 @@ class GalaxyColorManager
 		}
 	}
 
-	public function saveSystem()
+	public function saveSystem(): void
 	{
 		foreach ($this->system as $k => $v) {
 			if (true == $v['hasChanged']) {
@@ -81,7 +79,7 @@ class GalaxyColorManager
 		}
 	}
 
-	public function loadSector()
+	public function loadSector(): void
 	{
 		$qr = $this->database->query('SELECT id, rColor, prime FROM sector ORDER BY id');
 		while ($aw = $qr->fetch()) {
@@ -93,7 +91,7 @@ class GalaxyColorManager
 		}
 	}
 
-	public function saveSector()
+	public function saveSector(): void
 	{
 		foreach ($this->sector as $k => $v) {
 			if (true == $v['hasChanged']) {
@@ -103,7 +101,7 @@ class GalaxyColorManager
 		}
 	}
 
-	public function changeColorSystem()
+	public function changeColorSystem(): void
 	{
 		foreach ($this->system as $k => $v) {
 			if ($v['systemColor'] + array_sum($v['color']) == 0) {
@@ -145,7 +143,7 @@ class GalaxyColorManager
 		}
 	}
 
-	public function changeColorSector()
+	public function changeColorSector(): void
 	{
 		$sectorUpdatedColor = [];
 

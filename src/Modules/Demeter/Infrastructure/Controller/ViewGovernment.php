@@ -6,8 +6,8 @@ use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Manager\Forum\FactionNewsManager;
 use App\Modules\Demeter\Resource\LawResources;
 use App\Modules\Gaia\Manager\SectorManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\CreditTransactionManager;
-use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,13 +22,13 @@ class ViewGovernment extends AbstractController
 		FactionNewsManager $factionNewsManager,
 		CreditTransactionManager $creditTransactionManager,
 		ColorManager $colorManager,
-		PlayerManager $playerManager,
+		PlayerRepositoryInterface $playerRepository,
 		SectorManager $sectorManager,
 	): Response {
 		if (!$currentPlayer->isGovernmentMember()) {
 			throw $this->createAccessDeniedException();
 		}
-		$faction = $colorManager->get($currentPlayer->getRColor());
+		$faction = $currentPlayer->getRColor();
 
 		$creditTransactionManager->load(
 			['rSender' => $faction->id, 'type' => CreditTransaction::TYP_F_TO_P],
@@ -40,13 +40,13 @@ class ViewGovernment extends AbstractController
 			'faction' => $faction,
 			'parsed_description' => $colorManager->getParsedDescription($faction),
 			'credit_transactions' => $creditTransactionManager->getAll(),
-			'senators' => $playerManager->getParliamentMembers($faction->id),
+			'senators' => $playerRepository->getParliamentMembers($faction),
 			'faction_sectors' => $sectorManager->getFactionSectors($faction->id),
 			'faction_news' => $factionNewsManager->getFactionNews($faction->id),
 			'faction_news_to_edit' => $request->query->has('news') ? $factionNewsManager->get($request->query->get('news')) : null,
-			'faction_members' => $playerManager->getFactionPlayersByName($faction->id),
-			'members_count' => $playerManager->countByFactionAndStatements($faction->id, [Player::ACTIVE]),
-			'government_members' => $playerManager->getGovernmentMembers($faction->id),
+			'faction_members' => $playerRepository->getFactionPlayersByName($faction),
+			'members_count' => $playerRepository->countByFactionAndStatements($faction, [Player::ACTIVE]),
+			'government_members' => $playerRepository->getGovernmentMembers($faction),
 			'total_laws_count' => LawResources::size(),
 		]);
 	}

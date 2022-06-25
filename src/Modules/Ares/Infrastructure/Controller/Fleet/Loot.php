@@ -2,142 +2,122 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Game;
+use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
 use App\Modules\Ares\Domain\Event\Fleet\PlannedLootEvent;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
-use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
-use App\Modules\Gaia\Manager\PlaceManager;
-use App\Modules\Gaia\Manager\SectorManager;
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
-use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Uid\Uuid;
 
 class Loot extends AbstractController
 {
+	public function __construct(
+		private readonly CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		private readonly CommanderManager $commanderManager,
+		private readonly CommanderRepositoryInterface $commanderRepository,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly EventDispatcherInterface $eventDispatcher,
+	) {
+	}
+
+	#[Route(
+		path: '/commanders/{id}/loot',
+		name: 'loot',
+		methods: Request::METHOD_GET,
+	)]
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		ColorManager $colorManager,
-		CommanderManager $commanderManager,
-		PlaceManager $placeManager,
-		PlayerManager $playerManager,
-		SectorManager $sectorManager,
-		EntityManager $entityManager,
-		EventDispatcherInterface $eventDispatcher,
-		int $id,
+		PlaceRepositoryInterface $placeRepository,
+		CommanderArmyHandler $commanderArmyHandler,
+		Uuid $id,
 	): Response {
-		// @TODO simplify this hell
-		$place = $placeManager->get($request->query->getInt('placeId'));
-		if (null === $place->rPlayer || ($player = $playerManager->get($place->rPlayer)) === null) {
-			if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
-				if (null !== $place) {
-					if (Place::TERRESTRIAL == $place->typeOfPlace) {
-						if ($currentPlayer->getRColor() != $place->getPlayerColor()) {
-							$home = $placeManager->get($commander->getRBase());
+		$placeId = $request->query->get('placeId') ?? throw new BadRequestHttpException('Missing place ID');
 
-							$length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-							$duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
-
-							if ($commander->getPev() > 0) {
-								if (Commander::AFFECTED == $commander->statement) {
-									$sector = $sectorManager->get($place->rSector);
-
-									$sectorColor = $colorManager->get($sector->rColor);
-									$isFactionSector = $sector->rColor == $commander->playerColor || Color::ALLY == $sectorColor->colorLink[$currentPlayer->getRColor()];
-
-									$commander->destinationPlaceName = $place->baseName;
-									if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
-										$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration);
-										$this->addFlash('success', 'Flotte envoyée.');
-										// tutorial
-										$entityManager->flush();
-
-										$eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
-
-										if ($request->query->has('redirect')) {
-											return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
-										}
-
-										return $this->redirect($request->headers->get('referer'));
-									} else {
-										throw new ErrorException('Cet emplacement est trop éloigné.');
-									}
-								} else {
-									throw new ErrorException('Cet officier est déjà en déplacement.');
-								}
-							} else {
-								throw new ErrorException('Vous devez affecter au moins un vaisseau à votre officier.');
-							}
-						} else {
-							throw new ErrorException('Vous ne pouvez pas attaquer un lieu appartenant à votre Faction.');
-						}
-					} else {
-						throw new ErrorException('Ce lieu n\'est pas habité.');
-					}
-				} else {
-					throw new ErrorException('Ce lieu n\'existe pas.');
-				}
-			} else {
-				throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
-			}
-		} elseif ($player->level > 1 || $player->statement >= \App\Modules\Zeus\Model\Player::DELETED) {
-			if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
-				if (null !== $place) {
-					$color = $colorManager->get($currentPlayer->getRColor());
-
-					if ($currentPlayer->getRColor() != $place->getPlayerColor() && Color::ALLY != $color->colorLink[$player->rColor]) {
-						$home = $placeManager->get($commander->getRBase());
-
-						$length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-						$duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
-
-						if ($commander->getPev() > 0) {
-							$sector = $sectorManager->get($place->rSector);
-							$sectorColor = $colorManager->get($sector->rColor);
-
-							$isFactionSector = $sector->rColor == $commander->playerColor || Color::ALLY == $sectorColor->colorLink[$currentPlayer->getRColor()];
-
-							$commander->destinationPlaceName = $place->baseName;
-							if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
-								$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::LOOT, $length, $duration);
-								$this->addFlash('success', 'Flotte envoyée.');
-
-								$entityManager->flush();
-
-								$eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
-
-								if ($request->query->has('redirect')) {
-									return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
-								}
-
-								return $this->redirect($request->headers->get('referer'));
-							} else {
-								throw new ErrorException('Ce lieu est trop éloigné.');
-							}
-						} else {
-							throw new ErrorException('Vous devez affecter au moins un vaisseau à votre officier.');
-						}
-					} else {
-						throw new ErrorException('Vous ne pouvez pas attaquer un lieu appartenant à votre Faction ou d\'une faction alliée.');
-					}
-				} else {
-					throw new ErrorException('Ce lieu n\'existe pas.');
-				}
-			} else {
-				throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
-			}
-		} else {
-			throw new ErrorException('Vous ne pouvez pas piller un joueur de niveau 1.');
+		if (!Uuid::isValid($placeId)) {
+			throw new BadRequestHttpException('The given place ID is not a valid UUID');
 		}
+
+		// @TODO simplify this hell
+		$place = $placeRepository->get(Uuid::fromString($placeId)) ?? throw $this->createNotFoundException('Place not found');
+		$commander = $this->commanderRepository->get($id) ?? throw $this->createNotFoundException('Commander not found');
+
+		if ($commander->player->id !== $currentPlayer->id) {
+			throw $this->createAccessDeniedException('This commander does not belong to you');
+		}
+
+		$home = $commander->base;
+
+		// TODO replace with proper services
+		$length = Game::getDistance(
+			$home->place->system->xPosition,
+			$place->system->xPosition,
+			$home->place->system->yPosition,
+			$place->system->yPosition,
+		);
+		$duration = Game::getTimeToTravel(
+			$home->place,
+			$place,
+			$this->currentPlayerBonusRegistry->getPlayerBonus(),
+		);
+
+		if (0 === $commanderArmyHandler->getPev($commander)) {
+			throw new ConflictHttpException('You cannot send a commander with an empty fleet');
+		}
+
+		$sector = $place->system->sector;
+		$sectorColor = $sector->faction;
+		// Move that part in a Specification class
+		$isFactionSector = $sectorColor->id === $currentPlayer->faction->id || Color::ALLY == $sectorColor->relations[$currentPlayer->faction->identifier];
+
+		// Move that part in a Specification class
+		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
+			throw new ConflictHttpException('Ce lieu est trop éloigné.');
+		}
+
+		// Move that part in a Specification class
+		if (null !== ($targetPlayer = $place->player) && 1 === $targetPlayer->level && !in_array($place->player->statement, [Player::DELETED, Player::DEAD])) {
+			throw new ConflictHttpException('Vous ne pouvez pas piller un joueur actif de niveau 1.');
+		}
+
+		$faction = $currentPlayer->faction;
+
+		// Move that part in a Specification class
+		if (null !== $targetPlayer && ($faction->id === $targetPlayer->faction->id || Color::ALLY === $faction->relations[$targetPlayer->faction->identifier])) {
+			throw new ConflictHttpException('You cannot loot an ally planet');
+		}
+
+		if (Place::TERRESTRIAL !== $place->typeOfPlace) {
+			throw new ConflictHttpException('This place is not inhabited');
+		}
+
+		$this->commanderManager->move($commander, $place, $commander->base->place, Commander::LOOT, $length, $duration);
+
+		$this->addFlash('success', 'Flotte envoyée.');
+
+		$this->entityManager->flush();
+
+		$this->eventDispatcher->dispatch(new PlannedLootEvent($place, $commander, $currentPlayer));
+
+		if ($request->query->has('redirect')) {
+			return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
+		}
+
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

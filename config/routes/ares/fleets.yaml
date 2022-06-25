@@ -2,10 +2,6 @@ move_fleet:
     path: /{id}/move
     controller: App\Modules\Ares\Infrastructure\Controller\Fleet\Move
 
-loot:
-    path: /{id}/loot
-    controller: App\Modules\Ares\Infrastructure\Controller\Fleet\Loot
-
 colonize:
     path: /{id}/colonize
     controller: App\Modules\Ares\Infrastructure\Controller\Fleet\Colonize

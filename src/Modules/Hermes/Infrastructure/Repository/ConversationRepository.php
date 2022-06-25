@@ -2,38 +2,45 @@
 
 namespace App\Modules\Hermes\Infrastructure\Repository;
 
-use App\Classes\Entity\AbstractRepository;
 use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
+use App\Modules\Hermes\Model\Conversation;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
 
-class ConversationRepository extends AbstractRepository implements ConversationRepositoryInterface
+/**
+ * @extends DoctrineRepository<Conversation>
+ */
+class ConversationRepository extends DoctrineRepository implements ConversationRepositoryInterface
 {
-	public function countPlayerConversations(int $playerId): int
+	public function __construct(ManagerRegistry $registry)
 	{
-		$qr = $this->connection->prepare(
-			'SELECT COUNT(c.id) AS count
-			FROM `conversation` AS c
-			LEFT JOIN `conversationUser` AS u
-			ON u.rConversation = c.id
-			WHERE u.rPlayer = :player_id
-			AND u.dLastView < c.dLastMessage'
-		);
-		$qr->execute(['player_id' => $playerId]);
-
-		return $qr->fetch()['count'];
+		parent::__construct($registry, Conversation::class);
 	}
 
-	public function insert($entity)
+	public function getOneByPlayer(Player $player): Conversation
 	{
-		// TODO: Implement insert() method.
+		$qb = $this->createQueryBuilder('c');
+
+		$qb
+			->leftJoin('c.players', 'cu')
+			->where('cu.player = :player')
+			->setParameter('player', $player);
+
+		return $qb->getQuery()->getResult();
 	}
 
-	public function update($entity)
+	public function countPlayerConversations(Player $player): int
 	{
-		// TODO: Implement update() method.
-	}
+		$qb = $this->createQueryBuilder('c');
 
-	public function remove($entity)
-	{
-		// TODO: Implement remove() method.
+		$qb
+			->select('COUNT(c.id)')
+			->leftJoin('c.players', 'cu')
+			->where('cu.player = :player')
+			->andWhere('cu.lastViewedAt < c.lastMessageAt')
+			->setParameter('player', $player);
+
+		return $qb->getQuery()->getSingleScalarResult();
 	}
 }

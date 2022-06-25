@@ -74,7 +74,7 @@
 
 			<h4>Gouvernement actuel</h4>
 
-			{% set statuses = get_faction_info(faction.id, 'status') %}
+			{% set statuses = get_faction_info(faction.identifier, 'status') %}
 
 			{% for minister in government_members %}
 				<div class="player">
@@ -106,11 +106,11 @@
 			</div>
 			<div class="number-box half grey">
 				<span class="label">Nombre de points des territoires contrôlés</span>
-				<span class="value">{{ faction.sectors|number }}</span>
+				<span class="value">{{ sectors_count }}</span>
 			</div>
 			<div class="number-box half grey">
 				<span class="label">Nombre de joueurs actifs</span>
-				<span class="value">{{ faction.activePlayers|number }}</span>
+				<span class="value">{{ active_players_count }}</span>
 			</div>
 		</div>
 	</div>

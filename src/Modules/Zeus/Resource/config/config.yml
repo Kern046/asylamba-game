@@ -15,27 +15,21 @@ services:
     _defaults:
         autowire: true
         autoconfigure: true
+        bind:
+            $gaiaId: '%id_gaia%'
 
     App\Modules\Zeus\:
         resource: '%kernel.project_dir%/src/Modules/Zeus/'
         exclude:
             - '../../Message'
             - '../../Model'
-            - '../../Repository'
             - '../../Resource'
 
     App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface: '@App\Modules\Zeus\Application\Handler\Bonus\BonusApplier'
 
     App\Modules\Zeus\Infrastructure\ArgumentResolver\CurrentPlayerValueResolver:
         tags:
-            - { name: 'controller.argument_value_resolver', priority: 50 }
-
-    App\Modules\Zeus\Manager\PlayerManager:
-        arguments:
-            $playerBaseLevel: "%zeus.player.base_level%"
-            $playerTaxCoeff: "%zeus.player.tax_coeff%"
-            $serverId: "%server_id%"
-            $gaiaId: '%id_gaia%'
+            - { name: 'controller.argument_value_resolver', priority: 150 }
 
     App\Modules\Zeus\Infrastructure\Twig\PlayerExtension:
         arguments:

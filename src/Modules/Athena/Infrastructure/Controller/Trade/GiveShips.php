@@ -2,43 +2,50 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
-use App\Classes\Library\Utils;
+use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialShippingManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Manager\TransactionManager;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Gaia\Manager\PlaceManager;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class GiveShips extends AbstractController
 {
 	public function __invoke(
 		Request $request,
+		DurationHandler $durationHandler,
 		CommercialShippingManager $commercialShippingManager,
 		Player $currentPlayer,
 		OrbitalBase $currentBase,
-		OrbitalBaseManager $orbitalBaseManager,
+		CommercialShippingRepositoryInterface $commercialShippingRepository,
+		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		OrbitalBaseHelper $orbitalBaseHelper,
-		PlaceManager $placeManager,
-		TransactionManager $transactionManager,
-		NotificationManager $notificationManager,
-		EntityManager $entityManager,
+		TransactionRepositoryInterface $transactionRepository,
+		NotificationRepositoryInterface $notificationRepository,
 	): Response {
-		if ($currentBase->getId() === ($baseId = $request->request->get('baseId'))) {
+		$baseId = $request->request->get('baseId') ?? throw new BadRequestHttpException('Missing base id');
+
+		if (!Uuid::isValid($baseId)) {
+			throw new BadRequestHttpException('Invalid base id');
+		}
+
+		$baseUuid = Uuid::fromString($baseId);
+		if ($currentBase->id === $baseUuid) {
 			throw new BadRequestHttpException('You cannot send ships to your current base');
 		}
 
@@ -75,11 +82,13 @@ class GiveShips extends AbstractController
 		}
 
 		$commercialShipQuantity = Game::getCommercialShipQuantityNeeded(Transaction::TYP_SHIP, $ships, $shipType);
-		$totalShips = $orbitalBaseHelper->getBuildingInfo(6, 'level', $currentBase->getLevelCommercialPlateforme(), 'nbCommercialShip');
+		$totalShips = $orbitalBaseHelper->getBuildingInfo(6, 'level', $currentBase->levelCommercialPlateforme, 'nbCommercialShip');
 		$usedShips = 0;
 
-		foreach ($currentBase->commercialShippings as $commercialShipping) {
-			if ($commercialShipping->rBase == $currentBase->rPlace) {
+		// TODO make service
+		$commercialShippings = $commercialShippingRepository->getByBase($currentBase);
+		foreach ($commercialShippings as $commercialShipping) {
+			if ($commercialShipping->originBase->id === $currentBase->id) {
 				$usedShips += $commercialShipping->shipQuantity;
 			}
 		}
@@ -90,61 +99,84 @@ class GiveShips extends AbstractController
 			throw new ConflictHttpException('Missing transport ships to perform this operation');
 		}
 
-		if (($otherBase = $orbitalBaseManager->get($baseId)) === null) {
-			throw $this->createNotFoundException('Destination base not found');
-		}
+		$otherBase = $orbitalBaseRepository->get($baseUuid) ?? throw $this->createNotFoundException('Destination base not found');
 		// load places to compute travel time
-		$startPlace = $placeManager->get($currentBase->getRPlace());
-		$destinationPlace = $placeManager->get($otherBase->getRPlace());
+		$startPlace = $currentBase->place;
+		$destinationPlace = $otherBase->place;
+		// TODO implement bonus
 		$timeToTravel = Game::getTimeToTravelCommercial($startPlace, $destinationPlace);
-		$departure = Utils::now();
-		$arrival = Utils::addSecondsToDate($departure, $timeToTravel);
+		$departure = new \DateTimeImmutable();
+		$arrival = $durationHandler->getDurationEnd($departure, $timeToTravel);
 
 		// création de la transaction
-		$tr = new Transaction();
-		$tr->rPlayer = $currentPlayer->getId();
-		$tr->rPlace = $currentBase->getRPlace();
-		$tr->type = Transaction::TYP_SHIP;
-		$tr->quantity = $ships;
-		$tr->identifier = $shipType;
-		$tr->price = 0;
-		$tr->commercialShipQuantity = $commercialShipQuantity;
-		$tr->statement = Transaction::ST_COMPLETED;
-		$tr->dPublication = Utils::now();
-		$transactionManager->add($tr);
+		// TODO why a transaction ? Must destroy the price rates
+		// To handle the ships quantity.
+		// TODO Refactor ships quantity and move this field to commercial shipping entity
+		$tr = new Transaction(
+			id: Uuid::v4(),
+			player: $currentPlayer,
+			base: $currentBase,
+			type: Transaction::TYP_SHIP,
+			quantity: $ships,
+			identifier: $shipType,
+			price: 0,
+			statement: Transaction::ST_COMPLETED,
+			publishedAt: new \DateTimeImmutable(),
+			currentRate: $transactionRepository->getExchangeRate(Transaction::TYP_SHIP),
+		);
+		$transactionRepository->save($tr);
 
 		// création du convoi
-		$cs = new CommercialShipping();
-		$cs->rPlayer = $currentPlayer->getId();
-		$cs->rBase = $currentBase->getRPlace();
-		$cs->rBaseDestination = $otherBase->getRPlace();
-		$cs->rTransaction = $tr->id;
-		$cs->resourceTransported = 0;
-		$cs->shipQuantity = $commercialShipQuantity;
-		$cs->dDeparture = $departure;
-		$cs->dArrival = $arrival;
-		$cs->statement = CommercialShipping::ST_GOING;
+		$cs = new CommercialShipping(
+			id: Uuid::v4(),
+			player: $currentPlayer,
+			originBase: $currentBase,
+			destinationBase: $otherBase,
+			transaction: $tr,
+			resourceTransported: 0,
+			shipQuantity: $commercialShipQuantity,
+			departureDate: $departure,
+			arrivalDate: $arrival,
+			statement: CommercialShipping::ST_GOING,
+		);
 
 		$commercialShippingManager->add($cs);
 
-		$currentBase->setShipStorage($shipType, $currentBase->getShipStorage($shipType) - $ships);
+		$currentBase->removeShips($shipType, $ships);
 
-		if ($currentBase->getRPlayer() != $otherBase->getRPlayer()) {
-			$n = new Notification();
-			$n->setRPlayer($otherBase->getRPlayer());
-			$n->setTitle('Envoi de vaisseaux');
-			$n->addBeg()->addTxt($otherBase->getName())->addSep();
-			$n->addLnk('embassy/player-'.$currentPlayer->getId(), $currentPlayer->getName());
-			$n->addTxt(' a lancé un convoi de ')->addStg(Format::numberFormat($ships))->addTxt(' '.$shipName.' depuis sa base ');
-			$n->addLnk('map/place-'.$currentBase->getRPlace(), $currentBase->getName())->addTxt('. ');
-			$n->addBrk()->addTxt('Quand le convoi arrivera, les vaisseaux seront placés dans votre hangar.');
-			$n->addSep()->addLnk('bases/base-'.$otherBase->getId().'/view-commercialplateforme/mode-market', 'vers la place du commerce →');
-			$n->addEnd();
+		if ($currentBase->player->id !== $otherBase->player->id) {
 
-			$notificationManager->add($n);
+			$notification = NotificationBuilder::new()
+				->setTitle('Envoi de vaisseaux')
+				->setContent(
+					NotificationBuilder::paragraph(
+						$otherBase->name,
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->generateUrl('embassy', ['player' => $currentPlayer->id]),
+							$currentPlayer->name,
+						),
+						' a lancé un convoi de ',
+						NotificationBuilder::bold(Format::numberFormat($ships)),
+						' '.$shipName.' depuis sa base ',
+						NotificationBuilder::link(
+							$this->generateUrl('map', ['place' => $currentBase->place->id]),
+							$currentBase->name,
+						),
+						'.',
+					),
+					NotificationBuilder::paragraph(
+						'Quand le convoi arrivera, les vaisseaux seront placés dans votre hangar.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->generateUrl('switchbase', ['baseId' => $otherBase->id, 'page' => 'market']),
+							'vers la place du commerce →',
+						),
+					)
+				)
+				->for($otherBase->player);
+			$notificationRepository->save($notification);
 		}
-
-		$entityManager->flush();
 
 		$this->addFlash('success', 'Vaisseaux envoyés');
 

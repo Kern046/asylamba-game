@@ -1,31 +1,21 @@
 <?php
 
-/**
- * Sector Manager.
- *
- * @author Expansion
- * @copyright Expansion - le jeu
- *
- * @update 20.05.13
- */
-
 namespace App\Modules\Gaia\Manager;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Redis\RedisManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Model\Sector;
-use App\Modules\Zeus\Manager\PlayerManager;
 
 class SectorManager
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected RedisManager $redisManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected PlayerManager $playerManager,
-		protected SystemManager $systemManager,
-		protected array $scores = [],
+		private readonly RedisManager $redisManager,
+		private readonly SectorRepositoryInterface $sectorRepository,
+		private readonly SystemRepositoryInterface $systemRepository,
+		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private readonly array $scores = [],
 	) {
 	}
 
@@ -36,42 +26,9 @@ class SectorManager
 		// );
 	}
 
-	/**
-	 * @param int $id
-	 *
-	 * @return Sector
-	 */
-	public function get($id)
-	{
-		return $this->entityManager->getRepository(Sector::class)->get($id);
-	}
-
-	/**
-	 * @param int $factionId
-	 *
-	 * @return array
-	 */
-	public function getFactionSectors($factionId)
-	{
-		return $this->entityManager->getRepository(Sector::class)->getFactionSectors($factionId);
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAll()
-	{
-		return $this->entityManager->getRepository(Sector::class)->getAll();
-	}
-
-	public function changeOwnership(Sector $sector)
-	{
-		$this->entityManager->getRepository(Sector::class)->changeOwnership($sector);
-	}
-
 	public function calculateAllOwnerships()
 	{
-		foreach ($this->getAll() as $sector) {
+		foreach ($this->sectorRepository->getAll() as $sector) {
 			$this->calculateOwnership($sector);
 		}
 	}
@@ -79,33 +36,35 @@ class SectorManager
 	/**
 	 * @return array
 	 */
-	public function calculateOwnership(Sector $sector)
+	public function calculateOwnership(Sector $sector): array
 	{
-		$systems = $this->systemManager->getSectorSystems($sector->getId());
-		$bases = $this->orbitalBaseManager->getSectorBases($sector->getId());
+		$systems = $this->systemRepository->getSectorSystems($sector);
+		$bases = $this->orbitalBaseRepository->getSectorBases($sector);
 		$scores = [];
 
 		foreach ($bases as $base) {
-			$player = $this->playerManager->get($base->rPlayer);
+			$player = $base->player;
 
-			$scores[$player->rColor] =
-				(!empty($scores[$player->rColor]))
-				? $scores[$player->rColor] + $this->scores[$base->typeOfBase]
+			$scores[$player->faction->identifier] =
+				(!empty($scores[$player->faction->identifier]))
+				? $scores[$player->faction->identifier] + $this->scores[$base->typeOfBase]
 				: $this->scores[$base->typeOfBase]
 			;
 		}
 		// For each system, the owning faction gains two points
 		foreach ($systems as $system) {
-			if (0 === $system->rColor) {
+			if (null === $system->faction) {
 				continue;
 			}
-			$scores[$system->rColor] = (!empty($scores[$system->rColor])) ? $scores[$system->rColor] + 2 : 2;
+			$scores[$system->faction->identifier] = (!empty($scores[$system->faction->identifier]))
+				? $scores[$system->faction->identifier] + 2
+				: 2;
 		}
 		$scores[0] = 0;
 		arsort($scores);
 		reset($scores);
 
-		$this->redisManager->getConnection()->set('sector:'.$sector->getId(), serialize($scores));
+		$this->redisManager->getConnection()->set('sector:'.$sector->id, serialize($scores));
 
 		return $scores;
 	}

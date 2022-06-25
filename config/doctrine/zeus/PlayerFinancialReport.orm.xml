@@ -1,0 +1,18 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Zeus\Model\PlayerFinancialReport">
+		<id name="id" type="uuid" />
+
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player" />
+
+		<field name="createdAt" column="created_at" type="datetime_immutable" />
+		<field name="initialWallet" column="initial_wallet" type="integer" />
+		<field name="populationTaxes" column="population_taxes" type="integer" />
+		<field name="commercialRoutesIncome" column="commercial_routes_income" type="integer" />
+		<field name="factionTaxes" column="faction_taxes" type="integer" />
+		<field name="antiSpyInvestments" column="anti_spy_investments" type="integer" />
+		<field name="universityInvestments" column="university_investments" type="integer" />
+		<field name="schoolInvestments" column="school_investments" type="integer" />
+		<field name="commandersWages" column="commanders_wages" type="integer" />
+		<field name="shipsCost" column="ships_cost" type="integer" />
+	</entity>
+</doctrine-mapping>

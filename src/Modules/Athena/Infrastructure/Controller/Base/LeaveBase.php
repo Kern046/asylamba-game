@@ -3,6 +3,7 @@
 namespace App\Modules\Athena\Infrastructure\Controller\Base;
 
 use App\Classes\Entity\EntityManager;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
@@ -26,6 +27,7 @@ class LeaveBase extends AbstractController
 		OrbitalBase $currentBase,
 		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		CommanderManager $commanderManager,
+		CommanderRepositoryInterface $commanderRepository,
 		OrbitalBaseManager $orbitalBaseManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		PlaceManager $placeManager,
@@ -35,9 +37,14 @@ class LeaveBase extends AbstractController
 		if (1 === $currentPlayerBasesRegistry->count()) {
 			throw new ConflictHttpException('vous ne pouvez pas abandonner votre unique planète');
 		}
-		$baseCommanders = $commanderManager->getBaseCommanders($currentBase->getId());
+		// @TODO replace with a count query
+		$baseCommanders = $commanderRepository->getBaseCommanders($currentBase);
 
-		$isAFleetMoving = \array_reduce($baseCommanders, fn (bool $carry, Commander $commander) => $carry || $commander->isMoving(), false);
+		$isAFleetMoving = \array_reduce(
+			$baseCommanders,
+			fn (bool $carry, Commander $commander) => $carry || $commander->isMoving(),
+			false
+		);
 		if ($isAFleetMoving) {
 			throw new ConflictHttpException('toute les flottes de cette base doivent être immobiles');
 		}

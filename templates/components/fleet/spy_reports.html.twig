@@ -12,12 +12,12 @@
 					{% for spy_report in spy_reports %}
 						<div class="item">
 							<div class="left">
-								<img src="{{ asset('build/media/map/action/spy.png') }}" alt="" class="color{{ spy_report.placeColor }}" />
+								<img src="{{ asset('build/media/map/action/spy.png') }}" alt="" class="color{{ spy_report.placeFaction.identifier ?? 0 }}" />
 							</div>
 
 							<div class="center">
-								<strong><a href="{{ path('map', {'place': spy_report.rPlace}) }}">{{ spy_report.placeName }}</a></strong>
-								{{- spy_report.dSpying|date|raw -}}
+								<strong><a href="{{ path('map', {'place': spy_report.place.id}) }}">{{ spy_report.placeName }}</a></strong>
+								{{- spy_report.createdAt|date|raw -}}
 							</div>
 
 							<div class="right">
@@ -28,7 +28,7 @@
 					{% endfor %}
 				</div>
 			{% else %}
-				<p>Il n\'y a aucun rapport d\'espionnage dans vos archives.</p>
+				<p>Il n'y a aucun rapport d'espionnage dans vos archives.</p>
 			{% endif %}
 		</div>
 	</div>

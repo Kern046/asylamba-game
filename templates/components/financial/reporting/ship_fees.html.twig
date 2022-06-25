@@ -10,7 +10,7 @@
 				<ul class="list-type-1">
 					{% for base in player_bases %}
 						{% set base_fleet_cost = get_base_fleet_cost(base) %}
-						{% set base_commanders = commanders_by_base[base.id] is defined ? commanders_by_base[base.id] : [] %}
+						{% set base_commanders = commanders_by_base[base.id.toRfc4122()] is defined ? commanders_by_base[base.id.toRfc4122()] : [] %}
 						{% set total_base = base_fleet_cost + base_commanders|reduce(
 							(carry, commander) => carry + get_fleet_cost(commander)
 						) %}

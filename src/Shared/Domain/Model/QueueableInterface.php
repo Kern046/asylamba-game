@@ -2,9 +2,7 @@
 
 namespace App\Shared\Domain\Model;
 
-interface QueueableInterface
+interface QueueableInterface extends DurationInterface
 {
-	public function getEndDate(): string;
-
 	public function getResourceIdentifier(): int;
 }
