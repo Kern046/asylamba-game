@@ -101,9 +101,12 @@ Encore
 	//.autoProvidejQuery()
 
 	.configureDevServerOptions(options => {
-		options.allowedHosts = 'game.kalaxia.wip';
-		options.https = {
-			pfx: path.join(process.env.HOME, '.symfony5/certs/default.p12'),
+		options.server = {
+			type: 'https',
+			options: {
+				pfx: path.join(process.env.HOME, '.symfony5/certs/default.p12'),
+				allowedHosts: 'game.kalaxia.wip',
+			}
 		};
 	})
 ;
