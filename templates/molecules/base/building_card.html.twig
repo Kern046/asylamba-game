@@ -1,7 +1,7 @@
 <div class="build-item {% if not building_data.real_level %}disable{% endif %}">
 	<div class="name">
 		<img src="{{ asset('build/media/orbitalbase/' ~ get_building_info(building_number, 'imageLink') ~ '.png') }}" alt="" />
-		<strong>{{ get_building_info(building_number, 'frenchName') }}</strong>
+		<strong class="leading-none">{{ get_building_info(building_number, 'frenchName') }}</strong>
 		{% if building_data.level > 0 %}
 			<span class="level hb lt" title="niveau actuel">{{ building_data.level }}</span>
 		{% endif %}

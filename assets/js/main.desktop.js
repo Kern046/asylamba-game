@@ -27,7 +27,8 @@ jQuery(document).ready(function($) {
 			render.viewport.w = parseInt($('body').css('width'));
 
 			// hauteur du #conteneur
-			var hContent = render.viewport.h;
+			const headerColumn = document.querySelector('.component .head').offsetHeight;
+			var hContent = render.viewport.h - headerColumn;
 
 			// traitement des colonnes
 			$('.component').each(function(i) {
