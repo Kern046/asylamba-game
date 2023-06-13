@@ -20,39 +20,8 @@
 		<img src="{{ asset('build/media/resources/time.png') }}" alt="relèves" class="icon-color" />
 	{% endset %}
 
-	{% if building_data.building_requirements is not same as(true) %}
-		{% if 'niveau maximum atteint' == building_data.building_requirements %}
-			<span class="button disable">
-				<span class="text">
-					construction impossible<br/>
-					niveau maximum atteint
-				</span>
-			</span>
-		{% else %}
-			<span class="button disable hb lt" title="{{ building_data.building_requirements }}">
-				<span class="text">
-					construction impossible<br/>
-					{{ price }} | {{ time }}
-				</span>
-			</span>
-		{% endif %}
-	{% elseif building_data.technology_requirements is not same as(true) %}
-		<span class="button disable hb lt" title="{{ building_data.technology_requirements }}">
-			<span class="text">
-				construction impossible<br/>
-				{{ price }} | {{ time }}
-			</span>
-		</span>
-	{% elseif true != building_data.queue_requirements %}
-		<span class="button disable hb lt" title="file de construction pleine, revenez dans un moment">
-			<span class="text">
-				construction impossible<br/>
-				{{ price }} | {{ time }}
-			</span>
-		</span>
-	{% elseif true != building_data.resources_requirements %}
-		{% set missing_resources = get_building_info(building_number, 'level', (building_data.next_level), 'resourcePrice') - current_base.resourcesStorage %}
-		<span class="button disable hb lt" title="pas assez de ressources, il manque {{ missing_resources|number }} ressource{{ missing_resources|plural }}">
+	{% if 0 < building_data.building_requirements|length %}
+		<span class="button disable hb lt" title="{{ building_data.building_requirements|map(v => v.message)|join(', ') }}">
 			<span class="text">
 				construction impossible<br/>
 				{{ price }} | {{ time }}

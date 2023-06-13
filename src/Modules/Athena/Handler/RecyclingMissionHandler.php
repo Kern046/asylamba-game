@@ -14,11 +14,14 @@ use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Manager\PlayerManager;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[AsMessageHandler]
 readonly class RecyclingMissionHandler
@@ -28,9 +31,11 @@ readonly class RecyclingMissionHandler
 		private PlaceManager                        $placeManager,
 		private PlayerManager                       $playerManager,
 		private NotificationManager                 $notificationManager,
+		private NotificationRepositoryInterface                 $notificationRepository,
 		private RecyclingMissionRepositoryInterface $recyclingMissionRepository,
 		private RecyclingLogRepositoryInterface     $recyclingLogRepository,
 		private MessageBusInterface                 $messageBus,
+		private UrlGeneratorInterface $urlGenerator,
 	) {
 	}
 
@@ -56,20 +61,30 @@ readonly class RecyclingMissionHandler
 				$mission->statement = RecyclingMission::ST_DELETED;
 
 				// send notification to the player
-				$n = new Notification();
-				$n->setRPlayer($player->id);
-				$n->setTitle('Arrêt de mission de recyclage');
-				$n->addBeg()->addTxt('Un ');
-				$n->addLnk('map/place-'.$mission->rTarget, 'lieu');
-				$n->addTxt(' que vous recycliez est désormais totalement dépourvu de ressources et s\'est donc transformé en lieu vide.');
-				$n->addSep()->addTxt('Vos recycleurs restent donc stationnés sur votre ');
-				$n->addLnk('map/place-'.$orbitalBase->rPlace, 'base orbitale')->addTxt(' le temps que vous programmiez une autre mission.');
-				$n->addEnd();
-				$this->notificationManager->add($n);
+				$notification = NotificationBuilder::new()
+					->setTitle('Arrêt de mission de recyclage')
+					->setContent(NotificationBuilder::paragraph(
+						'Un ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $mission->target->id]),
+							'lieu',
+						),
+						' que vous recycliez est désormais totalement dépourvu de ressources et s\'est donc transformé en lieu vide.',
+						NotificationBuilder::divider(),
+						'Vos recycleurs restent donc stationnés sur votre ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $orbitalBase->place->id]),
+							'base orbitale',
+						),
+						' le temps que vous programmiez une autre mission.',
+					))
+					->for($player);
+
+				$this->notificationRepository->save($notification);
 			}
 
 			// if the sector change its color between 2 recyclings
-			if ($player->faction != $targetPlace->sector->faction && ColorResource::NO_FACTION != $targetPlace->sector->faction) {
+			if ($player->faction->id !== $targetPlace->system->sector->faction?->id) {
 				// stop the mission
 				$mission->statement = RecyclingMission::ST_DELETED;
 

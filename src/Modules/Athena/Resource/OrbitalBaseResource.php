@@ -2,6 +2,8 @@
 
 namespace App\Modules\Athena\Resource;
 
+use App\Modules\Promethee\Model\TechnologyId;
+
 class OrbitalBaseResource
 {
 	public const GENERATOR = 0;
@@ -252,7 +254,7 @@ class OrbitalBaseResource
 			],
 			'maxLevel' => [0, 0, 0, 10],
 			'description' => 'La <strong>Colonne d’Assemblage</strong> est le troisième atelier de construction d’appareils. Spécifique aux vaisseaux-mères, ce chantier spatial est indispensable à toute tentative de colonisation. Ce chantier titanesque conçu pour fabriquer des vaisseaux de taille quasi-planétaire, vous donnera la possibilité de construire trois types de vaisseaux-mères. Chacun de ces bâtiments spatiaux dispose de quasiment le même nombre d’aptitudes, excepté sa taille. En effet, lorsque vous créez un vaisseau mère de catégorie trois, il disposera de plus de place de construction que ses deux cadets.<br /><br />La Colonne d’Assemblage est la plus grosse plateforme que vous pouvez construire sur votre base. Elle est également la plus couteuse.',
-			'techno' => 2,
+			'techno' => TechnologyId::DOCK3_UNBLOCK,
 		],
 		[
 			'name' => 'technosphere',
@@ -345,7 +347,7 @@ class OrbitalBaseResource
 			],
 			'maxLevel' => [20, 30, 20, 30],
 			'description' => 'La <strong>Plateforme Commerciale</strong> est véritablement la <strong>place de commerce</strong> entre les joueurs d’Asylamba. En effet, cette plateforme vous permettra de <strong>vendre</strong> ou d’<strong>acheter</strong> des vaisseaux, des commandants ou encore des ressources.<br /><br />Vous devrez fixer vous-même le prix des marchandises que vous souhaitez vendre, il faudra donc faire attention aux tendances du marché, de manière à être sûr de vendre vos produits. De plus, toute vente ou achat est soumis à deux taxes, une d\'achat et une de vente. Prenez donc ces taxes en compte en fixant vos prix. Le montant des taxes revient aux factions concernées.',
-			'techno' => 0,
+			'techno' => TechnologyId::COM_PLAT_UNBLOCK,
 		],
 		[
 			'name' => 'storage',
@@ -439,7 +441,7 @@ class OrbitalBaseResource
 			],
 			'maxLevel' => [20, 20, 30, 30],
 			'description' => 'Le <strong>Centre de Recyclage</strong> est un bâtiment très intéressant économiquement parlant. En effet, il vous permettra d\'avoir un revenu supplémentaire en recyclant des lieux autour de vous.<br /><br />Il est possible de lancer des missions de recyclage composées de plusieurs <strong>recycleurs</strong>, ou collecteurs, sur des lieux tels que des champs de ruines, des ceintures d\'astéroïdes, des géantes gazeuses ou des poches de gaz. Le but étant l\'extraction et le forage de matériau pour en retirer des ressources, des crédits et même des vaisseaux.<br /><br />Chaque type de lieu est riche en une ou plusieurs de ces denrées. Attention, les denrées sont épuisables.',
-			'techno' => 3,
+			'techno' => TechnologyId::RECYCLING_UNBLOCK,
 		],
 		[
 			'name' => 'spatioport',
@@ -471,7 +473,7 @@ class OrbitalBaseResource
 			],
 			'maxLevel' => [0, 20, 10, 20],
 			'description' => 'Le <strong>Spatio-Port</strong>, véritable plaque tournante du commerce dans votre domaine, permet, en fonction de sa taille, de créer et de gérer des <strong>routes commerciales</strong> sur le long terme avec vos partenaires. Pour valider une route commerciale vous devez la proposer et l’autre joueur doit l’accepter.<br /><br />Une route commerciale génère des revenus chez les deux parties. Plus la route est longue, plus le prix pour la mettre en place sera élevé. Le rendement d\'une route est également proportionnel à la distance, mais il est par contre plafonné aux environs de 100 années lumières. Il faudra donc plus de temps pour rentabiliser une très longue route.<br /> Les routes commerciales entre deux secteurs différents ainsi qu’avec des joueurs non-alliés ont tendance à générer plus de revenus.',
-			'techno' => 4,
+			'techno' => TechnologyId::SPATIOPORT_UNBLOCK,
 		],
 	];
 }

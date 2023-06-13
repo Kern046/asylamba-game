@@ -131,20 +131,18 @@ class OrbitalBaseHelper
 		return false;
 	}
 
-	public function haveRights($buildingId, $level, $type, $sup)
+	public function haveRights($buildingId, $level, $type, $sup): bool
 	{
 		if ($this->isABuilding($buildingId)) {
 			switch ($type) {
 				// assez de ressources pour contruire ?
 				case 'resource':
-					return ($sup < $this->getBuildingInfo($buildingId, 'level', $level, 'resourcePrice')) ? false : true;
-					break;
+					return $sup >= $this->getBuildingInfo($buildingId, 'level', $level, 'resourcePrice');
 				// encore de la place dans la queue ?
 				// $sup est le nombre de batiments dans la queue
 				case 'queue':
 					// $buildingId n'est pas utilisé
-					return ($sup < $this->getBuildingInfo($buildingId, 'level', $level, 'nbQueues')) ? true : false;
-					break;
+					return $sup < $this->getBuildingInfo($buildingId, 'level', $level, 'nbQueues');
 				// droit de construire le batiment ?
 				// $sup est un objet de type OrbitalBase
 				case 'buildingTree':
@@ -158,35 +156,32 @@ class OrbitalBaseHelper
 						OrbitalBaseResource::DOCK3 => 30,
 						OrbitalBaseResource::COMMERCIAL_PLATEFORME, OrbitalBaseResource::RECYCLING => 10,
 						// no break
-						default => throw new \ErrorException('buildingId invalide (entre 0 et 9) dans haveRights de OrbitalBaseResource'),
+						default => throw new \LogicException('buildingId invalide (entre 0 et 9) dans haveRights de OrbitalBaseResource'),
 					};
-					if (null !== $diminution) {
-						if (OrbitalBaseResource::GENERATOR == $buildingId) {
-							if ($level > OrbitalBaseResource::$building[$buildingId]['maxLevel'][$sup->typeOfBase]) {
-								return 'niveau maximum atteint';
-							} else {
-								return true;
-							}
-						} else {
-							$realGeneratorLevel = $this->buildingLevelHandler->getBuildingRealLevel(
-								$sup,
-								OrbitalBaseResource::GENERATOR,
-								$this->buildingQueueRepository->getBaseQueues($sup),
-							);
+                    if (OrbitalBaseResource::GENERATOR == $buildingId) {
+                        if ($level > OrbitalBaseResource::$building[$buildingId]['maxLevel'][$sup->typeOfBase]) {
+                            return 'niveau maximum atteint';
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        $realGeneratorLevel = $this->buildingLevelHandler->getBuildingRealLevel(
+                            $sup,
+                            OrbitalBaseResource::GENERATOR,
+                            $this->buildingQueueRepository->getBaseQueues($sup),
+                        );
 
-							if (1 == $level and OrbitalBase::TYP_NEUTRAL == $sup->typeOfBase and in_array($buildingId, [OrbitalBaseResource::SPATIOPORT, OrbitalBaseResource::DOCK2])) {
-								return 'vous devez évoluer votre colonie pour débloquer ce bâtiment';
-							}
-							if ($level > OrbitalBaseResource::$building[$buildingId]['maxLevel'][$sup->typeOfBase]) {
-								return 'niveau maximum atteint';
-							} elseif ($level > ($realGeneratorLevel - $diminution)) {
-								return 'le niveau du générateur n\'est pas assez élevé';
-							} else {
-								return true;
-							}
-						}
-					}
-					break;
+                        if (1 == $level and OrbitalBase::TYP_NEUTRAL == $sup->typeOfBase and in_array($buildingId, [OrbitalBaseResource::SPATIOPORT, OrbitalBaseResource::DOCK2])) {
+                            return 'vous devez évoluer votre colonie pour débloquer ce bâtiment';
+                        }
+                        if ($level > OrbitalBaseResource::$building[$buildingId]['maxLevel'][$sup->typeOfBase]) {
+                            return 'niveau maximum atteint';
+                        } elseif ($level > ($realGeneratorLevel - $diminution)) {
+                            return 'le niveau du générateur n\'est pas assez élevé';
+                        } else {
+                            return true;
+                        }
+                    }
 				// a la technologie pour construire ce bâtiment ?
 				// $sup est un objet de type Technology
 				case 'techno':
@@ -200,10 +195,10 @@ class OrbitalBaseHelper
 					}
 					break;
 				default:
-					throw new \ErrorException('$type invalide (entre 1 et 4) dans haveRights de OrbitalBaseResource');
+					throw new \LogicException('$type invalide (entre 1 et 4) dans haveRights de OrbitalBaseResource');
 			}
 		} else {
-			throw new \ErrorException('buildingId invalide (entre 0 et 9) dans haveRights de OrbitalBaseResource');
+			throw new \LogicException('buildingId invalide (entre 0 et 9) dans haveRights de OrbitalBaseResource');
 		}
 	}
 }

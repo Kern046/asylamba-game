@@ -53,6 +53,22 @@ class BuildingLevelHandler
 		);
 	}
 
+	public function getRequiredGeneratorLevel(int $buildingIdentifier): int
+	{
+		return match ($buildingIdentifier) {
+			OrbitalBaseResource::GENERATOR,
+			OrbitalBaseResource::STORAGE,
+			OrbitalBaseResource::DOCK1,
+			OrbitalBaseResource::REFINERY,
+			OrbitalBaseResource::TECHNOSPHERE => 0,
+			OrbitalBaseResource::DOCK2, OrbitalBaseResource::SPATIOPORT => 20,
+			OrbitalBaseResource::DOCK3 => 30,
+			OrbitalBaseResource::COMMERCIAL_PLATEFORME, OrbitalBaseResource::RECYCLING => 10,
+			// no break
+			default => throw new \LogicException('Invalid building Identifier'),
+		};
+	}
+
 	private function getBuildingLevelField(int $buildingIdentifier): string
 	{
 		$buildingName = OrbitalBaseResource::$building[$buildingIdentifier]['name']

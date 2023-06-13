@@ -3,20 +3,16 @@
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
 use App\Classes\Library\Game;
-use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Infrastructure\Validator\Commander\CanConquer;
 use App\Modules\Ares\Infrastructure\Validator\DTO\Conquest;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Handler\CountPlayerBases;
-use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
-use App\Modules\Promethee\Model\TechnologyId;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -27,6 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Conquer extends AbstractController
@@ -36,7 +33,6 @@ class Conquer extends AbstractController
 		Player $currentPlayer,
 		OrbitalBase $orbitalBase,
 		CountPlayerBases $countPlayerBases,
-		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommanderManager $commanderManager,
 		CommanderRepositoryInterface $commanderRepository,
@@ -44,7 +40,6 @@ class Conquer extends AbstractController
 		PlayerManager $playerManager,
 		TechnologyRepositoryInterface $technologyRepository,
 		EntityManagerInterface $entityManager,
-		CommanderArmyHandler $commanderArmyHandler,
 		ValidatorInterface $validator,
 		Uuid $id,
 	): Response {
@@ -76,12 +71,17 @@ class Conquer extends AbstractController
 		}
 
 		$technologies = $technologyRepository->getPlayerTechnology($currentPlayer);
-		$validator->validate(new Conquest(
+		$conquest = new Conquest(
 			commander: $commander,
 			attackerTechnology: $technologies,
 			attackerBasesCount: $totalBases,
 			targetedPlace: $place,
-		), new CanConquer($price));
+		);
+		$violations = $validator->validate($conquest, new CanConquer($price));
+
+		if (0 < $violations->count()) {
+			throw new ValidationFailedException($conquest, $violations);
+		}
 
 		$duration = Game::getTimeToTravel($home->place, $place, $currentPlayerBonusRegistry->getPlayerBonus());
 		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $duration);

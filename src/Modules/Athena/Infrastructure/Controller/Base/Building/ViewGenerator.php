@@ -5,6 +5,8 @@ namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
+use App\Modules\Athena\Infrastructure\Validator\CanMakeBuilding;
+use App\Modules\Athena\Infrastructure\Validator\DTO\BuildingConstructionOrder;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
@@ -15,6 +17,7 @@ use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ViewGenerator extends AbstractController
 {
@@ -22,6 +25,7 @@ class ViewGenerator extends AbstractController
 		private readonly BuildingLevelHandler $buildingLevelHandler,
 		private readonly OrbitalBaseHelper $orbitalBaseHelper,
 		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
+		private readonly ValidatorInterface $validator,
 	) {
 
 	}
@@ -48,6 +52,7 @@ class ViewGenerator extends AbstractController
 	{
 		$data = [];
 		$buildingQueues = $this->buildingQueueRepository->getBaseQueues($currentBase);
+		$buildingQueuesCount = count($buildingQueues);
 
 		foreach (OrbitalBaseResource::$building as $buildingNumber => $buildingData) {
 			$level = $this->buildingLevelHandler->getBuildingLevel($currentBase, $buildingNumber);
@@ -58,21 +63,18 @@ class ViewGenerator extends AbstractController
 			);
 			$nextLevel = $realLevel + 1;
 
+			$buildingConstructionOrder = new BuildingConstructionOrder(
+				orbitalBase: $currentBase,
+				targetLevel: $nextLevel,
+				buildingIdentifier: $buildingNumber,
+				technology: $technology,
+			);
+
 			$data[$buildingNumber] = [
 				'real_level' => $realLevel,
 				'next_level' => $nextLevel,
 				'level' => $level,
-				'building_requirements' => $this->orbitalBaseHelper->haveRights($buildingNumber, $nextLevel, 'buildingTree', $currentBase),
-				'technology_requirements' => $this->orbitalBaseHelper->haveRights($buildingNumber, $nextLevel, 'techno', $technology),
-				'queue_requirements' => $this->orbitalBaseHelper->haveRights(
-					OrbitalBaseResource::GENERATOR,
-					$currentBase->levelGenerator,
-					'queue',
-					count(
-						$buildingQueues,
-					)
-				),
-				'resources_requirements' => $this->orbitalBaseHelper->haveRights($buildingNumber, $nextLevel, 'resource', $currentBase->resourcesStorage),
+				'building_requirements' => $this->validator->validate($buildingConstructionOrder, new CanMakeBuilding($buildingQueuesCount)),
 			];
 		}
 
