@@ -48,7 +48,8 @@
         "symfony/debug-bundle": "~6.2",
         "symfony/phpunit-bridge": "^6.2",
         "symfony/stopwatch": "~6.2",
-        "symfony/web-profiler-bundle": "~6.2"
+        "symfony/web-profiler-bundle": "~6.2",
+        "zenstruck/foundry": "^1.33"
     },
     "scripts": {
         "auto-scripts": {
