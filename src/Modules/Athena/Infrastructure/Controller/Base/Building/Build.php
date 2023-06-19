@@ -2,7 +2,6 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
-use App\Classes\Library\Utils;
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
@@ -13,7 +12,6 @@ use App\Modules\Athena\Manager\BuildingQueueManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\BuildingQueue;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
@@ -24,7 +22,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints\Sequentially;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
@@ -64,6 +61,7 @@ class Build extends AbstractController
 			buildingIdentifier: $identifier,
 			targetLevel: $targetLevel,
 		);
+
 		$violations = $validator->validate($buildingConstructionOrder, new Sequentially([
 			new IsValidBuilding(),
 			new CanMakeBuilding($buildingQueuesCount),
@@ -72,6 +70,7 @@ class Build extends AbstractController
 		if (0 < $violations->count()) {
 			throw new ValidationFailedException($buildingConstructionOrder, $violations);
 		}
+
 		$session = $request->getSession();
 		if (0 === $buildingQueuesCount) {
 			$startedAt = new \DateTimeImmutable();

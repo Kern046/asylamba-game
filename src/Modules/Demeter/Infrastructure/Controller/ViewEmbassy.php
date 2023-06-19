@@ -9,6 +9,7 @@ use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsGovernmentMember;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,7 +51,7 @@ class ViewEmbassy extends AbstractController
 				$data = [
 					'faction' => $faction,
 					'parsed_description' => $colorManager->getParsedDescription($faction),
-					'government_members' => $playerRepository->getGovernmentMembers($faction),
+					'government_members' => $playerRepository->getBySpecification(new IsGovernmentMember($faction)),
 					'diplomacy_statements' => [
 						Color::ENEMY => 'En guerre',
 						Color::ALLY => 'Allié',

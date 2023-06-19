@@ -3,6 +3,9 @@
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
 use App\Classes\Library\Utils;
+use App\Modules\Demeter\Domain\Repository\Election\CandidateRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\VoteRepositoryInterface;
 use App\Modules\Demeter\Manager\Election\CandidateManager;
 use App\Modules\Demeter\Manager\Election\ElectionManager;
 use App\Modules\Demeter\Manager\Election\VoteManager;
@@ -12,26 +15,27 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Candidate;
 use App\Modules\Demeter\Model\Election\Vote;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsFromFaction;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 
 class ViewElection extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		CandidateManager $candidateManager,
-		ElectionManager $electionManager,
-		VoteManager $voteManager,
+		ElectionRepositoryInterface $electionRepository,
+		CandidateRepositoryInterface $candidateRepository,
+		VoteRepositoryInterface $voteRepository,
 		PlayerRepositoryInterface $playerRepository,
-		ForumTopicManager $forumTopicManager,
 		ForumMessageManager $forumMessageManager,
 	): Response {
-		$faction = $currentPlayer->getRColor();
+		$faction = $currentPlayer->faction;
 
-		$election = $electionManager->getFactionLastElection($faction->id);
+		$election = $electionRepository->getFactionLastElection($faction);
 
 		$data = [
 			'faction' => $faction,
@@ -39,29 +43,31 @@ class ViewElection extends AbstractController
 		];
 
 		if (null !== $election) {
-			$candidates = $candidateManager->getByElection($election);
+			$candidates = $candidateRepository->getByElection($election);
 
 			$data['candidates'] = $candidates;
 			$data['is_candidate'] = 1 <= count(array_filter(
 				$candidates,
-				fn (Candidate $candidate) => $candidate->rPlayer === $currentPlayer->getId()
+				fn (Candidate $candidate) => $candidate->player->id === $currentPlayer->id
 			));
 
 			if ($faction->isInElection()) {
-				$votes = $voteManager->getElectionVotes($election);
+				$votes = $voteRepository->getElectionVotes($election);
 
-				$data['player_vote'] = $voteManager->getPlayerVote($currentPlayer, $election);
+				$data['player_vote'] = $voteRepository->getPlayerVote($currentPlayer, $election);
 				$data['votes'] = $votes;
-				$data['faction_members'] = $playerRepository->getFactionPlayers($faction);
+				$data['faction_members'] = $playerRepository->getBySpecification(new IsFromFaction($faction));
 
-				$candidate = ($request->query->has('candidate') && ($candidate = $candidateManager->get($request->query->get('candidate'))) !== null) ? $candidate : ([] !== $candidates ? $candidates[0] : null);
+				$candidate = ($request->query->has('candidate') && ($candidate = $candidateRepository->get(Uuid::fromString($request->query->get('candidate')))) !== null)
+					? $candidate
+					: ([] !== $candidates ? $candidates[0] : null);
 
 				$data['candidate'] = $candidate;
 
 				if (null !== $candidate) {
 					if ($faction->isRoyalistic()) {
-						$data['putsch_supporters_count'] = count(array_filter($votes, fn (Vote $vote) => $vote->rCandidate === $candidate->rPlayer));
-						$endPutsch = Utils::addSecondsToDate($faction->dLastElection, Color::PUTSCHTIME);
+						$data['putsch_supporters_count'] = count(array_filter($votes, fn (Vote $vote) => $vote->candidate->player->id === $candidate->player->id));
+						$endPutsch = Utils::addSecondsToDate($faction->lastElectionHeldAt, Color::PUTSCHTIME);
 						$data['remaining_putsch_time'] = Utils::interval(Utils::now(), $endPutsch, 's');
 					}
 

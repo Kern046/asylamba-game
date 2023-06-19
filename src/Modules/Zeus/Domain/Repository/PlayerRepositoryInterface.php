@@ -5,6 +5,9 @@ namespace App\Modules\Zeus\Domain\Repository;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Domain\Specification\SelectorSpecification;
+use Doctrine\Common\Collections\AbstractLazyCollection;
+use Doctrine\Common\Collections\Selectable;
 use Symfony\Component\Uid\Uuid;
 
 interface PlayerRepositoryInterface extends EntityRepositoryInterface
@@ -43,9 +46,9 @@ interface PlayerRepositoryInterface extends EntityRepositoryInterface
 	public function getFactionAccount(Color $faction): Player;
 
 	/**
-	 * @return list<Player>
+	 * @return AbstractLazyCollection<int, Player>|Selectable<int, Player>
 	 */
-	public function getFactionPlayers(Color $faction): array;
+	public function getBySpecification(SelectorSpecification $specification): AbstractLazyCollection|Selectable;
 
 	/**
 	 * @return list<Player>
@@ -62,17 +65,7 @@ interface PlayerRepositoryInterface extends EntityRepositoryInterface
 	 */
 	public function getLastFactionPlayers(Color $faction): array;
 
-	/**
-	 * @return list<Player>
-	 */
-	public function getParliamentMembers(Color $faction): array;
-
 	public function getGovernmentMember(Color $faction, int $status): Player|null;
-
-	/**
-	 * @return list<Player>
-	 */
-	public function getGovernmentMembers(Color $faction): array;
 
 	public function getFactionLeader(Color $faction): Player;
 

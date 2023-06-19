@@ -16,6 +16,7 @@ use App\Modules\Demeter\Model\Forum\ForumTopic;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsFromFaction;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -102,7 +103,7 @@ class MakeACoup extends AbstractController
 		);
 		$voteRepository->save($vote);
 
-		$factionPlayers = $playerRepository->getFactionPlayers($faction);
+		$factionPlayers = $playerRepository->getBySpecification(new IsFromFaction($faction));
 
 		$notificationBuilder = NotificationBuilder::new()
 			->setTitle('Coup d\'Etat.')

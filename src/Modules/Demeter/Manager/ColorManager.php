@@ -32,6 +32,7 @@ use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsParliamentMember;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\SchedulerInterface;
@@ -153,9 +154,9 @@ class ColorManager implements SchedulerInterface
 		}
 	}
 
-	public function sendSenateNotif(Color $color, bool $isFromChief = false): void
+	public function sendSenateNotif(Color $faction, bool $isFromChief = false): void
 	{
-		$parliamentMembers = $this->playerRepository->getParliamentMembers($color);
+		$parliamentMembers = $this->playerRepository->getBySpecification(new IsParliamentMember($faction));
 
 		$notificationBuilder = NotificationBuilder::new()
 			->setTitle($isFromChief ? 'Loi appliquée' : 'Loi proposée')
@@ -163,7 +164,7 @@ class ColorManager implements SchedulerInterface
 				$isFromChief
 					? sprintf(
 						'Votre %s a appliqué une loi.',
-						ColorResource::getInfo($color->id, 'status')[5]
+						ColorResource::getInfo($faction->identifier, 'status')[5]
 					)
 					: 'Votre gouvernement a proposé un projet de loi, en tant que membre du sénat,
 					il est de votre devoir de voter pour l\'acceptation ou non de ladite loi.',

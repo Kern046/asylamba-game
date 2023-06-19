@@ -11,15 +11,6 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class HasResourcesForBuildingValidator extends ConstraintValidator
 {
-	public function __construct(
-		private readonly OrbitalBaseHelper $orbitalBaseHelper,
-	) {
-
-	}
-
-	/**
-	 * @param BuildingConstructionOrder $value
-	 */
 	public function validate($value, Constraint $constraint): void
 	{
 		if (!$constraint instanceof HasResourcesForBuilding) {
@@ -30,18 +21,24 @@ class HasResourcesForBuildingValidator extends ConstraintValidator
 			throw new UnexpectedValueException($value, BuildingConstructionOrder::class);
 		}
 
-		$orbitalBase = $value->getBase();
-
-		$neededResources = $this->orbitalBaseHelper->getBuildingInfo(
-			$value->getBuildingIdentifier(),
-			'level',
-			$value->getTargetLevel(),
-			'resourcePrice',
-		);
-
-		if ($orbitalBase->resourcesStorage < $neededResources) {
-			$this->context->buildViolation('Cette base ne dispose pas de suffisamment de ressources')
+		if ($value->getBase()->resourcesStorage < $this->getNeededResources($value)) {
+			$this->context
+				->buildViolation('Cette base ne dispose pas de suffisamment de ressources')
 				->addViolation();
 		}
+	}
+
+	public function __construct(private readonly OrbitalBaseHelper $orbitalBaseHelper)
+	{
+	}
+
+	private function getNeededResources(BuildingConstructionOrder $buildingConstructionOrder): int
+	{
+		return $this->orbitalBaseHelper->getBuildingInfo(
+			$buildingConstructionOrder->getBuildingIdentifier(),
+			'level',
+			$buildingConstructionOrder->getTargetLevel(),
+			'resourcePrice',
+		);
 	}
 }

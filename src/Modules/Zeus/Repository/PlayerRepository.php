@@ -6,6 +6,9 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Domain\Specification\SelectorSpecification;
+use Doctrine\Common\Collections\AbstractLazyCollection;
+use Doctrine\Common\Collections\Selectable;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -100,20 +103,13 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 		], ['id' => 'ASC']);
 	}
 
-	/**
-	 * @return list<Player>
-	 */
-	public function getFactionPlayers(Color $faction): array
+	public function getBySpecification(SelectorSpecification $specification): AbstractLazyCollection|Selectable
 	{
-		return $this->createQueryBuilder('p')
-			->where('p.faction = :faction')
-			->andWhere('p.statement != :statement')
-			->setParameters([
-				'faction' => $faction,
-				'statement' => Player::DEAD,
-			])
-			->getQuery()
-			->getResult();
+		$queryBuilder = $this->createQueryBuilder('p');
+
+		$specification->addMatchingCriteria($queryBuilder);
+
+		return $queryBuilder->getQuery()->getResult();
 	}
 
 	/**
@@ -168,24 +164,6 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 			->getResult();
 	}
 
-	/**
-	 * @return list<Player>
-	 */
-	public function getParliamentMembers(Color $faction): array
-	{
-		return $this->createQueryBuilder('p')
-			->where('p.faction = :faction')
-			->andWhere('p.status = :status')
-			->andWhere('p.statement != :statement')
-			->setParameters([
-				'faction' => $faction,
-				'status' => Player::PARLIAMENT,
-				'statement' => Player::DEAD,
-			])
-			->getQuery()
-			->getResult();
-	}
-
 	public function getGovernmentMember(Color $faction, int $status): Player|null
 	{
 		return $this->createQueryBuilder('p')
@@ -199,25 +177,6 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 			])
 			->getQuery()
 			->getOneOrNullResult();
-	}
-
-	/**
-	 * @return list<Player>
-	 */
-	public function getGovernmentMembers(Color $faction): array
-	{
-		return $this->createQueryBuilder('p')
-			->where('p.faction = :faction')
-			->andWhere('p.status IN (:status)')
-			->andWhere('p.statement != :statement')
-			->setParameters([
-				'faction' => $faction,
-				'status' => [Player::TREASURER, Player::WARLORD, Player::MINISTER, Player::CHIEF],
-				'statement' => Player::DEAD,
-			])
-			->orderBy('p.status', 'DESC')
-			->getQuery()
-			->getResult();
 	}
 
 	public function getFactionLeader(Color $faction): Player

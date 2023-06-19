@@ -13,6 +13,7 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsGovernmentMember;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -53,7 +54,7 @@ class ViewOverview extends AbstractController
 			'faction' => $faction,
 			'news' => $factionNews,
 			'news_mode' => $mode,
-			'government_members' => $playerRepository->getGovernmentMembers($faction),
+			'government_members' => $playerRepository->getBySpecification(new IsGovernmentMember($faction)),
 			'effective_laws' => $lawRepository->getByFactionAndStatements($faction, [Law::EFFECTIVE]),
 			'voting_laws' => $lawRepository->getByFactionAndStatements($faction, [Law::VOTATION]),
 			'sectors_count' => $sectorRepository->countFactionSectors($faction),

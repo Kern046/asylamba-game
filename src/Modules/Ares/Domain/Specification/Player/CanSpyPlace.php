@@ -2,18 +2,27 @@
 
 namespace App\Modules\Ares\Domain\Specification\Player;
 
-use App\Modules\Gaia\Model\Place;
+use App\Modules\Ares\Domain\Specification\PlaceHasPlayer;
+use App\Modules\Ares\Domain\Specification\PlaceHavePlayersFaction;
+use App\Modules\Ares\Domain\Specification\PlaceIsInhabited;
+use App\Modules\Zeus\Model\Player;
+use App\Shared\Domain\Specification\AndSpecification;
+use App\Shared\Domain\Specification\NotSpecification;
+use App\Shared\Domain\Specification\OrSpecification;
 
-// Transform into composite specification
-// And implement Partially Satisfied Specification
-class CanSpyPlace extends PlayerSpecification
+class CanSpyPlace extends OrSpecification
 {
-	/**
-	 * @param Place $candidate
-	 */
-	public function isSatisfiedBy($candidate): bool
+	public function __construct(Player $player)
 	{
-		return (null !== $candidate->player && $candidate->player->faction->id !== $this->player->faction->id)
-			|| (null === $candidate->player && 1 === $candidate->typeOfPlace);
+		parent::__construct(
+			new AndSpecification(
+				new PlaceHasPlayer(),
+				new NotSpecification(new PlaceHavePlayersFaction($player)),
+			),
+			new AndSpecification(
+				new NotSpecification(new PlaceHasPlayer()),
+				new PlaceIsInhabited(),
+			),
+		);
 	}
 }

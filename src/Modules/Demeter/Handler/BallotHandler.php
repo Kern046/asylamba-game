@@ -24,6 +24,7 @@ use App\Modules\Hermes\Model\ConversationMessage;
 use App\Modules\Hermes\Model\ConversationUser;
 use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsGovernmentMember;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -98,7 +99,8 @@ readonly class BallotHandler
 				arsort($ballot);
 				reset($ballot);
 
-				$governmentMembers = $this->playerRepository->getGovernmentMembers($faction);
+				$governmentMembers = $this->playerRepository->getBySpecification(new IsGovernmentMember($faction));
+
 				$newChief = $this->playerRepository->get(key($ballot));
 
 				$this->mandate($faction, $governmentMembers, $newChief, $chiefId, true, $conv, $convPlayer, $listCandidate);
@@ -115,7 +117,7 @@ readonly class BallotHandler
 				}
 
 				if (((current($ballot) / ($faction->activePlayers + 1)) * 100) >= Color::PUTSCHPERCENTAGE) {
-					$governmentMembers = $this->playerRepository->getGovernmentMembers($faction);
+					$governmentMembers = $this->playerRepository->getBySpecification(new IsGovernmentMember($faction));
 					$newChief = $this->playerRepository->get(key($ballot));
 					$this->mandate($faction, $governmentMembers, $newChief, $chiefId, true, $conv, $convPlayerID, $listCandidate);
 				} else {
@@ -139,7 +141,7 @@ readonly class BallotHandler
 					next($ballot);
 				}
 
-				$governmentMembers = $this->playerRepository->getGovernmentMembers($faction);
+				$governmentMembers = $this->playerRepository->getBySpecification(new IsGovernmentMember($faction));
 				$newChief = $this->playerRepository->get(key($ballot));
 
 				$this->mandate($faction, $governmentMembers, $newChief, $chiefId, true, $conv, $convPlayerID, $listCandidate);
