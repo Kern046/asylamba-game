@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Athena\Infrastructure\DataFixtures\Factory;
+
+use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Zeus\Infrastructure\DataFixtures\Factory\PlayerFactory;
+use Symfony\Component\Uid\Uuid;
+use Zenstruck\Foundry\ModelFactory;
+
+class OrbitalBaseFactory extends ModelFactory
+{
+	protected function getDefaults(): array
+	{
+		return [
+			'id' => Uuid::v4(),
+			'place' => null,
+			'player' => PlayerFactory::random(),
+			'name' => 'Colonie',
+			'typeOfBase' => OrbitalBase::TYP_NEUTRAL,
+			'levelGenerator' => 1,
+			'levelRefinery' => 1,
+			'levelDock1' => 1,
+			'levelDock2' => 0,
+			'levelDock3' => 0,
+			'levelTechnosphere' => 1,
+			'levelCommercialPlateforme' => 0,
+			'levelStorage' => 1,
+			'levelRecycling' => 0,
+			'levelSpatioport' => 0,
+			'points' => 0,
+			'iSchool' => 1000,
+			'iAntiSpy' => 0,
+			'antiSpyAverage' => 0,
+			'shipStorage' => [],
+			'resourcesStorage' => 5000,
+			'createdAt' => new \DateTimeImmutable(),
+			'updatedAt' => new \DateTimeImmutable(),
+		];
+	}
+
+	protected static function getClass(): string
+	{
+		return OrbitalBase::class;
+	}
+}

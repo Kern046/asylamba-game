@@ -6,9 +6,6 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Domain\Specification\SelectorSpecification;
-use Doctrine\Common\Collections\AbstractLazyCollection;
-use Doctrine\Common\Collections\Selectable;
-use Symfony\Component\Uid\Uuid;
 
 interface PlayerRepositoryInterface extends EntityRepositoryInterface
 {
@@ -46,9 +43,9 @@ interface PlayerRepositoryInterface extends EntityRepositoryInterface
 	public function getFactionAccount(Color $faction): Player;
 
 	/**
-	 * @return AbstractLazyCollection<int, Player>|Selectable<int, Player>
+	 * @return list<Player>
 	 */
-	public function getBySpecification(SelectorSpecification $specification): AbstractLazyCollection|Selectable;
+	public function getBySpecification(SelectorSpecification $specification): array;
 
 	/**
 	 * @return list<Player>

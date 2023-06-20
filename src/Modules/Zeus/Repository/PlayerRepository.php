@@ -7,10 +7,7 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Domain\Specification\SelectorSpecification;
-use Doctrine\Common\Collections\AbstractLazyCollection;
-use Doctrine\Common\Collections\Selectable;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends DoctrineRepository<Player>
@@ -103,7 +100,7 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 		], ['id' => 'ASC']);
 	}
 
-	public function getBySpecification(SelectorSpecification $specification): AbstractLazyCollection|Selectable
+	public function getBySpecification(SelectorSpecification $specification): array
 	{
 		$queryBuilder = $this->createQueryBuilder('p');
 
