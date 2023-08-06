@@ -1,12 +1,12 @@
 {% set statuses = get_faction_info(player_ranking.player.faction.identifier, 'status') %}
 
-<div class="player color{{ player_ranking.color }} {% if current_player.id == player_ranking.rPlayer %}active{% endif %}">
-	<a href="{{ path('embassy', {'player': player_ranking.rPlayer}) }}">
-		<img src="{{ asset('build/media/avatar/small/' ~ player_ranking.avatar ~ '.png') }}" alt="{{ player_ranking.name }}" class="picto" />
+<div class="player color{{ player_ranking.player.faction.identifier }} {% if current_player.id == player_ranking.player.id %}active{% endif %}">
+	<a href="{{ path('embassy', {'player': player_ranking.player.id}) }}">
+		<img src="{{ asset('build/media/avatar/small/' ~ player_ranking.player.avatar ~ '.png') }}" alt="{{ player_ranking.player.name }}" class="picto" />
 	</a>
 
-	<span class="title">{{ statuses[player_ranking.status - 1] }}</span>
-	<strong class="name">{{ player_ranking.name }}</strong>
+	<span class="title">{{ statuses[player_ranking.player.status - 1] }}</span>
+	<strong class="name">{{ player_ranking.player.name }}</strong>
 
 	<span class="experience">
 		{{ value|raw }}

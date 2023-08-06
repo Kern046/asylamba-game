@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Zeus\Infrastructure\DataFixtures\Factory;
 
+use App\Modules\Demeter\Infrastructure\DataFixtures\Factory\FactionFactory;
 use App\Modules\Zeus\Model\Player;
 use Zenstruck\Foundry\ModelFactory;
 
@@ -14,7 +15,7 @@ class PlayerFactory extends ModelFactory
 		return [
 			'id' => 0,
 			'bind' => self::faker()->md5(),
-			'faction' => null,
+			'faction' => FactionFactory::randomOrCreate(),
 			'godFather' => null,
 			'name' => self::faker()->userName(),
 			'sex' => 0,

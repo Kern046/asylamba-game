@@ -21,5 +21,10 @@ interface FactionRankingRepositoryInterface extends EntityRepositoryInterface
 	/**
 	 * @return list<FactionRanking>
 	 */
+	public function getRankingsByField(string $field): array;
+
+	/**
+	 * @return list<FactionRanking>
+	 */
 	public function getFactionRankings(Color $faction): array;
 }

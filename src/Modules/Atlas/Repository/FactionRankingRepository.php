@@ -23,7 +23,7 @@ class FactionRankingRepository extends DoctrineRepository implements FactionRank
 	{
 		$qb = $this->createQueryBuilder('fr');
 
-		$qb->select('COUNT(n.id) as nb, SUM(cr.income) as income')
+		$qb->select('COUNT(cr.id) as nb, SUM(cr.income) as income')
 			->from(CommercialRoute::class, 'cr')
 			->join('cr.originBase', 'ob')
 			->join('ob.player', 'obp')
@@ -37,7 +37,7 @@ class FactionRankingRepository extends DoctrineRepository implements FactionRank
 			->setParameter('faction', $faction)
 			->setParameter('statement', CommercialRoute::ACTIVE);
 
-		return $qb->getQuery()->getScalarResult();
+		return $qb->getQuery()->getSingleResult();
 	}
 
 	public function getLastRanking(Color $faction): FactionRanking|null
@@ -51,6 +51,11 @@ class FactionRankingRepository extends DoctrineRepository implements FactionRank
 			->setMaxResults(1);
 
 		return $qb->getQuery()->getOneOrNullResult();
+	}
+
+	public function getRankingsByField(string $field): array
+	{
+		return $this->findBy([], [$field => 'DESC']);
 	}
 
 	public function getFactionRankings(Color $faction): array

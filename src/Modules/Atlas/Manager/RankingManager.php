@@ -3,7 +3,6 @@
 namespace App\Modules\Atlas\Manager;
 
 use App\Classes\Library\Utils;
-use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
@@ -65,19 +64,5 @@ class RankingManager
 			throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
 		}
 		$this->conversationManager->changeSession($S_CVM1);
-	}
-
-	public function createRanking(bool $isPlayer, bool $isFaction): Ranking
-	{
-		$ranking =
-			(new Ranking())
-			->setIsPlayer($isPlayer)
-			->setIsFaction($isFaction)
-			->setCreatedAt(Utils::now())
-		;
-		$this->entityManager->persist($ranking);
-		$this->entityManager->flush($ranking);
-
-		return $ranking;
 	}
 }

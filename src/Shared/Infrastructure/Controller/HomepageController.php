@@ -5,6 +5,7 @@ namespace App\Shared\Infrastructure\Controller;
 use App\Classes\Library\Security;
 use App\Classes\Library\Utils;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsActivePlayer;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +15,8 @@ final class HomepageController extends AbstractController
 {
 	public function __invoke(PlayerRepositoryInterface $playerRepository, Security $security): Response
 	{
-		$players = $playerRepository->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
+
+		$players = $playerRepository->getBySpecification(new IsActivePlayer());
 
 		return $this->render('pages/homepage.html.twig', [
 			'active_players' => $players,

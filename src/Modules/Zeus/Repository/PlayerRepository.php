@@ -72,24 +72,28 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 
 	public function countAllPlayers(): int
 	{
-		return $this->createQueryBuilder('p')
+		$qb = $this->createQueryBuilder('p');
+
+		$qb
 			->select('COUNT(p.id)')
-			->where('p.statement = :statement')
-			->setParameter('statement', [Player::ACTIVE, Player::INACTIVE])
-			->getQuery()
-			->getSingleScalarResult();
+			->where($qb->expr()->in('p.statement', ':statement'))
+			->setParameter('statement', [Player::ACTIVE, Player::INACTIVE]);
+
+		return $qb->getQuery()->getSingleScalarResult();
 	}
 
 	public function countByFactionAndStatements(Color $faction, array $statements): int
 	{
-		return $this->createQueryBuilder('p')
+		$qb = $this->createQueryBuilder('p');
+
+		$qb
 			->select('COUNT(p.id)')
-			->where('p.statement = :statement')
+			->where($qb->expr()->in('p.statement', ':statement'))
 			->andWhere('p.faction = :faction')
 			->setParameter('faction', $faction)
-			->setParameter('statement', $statements)
-			->getQuery()
-			->getSingleScalarResult();
+			->setParameter('statement', $statements);
+
+		return $qb->getQuery()->getSingleScalarResult();
 	}
 
 	public function getFactionAccount(Color $faction): Player

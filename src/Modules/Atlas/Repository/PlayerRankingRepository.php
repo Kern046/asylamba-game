@@ -9,8 +9,12 @@ use App\Modules\Atlas\Model\PlayerRanking;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * TODO build ranking statement with queryBuilder
+ */
 class PlayerRankingRepository extends DoctrineRepository implements PlayerRankingRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)
@@ -30,102 +34,110 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 		return $qb->getQuery()->getResult();
 	}
 
-	public function getAttackersButcherRanking(): array
+	public function getPlayerRanking(Player $player): PlayerRanking|null
 	{
-		$qb = $this->getEntityManager()->createQueryBuilder();
-
-		$qb->select([
-			'p.id as player_id',
-			'(SUM(r.attackerPevAtBeginning) - SUM(r.attackerPevAtEnd)) AS lostPEV',
-			'(SUM(r.defenderPevAtBeginning) - SUM(r.defenderPevAtEnd)) AS destroyedPEV',
-		])
-			->from(Report::class, 'r')
-			->leftJoin('r.player', 'p')
-			->where($qb->expr()->in('p.statement', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]))
-			->groupBy('p.id')
-			->orderBy('p.id', 'ASC');
-
-		return $qb->getQuery()->getResult();
+		return $this->findOneBy([
+			'player' => $player,
+		]);
 	}
 
-	public function getDefendersButcherRanking(): array
+	public function getBestPlayerRanking(): PlayerRanking|null
 	{
-		$qb = $this->getEntityManager()->createQueryBuilder();
-
-		$qb->select([
-			'p.id as player_id',
-			'(SUM(r.pevInBeginD) - SUM(r.pevAtEndD)) AS lostPEV',
-			'(SUM(r.pevInBeginA) - SUM(r.pevAtEndA)) AS destroyedPEV',
-			'(SUM(r.pevInBeginD) - SUM(r.pevAtEndD) - SUM(r.pevInBeginA) - SUM(r.pevAtEndA)) AS score',
-		])
-			->from(Report::class, 'r')
-			->leftJoin('r.player', 'p')
-			->where($qb->expr()->in('p.statement', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]))
-			->groupBy('p.id')
-			->orderBy('p.id', 'ASC');
-
-		return $qb->getQuery()->getResult();
+		return $this->findOneBy([], [
+			'generalPosition' => 'DESC',
+		]);
 	}
 
-	public function getPlayersResources(): array
+	public function getAttackersButcherRanking(): Result
 	{
-		return $this->getEntityManager()->getConnection()->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
+			<<<SQL
+				SELECT
+					p.id AS player_id,
+					SUM(r.attacker_pev_at_beginning) - SUM(r.attacker_pev_at_end) AS lostPEV,
+					SUM(r.defender_pev_at_beginning) - SUM(r.defender_pev_at_end) AS destroyedPEV
+				FROM report r
+				LEFT JOIN player p ON r.attacker_id = p.id
+				WHERE p.statement IN (:statements)
+				GROUP BY p.id
+				ORDER BY p.id
+			SQL,
+			['statements' => implode(',',[Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY])],
+		);
+	}
+
+	public function getDefendersButcherRanking(): Result
+	{
+		return $this->getEntityManager()->getConnection()->executeQuery(
+			<<<SQL
+				SELECT
+					p.id as player_id,
+					(SUM(r.defender_pev_at_beginning) - SUM(r.defender_pev_at_end)) AS lostPEV,
+					(SUM(r.attacker_pev_at_beginning) - SUM(r.attacker_pev_at_end)) AS destroyedPEV,
+					(SUM(r.defender_pev_at_beginning) - SUM(r.defender_pev_at_end) - SUM(r.attacker_pev_at_beginning) - SUM(r.attacker_pev_at_end)) AS score
+				FROM report r
+				LEFT JOIN player p ON r.defender_id = p.id
+				WHERE p.statement IN (:statements)
+				GROUP BY p.id
+				ORDER BY p.id
+			SQL,
+			['statements' => implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY])],
+		);
+	}
+
+	public function getRankingsByRange(string $field, int $offset, int $limit): array
+	{
+		return $this->findBy([], [$field => 'ASC'], $limit, $offset);
+	}
+
+	public function getPlayersResources(): Result
+	{
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT p.id AS player,
 				ob.levelRefinery AS levelRefinery,
 				pl.coefResources AS coefResources
 			FROM orbitalBase AS ob 
 			LEFT JOIN place AS pl
-				ON pl.id = ob.rPlace
+				ON pl.id = ob.place_id
 			LEFT JOIN player AS p
-				on p.id = ob.rPlayer
+				on p.id = ob.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')'
 		);
 	}
 
-	public function getPlayersResourcesData(): array
+	public function getPlayersResourcesData(): Result
 	{
-		return $this->getEntityManager()->getConnection()->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
 				p.id AS player,
 				SUM(ob.resourcesStorage) AS sumResources
 			FROM orbitalBase AS ob 
 			LEFT JOIN player AS p
-				on p.id = ob.rPlayer
+				on p.id = ob.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
-			GROUP BY ob.rPlace'
+			GROUP BY ob.place_id'
 		);
 	}
 
-	public function getPlayersGeneralData(): array
+	public function getPlayersGeneralData(): Result
 	{
-		return $this->getEntityManager()->getConnection()->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
 				p.id AS player,
 				SUM(ob.points) AS points,
 				SUM(ob.resourcesStorage) AS resources,
-				SUM(ob.pegaseStorage) AS s0,
-				SUM(ob.satyreStorage) AS s1,
-				SUM(ob.sireneStorage) AS s3,
-				SUM(ob.dryadeStorage) AS s4,
-				SUM(ob.chimereStorage) AS s2,
-				SUM(ob.meduseStorage) AS s5,
-				SUM(ob.griffonStorage) AS s6,
-				SUM(ob.cyclopeStorage) AS s7,
-				SUM(ob.minotaureStorage) AS s8,
-				SUM(ob.hydreStorage) AS s9,
-				SUM(ob.cerbereStorage) AS s10,
-				SUM(ob.phenixStorage) AS s11
+				ob.ship_storage
 			FROM orbitalBase AS ob 
 			LEFT JOIN player AS p
-				ON p.id = ob.rPlayer
+				ON p.id = ob.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id'
 		);
 	}
 
-	public function getPlayersArmiesData(): array
+	public function getPlayersArmiesData(): Result
 	{
-		return $this->getEntityManager()->getConnection()->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
 				p.id AS player,
 				SUM(sq.ship0) as s0,
@@ -142,46 +154,46 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 				SUM(sq.ship11) as s11
 			FROM squadron AS sq 
 			LEFT JOIN commander AS c
-				ON c.id = sq.rCommander
+				ON c.id = sq.commander_id
 			LEFT JOIN player AS p
-				ON p.id = c.rPlayer
+				ON p.id = c.player_id
 			WHERE c.statement IN ('.implode(',', [Commander::AFFECTED, Commander::MOVING]).')
 			GROUP BY p.id'
 		);
 	}
 
-	public function getPlayersPlanetData(): array
+	public function getPlayersPlanetData(): Result
 	{
-		return $this->getEntityManager()->getConnection()->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
 				p.id AS player,
-				COUNT(ob.rPlace) AS sumPlanets
+				COUNT(ob.place_id) AS sumPlanets
 			FROM orbitalBase AS ob
 			LEFT JOIN player AS p
-				on p.id = ob.rPlayer
+				on p.id = ob.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
-			GROUP BY ob.rPlace'
+			GROUP BY ob.place_id'
 		);
 	}
 
-	public function getPlayersTradeRoutes(): array
+	public function getPlayersTradeRoutes(): Result
 	{
-		return $this->getEntityManager()->getConnection()->query(
+		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
 				p.id AS player,
-				SUM(income) AS income
+				SUM(c.income) AS income
 			FROM commercialRoute AS c
 			LEFT JOIN orbitalBase AS o
-				ON o.rPlace = c.rOrbitalBase
-				RIGHT JOIN player AS p
-					ON p.id = o.rPlayer
+				ON o.place_id = c.origin_base_id
+			RIGHT JOIN player AS p
+				ON p.id = o.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
 		);
 	}
 
-	public function getPlayersLinkedTradeRoutes(): array
+	public function getPlayersLinkedTradeRoutes(): Result
 	{
 		return $this->getEntityManager()->getConnection()->executeQuery(
 			'SELECT 
@@ -189,12 +201,12 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 				SUM(income) AS income
 			FROM `commercialRoute` AS c
 			LEFT JOIN orbitalBase AS o
-				ON o.place = c.destinationBase
-				RIGHT JOIN player AS p
-					ON p.id = o.player
+				ON o.place_id = c.destination_base_id
+			RIGHT JOIN player AS p
+				ON p.id = o.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
-		)->fetchAllAssociative();
+		);
 	}
 }

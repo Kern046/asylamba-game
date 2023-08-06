@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Athena\Infrastructure\DataFixtures\Factory;
 
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Gaia\Infrastructure\DataFixtures\Factory\PlaceFactory;
 use App\Modules\Zeus\Infrastructure\DataFixtures\Factory\PlayerFactory;
 use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\ModelFactory;
@@ -15,7 +16,7 @@ class OrbitalBaseFactory extends ModelFactory
 	{
 		return [
 			'id' => Uuid::v4(),
-			'place' => null,
+			'place' => PlaceFactory::random(),
 			'player' => PlayerFactory::random(),
 			'name' => 'Colonie',
 			'typeOfBase' => OrbitalBase::TYP_NEUTRAL,

@@ -3,37 +3,29 @@
 namespace App\Modules\Atlas\Infrastructure\Controller;
 
 use App\Classes\Library\Utils;
-use App\Modules\Atlas\Manager\FactionRankingManager;
+use App\Modules\Atlas\Domain\Repository\FactionRankingRepositoryInterface;
+use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
 class ViewFactionRankings extends AbstractController
 {
 	public function __invoke(
-		FactionRankingManager $factionRankingManager,
+		DurationHandler $durationHandler,
+		FactionRankingRepositoryInterface $factionRankingRepository,
 	): Response {
-		if (Utils::interval($this->getParameter('server_start_time'), Utils::now(), 'h') > $this->getParameter('hours_before_start_of_ranking')) {
-			$factionRankingManager->loadLastContext([], ['pointsPosition', 'ASC'], [0, 1]);
-		} else {
-			$factionRankingManager->loadLastContext([], ['generalPosition', 'ASC'], [0, 1]);
-		}
-		$bestFaction = $factionRankingManager->get(0);
+		// @TODO Replace this parameter by a dynamic field
+		$serverStartTime = new \DateTimeImmutable($this->getParameter('server_start_time'));
+		$hoursBeforeRankingStart = $this->getParameter('hours_before_start_of_ranking');
 
-		$factionRankingManager->newSession();
-		$factionRankingManager->loadLastContext([], ['pointsPosition', 'ASC']);
-		$pointsRankings = $factionRankingManager->getAll();
+		$pointsRankings = $factionRankingRepository->getRankingsByField('pointsPosition');
+		$generalRankings = $factionRankingRepository->getRankingsByField('generalPosition');
+		$wealthRankings = $factionRankingRepository->getRankingsByField('wealthPosition');
+		$territorialRankings = $factionRankingRepository->getRankingsByField('territorialPosition');
 
-		$factionRankingManager->newSession();
-		$factionRankingManager->loadLastContext([], ['generalPosition', 'ASC']);
-		$generalRankings = $factionRankingManager->getAll();
-
-		$factionRankingManager->newSession();
-		$factionRankingManager->loadLastContext([], ['wealthPosition', 'ASC']);
-		$wealthRankings = $factionRankingManager->getAll();
-
-		$factionRankingManager->newSession();
-		$factionRankingManager->loadLastContext([], ['territorialPosition', 'ASC']);
-		$territorialRankings = $factionRankingManager->getAll();
+		$bestFaction = ($durationHandler->getHoursDiff($serverStartTime, new \DateTimeImmutable()) > $hoursBeforeRankingStart)
+			? $pointsRankings[0] ?? null
+			: $generalRankings[0] ?? null;
 
 		return $this->render('pages/atlas/faction_rankings.html.twig', [
 			'best_faction' => $bestFaction,

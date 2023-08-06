@@ -1,8 +1,8 @@
-<div class="player faction color{{ faction_ranking.rFaction }} {% if current_player.rColor == faction_ranking.rFaction %}active{% endif %}">
-	<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_ranking.rFaction ~ '.png') }}" alt="{{ faction_ranking.rFaction }}" class="picto" />
+<div class="player faction color{{ faction_ranking.faction.identifier }} {% if current_player.faction.id == faction_ranking.faction.id %}active{% endif %}">
+	<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_ranking.faction.identifier ~ '.png') }}" alt="{{ faction_ranking.faction.identifier }}" class="picto" />
 
-	<span class="title">{{ get_faction_info(faction_ranking.rFaction, 'government') }}</span>
-	<strong class="name">{{ get_faction_info(faction_ranking.rFaction, 'popularName') }}</strong>
+	<span class="title">{{ get_faction_info(faction_ranking.faction.identifier, 'government') }}</span>
+	<strong class="name">{{ get_faction_info(faction_ranking.faction.identifier, 'popularName') }}</strong>
 	<span class="experience">
 		{{ value|raw }}
 	</span>

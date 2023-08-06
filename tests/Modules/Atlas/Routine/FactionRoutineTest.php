@@ -5,7 +5,7 @@ namespace Tests\App\Modules\Atlas\Routine;
 use App\Modules\Atlas\Model\FactionRanking;
 use App\Modules\Atlas\Model\PlayerRanking;
 use App\Modules\Atlas\Model\Ranking;
-use App\Modules\Atlas\Routine\FactionRoutine;
+use App\Modules\Atlas\Routine\FactionRoutineHandler;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Model\Sector;
@@ -13,7 +13,7 @@ use App\Modules\Zeus\Model\Player;
 
 class FactionRoutineTest extends \PHPUnit\Framework\TestCase
 {
-	/** @var FactionRoutine * */
+	/** @var FactionRoutineHandler * */
 	protected $routine;
 	/** @var array * */
 	protected $rankings;
@@ -27,7 +27,7 @@ class FactionRoutineTest extends \PHPUnit\Framework\TestCase
 
 	public function setUp(): void
 	{
-		$this->routine = new FactionRoutine();
+		$this->routine = new FactionRoutineHandler();
 		$this->rankings = [];
 	}
 

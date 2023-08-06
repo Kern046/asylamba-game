@@ -149,69 +149,6 @@ class Utils
 		return $string;
 	}
 
-	public static function arrayToWhere($array, $prefix = '')
-	{
-		if (!empty($array)) {
-			$i = 0;
-			$return = '';
-
-			foreach ($array as $k => $v) {
-				if (0 == $i) {
-					$return .= 'WHERE ';
-				} else {
-					$return .= ' AND ';
-				}
-				if (is_array($v)) {
-					$return .= ' (';
-					for ($j = 0; $j < count($v); ++$j) {
-						if (0 == $j) {
-							$return .= $prefix.$k.' = ?';
-						} else {
-							$return .= ' OR '.$prefix.$k.' = ?';
-						}
-					}
-					$return .= ') ';
-				} else {
-					$return .= $prefix.$k.' = ? ';
-				}
-				++$i;
-			}
-
-			return $return;
-		}
-	}
-
-	public static function arrayToOrder($array, $prefix = '')
-	{
-		if (!empty($array)) {
-			$return = 'ORDER BY';
-			$i = 0;
-			foreach ($array as $k) {
-				if (1 != $i % 2 and 0 != $i) {
-					$return .= ',';
-				}
-				$return .= ' '.$prefix.$k;
-				++$i;
-			}
-
-			return $return;
-		}
-	}
-
-	public static function arrayToLimit($array)
-	{
-		if (empty($array)) {
-			return '';
-		} else {
-			return 'LIMIT '.$array[0].', '.$array[1];
-		}
-	}
-
-	public static function hashAndSalt($string)
-	{
-		return sha1($string.'abdelazer');
-	}
-
 	public static function shuffle(&$array)
 	{
 		$keys = array_keys($array);

@@ -2,8 +2,9 @@
 
 namespace App\Modules\Atlas\Infrastructure\Controller;
 
-use App\Modules\Atlas\Manager\PlayerRankingManager;
+use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
 use App\Modules\Atlas\Model\PlayerRanking;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,16 +16,15 @@ class ViewPlayerRankings extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		PlayerRankingManager $playerRankingManager,
 		PlayerManager $playerManager,
+		PlayerRepositoryInterface $playerRepository,
+		PlayerRankingRepositoryInterface $playerRankingRepository,
 	): Response {
 		// load current player
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext(['rPlayer' => $currentPlayer->getId()]);
-		$p = $playerRankingManager->get();
+		$p = $playerRankingRepository->getPlayerRanking($currentPlayer);
 
-		$positionGetter = fn (PlayerRanking|false $p, callable $positionFieldGetter) => (
-			false === $p ||
+		$positionGetter = fn (PlayerRanking|null $p, callable $positionFieldGetter) => (
+			null === $p ||
 			'top' === $request->query->get('mode') ||
 			$positionFieldGetter($p) - PlayerRanking::PREV < 0
 		) ? 0 : $positionFieldGetter($p) - PlayerRanking::PREV;
@@ -37,37 +37,21 @@ class ViewPlayerRankings extends AbstractController
 		$butcherPosition = $positionGetter($p, fn (PlayerRanking $p) => $p->butcherPosition);
 		$traderPosition = $positionGetter($p, fn (PlayerRanking $p) => $p->traderPosition);
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['generalPosition', 'ASC'], [0, 1]);
-		$bestPlayer = $playerRankingManager->get(0);
+		$bestPlayer = $playerRankingRepository->getBestPlayerRanking()?->player;
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['generalPosition', 'ASC'], [$generalPosition, PlayerRanking::STEP]);
-		$generalRankings = $playerRankingManager->getAll();
+		$generalRankings = $playerRankingRepository->getRankingsByRange('generalPosition', $generalPosition, PlayerRanking::STEP);
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['experiencePosition', 'ASC'], [$experiencePosition, PlayerRanking::STEP]);
-		$experienceRankings = $playerRankingManager->getAll();
+		$experienceRankings = $playerRankingRepository->getRankingsByRange('experiencePosition', $experiencePosition, PlayerRanking::STEP);
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['fightPosition', 'ASC'], [$fightPosition, PlayerRanking::STEP]);
-		$fightRankings = $playerRankingManager->getAll();
+		$fightRankings = $playerRankingRepository->getRankingsByRange('fightPosition', $fightPosition, PlayerRanking::STEP);
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['resourcesPosition', 'ASC'], [$resourcesPosition, PlayerRanking::STEP]);
-		$resourcesRankings = $playerRankingManager->getAll();
+		$resourcesRankings = $playerRankingRepository->getRankingsByRange('resourcesPosition', $resourcesPosition, PlayerRanking::STEP);
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['armiesPosition', 'ASC'], [$armiesPosition, PlayerRanking::STEP]);
-		$armiesRankings = $playerRankingManager->getAll();
+		$armiesRankings = $playerRankingRepository->getRankingsByRange('armiesPosition', $armiesPosition, PlayerRanking::STEP);
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['butcherPosition', 'ASC'], [$butcherPosition, PlayerRanking::STEP]);
-		$butcherRankings = $playerRankingManager->getAll();
+		$butcherRankings = $playerRankingRepository->getRankingsByRange('butcherPosition', $butcherPosition, PlayerRanking::STEP);
 
-		$playerRankingManager->newSession();
-		$playerRankingManager->loadLastContext([], ['traderPosition', 'ASC'], [$traderPosition, PlayerRanking::STEP]);
-		$traderRankings = $playerRankingManager->getAll();
+		$traderRankings = $playerRankingRepository->getRankingsByRange('traderPosition', $traderPosition, PlayerRanking::STEP);
 
 		return $this->render('pages/atlas/player_rankings.html.twig', [
 			'best_player' => $bestPlayer,
@@ -78,8 +62,8 @@ class ViewPlayerRankings extends AbstractController
 			'armies_rankings' => $armiesRankings,
 			'butcher_rankings' => $butcherRankings,
 			'trader_rankings' => $traderRankings,
-			'active_players_count' => $playerManager->countActivePlayers(),
-			'all_players_count' => $playerManager->countAllPlayers(),
+			'active_players_count' => $playerRepository->countActivePlayers(),
+			'all_players_count' => $playerRepository->countAllPlayers(),
 		]);
 	}
 }
