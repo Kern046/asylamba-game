@@ -75,7 +75,7 @@ readonly class UniversityInvestmentHandler
 
 		$notificationBuilder->addContent(
 			NotificationBuilder::divider(),
-			NotificationBuilder::link($this->urlGenerator->generate('financial'), 'vers les finances →'),
+			NotificationBuilder::link($this->urlGenerator->generate('financial_investments'), 'vers les finances →'),
 		);
 
 		$this->notificationRepository->save($notificationBuilder->for($player));
