@@ -27,25 +27,28 @@ jQuery(document).ready(function($) {
 			render.viewport.w = parseInt($('body').css('width'));
 
 			// hauteur du #conteneur
-			const headerColumn = document.querySelector('.component .head').offsetHeight;
-			var hContent = render.viewport.h - headerColumn;
+			const headerColumn = document.querySelector('.component .head');
 
-			// traitement des colonnes
-			$('.component').each(function(i) {
-				var currentColumn = $(this);
-				render.column.number += parseInt(parseInt(currentColumn.css('width')) / render.column.defaultSize);
+			if (null !== headerColumn) {
+				var hContent = render.viewport.h - headerColumn.offsetHeight;
 
-				currentColumn.css('height', hContent);
-				currentColumn.find('.fix-body').css('height', hContent - parseInt(currentColumn.find('.head').css('height')));
+				// traitement des colonnes
+				$('.component').each(function(i) {
+					var currentColumn = $(this);
+					render.column.number += parseInt(parseInt(currentColumn.css('width')) / render.column.defaultSize);
 
-				if ($('body').hasClass('no-scrolling') && !currentColumn.hasClass('hasMover')) {
-					currentColumn.find('.fix-body').append('<a href="#" class="toTop"></a>');
-					currentColumn.find('.fix-body').append('<a href="#" class="toBottom"></a>');
-					currentColumn.addClass('hasMover');
+					currentColumn.css('height', hContent);
+					currentColumn.find('.fix-body').css('height', hContent - parseInt(currentColumn.find('.head').css('height')));
 
-					columnController.move(currentColumn.find('.fix-body'), 'top');
-				}
-			});
+					if ($('body').hasClass('no-scrolling') && !currentColumn.hasClass('hasMover')) {
+						currentColumn.find('.fix-body').append('<a href="#" class="toTop"></a>');
+						currentColumn.find('.fix-body').append('<a href="#" class="toBottom"></a>');
+						currentColumn.addClass('hasMover');
+
+						columnController.move(currentColumn.find('.fix-body'), 'top');
+					}
+				});
+			}
 
 			$('#content').css('width', ((render.column.number * render.column.defaultSize) + 500 + (3 * render.column.defaultSize)));
 

@@ -9,11 +9,12 @@
 	{{ include('molecules/map/commanders.html.twig', { local_commanders }) }}
 
 	<div id="coord-box"></div>
+	{%  dump(default_position) %}
 
 	{% if default_position.system is not null %}
 		{% set no_ajax = true %}
 
-		<div id="action-box">
+		<div id="action-box" class="active">
 			{{ include('components/map/system_details.html.twig', {
 				places,
 				no_ajax,
