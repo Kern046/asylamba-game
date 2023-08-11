@@ -8,6 +8,7 @@ use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Domain\Specification\SelectorSpecification;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 
 /**
  * @extends DoctrineRepository<Player>
@@ -121,10 +122,8 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 		return $this->createQueryBuilder('p')
 			->where('p.faction = :faction')
 			->andWhere('p.statement != :statement')
-			->setParameters([
-				'faction' => $faction,
-				'statement' => Player::DEAD,
-			])
+			->setParameter('faction', $faction->id, UuidType::NAME)
+			->setParameter('statement',  Player::DEAD)
 			->orderBy('p.factionPoint', 'DESC')
 			->getQuery()
 			->getResult();

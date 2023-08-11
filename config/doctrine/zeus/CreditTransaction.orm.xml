@@ -12,6 +12,7 @@
 			<discriminator-mapping value="player_to_player" class="App\Modules\Zeus\Model\PlayerToPlayerCreditTransaction" />
 			<discriminator-mapping value="player_to_faction" class="App\Modules\Zeus\Model\PlayerToFactionCreditTransaction" />
 			<discriminator-mapping value="faction_to_player" class="App\Modules\Zeus\Model\FactionToPlayerCreditTransaction" />
+			<discriminator-mapping value="faction_to_faction" class="App\Modules\Zeus\Model\FactionToFactionCreditTransaction" />
 		</discriminator-map>
 
 		<id name="id" type="integer" column="id">

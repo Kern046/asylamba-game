@@ -107,6 +107,7 @@
 		</div>
 
 		{% if search_results is not null %}
+			{% dump(search_results) %}
 			<div class="component player rank">
 			<div class="head skin-2">
 				<h2>Résultats</h2>
@@ -114,7 +115,7 @@
 			<div class="fix-body">
 				<div class="body">
 					{% for base in search_results %}
-						<a href="{{ path('map', {'place': base.placeId}) }}" class="player color{{ base.factionIdentifier }}">
+						<a href="{{ path('map', {'place': base.placeId }) }}" class="player color{{ base.factionIdentifier }}">
 							<img src="{{ asset('build/media/avatar/small/' ~ base.playerAvatar ~ '.png') }}" alt="" class="picto">
 							<span class="title">{{ base.playerName }}</span>
 							<strong class="name">{{ base.baseName }}</strong>

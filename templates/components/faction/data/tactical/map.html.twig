@@ -7,17 +7,17 @@
 			<div class="tactical-map">
 				<svg class="sectors" viewBox="0, 0, 750, 750" xmlns="http://www.w3.org/2000/svg">
 					{% for sector in sectors %}
-						<polygon data-id="{{ sector.id }}"
-						class="ally{{ sector.rColor }} {{ sector.rColor != 0 ? 'enabled' : 'disabled' }}"
-						points="{{ galaxy_configuration.sectorCoord(sector.id, map_scale, 0) }}"
+						<polygon data-id="{{ sector.identifier }}"
+						class="ally{{ sector.faction.identifier ?? 0 }} {{ (sector.faction.identifier ?? 0) != 0 ? 'enabled' : 'disabled' }}"
+						points="{{ galaxy_configuration.sectorCoord(sector.identifier, map_scale, 0) }}"
 						/>
 					{% endfor %}
 				</svg>
 				<div class="number">
 					{% for sector in sectors %}
-						{% set i = sector.id - 1 %}
-						<span id="sector{{ sector.id }}" class="ally{{ sector.rColor }}" style="top: {{ galaxy_configuration.sectors[i].display[1] * map_scale / 1.35 }}px; left: {{ galaxy_configuration.sectors[i].display[0] * map_scale / 1.35 }}px;">
-							{{ sector.id }}
+						{% set i = sector.identifier - 1 %}
+						<span id="sector{{ sector.identifier }}" class="ally{{ sector.faction.identifier ?? 0 }}" style="top: {{ galaxy_configuration.sectors[i].display[1] * map_scale / 1.35 }}px; left: {{ galaxy_configuration.sectors[i].display[0] * map_scale / 1.35 }}px;">
+							{{ sector.identifier }}
 						</span>
 					{% endfor %}
 				</div>

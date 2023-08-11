@@ -134,38 +134,18 @@ class CommanderRepository extends DoctrineRepository implements CommanderReposit
 
 	public function getFactionCommanderStats(Color $faction): array
 	{
-		return $this->getEntityManager()->getConnection()->fetchAllAssociative(
-			'SELECT
-				COUNT(c.id) AS nb,
-				AVG(c.level) AS avgLevel
-			FROM commander AS c
-			LEFT JOIN player AS p ON c.player = p.id
-			WHERE p.rColor = ? AND (c.statement = ? OR c.statement = ?)',
-			[$faction->id, Commander::AFFECTED, Commander::MOVING],
-		);
-	}
+		$qb = $this->createQueryBuilder('c');
 
-	public function getFactionFleetStats(Color $faction): array
-	{
-		return $this->getEntityManager()->getConnection()->fetchAllAssociative(
-			'SELECT
-				SUM(s.ship0) AS nbs0,
-				SUM(s.ship1) AS nbs1,
-				SUM(s.ship2) AS nbs2,
-				SUM(s.ship3) AS nbs3,
-				SUM(s.ship4) AS nbs4,
-				SUM(s.ship5) AS nbs5,
-				SUM(s.ship6) AS nbs6,
-				SUM(s.ship7) AS nbs7,
-				SUM(s.ship8) AS nbs8,
-				SUM(s.ship9) AS nbs9,
-				SUM(s.ship10) AS nbs10,
-				SUM(s.ship11) AS nbs11
-			FROM squadron AS s
-			LEFT JOIN commander AS c ON s.rCommander = c.id
-			LEFT JOIN player AS p ON c.player = p.id
-			WHERE p.rColor = ? AND (c.statement = ? OR c.statement = ?)',
-			[$faction->id, Commander::AFFECTED, Commander::MOVING],
-		);
+		$qb
+			->select(
+				'COUNT(c.id) AS nb',
+				'AVG(c.level) AS avgLevel',
+			)
+			->join('c.player', 'p')
+			->where('p.faction = :faction')
+			->andWhere($qb->expr()->in('c.statement', [Commander::AFFECTED, Commander::MOVING]))
+			->setParameter('faction', $faction->id, UuidType::NAME);
+
+		return $qb->getQuery()->getSingleResult();
 	}
 }

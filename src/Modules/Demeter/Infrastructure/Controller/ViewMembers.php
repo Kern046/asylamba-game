@@ -5,6 +5,7 @@ namespace App\Modules\Demeter\Infrastructure\Controller;
 use App\Classes\Library\Utils;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +15,7 @@ class ViewMembers extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		DurationHandler $durationHandler,
 		PlayerRepositoryInterface $playerRepository,
 	): Response {
 		$faction = $currentPlayer->faction;
@@ -34,7 +36,7 @@ class ViewMembers extends AbstractController
 		$factionPlayers = $playerRepository->getFactionPlayersByRanking($faction);
 
 		foreach ($factionPlayers as $factionPlayer) {
-			if (Utils::interval(Utils::now(), $factionPlayer->dLastActivity, 's') < 600) {
+			if ($durationHandler->getDiff(new \DateTimeImmutable(), $factionPlayer->dLastActivity) < 600) {
 				++$onlinePlayersCount;
 			} else {
 				++$offlinePlayersCount;

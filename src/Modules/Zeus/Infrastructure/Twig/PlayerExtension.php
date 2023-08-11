@@ -9,6 +9,7 @@ use App\Modules\Promethee\Helper\ResearchHelper;
 use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -17,6 +18,7 @@ class PlayerExtension extends AbstractExtension
 	public function __construct(
 		private readonly BonusApplierInterface $bonusApplier,
 		private readonly CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		private readonly DurationHandler $durationHandler,
 		private readonly OrbitalBaseManager $orbitalBaseManager,
 		private readonly ResearchHelper $researchHelper,
 		private readonly int $timeEventUpdate,
@@ -32,8 +34,8 @@ class PlayerExtension extends AbstractExtension
 			new TwigFunction('get_faction_info', fn (int $factionId, string $info) => ColorResource::getInfo($factionId, $info)),
 			new TwigFunction('get_player_bases_count', fn (array $movingCommanders) => $this->orbitalBaseManager->getPlayerBasesCount($movingCommanders)),
 			new TwigFunction('get_research_info', fn (string $researchType, string $info) => $this->researchHelper->getInfo($researchType, $info)),
-			new TwigFunction('is_player_online', fn (Player $player) => Utils::interval(Utils::now(), $player->dLastActivity, 's') < ($this->timeEventUpdate * 2)),
-			new TwigFunction('is_player_inactive', fn (Player $player) => Utils::interval(Utils::now(), $player->dLastActivity) > $this->allyInactiveTime),
+			new TwigFunction('is_player_online', fn (Player $player) => $this->durationHandler->getDiff(new \DateTimeImmutable(), $player->dLastActivity) < ($this->timeEventUpdate * 2)),
+			new TwigFunction('is_player_inactive', fn (Player $player) => $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $player->dLastActivity) > $this->allyInactiveTime),
 		];
 	}
 }

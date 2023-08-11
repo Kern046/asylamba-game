@@ -75,9 +75,4 @@ interface CommanderRepositoryInterface extends EntityRepositoryInterface
 	 * @return array{nb: int, avgLevel: int}
 	 */
 	public function getFactionCommanderStats(Color $faction): array;
-
-	/**
-	 * @return array<string, int>
-	 */
-	public function getFactionFleetStats(Color $faction): array;
 }

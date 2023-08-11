@@ -58,7 +58,7 @@ class Propose extends AbstractController
 		$otherFaction = $player->faction;
 
 		// TODO move to validation constraint
-		if (Color::ENEMY === $playerFaction->relations[$otherFaction->identifier] || Color::ENEMY === $otherFaction->relations[$playerFaction->identifier]) {
+		if ($playerFaction->identifier !== $otherFaction->identifier && (Color::ENEMY === $playerFaction->relations[$otherFaction->identifier] || Color::ENEMY === $otherFaction->relations[$playerFaction->identifier])) {
 			throw new ConflictHttpException('impossible de proposer une route commerciale à ce joueur, vos factions sont en guerre.');
 		}
 		// TODO move to validation constraint

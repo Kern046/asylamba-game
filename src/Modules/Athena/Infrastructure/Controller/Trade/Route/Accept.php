@@ -49,7 +49,7 @@ class Accept extends AbstractController
 		$proposerFaction = $cr->originBase->player->faction;
 		$acceptorFaction = $cr->destinationBase->player->faction;
 
-		if (Color::ENEMY === $proposerFaction->relations[$acceptorFaction->identifier] || Color::ENEMY === $acceptorFaction->relations[$proposerFaction->identifier]) {
+		if ($proposerFaction->identifier !== $acceptorFaction->identifier && (Color::ENEMY === $proposerFaction->relations[$acceptorFaction->identifier] || Color::ENEMY === $acceptorFaction->relations[$proposerFaction->identifier])) {
 			throw new ConflictHttpException('You cannot accept this route: your two factions are at war');
 		}
 		$proposerBase = $cr->originBase;

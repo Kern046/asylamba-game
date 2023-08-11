@@ -7,6 +7,7 @@ use App\Classes\Redis\RedisManager;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Domain\Repository\LiveReportRepositoryInterface;
 use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
+use App\Modules\Ares\Domain\Repository\SquadronRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Resource\CommanderResources;
@@ -44,15 +45,14 @@ class ViewData extends AbstractController
 	public function __invoke(
 		Request                              $request,
 		Player                               $currentPlayer,
-		ColorManager                         $colorManager,
 		CommanderRepositoryInterface         $commanderRepository,
-		CommercialRouteManager               $commercialRouteManager,
 		CommercialTaxRepositoryInterface     $commercialTaxRepository,
 		CreditTransactionRepositoryInterface $creditTransactionRepository,
 		LiveReportRepositoryInterface        $reportRepository,
 		FactionRankingRepositoryInterface    $factionRankingRepository,
 		GalaxyConfiguration                  $galaxyConfiguration,
 		SectorRepositoryInterface            $sectorRepository,
+		SquadronRepositoryInterface $squadronRepository,
 	): Response {
 		$faction = $currentPlayer->faction;
 
@@ -68,33 +68,21 @@ class ViewData extends AbstractController
 		// @TODO factoriser cette formule
 		$creditBase += $creditBase * 12 / 100;
 
-		// load
-		$creditTransactionRepository->newSession();
-		$creditTransactionRepository->load(
-			['rReceiver' => $faction->id, 'type' => CreditTransaction::TYP_FACTION],
-			['dTransaction', 'DESC'],
-			[0, 20],
-		);
-		$membersDonations = $creditTransactionRepository->getAll();
+		$membersDonations = $creditTransactionRepository->getAllByFactionReceiverFromMembers($faction);
 
-		$creditTransactionRepository->newSession();
-		$creditTransactionRepository->load(
-			['rSender' => $faction->id, 'type' => CreditTransaction::TOTO],
-			['dTransaction', 'DESC'],
-			[0, 20],
-		);
-		$factionDonations = $creditTransactionRepository->getAll();
+		$factionDonations = $creditTransactionRepository->getAllByFactionReceiverFromFactions($faction);
 
 		$importaxes = $commercialTaxRepository->getFactionTaxesByImport($faction);
 
 		$exportTaxes = $commercialTaxRepository->getFactionTaxesByExport($faction);
 
 		$commanderStats = $commanderRepository->getFactionCommanderStats($faction);
-		$fleetStats = $commanderRepository->getFactionFleetStats($faction);
+
+		$fleetStats = $squadronRepository->getFactionFleetStats($faction);
 
 		$totalPEV = 0;
 		for ($i = 0; $i < 12; ++$i) {
-			$totalPEV += $fleetStats['nbs'.$i] * ShipResource::getInfo($i, 'pev');
+			$totalPEV += ($fleetStats['nbs'.$i] ?? 0) * ShipResource::getInfo($i, 'pev');
 		}
 
 		$factions = $this->colorRepository->findAll();
@@ -109,6 +97,7 @@ class ViewData extends AbstractController
 			'faction_donations' => $factionDonations,
 			'faction_sectors' => $sectorRepository->getFactionSectors($faction),
 			'rc_data' => $this->commercialRouteRepository->getCommercialRouteFactionData($faction),
+			'faction_internal_commercial_routes_data' => $this->commercialRouteRepository->getInternalCommercialRouteFactionData($faction),
 			'rc_diplomatic_data' => $this->getCommercialRoutesDiplomaticData($faction),
 			'import_taxes' => $importaxes,
 			'export_taxes' => $exportTaxes,
@@ -157,11 +146,11 @@ class ViewData extends AbstractController
 				$percents = ['color'.$faction->identifier => 0];
 				$scores = unserialize($this->redisManager->getConnection()->get('sector:'.$sector->identifier));
 
-				if (!isset($scores[$faction->identifier]) && $sector->faction->id !== $faction->id) {
+				if (!isset($scores[$faction->identifier]) && $sector->faction?->id !== $faction->id) {
 					unset($sectors[$key]);
 					continue;
 				}
-				if ('Secteurs conquis' === $type && $sector->faction->id !== $faction->id) {
+				if ('Secteurs conquis' === $type && $sector->faction?->id !== $faction->id) {
 					continue;
 				}
 
@@ -174,7 +163,7 @@ class ViewData extends AbstractController
 
 				arsort($percents);
 
-				if ($sector->faction->id === $faction->id || ($scores[$faction->identifier] > 0)) {
+				if ($sector?->faction->id === $faction->id || ($scores[$faction->identifier] > 0)) {
 					$types[$type] = $sector;
 				}
 			}
@@ -197,7 +186,7 @@ class ViewData extends AbstractController
 			function ($acc, $factionId) use ($faction) {
 				$acc[$factionId] = $this->commercialRouteRepository->countCommercialRoutesBetweenFactions(
 					$faction,
-					$this->colorRepository->get($factionId),
+					$this->colorRepository->getOneByIdentifier($factionId),
 				);
 
 				return $acc;

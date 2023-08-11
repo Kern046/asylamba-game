@@ -42,36 +42,39 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 	{
 		$factionIdentifiers = sprintf("(%s)", implode(',', $factions));
 
-		return $this->getEntityManager()->getConnection()->fetchAllAssociative(
-			<<<SQL
-				SELECT
-				faction.identifier AS factionIdentifier,
-				player.avatar AS playerAvatar,
-				player.name AS playerName,
-				ob.name AS baseName,
-				ob.place_id AS placeId,
-				(FLOOR(SQRT(POW(:system_x - s.xPosition, 2) + POW(:system_y - s.yPosition, 2)))) AS distance
-				FROM orbitalBase AS ob
-				INNER JOIN player ON ob.player_id = player.id
-				INNER JOIN color faction ON faction.id = player.faction_id
-				INNER JOIN place AS p ON ob.place_id = p.id
-				INNER JOIN system AS s ON p.system_id = s.id
-				INNER JOIN sector AS se ON s.sector_id = se.id
-				WHERE player.id != :player_id
-				AND ob.levelSpatioport > 0
-				AND (FLOOR(SQRT(POW(:system_x - s.xPosition, 2) + POW(:system_y - s.yPosition, 2)))) >= :min_distance
-				AND (FLOOR(SQRT(POW(:system_x - s.xPosition, 2) + POW(:system_y - s.yPosition, 2)))) <= :max_distance
-				AND faction.identifier IN $factionIdentifiers
-				ORDER BY distance DESC
-				LIMIT 40
-			SQL,
-			[
-				'system_x' => $orbitalBase->place->system->xPosition,
-				'system_y' => $orbitalBase->place->system->yPosition,
-				'player_id' => $player->id,
-				'min_distance' => $minDistance,
-				'max_distance' => $maxDistance,
-			],
+		return array_map(
+			fn (array $data) => array_merge($data, ['placeId' => Uuid::fromBinary($data['placeId'])]),
+			$this->getEntityManager()->getConnection()->fetchAllAssociative(
+				<<<SQL
+					SELECT
+					faction.identifier AS factionIdentifier,
+					player.avatar AS playerAvatar,
+					player.name AS playerName,
+					ob.name AS baseName,
+					ob.place_id AS placeId,
+					(FLOOR(SQRT(POW(:system_x - s.xPosition, 2) + POW(:system_y - s.yPosition, 2)))) AS distance
+					FROM orbitalBase AS ob
+					INNER JOIN player ON ob.player_id = player.id
+					INNER JOIN color faction ON faction.id = player.faction_id
+					INNER JOIN place AS p ON ob.place_id = p.id
+					INNER JOIN system AS s ON p.system_id = s.id
+					INNER JOIN sector AS se ON s.sector_id = se.id
+					WHERE player.id != :player_id
+					AND ob.levelSpatioport > 0
+					AND (FLOOR(SQRT(POW(:system_x - s.xPosition, 2) + POW(:system_y - s.yPosition, 2)))) >= :min_distance
+					AND (FLOOR(SQRT(POW(:system_x - s.xPosition, 2) + POW(:system_y - s.yPosition, 2)))) <= :max_distance
+					AND faction.identifier IN $factionIdentifiers
+					ORDER BY distance DESC
+					LIMIT 40
+				SQL,
+				[
+					'system_x' => $orbitalBase->place->system->xPosition,
+					'system_y' => $orbitalBase->place->system->yPosition,
+					'player_id' => $player->id,
+					'min_distance' => $minDistance,
+					'max_distance' => $maxDistance,
+				],
+			),
 		);
 	}
 
@@ -100,56 +103,78 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 	 */
 	public function countCommercialRoutesBetweenFactions(Color $faction, Color $otherFaction): int
 	{
-		return $this->getEntityManager()->getConnection()->fetchNumeric(
-			<<<SQL
-				SELECT
-					COUNT(cr.id) AS nb
-				FROM commercialRoute AS cr
-				LEFT JOIN orbitalBase AS ob1
-					ON cr.originBase = ob1.rPlace
-				LEFT JOIN player AS pl1
-					ON ob1.player = pl1.id
-				LEFT JOIN orbitalBase AS ob2
-					ON cr.destinationBase = ob2.rPlace
-				LEFT JOIN player AS pl2
-					ON ob2.player = pl2.id
-				WHERE (
-				    (pl1.faction = :faction AND pl2.faction = :other_faction)
-					OR (pl1.faction = :other_faction AND pl2.faction = :faction)
-				) AND cr.statement = :statement
-			SQL,
-			[
-				'faction' => $faction,
-				'other_faction' => $otherFaction,
-				'statement' => CommercialRoute::ACTIVE,
-			],
-		);
+		$qb = $this->createQueryBuilder('cr');
+
+		$qb->select('COUNT(cr.id)')
+			->join('cr.originBase', 'ob1')
+			->join('ob1.player', 'p1')
+			->join('cr.destinationBase', 'ob2')
+			->join('ob2.player', 'p2')
+			->where($qb->expr()->orX(
+				$qb->expr()->andX(
+					$qb->expr()->eq('p1.faction', ':faction'),
+					$qb->expr()->eq('p2.faction', ':other_faction'),
+				),
+				$qb->expr()->andX(
+					$qb->expr()->eq('p1.faction', ':other_faction'),
+					$qb->expr()->eq('p2.faction', ':faction'),
+				),
+			))
+			->andWhere('cr.statement = :statement')
+			->setParameter('faction', $faction->id, UuidType::NAME)
+			->setParameter('other_faction', $otherFaction->id, UuidType::NAME)
+			->setParameter('statement', CommercialRoute::ACTIVE)
+		;
+
+		return $qb->getQuery()->getSingleScalarResult();
 	}
 
 	public function getCommercialRouteFactionData(Color $faction): array
 	{
-		return $this->getEntityManager()->getConnection()->fetchAssociative(
-			<<<SQL
-				SELECT
-					COUNT(cr.id) AS nb,
-					SUM(cr.income) AS income
-				FROM commercialRoute AS cr
-				LEFT JOIN orbitalBase AS ob1
-					ON cr.originBase = ob1.place
-				LEFT JOIN player AS pl1
-					ON ob1.player = pl1.id
-				LEFT JOIN orbitalBase AS ob2
-					ON cr.destinationBase = ob2.rPlace
-				LEFT JOIN player AS pl2
-					ON ob2.player = pl2.id
-				WHERE (pl1.faction = :faction OR pl2.faction = :faction)
-					AND cr.statement = :statement
-			SQL,
-			[
-				'faction' => $faction,
-				'statement' => CommercialRoute::ACTIVE,
-			],
-		);
+		$qb = $this->createQueryBuilder('cr');
+
+		$qb->select(
+			'COUNT(cr.id) AS nb',
+			'SUM(cr.income) AS income',
+		)
+			->join('cr.originBase', 'ob1')
+			->join('ob1.player', 'p1')
+			->join('cr.destinationBase', 'ob2')
+			->join('ob2.player', 'p2')
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('p1.faction', ':faction'),
+				$qb->expr()->eq('p2.faction', ':faction'),
+			))
+			->andWhere('cr.statement = :statement')
+			->setParameter('faction', $faction->id, UuidType::NAME)
+			->setParameter('statement', CommercialRoute::ACTIVE)
+		;
+
+		return $qb->getQuery()->getSingleResult();
+	}
+
+	public function getInternalCommercialRouteFactionData(Color $faction): array
+	{
+		$qb = $this->createQueryBuilder('cr');
+
+		$qb->select(
+			'COUNT(cr.id) AS nb',
+			'SUM(cr.income) AS income',
+		)
+			->join('cr.originBase', 'ob1')
+			->join('ob1.player', 'p1')
+			->join('cr.destinationBase', 'ob2')
+			->join('ob2.player', 'p2')
+			->where($qb->expr()->andX(
+				$qb->expr()->eq('p1.faction', ':faction'),
+				$qb->expr()->eq('p2.faction', ':faction'),
+			))
+			->andWhere('cr.statement = :statement')
+			->setParameter('faction', $faction->id, UuidType::NAME)
+			->setParameter('statement', CommercialRoute::ACTIVE)
+		;
+
+		return $qb->getQuery()->getSingleResult();
 	}
 
 	public function getByIdAndBase(Uuid $id, OrbitalBase $base): CommercialRoute|null

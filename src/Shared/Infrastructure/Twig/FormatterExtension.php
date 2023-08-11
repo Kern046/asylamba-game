@@ -19,7 +19,7 @@ class FormatterExtension extends AbstractExtension
 	{
 		return [
 			new TwigFilter('parse', fn (string $content) => $this->parser->parse($content)),
-			new TwigFilter('number', fn (int|float $number, int $decimals = 0) => Format::numberFormat($number, $decimals)),
+			new TwigFilter('number', fn (int|float|null $number, int $decimals = 0) => Format::numberFormat($number ?? 0, $decimals)),
 			new TwigFilter('ranking', fn (int|float $number) => Format::rankingFormat($number)),
 			new TwigFilter('ordinal_number', fn (int|float $number) => Format::ordinalNumber($number)),
 			new TwigFilter('plural', fn (int|float $number) => Format::plural($number)),

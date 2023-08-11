@@ -33,6 +33,8 @@ interface CommercialRouteRepositoryInterface extends EntityRepositoryInterface
 
 	public function getCommercialRouteFactionData(Color $faction): array;
 
+	public function getInternalCommercialRouteFactionData(Color $faction): array;
+
 	public function getByIdAndBase(Uuid $id, OrbitalBase $base): CommercialRoute|null;
 
 	public function getByIdAndDistantBase(Uuid $id, OrbitalBase $base): CommercialRoute|null;
