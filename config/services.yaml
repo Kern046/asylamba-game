@@ -11,30 +11,6 @@ imports:
     - { resource: ../src/Modules/Zeus/Resource/config/config.yml }
 
 parameters:
-    # définition des ROOT
-    app_root: '%env(APP_ROOT)%'
-    getout_root: '%env(GETOUT_ROOT)%'
-    system_path:		'%kernel.project_dir%/src'
-    classes_path:       '%system_path%/Classes'
-
-    modules: 		'%system_path%/Modules/'
-    lib: 			'%classes_path%/lib/'
-    config: 		'%system_path%/config/'
-    event: 		'%system_path%/event/'
-
-    inscription: 	'%system_path%/inscription/'
-    connection: 	'%system_path%/connection/'
-
-    action: 		'%system_path%/action/std/'
-    ajax: 			'%system_path%/action/ajax/'
-
-    api: 			'%system_path%/api/'
-    script:		'%system_path%/script/'
-    buffer:		'%system_path%/buffer/'
-
-    template: 		'%system_path%/views/templates/'
-    pages: 		'%system_path%/views/pages/'
-    component: 	'%system_path%/views/components/'
     session_lifetime: 1800
     log_directory: var/logs
     log_rotation: 3
@@ -42,10 +18,9 @@ parameters:
     gaia.galaxy_configuration.class: App\Modules\Gaia\Galaxy\GalaxyConfigurationV6
     game.available_factions: [1, 2, 3, 4, 7]
 
-    apimode: '%env(APIMODE)%'
+    apimode: 'disabled'
 
-    server_id: '%env(SERVER_ID)%'
-    server_cycle_timeout: '%env(SERVER_CYCLE_TIMEOUT)%'
+    server_id: 0
     server_start_time: '%env(SERVER_START_TIME)%'
 
     security_api_key: '%env(SECURITY_API_KEY)%'
@@ -90,36 +65,10 @@ parameters:
     hours_before_start_of_ranking: 480
     points_to_win: 2000
 
-
-    publicr: '/public/'
-    css: '%publicr%css/'
-    js: '%publicr%js/'
     media: '/media/'
-    log: '%publicr%log/'
     # active les APIs de confirmation
     # active la création de personnage au niveau 5
     highmode: true
-    # active l'ajout du script analytics
-    analytics: false
-    # active la captation des données d'analyse (TB)
-    data_analysis: false
-    #########
-    # INFOS #
-    #########
-    # défini le nom du tableau de session
-    # note : utile si plusieurs instances cohabitent sur la même machine
-    server_sess: 'server'
-    # défini le titre du serveur (affiché comme titre)
-    app_name: 'Asylamba'
-    # défini le sous-titre du serveur (affiché comme titre)
-    app_subname: 'Expansion Stellaire'
-    # numéro de version de l'app
-    app_version: '2.0.0'
-    # créateurs du projet
-    app_creator: 'Gil Clavien, Jacky Casas, Noé Zufferey'
-    # défini la description du serveur (affichée dans la page)
-    app_description: 'Asylamba, jeu par navigateur'
-    #################
     # MISCELLANEOUS #
     #################
     # définition des ids des différants joueurs systèmes
@@ -176,14 +125,7 @@ services:
 
     App\Classes\Library\Parser:
         arguments:
-            $appRoot: '%app_root%'
             $mediaPath: '%media%'
-
-    App\Classes\Worker\API:
-        arguments:
-            $serverId: "%server_id%"
-            $apiKey: "%security_api_key%"
-            $getOutRoot: "%getout_root%"
 
     App\Classes\Library\Security:
         arguments:

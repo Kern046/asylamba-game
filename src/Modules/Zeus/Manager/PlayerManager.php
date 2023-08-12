@@ -2,7 +2,6 @@
 
 namespace App\Modules\Zeus\Manager;
 
-use App\Classes\Worker\API;
 use App\Modules\Athena\Application\Handler\OrbitalBasePointsHandler;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -38,7 +37,6 @@ class PlayerManager
 		private SectorRepositoryInterface $sectorRepository,
 		private TechnologyRepositoryInterface $technologyRepository,
 		private UrlGeneratorInterface $urlGenerator,
-		private API $api,
 		#[Autowire('%zeus.player.base_level%')]
 		private int $playerBaseLevel,
 		#[Autowire('%server_id%')]
@@ -49,7 +47,8 @@ class PlayerManager
 	public function kill(Player $player): void
 	{
 		// API call
-		$this->api->playerIsDead($player->bind, $this->serverId);
+		// TODO Replace when portal is implemented
+		// $this->api->playerIsDead($player->bind, $this->serverId);
 
 		// check if there is no other player with the same dead-name
 		$futureName = sprintf('&#8224; %s ', $player->name);

@@ -6,7 +6,6 @@ use App\Classes\Container\ArrayList;
 use App\Classes\Container\EventList;
 use App\Classes\Library\Security;
 use App\Classes\Library\Utils;
-use App\Classes\Worker\API;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Zeus\Domain\Event\PlayerConnectionEvent;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
@@ -28,7 +27,6 @@ class ConnectController extends AbstractController
 		Request $request,
 		Security $security,
 		PlayerRepositoryInterface $playerRepository,
-		API $api,
 		EntityManagerInterface $entityManager,
 		EventDispatcherInterface $eventDispatcher,
 		string $bindKey
@@ -59,9 +57,10 @@ class ConnectController extends AbstractController
 		$player->dLastActivity = new \DateTimeImmutable();
 
 		// confirmation au portail
-		if ('enabled' === $this->getParameter('apimode')) {
+		// TODO Replace when portal is implemented
+		/*if ('enabled' === $this->getParameter('apimode')) {
 			$api->confirmConnection($bindKey);
-		}
+		}*/
 		$entityManager->flush($player);
 
 		$eventDispatcher->dispatch(new PlayerConnectionEvent($player));

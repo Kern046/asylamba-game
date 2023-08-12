@@ -4,11 +4,9 @@ namespace App\Modules\Zeus\Infrastructure\Controller;
 
 use App\Classes\Container\ArrayList;
 use App\Classes\Library\Security;
-use App\Classes\Worker\API;
 use App\Modules\Ares\Model\Ship;
 use App\Modules\Athena\Application\Handler\OrbitalBasePointsHandler;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
@@ -41,7 +39,6 @@ use Symfony\Component\Uid\Uuid;
 class CreateCharacter extends AbstractController
 {
 	public function __construct(
-		private readonly API $api,
 		private readonly ColorRepositoryInterface $colorRepository,
 		private readonly PlayerRepositoryInterface $playerRepository,
 		private readonly PlayerManager $playerManager,
@@ -116,10 +113,11 @@ class CreateCharacter extends AbstractController
 				throw new UnauthorizedHttpException('Invalid bindkey');
 			}
 		} elseif ($session->has('prebindkey')) {
+			// TODO Replace when portal is implemented
 			if ('enabled' === $this->getParameter('apimode')) {
 				// utilisation de l'API
 
-				if ($this->api->userExist($session->get('prebindkey'))) {
+				/*if ($this->api->userExist($session->get('prebindkey'))) {
 					if (null === $this->playerRepository->findOneBy(['bind' => $session->get('prebindkey')])) {
 						$session->set('inscription', new ArrayList());
 						$session->get('inscription')->add('bindkey', $session->get('prebindkey'));
@@ -129,22 +127,26 @@ class CreateCharacter extends AbstractController
 						if (!empty($this->api->data['userInfo']['sponsorship'])) {
 							list($server, $player) = explode('#', $this->api->data['userInfo']['sponsorship']);
 
+							// TODO Replace when portal is implemented
 							if ($server == $this->getParameter('server_id')) {
 								$session->set('rgodfather', $player);
 							}
 						}
 					} else {
+						// TODO Replace when portal is implemented
 						return $this->redirect($this->getParameter('getout_root').'serveurs/message-useralreadysigned');
 					}
 				} else {
+					// TODO Replace when portal is implemented
 					return $this->redirect($this->getParameter('getout_root').'serveurs/message-unknowuser');
-				}
+				}*/
 			} else {
 				$session->set('inscription', new ArrayList());
 				$session->get('inscription')->add('bindkey', $session->get('prebindkey'));
 				$session->get('inscription')->add('portalPseudo', null);
 			}
 		} else {
+			// TODO Replace when portal is implemented
 			return $this->redirect($this->getParameter('getout_root').'serveurs/message-nobindkey');
 		}
 
@@ -157,6 +159,7 @@ class CreateCharacter extends AbstractController
 	{
 		$session = $request->getSession();
 		if (!$session->has('inscription')) {
+			// TODO Replace when portal is implemented
 			return $this->redirect($this->getParameter('getout_root').'serveurs/message-forbiddenaccess');
 		}
 		// création du tableau des alliances actives
@@ -260,9 +263,11 @@ class CreateCharacter extends AbstractController
 					throw new BadRequestHttpException('le nom de votre base doit contenir entre '.$check->getMinLength().' et '.$check->getMaxLength().' caractères');
 				}
 			} else {
+				// TODO Replace when portal is implemented
 				return $this->redirect($this->getParameter('getout_root').'serveurs/message-forbiddenaccess');
 			}
 		} else {
+			// TODO Replace when portal is implemented
 			return $this->redirect($this->getParameter('getout_root').'serveurs/message-forbiddenaccess');
 		}
 
@@ -464,9 +469,10 @@ class CreateCharacter extends AbstractController
 			// modification de la place
 
 			// confirmation au portail
-			if ('enabled' === $this->getParameter('apimode')) {
+			// TODO Replace when portal is implemented
+			/*if ('enabled' === $this->getParameter('apimode')) {
 				$return = $this->api->confirmInscription($session->get('inscription')->get('bindkey'));
-			}
+			}*/
 			// clear les sessions
 			$session->remove('inscription');
 			$session->remove('prebindkey');

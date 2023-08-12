@@ -6,6 +6,7 @@ use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Zeus\Manager\PlayerManager;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class Parser
@@ -25,7 +26,7 @@ class Parser
 	public function __construct(
 		private readonly PlayerRepositoryInterface $playerRepository,
 		private readonly PlaceRepositoryInterface $placeRepository,
-		private readonly string $appRoot,
+		private readonly UrlGeneratorInterface $urlGenerator,
 		private readonly string $mediaPath,
 	) {
 	}
@@ -139,7 +140,7 @@ class Parser
 			function ($m) {
 				return
 					(($player = $this->playerRepository->getByName($m[1])) !== null)
-					? '<a href="' . $this->appRoot . 'embassy/player-' . $player->id . '" class="color' . $player->faction->identifier . ' hb lt" title="voir le profil">' . $player->name . '</a>'
+					? '<a href="' . $this->urlGenerator->generate('embassy', ['player' => $player->id]) . '" class="color' . $player->faction->identifier . ' hb lt" title="voir le profil">' . $player->name . '</a>'
 					: $m[0]
 				;
 			},
@@ -154,9 +155,9 @@ class Parser
 			function ($m) {
 				if (($place = $this->placeRepository->get($m[1]))) {
 					if ($place->getTypeOfBase() > 0) {
-						return '<a href="'.$this->appRoot.'map/place-'.$place->id.'" class="color'.$place->player->faction->identifier.' hb lt" title="voir la planète">'.$place->base->name.'</a>';
+						return '<a href="'.$this->urlGenerator->generate('map', ['place' => $place->id]).'" class="color'.$place->player->faction->identifier.' hb lt" title="voir la planète">'.$place->base->name.'</a>';
 					} else {
-						return '<a href="'.$this->appRoot.'map/place-'.$place->id.'" class="hb lt" title="voir la planète">planète rebelle</a>';
+						return '<a href="'.$this->urlGenerator->generate('map', ['place' => $place->id]).'" class="hb lt" title="voir la planète">planète rebelle</a>';
 					}
 				}
 

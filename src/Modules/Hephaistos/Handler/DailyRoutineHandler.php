@@ -2,16 +2,12 @@
 
 namespace App\Modules\Hephaistos\Handler;
 
-use App\Classes\Library\Utils;
-use App\Classes\Worker\API;
 use App\Modules\Hephaistos\Message\DailyRoutineMessage;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
-use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]

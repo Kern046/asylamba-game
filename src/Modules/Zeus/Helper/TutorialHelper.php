@@ -2,33 +2,27 @@
 
 namespace App\Modules\Zeus\Helper;
 
-use App\Classes\Library\Session\SessionWrapper;
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
-use App\Modules\Promethee\Manager\TechnologyManager;
-use App\Modules\Promethee\Manager\TechnologyQueueManager;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
 
-class TutorialHelper
+readonly class TutorialHelper
 {
 	public function __construct(
-		private readonly EntityManagerInterface $entityManager,
-		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
-		private readonly TechnologyQueueManager $technologyQueueManager,
-		private readonly TechnologyManager $technologyManager,
-		private readonly TechnologyRepositoryInterface $technologyRepository,
-		private readonly TechnologyQueueRepositoryInterface $technologyQueueRepository,
-		private readonly SessionWrapper $sessionWrapper,
-		private readonly BuildingLevelHandler $buildingLevelHandler,
+		private EntityManagerInterface             $entityManager,
+		private OrbitalBaseRepositoryInterface     $orbitalBaseRepository,
+		private BuildingQueueRepositoryInterface   $buildingQueueRepository,
+		private TechnologyRepositoryInterface      $technologyRepository,
+		private TechnologyQueueRepositoryInterface $technologyQueueRepository,
+		private BuildingLevelHandler               $buildingLevelHandler,
 	) {
 	}
 
-	public function checkTutorial(): void
+	/*public function checkTutorial(): void
 	{
 		// PAS UTILISEE POUR L'INSTANT (le sera quand il y aura une étape passive dans le tutoriel)
 		$player = $this->sessionWrapper->get('playerId');
@@ -50,7 +44,7 @@ class TutorialHelper
 				}
 			}
 		}
-	}
+	}*/
 
 	public function setStepDone(Player $player): void
 	{

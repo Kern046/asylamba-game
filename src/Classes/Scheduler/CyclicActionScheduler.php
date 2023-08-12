@@ -4,8 +4,6 @@ namespace App\Classes\Scheduler;
 
 use App\Modules\Ares\Message\CommandersSchoolExperienceMessage;
 use App\Modules\Athena\Message\Base\BasesUpdateMessage;
-use App\Modules\Atlas\Message\FactionRankingMessage;
-use App\Modules\Atlas\Message\PlayerRankingMessage;
 use App\Modules\Gaia\Message\NpcsPlacesUpdateMessage;
 use App\Modules\Gaia\Message\PlayersPlacesUpdateMessage;
 use App\Modules\Hephaistos\Message\DailyRoutineMessage;
@@ -18,8 +16,6 @@ class CyclicActionScheduler
 	protected array $queues = [
 		self::TYPE_DAILY => [
 			DailyRoutineMessage::class,
-			FactionRankingMessage::class,
-			PlayerRankingMessage::class,
 		],
 		self::TYPE_HOURLY => [
 			BasesUpdateMessage::class,
