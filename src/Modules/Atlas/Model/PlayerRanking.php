@@ -27,6 +27,7 @@ class PlayerRanking
 
 	public function __construct(
 		public Uuid $id,
+		public Ranking $ranking,
 		public Player $player,
 		public int $general,			// pts des bases + flottes + commandants
 		public int $generalPosition,

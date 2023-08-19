@@ -4,7 +4,7 @@
 
 		<one-to-many field="players" mapped-by="conversation" target-entity="App\Modules\Hermes\Model\ConversationUser" />
 
-		<field name="title" />
+		<field name="title" nullable="true" />
 		<field name="createdAt" type="datetime_immutable" />
 		<field name="lastMessageAt" type="datetime_immutable" nullable="true" />
 		<field name="messagesCount" type="smallint" />

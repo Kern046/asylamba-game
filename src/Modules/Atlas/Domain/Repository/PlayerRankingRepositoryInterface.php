@@ -3,6 +3,7 @@
 namespace App\Modules\Atlas\Domain\Repository;
 
 use App\Modules\Atlas\Model\PlayerRanking;
+use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
@@ -16,16 +17,16 @@ interface PlayerRankingRepositoryInterface extends EntityRepositoryInterface
 	/**
 	 * @return list<PlayerRanking>
 	 */
-	public function getFactionPlayerRankings(Color $faction): array;
+	public function getFactionPlayerRankings(Ranking $ranking, Color $faction): array;
 
-	public function getPlayerRanking(Player $player): PlayerRanking|null;
+	public function getPlayerLastRanking(Player $player): PlayerRanking|null;
 
 	public function getBestPlayerRanking(): PlayerRanking|null;
 
 	/**
 	 * @return list<PlayerRanking>
 	 */
-	public function getRankingsByRange(string $field, int $offset, int $limit): array;
+	public function getRankingsByRange(Ranking $ranking, string $field, int $offset, int $limit): array;
 
 	public function getPlayersResources(): Result;
 

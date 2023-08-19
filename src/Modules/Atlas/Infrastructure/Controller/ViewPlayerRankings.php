@@ -3,6 +3,7 @@
 namespace App\Modules\Atlas\Infrastructure\Controller;
 
 use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
+use App\Modules\Atlas\Domain\Repository\RankingRepositoryInterface;
 use App\Modules\Atlas\Model\PlayerRanking;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
@@ -19,9 +20,10 @@ class ViewPlayerRankings extends AbstractController
 		PlayerManager $playerManager,
 		PlayerRepositoryInterface $playerRepository,
 		PlayerRankingRepositoryInterface $playerRankingRepository,
+		RankingRepositoryInterface $rankingRepository,
 	): Response {
 		// load current player
-		$p = $playerRankingRepository->getPlayerRanking($currentPlayer);
+		$p = $playerRankingRepository->getPlayerLastRanking($currentPlayer);
 
 		$positionGetter = fn (PlayerRanking|null $p, callable $positionFieldGetter) => (
 			null === $p ||
@@ -37,21 +39,23 @@ class ViewPlayerRankings extends AbstractController
 		$butcherPosition = $positionGetter($p, fn (PlayerRanking $p) => $p->butcherPosition);
 		$traderPosition = $positionGetter($p, fn (PlayerRanking $p) => $p->traderPosition);
 
+		$ranking = $rankingRepository->getLastRanking();
+
 		$bestPlayer = $playerRankingRepository->getBestPlayerRanking()?->player;
 
-		$generalRankings = $playerRankingRepository->getRankingsByRange('generalPosition', $generalPosition, PlayerRanking::STEP);
+		$generalRankings = $playerRankingRepository->getRankingsByRange($ranking, 'generalPosition', $generalPosition, PlayerRanking::STEP);
 
-		$experienceRankings = $playerRankingRepository->getRankingsByRange('experiencePosition', $experiencePosition, PlayerRanking::STEP);
+		$experienceRankings = $playerRankingRepository->getRankingsByRange($ranking, 'experiencePosition', $experiencePosition, PlayerRanking::STEP);
 
-		$fightRankings = $playerRankingRepository->getRankingsByRange('fightPosition', $fightPosition, PlayerRanking::STEP);
+		$fightRankings = $playerRankingRepository->getRankingsByRange($ranking, 'fightPosition', $fightPosition, PlayerRanking::STEP);
 
-		$resourcesRankings = $playerRankingRepository->getRankingsByRange('resourcesPosition', $resourcesPosition, PlayerRanking::STEP);
+		$resourcesRankings = $playerRankingRepository->getRankingsByRange($ranking, 'resourcesPosition', $resourcesPosition, PlayerRanking::STEP);
 
-		$armiesRankings = $playerRankingRepository->getRankingsByRange('armiesPosition', $armiesPosition, PlayerRanking::STEP);
+		$armiesRankings = $playerRankingRepository->getRankingsByRange($ranking, 'armiesPosition', $armiesPosition, PlayerRanking::STEP);
 
-		$butcherRankings = $playerRankingRepository->getRankingsByRange('butcherPosition', $butcherPosition, PlayerRanking::STEP);
+		$butcherRankings = $playerRankingRepository->getRankingsByRange($ranking, 'butcherPosition', $butcherPosition, PlayerRanking::STEP);
 
-		$traderRankings = $playerRankingRepository->getRankingsByRange('traderPosition', $traderPosition, PlayerRanking::STEP);
+		$traderRankings = $playerRankingRepository->getRankingsByRange($ranking, 'traderPosition', $traderPosition, PlayerRanking::STEP);
 
 		return $this->render('pages/atlas/player_rankings.html.twig', [
 			'best_player' => $bestPlayer,

@@ -12,6 +12,7 @@ class FactionRanking
 {
 	public function __construct(
 		public Uuid $id,
+		public Ranking $ranking,
 		public Color $faction,
 		public int $points,
 		public int $pointsPosition,

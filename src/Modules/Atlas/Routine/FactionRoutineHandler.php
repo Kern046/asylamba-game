@@ -7,6 +7,7 @@ use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
 use App\Modules\Atlas\Manager\RankingManager;
 use App\Modules\Atlas\Model\FactionRanking;
 use App\Modules\Atlas\Model\PlayerRanking;
+use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
@@ -41,19 +42,19 @@ class FactionRoutineHandler
 	) {
 	}
 
-	public function process(): void
+	public function process(Ranking $ranking): void
 	{
 		$factions = $this->colorRepository->getInGameFactions();
 		$sectors = $this->sectorRepository->getAll();
 
 		foreach ($factions as $faction) {
 			$routesIncome = $this->factionRankingRepository->getRoutesIncome($faction);
-			$playerRankings = $this->playerRankingRepository->getFactionPlayerRankings($faction);
+			$playerRankings = $this->playerRankingRepository->getFactionPlayerRankings($ranking, $faction);
 
 			$this->execute($faction, $playerRankings, $routesIncome, $sectors);
 		}
 
-		$winningFactionId = $this->processResults($factions);
+		$winningFactionId = $this->processResults($ranking, $factions);
 
 		if (null !== $winningFactionId) {
 			$this->rankingManager->processWinningFaction($winningFactionId);
@@ -80,6 +81,7 @@ class FactionRoutineHandler
 	 * @param list<Color> $factions
 	 */
 	public function processResults(
+		Ranking $ranking,
 		array $factions,
 	): Color|null {
 		// ---------------- COMPUTING -------------------#
@@ -149,9 +151,8 @@ class FactionRoutineHandler
 
 		foreach ($factions as $faction) {
 			$factionId = $faction->identifier;
-			// TODO get the faction previous ranking
 			/** @var FactionRanking|null $oldRanking */
-			$oldRanking = null;
+			$oldRanking = $this->factionRankingRepository->getLastRanking($faction);
 			$generalPosition = $listG[$factionId]['position'];
 			$wealthPosition = $listW[$factionId]['position'];
 			$territorialPosition = $listT[$factionId]['position'];
@@ -170,6 +171,7 @@ class FactionRoutineHandler
 
 			$fr = new FactionRanking(
 				id: Uuid::v4(),
+				ranking: $ranking,
 				faction: $faction,
 				points: $points,
 				pointsPosition: $pointsPosition,

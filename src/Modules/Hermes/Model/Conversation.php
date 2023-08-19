@@ -15,8 +15,8 @@ class Conversation
 
 	public function __construct(
 		public Uuid $id,
-		public string $title,
 		public \DateTimeImmutable $createdAt,
+		public string|null $title = null,
 		public \DateTimeImmutable|null $lastMessageAt = null,
 		public int $messagesCount = 0,
 		public int $type = self::TY_USER,

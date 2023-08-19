@@ -4,6 +4,8 @@ namespace App\Modules\Atlas\Infrastructure\Controller;
 
 use App\Classes\Library\Utils;
 use App\Modules\Atlas\Domain\Repository\FactionRankingRepositoryInterface;
+use App\Modules\Atlas\Model\Ranking;
+use App\Modules\Atlas\Repository\RankingRepository;
 use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,15 +15,18 @@ class ViewFactionRankings extends AbstractController
 	public function __invoke(
 		DurationHandler $durationHandler,
 		FactionRankingRepositoryInterface $factionRankingRepository,
+		RankingRepository $rankingRepository,
 	): Response {
 		// @TODO Replace this parameter by a dynamic field
 		$serverStartTime = new \DateTimeImmutable($this->getParameter('server_start_time'));
 		$hoursBeforeRankingStart = $this->getParameter('hours_before_start_of_ranking');
 
-		$pointsRankings = $factionRankingRepository->getRankingsByField('pointsPosition');
-		$generalRankings = $factionRankingRepository->getRankingsByField('generalPosition');
-		$wealthRankings = $factionRankingRepository->getRankingsByField('wealthPosition');
-		$territorialRankings = $factionRankingRepository->getRankingsByField('territorialPosition');
+		$ranking = $rankingRepository->getLastRanking();
+
+		$pointsRankings = $factionRankingRepository->getRankingsByField($ranking, 'pointsPosition');
+		$generalRankings = $factionRankingRepository->getRankingsByField($ranking, 'generalPosition');
+		$wealthRankings = $factionRankingRepository->getRankingsByField($ranking, 'wealthPosition');
+		$territorialRankings = $factionRankingRepository->getRankingsByField($ranking, 'territorialPosition');
 
 		$bestFaction = ($durationHandler->getHoursDiff($serverStartTime, new \DateTimeImmutable()) > $hoursBeforeRankingStart)
 			? $pointsRankings[0] ?? null

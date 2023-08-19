@@ -2,8 +2,12 @@
 	<entity name="App\Modules\Atlas\Model\PlayerRanking" table="playerRanking">
 		<id name="id" column="id" type="uuid" />
 
-		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player">
+		<many-to-one field="ranking" target-entity="App\Modules\Atlas\Model\Ranking">
 			
+		</many-to-one>
+
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player">
+
 		</many-to-one>
 
 		<field name="general" type="smallint" />

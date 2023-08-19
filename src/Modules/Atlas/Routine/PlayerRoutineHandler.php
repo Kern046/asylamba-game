@@ -8,6 +8,7 @@ use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
 use App\Modules\Atlas\Model\PlayerRanking;
+use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\DBAL\Result;
@@ -26,9 +27,8 @@ class PlayerRoutineHandler
 	) {
 	}
 
-	public function process(): void
+	public function process(Ranking $ranking): void
 	{
-
 		$players = $this->playerRepository->getByStatements([Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
 
 		$this->execute(
@@ -44,7 +44,7 @@ class PlayerRoutineHandler
 			$this->playerRankingRepository->getDefendersButcherRanking(),
 		);
 
-		$this->processResults($players);
+		$this->processResults($ranking, $players);
 	}
 
 	/**
@@ -94,7 +94,7 @@ class PlayerRoutineHandler
 	/**
 	 * @param list<Player> $players
 	 */
-	private function processResults($players): void
+	private function processResults(Ranking $ranking, $players): void
 	{
 		foreach ($players as $player) {
 			if (isset($this->results[$player->id])) {
@@ -161,9 +161,8 @@ class PlayerRoutineHandler
 		foreach ($players as $player) {
 			$playerId = $player->id;
 
-			// TODO get previous ranking
 			/** @var PlayerRanking|null $oldRanking */
-			$oldRanking = null;
+			$oldRanking = $this->playerRankingRepository->getPlayerLastRanking($player);
 			$generalPosition = $listG[$playerId]['position'];
 			$resourcesPosition = $listR[$playerId]['position'];
 			$fightPosition = $listF[$playerId]['position'];
@@ -174,6 +173,7 @@ class PlayerRoutineHandler
 
 			$pr = new PlayerRanking(
 				id: Uuid::v4(),
+				ranking: $ranking,
 				player: $player,
 				general: $listG[$playerId]['general'],
 				generalPosition: $generalPosition,

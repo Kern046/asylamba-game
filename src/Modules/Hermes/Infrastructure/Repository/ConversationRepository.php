@@ -43,4 +43,21 @@ class ConversationRepository extends DoctrineRepository implements ConversationR
 
 		return $qb->getQuery()->getSingleScalarResult();
 	}
+
+	public function getPlayerConversations(Player $player, int $mode): array
+	{
+		$qb = $this->createQueryBuilder('c');
+
+		$qb
+			->select('COUNT(c.id)')
+			->leftJoin('c.players', 'cu')
+			->where('cu.player = :player')
+			->andWhere('cu.conversationStatus = :mode')
+			->orderBy('c.lastMessageAt', 'DESC')
+			->setMaxResults(Conversation::CONVERSATION_BY_PAGE)
+			->setParameter('player', $player)
+			->setParameter('mode', $mode);
+
+		return $qb->getQuery()->getResult();
+	}
 }

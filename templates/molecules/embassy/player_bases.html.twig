@@ -7,10 +7,10 @@
 			{% for base in player_bases %}
 				<div class="number-box grey">
 					<span class="value">{{ base.name }}</span>
-					<span class="label">secteur {{ base.sector }}</span>
+					<span class="label">secteur {{ base.place.system.sector.identifier }}</span>
 
 					<span class="group-link">
-						<a href="{{ path('map', {'place': base.rPlace }) }}" class="hb lt" title="voir sur la carte">→</a>
+						<a href="{{ path('map', {'place': base.place.id }) }}" class="hb lt" title="voir sur la carte">→</a>
 					</span>
 				</div>
 			{% endfor %}

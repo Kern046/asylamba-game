@@ -9,10 +9,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
 
 class Archive extends AbstractController
 {
+	#[Route(
+		path: '/notifications/{id}/archive',
+		name: 'archive_notification',
+		methods: Request::METHOD_GET,
+	)]
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,

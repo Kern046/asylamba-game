@@ -1,6 +1,6 @@
 {% set statuses = get_faction_info(player_ranking.player.faction.identifier, 'status') %}
 
-<div class="player color{{ player_ranking.player.faction.identifier }} {% if current_player.id == player_ranking.player.id %}active{% endif %}">
+<div class="player min-w-full color{{ player_ranking.player.faction.identifier }} {% if current_player.id == player_ranking.player.id %}active{% endif %}">
 	<a href="{{ path('embassy', {'player': player_ranking.player.id}) }}">
 		<img src="{{ asset('build/media/avatar/small/' ~ player_ranking.player.avatar ~ '.png') }}" alt="{{ player_ranking.player.name }}" class="picto" />
 	</a>

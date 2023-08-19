@@ -3,6 +3,7 @@
 namespace App\Modules\Atlas\Domain\Repository;
 
 use App\Modules\Atlas\Model\FactionRanking;
+use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 
@@ -21,7 +22,7 @@ interface FactionRankingRepositoryInterface extends EntityRepositoryInterface
 	/**
 	 * @return list<FactionRanking>
 	 */
-	public function getRankingsByField(string $field): array;
+	public function getRankingsByField(Ranking $ranking, string $field): array;
 
 	/**
 	 * @return list<FactionRanking>

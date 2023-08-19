@@ -11,4 +11,9 @@ interface ConversationRepositoryInterface extends EntityRepositoryInterface
 	public function getOneByPlayer(Player $player): Conversation;
 
 	public function countPlayerConversations(Player $player): int;
+
+	/**
+	 * @return list<Conversation>
+	 */
+	public function getPlayerConversations(Player $player, int $mode): array;
 }

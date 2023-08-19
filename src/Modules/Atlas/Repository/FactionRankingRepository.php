@@ -5,6 +5,7 @@ namespace App\Modules\Atlas\Repository;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Atlas\Domain\Repository\FactionRankingRepositoryInterface;
 use App\Modules\Atlas\Model\FactionRanking;
+use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -53,9 +54,9 @@ class FactionRankingRepository extends DoctrineRepository implements FactionRank
 		return $qb->getQuery()->getOneOrNullResult();
 	}
 
-	public function getRankingsByField(string $field): array
+	public function getRankingsByField(Ranking $ranking, string $field): array
 	{
-		return $this->findBy([], [$field => 'DESC']);
+		return $this->findBy(['ranking' => $ranking], [$field => 'DESC']);
 	}
 
 	public function getFactionRankings(Color $faction): array

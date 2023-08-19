@@ -6,11 +6,13 @@ use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Model\Report;
 use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
 use App\Modules\Atlas\Model\PlayerRanking;
+use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 
 /**
  * TODO build ranking statement with queryBuilder
@@ -22,23 +24,31 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 		parent::__construct($registry, PlayerRanking::class);
 	}
 
-	public function getFactionPlayerRankings(Color $faction): array
+	public function getFactionPlayerRankings(Ranking $ranking, Color $faction): array
 	{
 		$qb = $this->createQueryBuilder('pr');
 
 		$qb
 			->join('pr.player', 'p')
 			->where('p.faction = :faction')
-			->setParameter('faction', $faction);
+			->andWhere('pr.ranking = :ranking')
+			->setParameter('faction', $faction)
+			->setParameter('ranking', $ranking);
 
 		return $qb->getQuery()->getResult();
 	}
 
-	public function getPlayerRanking(Player $player): PlayerRanking|null
+	public function getPlayerLastRanking(Player $player): PlayerRanking|null
 	{
-		return $this->findOneBy([
-			'player' => $player,
-		]);
+		$qb = $this->createQueryBuilder('pr');
+
+		$qb
+			->orderBy('pr.createdAt', 'DESC')
+			->where('pr.player = :player')
+			->setParameter('player', $player)
+			->setMaxResults(1);
+
+		return $qb->getQuery()->getOneOrNullResult();
 	}
 
 	public function getBestPlayerRanking(): PlayerRanking|null
@@ -85,9 +95,11 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 		);
 	}
 
-	public function getRankingsByRange(string $field, int $offset, int $limit): array
+	public function getRankingsByRange(Ranking $ranking, string $field, int $offset, int $limit): array
 	{
-		return $this->findBy([], [$field => 'ASC'], $limit, $offset);
+		return $this->findBy([
+			'ranking' => $ranking,
+		], [$field => 'ASC'], $limit, $offset);
 	}
 
 	public function getPlayersResources(): Result
@@ -183,10 +195,8 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 				p.id AS player,
 				SUM(c.income) AS income
 			FROM commercialRoute AS c
-			LEFT JOIN orbitalBase AS o
-				ON o.place_id = c.origin_base_id
-			RIGHT JOIN player AS p
-				ON p.id = o.player_id
+			LEFT JOIN orbitalBase AS o ON o.id = c.origin_base_id
+			RIGHT JOIN player AS p ON p.id = o.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')
 			GROUP BY p.id
 			ORDER BY p.id'
@@ -201,7 +211,7 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 				SUM(income) AS income
 			FROM `commercialRoute` AS c
 			LEFT JOIN orbitalBase AS o
-				ON o.place_id = c.destination_base_id
+				ON o.id = c.destination_base_id
 			RIGHT JOIN player AS p
 				ON p.id = o.player_id
 			WHERE p.statement IN ('.implode(',', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]).')

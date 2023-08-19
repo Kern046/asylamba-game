@@ -8,9 +8,15 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class ReadAll extends AbstractController
 {
+	#[Route(
+		path: '/notifications/read-all',
+		name: 'read_all_notifications',
+		methods: Request::METHOD_GET,
+	)]
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
