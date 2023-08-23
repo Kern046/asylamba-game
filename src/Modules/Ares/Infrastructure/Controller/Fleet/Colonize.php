@@ -119,7 +119,7 @@ class Colonize extends AbstractController
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
 			throw new ConflictHttpException('Cet emplacement est trop éloigné.');
 		}
-		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $length, $duration);
+		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $duration);
 		// debit credit
 		$playerManager->decreaseCredit($currentPlayer, $price);
 

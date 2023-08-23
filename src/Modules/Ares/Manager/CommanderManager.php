@@ -93,7 +93,7 @@ readonly class CommanderManager implements SchedulerInterface
 		Place $rDestinationPlace,
 		Place $rStartPlace,
 		string $travelType,
-		int $duration
+		int $duration,
 	): void {
 		$commander->destinationPlace = $rDestinationPlace;
 		$commander->startPlace = $rStartPlace;

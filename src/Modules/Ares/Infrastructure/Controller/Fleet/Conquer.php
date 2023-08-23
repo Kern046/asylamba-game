@@ -84,6 +84,7 @@ class Conquer extends AbstractController
 		}
 
 		$duration = Game::getTimeToTravel($home->place, $place, $currentPlayerBonusRegistry->getPlayerBonus());
+
 		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $duration);
 		// debit credit
 		$playerManager->decreaseCredit($currentPlayer, $price);
