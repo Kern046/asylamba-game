@@ -184,7 +184,6 @@ readonly class ConquestManager
 			// victoire
 			if (!$commander->isDead()) {
 				$place->player = $commander->player;
-				$place->typeOfPlace = Place::TYP_ORBITALBASE;
 
 				// créer une base
 				// TODO factorize in a service
