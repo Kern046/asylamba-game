@@ -153,7 +153,7 @@ class PlayerManager
 			? 0
 			: abs($credit)
 		;
-		$player->credit += $credits;
+		$player->credit -= $credits;
 		$this->playerRepository->updatePlayerCredits($player, -$credits);
 	}
 

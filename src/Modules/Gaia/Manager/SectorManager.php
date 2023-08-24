@@ -4,7 +4,6 @@ namespace App\Modules\Gaia\Manager;
 
 use App\Classes\Redis\RedisManager;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
-use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Model\Sector;
 
@@ -12,29 +11,17 @@ class SectorManager
 {
 	public function __construct(
 		private readonly RedisManager $redisManager,
-		private readonly SectorRepositoryInterface $sectorRepository,
 		private readonly SystemRepositoryInterface $systemRepository,
 		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		private readonly array $scores = [],
 	) {
 	}
 
-	public function initOwnershipData()
-	{
-		// $this->loadBalancer->affectTask(
-		//    $this->taskManager->createTechnicalTask('gaia.sector_manager', 'calculateAllOwnerships')
-		// );
-	}
-
-	public function calculateAllOwnerships()
-	{
-		foreach ($this->sectorRepository->getAll() as $sector) {
-			$this->calculateOwnership($sector);
-		}
-	}
-
 	/**
-	 * @return array
+	 * Returns a sorted array with faction identifiers as keys and their ownership score as values
+	 * The highest score is first
+	 *
+	 * @return array<int, int>
 	 */
 	public function calculateOwnership(Sector $sector): array
 	{
@@ -62,7 +49,6 @@ class SectorManager
 		}
 		$scores[0] = 0;
 		arsort($scores);
-		reset($scores);
 
 		$this->redisManager->getConnection()->set('sector:'.$sector->id, serialize($scores));
 

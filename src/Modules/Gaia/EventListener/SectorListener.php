@@ -1,20 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Gaia\EventListener;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Redis\RedisManager;
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Gaia\Event\PlaceOwnerChangeEvent;
 use App\Modules\Gaia\Manager\SectorManager;
-use App\Modules\Gaia\Manager\SystemManager;
 
-class SectorListener
+readonly class SectorListener
 {
 	public function __construct(
-		private readonly ColorRepositoryInterface $colorRepository,
-		private readonly SectorManager $sectorManager,
-		private readonly int $sectorMinimalScore,
+		private ColorRepositoryInterface $colorRepository,
+		private SectorManager $sectorManager,
+		private SectorRepositoryInterface $sectorRepository,
+		private int $sectorMinimalScore,
 	) {
 	}
 
@@ -25,21 +26,21 @@ class SectorListener
 		$scores = $this->sectorManager->calculateOwnership($sector);
 
 		$newColor = key($scores);
-		$hasEnoughPoints = false;
-		foreach ($scores as $factionId => $score) {
-			if (0 !== $factionId && $score >= $this->sectorMinimalScore) {
-				$hasEnoughPoints = true;
-				break;
+		$score = $scores[$newColor];
+		$hasEnoughPoints = $score >= $this->sectorMinimalScore;
+
+		$currentFactionIdentifier = $sector->faction?->identifier ?? 0;
+
+		if (!$hasEnoughPoints) {
+			// If this is a prime sector, we do not pull back the color from the sector
+			// TODO check behavior if another faction has taken the prime sector before
+			if (!$sector->prime) {
+				$sector->faction = null;
 			}
+		} elseif ($currentFactionIdentifier !== $newColor && $score > $scores[$currentFactionIdentifier]) {
+			$sector->faction = $this->colorRepository->getOneByIdentifier($newColor);
 		}
 
-		$currentFactionIdentifier = $sector->faction?->identifier;
-		// If the faction has more points than the minimal score and the current owner of the sector, he claims it
-		if (true === $hasEnoughPoints && null === $currentFactionIdentifier || ($currentFactionIdentifier !== $newColor && $scores[$newColor] > $scores[$currentFactionIdentifier])) {
-			$sector->faction = $this->colorRepository->getOneByIdentifier($newColor);
-		// If this is a prime sector, we do not pull back the color from the sector
-		} elseif (false === $hasEnoughPoints && false === $sector->prime) {
-			$sector->faction = null;
-		}
+		$this->sectorRepository->save($sector);
 	}
 }

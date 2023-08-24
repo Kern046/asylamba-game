@@ -6,6 +6,7 @@ use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\Sector;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -27,17 +28,9 @@ interface PlaceRepositoryInterface extends EntityRepositoryInterface
 	public function getSystemPlaces(System $system): array;
 
 	/**
-	 * @return list<Place>
+	 * @return Collection<Place>
 	 */
-	public function getPlayerPlaces(int $offset, int $limit = 20): array;
-
-	public function countPlayerPlaces(): int;
-	/**
-	 * @return list<Place>
-	 */
-	public function getNpcPlaces(int $offset, int $limit = 20): array;
-
-	public function countNpsPlaces(): int;
+	public function getAll(): Collection;
 
 	/**
 	 * @return list<Uuid>

@@ -2,7 +2,6 @@
 
 namespace App\Modules\Ares\Manager;
 
-use App\Classes\Library\Utils;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
@@ -12,7 +11,6 @@ use App\Modules\Athena\Application\Handler\OrbitalBasePointsHandler;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Event\PlaceOwnerChangeEvent;
@@ -20,7 +18,6 @@ use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
-use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -29,19 +26,19 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 readonly class ConquestManager
 {
 	public function __construct(
-		private CommanderManager               $commanderManager,
-		private CommanderRepositoryInterface   $commanderRepository,
-		private PlaceManager                   $placeManager,
+		private CommanderManager $commanderManager,
+		private CommanderRepositoryInterface $commanderRepository,
+		private PlaceManager $placeManager,
 		private OrbitalBasePointsHandler $orbitalBasePointsHandler,
-		private OrbitalBaseManager             $orbitalBaseManager,
+		private OrbitalBaseManager $orbitalBaseManager,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private PlayerBonusManager             $playerBonusManager,
-		private ReportRepositoryInterface      $reportRepository,
-		private EntityManagerInterface         $entityManager,
-		private EventDispatcherInterface       $eventDispatcher,
-		private NotificationManager            $notificationManager,
-		private int                            $colonizationCost,
-		private int                            $conquestCost,
+		private PlayerBonusManager $playerBonusManager,
+		private ReportRepositoryInterface $reportRepository,
+		private EntityManagerInterface $entityManager,
+		private EventDispatcherInterface $eventDispatcher,
+		private NotificationManager $notificationManager,
+		private int $colonizationCost,
+		private int $conquestCost,
 	) {
 	}
 
@@ -83,7 +80,7 @@ readonly class ConquestManager
 				$placeBase = $place->base;
 				$baseCommanders = $this->commanderRepository->getBaseCommanders($placeBase);
 
-				for ($nbrBattle = 0; $nbrBattle < count($baseCommanders); $nbrBattle++) {
+				for ($nbrBattle = 0; $nbrBattle < count($baseCommanders); ++$nbrBattle) {
 					if (!$baseCommanders[$nbrBattle]->isAffected()) {
 						continue;
 					}
@@ -147,7 +144,7 @@ readonly class ConquestManager
 
 					// PATCH DEGUEU POUR LES MUTLIS-COMBATS
 					$this->notificationManager->patchForMultiCombats($commander->player, $place->player, $commander->getArrivalDate());
-				// défaite
+					// défaite
 				} else {
 					for ($i = 0; $i < count($place->commanders); ++$i) {
 						if (Commander::DEAD == $place->commanders[$i]->statement) {
@@ -218,7 +215,7 @@ readonly class ConquestManager
 
 				$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place), PlaceOwnerChangeEvent::NAME);
 
-			// défaite
+				// défaite
 			} else {
 				// création du rapport
 				$report = $this->commanderManager->createReport($place);
@@ -231,7 +228,6 @@ readonly class ConquestManager
 				$this->placeManager->sendNotif($place, Place::CONQUEREMPTYFAIL, $commander);
 			}
 		}
-		$this->entityManager->flush(Commander::class);
-		$this->entityManager->flush($place);
+		$this->entityManager->flush();
 	}
 }

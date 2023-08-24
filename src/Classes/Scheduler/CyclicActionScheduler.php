@@ -4,7 +4,7 @@ namespace App\Classes\Scheduler;
 
 use App\Modules\Ares\Message\CommandersSchoolExperienceMessage;
 use App\Modules\Athena\Message\Base\BasesUpdateMessage;
-use App\Modules\Gaia\Message\NpcsPlacesUpdateMessage;
+use App\Modules\Gaia\Message\PlacesUpdateMessage;
 use App\Modules\Gaia\Message\PlayersPlacesUpdateMessage;
 use App\Modules\Hephaistos\Message\DailyRoutineMessage;
 use App\Modules\Zeus\Message\PlayersCreditsUpdateMessage;
@@ -20,9 +20,8 @@ class CyclicActionScheduler
 		self::TYPE_HOURLY => [
 			BasesUpdateMessage::class,
 			CommandersSchoolExperienceMessage::class,
-			NpcsPlacesUpdateMessage::class,
+			PlacesUpdateMessage::class,
 			PlayersCreditsUpdateMessage::class,
-			PlayersPlacesUpdateMessage::class,
 		],
 	];
 

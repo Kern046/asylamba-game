@@ -8,6 +8,8 @@ use App\Modules\Gaia\Model\Sector;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -42,56 +44,13 @@ class PlaceRepository extends DoctrineRepository implements PlaceRepositoryInter
 		);
 	}
 
-	public function getPlayerPlaces(int $offset, int $limit = 20): array
+	public function getAll(): Collection
 	{
-		$qb = $this->createQueryBuilder('p');
-
-		$qb->where($qb->expr()->isNotNull('p.player'))
-			->andWhere('p.typeOfPlace = :type')
-			->orderBy('p.id', 'ASC')
-			->setFirstResult($offset)
-			->setMaxResults($limit)
-			->setParameter('type', Place::TERRESTRIAL);
-
-		return $qb->getQuery()->getResult();
-	}
-
-	public function countPlayerPlaces(): int
-	{
-		$qb = $this->createQueryBuilder('p');
-
-		$qb->select('COUNT(p.id)')
-			->where($qb->expr()->isNotNull('p.player'))
-			->andWhere('p.typeOfPlace = :type')
-			->setParameter('type', Place::TERRESTRIAL);
-
-		return $qb->getQuery()->getSingleScalarResult();
-	}
-
-	public function getNpcPlaces(int $offset, int $limit = 20): array
-	{
-		$qb = $this->createQueryBuilder('p');
-
-		$qb->where($qb->expr()->isNull('p.player'))
-			->andWhere('p.typeOfPlace = :type')
-			->orderBy('p.id', 'ASC')
-			->setFirstResult($offset)
-			->setMaxResults($limit)
-			->setParameter('type', Place::TERRESTRIAL);
-
-		return $qb->getQuery()->getResult();
-	}
-
-	public function countNpsPlaces(): int
-	{
-		$qb = $this->createQueryBuilder('p');
-
-		$qb->select('COUNT(p.id)')
-			->where($qb->expr()->isNull('p.player'))
-			->andWhere('p.typeOfPlace = :type')
-			->setParameter('type', Place::TERRESTRIAL);
-
-		return $qb->getQuery()->getSingleScalarResult();
+		return $this->matching(
+			Criteria::create()
+				->where(Criteria::expr()->eq('typeOfPlace', Place::TERRESTRIAL))
+				->orderBy(['id' => 'ASC'])
+		);
 	}
 
 	public function findPlacesIdsForANewBase(Sector $sector): array
