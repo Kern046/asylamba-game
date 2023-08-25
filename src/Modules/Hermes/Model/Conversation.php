@@ -20,6 +20,7 @@ class Conversation
 		public \DateTimeImmutable|null $lastMessageAt = null,
 		public int $messagesCount = 0,
 		public int $type = self::TY_USER,
+		/** @var Collection<ConversationUser> $players */
 		public Collection $players = new ArrayCollection(),
 	) {
 			

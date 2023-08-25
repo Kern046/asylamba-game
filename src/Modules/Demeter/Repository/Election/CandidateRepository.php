@@ -2,6 +2,7 @@
 
 namespace App\Modules\Demeter\Repository\Election;
 
+use App\Modules\Demeter\Domain\Repository\Election\CandidateRepositoryInterface;
 use App\Modules\Demeter\Model\Election\Candidate;
 use App\Modules\Demeter\Model\Election\Election;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
@@ -12,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 /**
  * @extends DoctrineRepository<Candidate>
  */
-class CandidateRepository extends DoctrineRepository
+class CandidateRepository extends DoctrineRepository implements CandidateRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)
 	{

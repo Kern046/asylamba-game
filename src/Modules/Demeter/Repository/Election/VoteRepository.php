@@ -21,16 +21,25 @@ class VoteRepository extends DoctrineRepository implements VoteRepositoryInterfa
 
 	public function getPlayerVote(Player $player, Election $election): Vote|null
 	{
-		return $this->findOneBy([
-			'player' => $player,
-			'election' => $election,
-		]);
+		$qb = $this->createQueryBuilder('v');
+
+		$qb->join('v.candidate', 'c')
+			->where('c.election = :election')
+			->andWhere('c.player = :player')
+			->setParameter('election', $election)
+			->setParameter('player', $player);
+
+		return $qb->getQuery()->getOneOrNullResult();
 	}
 
 	public function getElectionVotes(Election $election): array
 	{
-		return $this->findBy([
-			'election' => $election,
-		]);
+		$qb = $this->createQueryBuilder('v');
+
+		$qb->join('v.candidate', 'c')
+			->where('c.election = :election')
+			->setParameter('election', $election);
+
+		return $qb->getQuery()->getResult();
 	}
 }

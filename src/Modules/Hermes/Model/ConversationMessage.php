@@ -17,7 +17,7 @@ class ConversationMessage
 		public Conversation $conversation,
 		public Player $player,
 		public string $content,
-		public \DateTimeImmutable $createdAt,
+		public \DateTimeImmutable $createdAt = new \DateTimeImmutable(),
 		public int $type = self::TY_STD,
 		public \DateTimeImmutable|null $updatedAt = null,
 	) {

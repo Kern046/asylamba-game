@@ -179,7 +179,7 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 			->getOneOrNullResult();
 	}
 
-	public function getFactionLeader(Color $faction): Player
+	public function getFactionLeader(Color $faction): Player|null
 	{
 		return $this->getGovernmentMember($faction, Player::CHIEF);
 	}

@@ -64,7 +64,7 @@ interface PlayerRepositoryInterface extends EntityRepositoryInterface
 
 	public function getGovernmentMember(Color $faction, int $status): Player|null;
 
-	public function getFactionLeader(Color $faction): Player;
+	public function getFactionLeader(Color $faction): Player|null;
 
 	/**
 	 * @return list<Player>

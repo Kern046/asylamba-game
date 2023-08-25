@@ -38,6 +38,30 @@ class ColorResource
 	public const BONUS_CARDAN_COLO = 10;		// price 10% less for colo or conquest
 	public const BONUS_APHERA_TECHNO = 2;		// 4% less time to build technologies
 
+	public static function getPopularName(Color $faction): string
+	{
+		return self::getInfo($faction->identifier, 'popularName');
+	}
+
+	public static function getOfficialName(Color $faction): string
+	{
+		return self::getInfo($faction->identifier, 'officialName');
+	}
+
+	/**
+	 * @param Color $faction
+	 * @return list<string>
+	 */
+	public static function getStatuses(Color $faction): array
+	{
+		return self::getInfo($faction->identifier, 'status');
+	}
+
+	/**
+	 * @param int $id
+	 * @param string $info
+	 * @return ()
+	 */
 	public static function getInfo(int $id, string $info): mixed
 	{
 		if ($id <= count(self::$colors)) {

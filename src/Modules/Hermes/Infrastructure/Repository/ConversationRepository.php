@@ -27,7 +27,7 @@ class ConversationRepository extends DoctrineRepository implements ConversationR
 			->where('cu.player = :player')
 			->setParameter('player', $player);
 
-		return $qb->getQuery()->getResult();
+		return $qb->getQuery()->getSingleResult();
 	}
 
 	public function countPlayerConversations(Player $player): int

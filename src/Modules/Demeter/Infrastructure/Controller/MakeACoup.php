@@ -53,7 +53,7 @@ class MakeACoup extends AbstractController
 		}
 		$faction = $currentPlayer->faction;
 
-		if (Color::MANDATE === $faction->electionStatement) {
+		if (Color::MANDATE !== $faction->electionStatement) {
 			throw new ConflictHttpException('Un coup d\'état est déjà en cours.');
 		}
 		// TODO allow coups for democratic factions
@@ -111,7 +111,7 @@ class MakeACoup extends AbstractController
 				'Un membre de votre Faction soulève une partie du peuple et tente un coup d\'état contre le gouvernement.',
 				NotificationBuilder::divider(),
 				NotificationBuilder::link(
-					$this->generateUrl('view_election', ['electionId' => $election->id]),
+					$this->generateUrl('view_faction_election'),
 					'prendre parti sur le coup d\'état.',
 				),
 			));

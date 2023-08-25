@@ -4,9 +4,7 @@ namespace App\Modules\Demeter\Manager;
 
 use App\Classes\Library\DateTimeConverter;
 use App\Classes\Library\Parser;
-use App\Classes\Library\Utils;
 use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
-use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
 use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Message\BallotMessage;
@@ -30,7 +28,6 @@ use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Demeter\Resource\LawResources;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
-use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Infrastructure\Validator\IsParliamentMember;
 use App\Modules\Zeus\Manager\PlayerManager;
@@ -38,9 +35,7 @@ use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\SchedulerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class ColorManager implements SchedulerInterface
@@ -49,7 +44,6 @@ class ColorManager implements SchedulerInterface
 
 	public function __construct(
 		private readonly ColorRepositoryInterface $colorRepository,
-		private readonly ElectionRepositoryInterface $electionRepository,
 		private readonly PlayerRepositoryInterface $playerRepository,
 		private readonly LawRepositoryInterface $lawRepository,
 		private readonly NotificationRepositoryInterface $notificationRepository,

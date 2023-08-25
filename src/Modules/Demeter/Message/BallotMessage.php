@@ -1,18 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Message;
 
 use App\Shared\Domain\Message\AsyncMessage;
 use Symfony\Component\Uid\Uuid;
 
-class BallotMessage implements AsyncMessage
+readonly class BallotMessage implements AsyncMessage
 {
-	public function __construct(private readonly Uuid $factionId)
+	public function __construct(public Uuid $factionId)
 	{
-	}
-
-	public function getFactionId(): Uuid
-	{
-		return $this->factionId;
 	}
 }
