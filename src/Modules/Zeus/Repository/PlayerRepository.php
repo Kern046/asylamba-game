@@ -91,7 +91,7 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 			->select('COUNT(p.id)')
 			->where($qb->expr()->in('p.statement', ':statement'))
 			->andWhere('p.faction = :faction')
-			->setParameter('faction', $faction)
+			->setParameter('faction', $faction->id, UuidType::NAME)
 			->setParameter('statement', $statements);
 
 		return $qb->getQuery()->getSingleScalarResult();

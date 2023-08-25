@@ -4,10 +4,21 @@
                           https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
 	<entity name="App\Modules\Demeter\Model\Forum\ForumTopic" table="forumTopic">
-		<id name="id" type="integer" column="id">
-			<options>
-				<option name="unsigned">true</option>
-			</options>
-		</id>
+		<id name="id" type="uuid" />
+
+		<many-to-one field="faction" target-entity="App\Modules\Demeter\Model\Color" />
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player" />
+		<many-to-one field="lastView" target-entity="App\Modules\Zeus\Model\Player">
+			<join-column nullable="true" />
+		</many-to-one>
+
+		<field name="title" />
+		<field name="forum" type="smallint" />
+		<field name="statement" type="smallint" />
+		<field name="isUp" type="boolean" />
+		<field name="isClosed" type="boolean" />
+		<field name="isArchived" type="boolean" />
+		<field name="createdAt" type="datetime_immutable" />
+		<field name="lastContributedAt" type="datetime_immutable" />
 	</entity>
 </doctrine-mapping>

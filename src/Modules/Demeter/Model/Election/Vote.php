@@ -11,6 +11,7 @@ class Vote
 		public Uuid $id,
 		public Candidate $candidate,
 		public Player $player,
+		public bool $hasApproved,
 		public \DateTimeImmutable $votedAt,
 	) {
 	}

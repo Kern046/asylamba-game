@@ -3,20 +3,20 @@
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
 use App\Classes\Library\Utils;
+use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
 use App\Modules\Demeter\Domain\Repository\Election\CandidateRepositoryInterface;
 use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
 use App\Modules\Demeter\Domain\Repository\Election\VoteRepositoryInterface;
-use App\Modules\Demeter\Manager\Election\CandidateManager;
-use App\Modules\Demeter\Manager\Election\ElectionManager;
-use App\Modules\Demeter\Manager\Election\VoteManager;
+use App\Modules\Demeter\Domain\Repository\Forum\ForumMessageRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Forum\ForumTopicRepositoryInterface;
 use App\Modules\Demeter\Manager\Forum\ForumMessageManager;
-use App\Modules\Demeter\Manager\Forum\ForumTopicManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Candidate;
 use App\Modules\Demeter\Model\Election\Vote;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Infrastructure\Validator\IsFromFaction;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +31,10 @@ class ViewElection extends AbstractController
 		CandidateRepositoryInterface $candidateRepository,
 		VoteRepositoryInterface $voteRepository,
 		PlayerRepositoryInterface $playerRepository,
-		ForumMessageManager $forumMessageManager,
+		ForumTopicRepositoryInterface $forumTopicRepository,
+		ForumMessageRepositoryInterface $forumMessageRepository,
+		DurationHandler $durationHandler,
+		NextElectionDateCalculator $nextElectionDateCalculator,
 	): Response {
 		$faction = $currentPlayer->faction;
 
@@ -56,7 +59,7 @@ class ViewElection extends AbstractController
 
 				$data['player_vote'] = $voteRepository->getPlayerVote($currentPlayer, $election);
 				$data['votes'] = $votes;
-				$data['faction_members'] = $playerRepository->getBySpecification(new IsFromFaction($faction));
+				$data['faction_members_count'] = $playerRepository->countByFactionAndStatements($faction, [Player::ACTIVE]);
 
 				$candidate = ($request->query->has('candidate') && ($candidate = $candidateRepository->get(Uuid::fromString($request->query->get('candidate')))) !== null)
 					? $candidate
@@ -66,30 +69,18 @@ class ViewElection extends AbstractController
 
 				if (null !== $candidate) {
 					if ($faction->isRoyalistic()) {
-						$data['putsch_supporters_count'] = count(array_filter($votes, fn (Vote $vote) => $vote->candidate->player->id === $candidate->player->id));
-						$endPutsch = Utils::addSecondsToDate($faction->lastElectionHeldAt, Color::PUTSCHTIME);
-						$data['remaining_putsch_time'] = Utils::interval(Utils::now(), $endPutsch, 's');
+						$data['putsch_supporters_count'] = count(array_filter($votes, fn (Vote $vote) => $vote->hasApproved));
+						$data['remaining_putsch_time'] = $durationHandler->getRemainingTime(
+							$nextElectionDateCalculator->getPutschEndDate($faction)
+						);
 					}
 
-					$forumTopicManager->load(
-						[
-							'rForum' => 30,
-							'rPlayer' => $candidate->rPlayer,
-						],
-						['id', 'DESC'],
-						[0, 1],
-						$currentPlayer->getId(),
-					);
+					$topic = $forumTopicRepository->getByForumAndPlayer(30, $candidate->player);
+					// TODO Handle forum topic views
+					// $forumTopicManager->updateLastView($topic, $currentPlayer->getId());
 
-					if (1 == $forumTopicManager->size()) {
-						$topic = $forumTopicManager->get(0);
-						$forumTopicManager->updateLastView($topic, $currentPlayer->getId());
-
-						$forumMessageManager->load(['rTopic' => $topic->id], ['dCreation', 'DESC', 'id', 'DESC']);
-
-						$data['topic'] = $topic;
-						$data['topic_messages'] = $forumMessageManager->getAll();
-					}
+					$data['topic'] = $topic;
+					$data['topic_messages'] = $forumMessageRepository->getTopicMessages($topic);
 				}
 			}
 		}

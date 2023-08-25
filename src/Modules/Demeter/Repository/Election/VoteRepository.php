@@ -8,6 +8,7 @@ use App\Modules\Demeter\Model\Election\Vote;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 
 /**
  * @extends DoctrineRepository<Vote>
@@ -25,8 +26,8 @@ class VoteRepository extends DoctrineRepository implements VoteRepositoryInterfa
 
 		$qb->join('v.candidate', 'c')
 			->where('c.election = :election')
-			->andWhere('c.player = :player')
-			->setParameter('election', $election)
+			->andWhere('v.player = :player')
+			->setParameter('election', $election->id, UuidType::NAME)
 			->setParameter('player', $player);
 
 		return $qb->getQuery()->getOneOrNullResult();
@@ -38,7 +39,7 @@ class VoteRepository extends DoctrineRepository implements VoteRepositoryInterfa
 
 		$qb->join('v.candidate', 'c')
 			->where('c.election = :election')
-			->setParameter('election', $election);
+			->setParameter('election', $election->id, UuidType::NAME);
 
 		return $qb->getQuery()->getResult();
 	}
