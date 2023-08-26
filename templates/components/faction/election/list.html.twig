@@ -22,12 +22,12 @@
 				{% for candidate in candidates %}
 					<div class="item">
 						<div class="left">
-							<img src="{{ asset('build/media/avatar/small/' ~ candidate.avatar ~ '.png') }}" alt="{{ candidate.name }}" />
+							<img src="{{ asset('build/media/avatar/small/' ~ candidate.player.avatar ~ '.png') }}" alt="{{ candidate.player.name }}" />
 							</div>
 
 						<div class="center">
-							<strong>{{ candidate.name }}</strong>
-							{{ statuses[candidate.status - 1] }}
+							<strong>{{ candidate.player.name }}</strong>
+							{{ statuses[candidate.player.status - 1] }}
 						</div>
 
 						<div class="right">

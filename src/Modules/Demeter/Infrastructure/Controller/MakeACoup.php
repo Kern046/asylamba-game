@@ -3,6 +3,7 @@
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
 use App\Classes\Library\DateTimeConverter;
+use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
 use App\Modules\Demeter\Domain\Repository\Election\CandidateRepositoryInterface;
 use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
 use App\Modules\Demeter\Domain\Repository\Election\VoteRepositoryInterface;
@@ -32,6 +33,7 @@ class MakeACoup extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		NextElectionDateCalculator $nextElectionDateCalculator,
 		NotificationRepositoryInterface $notificationRepository,
 		PlayerManager $playerManager,
 		PlayerRepositoryInterface $playerRepository,
@@ -63,7 +65,7 @@ class MakeACoup extends AbstractController
 		$election = new Election(
 			id: Uuid::v4(),
 			faction: $faction,
-			dElection: new \DateTimeImmutable(sprintf('+%d seconds', Color::PUTSCHTIME)),
+			dElection: new \DateTimeImmutable(),
 		);
 
 		$electionRepository->save($election);
@@ -99,6 +101,7 @@ class MakeACoup extends AbstractController
 			id: Uuid::v4(),
 			candidate: $candidate,
 			player: $currentPlayer,
+			hasApproved: true,
 			votedAt: new \DateTimeImmutable(),
 		);
 		$voteRepository->save($vote);
@@ -126,7 +129,7 @@ class MakeACoup extends AbstractController
 
 		$messageBus->dispatch(
 			new BallotMessage($faction->id),
-			[DateTimeConverter::to_delay_stamp($election->dElection)],
+			[DateTimeConverter::to_delay_stamp($nextElectionDateCalculator->getPutschEndDate($faction))],
 		);
 
 		return $this->redirect($request->headers->get('referer'));

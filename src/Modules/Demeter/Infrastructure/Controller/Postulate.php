@@ -2,14 +2,11 @@
 
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
 use App\Classes\Library\Utils;
-use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Election\CandidateManager;
-use App\Modules\Demeter\Manager\Election\ElectionManager;
-use App\Modules\Demeter\Manager\Election\VoteManager;
-use App\Modules\Demeter\Manager\Forum\ForumTopicManager;
+use App\Modules\Demeter\Domain\Repository\Election\CandidateRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Election\VoteRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\Forum\ForumTopicRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Candidate;
 use App\Modules\Demeter\Model\Forum\ForumTopic;
@@ -19,100 +16,85 @@ use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class Postulate extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		ElectionManager $electionManager,
-		CandidateManager $candidateManager,
 		PlayerManager $playerManager,
-		ForumTopicManager $forumTopicManager,
-		VoteManager $voteManager,
-		EntityManager $entityManager,
-		int $id,
+		CandidateRepositoryInterface $candidateRepository,
+		ElectionRepositoryInterface $electionRepository,
+		ForumTopicRepositoryInterface $forumTopicRepository,
+		VoteRepositoryInterface $voteRepository,
+		Uuid $id,
 	): Response {
-		$program = $request->request->get('program');
-		$chiefChoice = $request->request->get('chiefchoice');
-		$treasurerChoice = $request->request->get('treasurerchoice');
-		$warlordChoice = $request->request->get('warlordchoice');
-		$ministerChoice = $request->request->get('ministerchoice');
+		$program = $request->request->get('program')
+			?? throw new BadRequestHttpException('Missing program');
+//		$chiefChoice = $request->request->get('chiefchoice');
+//		$treasurerChoice = $request->request->get('treasurerchoice');
+//		$warlordChoice = $request->request->get('warlordchoice');
+//		$ministerChoice = $request->request->get('ministerchoice');
 
-		if (false !== $program) {
-			if (($election = $electionManager->get($id)) !== null) {
-				if ($election->rColor == $currentPlayer->getRColor()) {
-					$chiefChoice = 1;
-					$treasurerChoice = 1;
-					$warlordChoice = 1;
-					$ministerChoice = 1;
+		$election = $electionRepository->get($id)
+			?? throw $this->createNotFoundException(sprintf('Election %s not found', $id->toBase32()));
 
-					if ($currentPlayer->isParliamentMember()) {
-						$faction = $currentPlayer->getRColor();
-
-						if (Color::CAMPAIGN == $faction->electionStatement) {
-							if (null !== $chiefChoice && false !== $treasurerChoice && false !== $warlordChoice && false !== $ministerChoice) {
-								if (($candidate = $candidateManager->getByElectionAndPlayer($election, $currentPlayer)) === null) {
-									$candidate = new Candidate();
-
-									$candidate->rElection = $id;
-									$candidate->rPlayer = $currentPlayer->getId();
-									$candidate->chiefChoice = $chiefChoice;
-									$candidate->treasurerChoice = $treasurerChoice;
-									$candidate->warlordChoice = $warlordChoice;
-									$candidate->ministerChoice = $ministerChoice;
-									$candidate->dPresentation = Utils::now();
-									$candidate->program = $program;
-
-									$candidateManager->add($candidate);
-
-									$topic = new ForumTopic();
-									$topic->title = 'Candidat '.$currentPlayer->getName();
-									$topic->rForum = 30;
-									$topic->rPlayer = $candidate->rPlayer;
-									$topic->rColor = $currentPlayer->getRColor();
-									$topic->dCreation = Utils::now();
-									$topic->dLastMessage = Utils::now();
-
-									$forumTopicManager->add($topic);
-
-									if (ColorResource::CARDAN == $currentPlayer->getRColor()) {
-										$vote = new \App\Modules\Demeter\Model\Election\Vote();
-
-										$vote->rPlayer = $currentPlayer->getId();
-										$vote->rCandidate = $currentPlayer->getId();
-										$vote->rElection = $election->id;
-										$vote->dVotation = Utils::now();
-
-										$voteManager->add($vote);
-									}
-									$this->addFlash('success', 'Candidature déposée.');
-
-									return $this->redirectToRoute('view_faction_election', ['candidate' => $candidate->id]);
-								} else {
-									$entityManager->remove($candidate);
-
-									$this->addFlash('success', 'Candidature retirée.');
-
-									return $this->redirect($request->headers->get('referer'));
-								}
-							} else {
-								throw new ErrorException('Informations manquantes sur les choix.');
-							}
-						} else {
-							throw new ErrorException('Vous ne pouvez présenter ou retirer votre candidature qu\'en période de campagne.');
-						}
-					} else {
-						throw new ErrorException('Vous ne pouvez pas vous présenter, vous ne faite pas partie de l\'élite.');
-					}
-				} else {
-					throw new ErrorException('Cette election ne se déroule pas dans la faction du joueur.');
-				}
-			} else {
-				throw new ErrorException('Cette election n\'existe pas.');
-			}
-		} else {
-			throw new ErrorException('Informations manquantes.');
+		if ($election->faction->id !== $currentPlayer->faction->id) {
+			throw $this->createAccessDeniedException('You do not belong to this faction');
 		}
+
+		if (!$currentPlayer->isParliamentMember()) {
+			throw new ConflictHttpException('Vous ne pouvez pas vous présenter, vous ne faite pas partie de l\'élite.');
+		}
+		$faction = $currentPlayer->faction;
+
+		if (!$faction->isInCampaign()) {
+			throw new ConflictHttpException('Vous ne pouvez présenter ou retirer votre candidature qu\'en période de campagne.');
+		}
+
+		if (($candidate = $candidateRepository->getByElectionAndPlayer($election, $currentPlayer)) !== null) {
+			$candidateRepository->remove($candidate);
+
+			$this->addFlash('success', 'Candidature retirée.');
+
+			return $this->redirect($request->headers->get('referer'));
+		}
+		$candidate = new Candidate(
+			id: Uuid::v4(),
+			election: $election,
+			player: $currentPlayer,
+			program: $program,
+		);
+
+		$candidateRepository->save($candidate);
+
+		$topic = new ForumTopic(
+			id: Uuid::v4(),
+			title: 'Candidat '.$currentPlayer->name,
+			player: $currentPlayer,
+			forum: 30,
+			faction: $currentPlayer->faction,
+		);
+
+		$forumTopicRepository->save($topic);
+
+		if (ColorResource::CARDAN === $currentPlayer->faction->identifier) {
+			$vote = new \App\Modules\Demeter\Model\Election\Vote(
+				id: Uuid::v4(),
+				player: $currentPlayer,
+				candidate: $candidate,
+				hasApproved: true,
+				votedAt: new \DateTimeImmutable(),
+			);
+
+			$voteRepository->save($vote);
+		}
+		$this->addFlash('success', 'Candidature déposée.');
+
+		return $this->redirectToRoute('view_faction_election', ['candidate' => $candidate->id]);
 	}
 }

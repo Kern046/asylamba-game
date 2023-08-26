@@ -1,24 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Application\Election;
 
 use App\Modules\Demeter\Domain\Repository\Election\ElectionRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
-use App\Modules\Demeter\Model\Election\Election;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use function Sodium\add;
 
-class NextElectionDateCalculator
+readonly class NextElectionDateCalculator
 {
 	public function __construct(
-		private readonly ElectionRepositoryInterface $electionRepository,
-		private readonly DurationHandler $durationHandler,
+		private ElectionRepositoryInterface $electionRepository,
+		private DurationHandler $durationHandler,
 		#[Autowire('%server_start_time%')]
-		private readonly string $serverStartTime,
+		private string $serverStartTime,
 	) {
-
 	}
 
 	public function getBallotDate(Color $faction): \DateTimeImmutable

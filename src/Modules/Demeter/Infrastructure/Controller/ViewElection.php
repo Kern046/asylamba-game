@@ -54,7 +54,7 @@ class ViewElection extends AbstractController
 				fn (Candidate $candidate) => $candidate->player->id === $currentPlayer->id
 			));
 
-			if ($faction->isInElection()) {
+			if ($faction->hasOngoingElectionCampaign()) {
 				$votes = $voteRepository->getElectionVotes($election);
 
 				$data['player_vote'] = $voteRepository->getPlayerVote($currentPlayer, $election);

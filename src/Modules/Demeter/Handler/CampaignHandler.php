@@ -41,6 +41,7 @@ class CampaignHandler
 		);
 
 		$this->electionRepository->save($election);
+
 		$faction->electionStatement = Color::CAMPAIGN;
 		if ($faction->isDemocratic()) {
 			$this->messageBus->dispatch(

@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
 use App\Modules\Demeter\Domain\Repository\Forum\FactionNewsRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Resource\LawResources;
 use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Zeus\Domain\Repository\CreditTransactionRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Infrastructure\Validator\IsGovernmentMember;
 use App\Modules\Zeus\Infrastructure\Validator\IsParliamentMember;
-use App\Modules\Zeus\Manager\CreditTransactionManager;
 use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +24,7 @@ class ViewGovernment extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		CreditTransactionManager $creditTransactionManager,
+		CreditTransactionRepositoryInterface $creditTransactionRepository,
 		ColorManager $colorManager,
 		PlayerRepositoryInterface $playerRepository,
 		SectorRepositoryInterface $sectorRepository,
@@ -33,16 +35,10 @@ class ViewGovernment extends AbstractController
 		}
 		$faction = $currentPlayer->faction;
 
-		$creditTransactionManager->load(
-			['rSender' => $faction->id, 'type' => CreditTransaction::TYP_F_TO_P],
-			['dTransaction', 'DESC'],
-			[0, 20]
-		);
-
 		return $this->render('pages/demeter/faction/government.html.twig', [
 			'faction' => $faction,
 			'parsed_description' => $colorManager->getParsedDescription($faction),
-			'credit_transactions' => $creditTransactionManager->getAll(),
+			//'credit_transactions' => $creditTransactionRepository->getAllBySender($faction),
 			'senators' => $playerRepository->getBySpecification(new IsParliamentMember($faction)),
 			'faction_sectors' => $sectorRepository->getFactionSectors($faction),
 			'faction_news' => $factionNewsRepository->getFactionNews($faction),

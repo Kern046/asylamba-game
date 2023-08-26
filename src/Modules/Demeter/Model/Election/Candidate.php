@@ -11,12 +11,12 @@ class Candidate
 		public Uuid $id,
 		public Election $election,
 		public Player $player,
-		public Player|null $chiefChoice,
-		public Player|null $treasurerChoice,
-		public Player|null $warlordChoice,
-		public Player|null $ministerChoice,
 		public string $program,
-		public \DateTimeImmutable $createdAt,
+		public Player|null $chiefChoice = null,
+		public Player|null $treasurerChoice = null,
+		public Player|null $warlordChoice = null,
+		public Player|null $ministerChoice = null,
+		public \DateTimeImmutable $createdAt = new \DateTimeImmutable(),
 	) {
 	}
 }

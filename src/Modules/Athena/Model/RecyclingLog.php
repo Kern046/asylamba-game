@@ -2,10 +2,12 @@
 
 namespace App\Modules\Athena\Model;
 
+use Symfony\Component\Uid\Uuid;
+
 class RecyclingLog
 {
 	public function __construct(
-		public int $id,
+		public Uuid $id,
 		public RecyclingMission $mission,
 		public \DateTimeImmutable $createdAt,
 		public int $resources = 0,

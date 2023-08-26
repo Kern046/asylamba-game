@@ -134,16 +134,15 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 	 */
 	public function getFactionPlayersByName(Color $faction): array
 	{
-		return $this->createQueryBuilder('p')
+		$qb = $this->createQueryBuilder('p');
+
+		$qb
 			->where('p.faction = :faction')
-			->andWhere('p.statement = :statement')
-			->setParameters([
-				'faction' => $faction,
-				'statement' => [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY],
-			])
-			->orderBy('name', 'ASC')
-			->getQuery()
-			->getResult();
+			->andWhere($qb->expr()->in('p.statement', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]))
+			->setParameter('faction', $faction)
+			->orderBy('p.name', 'ASC');
+
+		return $qb->getQuery()->getResult();
 	}
 
 	/**
