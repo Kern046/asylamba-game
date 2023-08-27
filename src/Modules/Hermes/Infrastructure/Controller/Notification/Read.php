@@ -15,7 +15,7 @@ class Read extends AbstractController
 	#[Route(
 		path: '/notifications/{id}/read',
 		name: 'read_notification',
-		methods: Request::METHOD_GET,
+		methods: Request::METHOD_PATCH,
 	)]
 	public function __invoke(
 		Request $request,
