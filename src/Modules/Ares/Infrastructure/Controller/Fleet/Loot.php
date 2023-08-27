@@ -106,7 +106,7 @@ class Loot extends AbstractController
 			throw new ConflictHttpException('This place is not inhabited');
 		}
 
-		$this->commanderManager->move($commander, $place, $commander->base->place, Commander::LOOT, $length, $duration);
+		$this->commanderManager->move($commander, $place, $commander->base->place, Commander::LOOT, $duration);
 
 		$this->addFlash('success', 'Flotte envoyée.');
 

@@ -65,7 +65,7 @@ class Move extends AbstractController
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
 			throw new ConflictHttpException('Cet emplacement est trop éloigné.');
 		}
-		$commanderManager->move($commander, $place, $home->place, Commander::MOVE, $length, $duration);
+		$commanderManager->move($commander, $place, $home->place, Commander::MOVE, $duration);
 
 		$commanderRepository->save($commander);
 

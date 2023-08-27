@@ -217,15 +217,9 @@ readonly class CommanderManager implements SchedulerInterface
 	// comeBack
 	public function comeBack(Place $place, Commander $commander, Place $commanderPlace, $playerBonus): void
 	{
-		$length = Game::getDistance(
-			$place->system->xPosition,
-			$commanderPlace->system->xPosition,
-			$place->system->yPosition,
-			$commanderPlace->system->yPosition,
-		);
 		$duration = Game::getTimeToTravel($commanderPlace, $place, $playerBonus);
 
-		$this->move($commander, $commander->base->place, $place, Commander::BACK, $length, $duration);
+		$this->move($commander, $commander->base->place, $place, Commander::BACK, $duration);
 	}
 
 	public function lootAnEmptyPlace(Place $place, Commander $commander, PlayerBonus $playerBonus): void
