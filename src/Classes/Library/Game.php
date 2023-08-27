@@ -166,7 +166,7 @@ class Game
 		} else {
 			$duration = self::getTimeToTravel($startPlace, $destinationPlace);
 
-			$secRemaining = strtotime($arrivalDate) - strtotime(Utils::now());
+			$secRemaining = $arrivalDate->getTimestamp() - time();
 			$ratioRemaining = $secRemaining / $duration;
 
 			$distance = self::getDistance(
