@@ -13,8 +13,11 @@ use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,9 +32,11 @@ class GiveShips extends AbstractController
 	public function __invoke(
 		Request $request,
 		DurationHandler $durationHandler,
+		GetTravelTime $getTravelTime,
 		CommercialShippingManager $commercialShippingManager,
 		Player $currentPlayer,
 		OrbitalBase $currentBase,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
 		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		OrbitalBaseHelper $orbitalBaseHelper,
@@ -103,8 +108,7 @@ class GiveShips extends AbstractController
 		// load places to compute travel time
 		$startPlace = $currentBase->place;
 		$destinationPlace = $otherBase->place;
-		// TODO implement bonus
-		$timeToTravel = Game::getTimeToTravelCommercial($startPlace, $destinationPlace);
+		$timeToTravel = $getTravelTime($startPlace, $destinationPlace, TravelType::CommercialShipping, $currentPlayerBonusRegistry->getPlayerBonus());
 		$departure = new \DateTimeImmutable();
 		$arrival = $durationHandler->getDurationEnd($departure, $timeToTravel);
 

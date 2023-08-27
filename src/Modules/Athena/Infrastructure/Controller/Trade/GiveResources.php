@@ -2,11 +2,8 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade;
 
-use App\Classes\Exception\ErrorException;
-use App\Classes\Exception\FormException;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
-use App\Classes\Library\Utils;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
@@ -15,11 +12,12 @@ use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,6 +32,8 @@ class GiveResources extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		GetTravelTime $getTravelTime,
 		DurationHandler $durationHandler,
 		OrbitalBase $currentBase,
 		OrbitalBaseManager $orbitalBaseManager,
@@ -65,7 +65,7 @@ class GiveResources extends AbstractController
 		// ---------------------------
 		// controler le nombre de vaisseaux
 		// verif : have we enough commercialShips
-		$totalShips = $orbitalBaseHelper->getBuildingInfo(6, 'level', $currentBase->getLevelCommercialPlateforme(), 'nbCommercialShip');
+		$totalShips = $orbitalBaseHelper->getBuildingInfo(6, 'level', $currentBase->levelCommercialPlateforme, 'nbCommercialShip');
 		$usedShips = 0;
 
 		$commercialShippings = $commercialShippingRepository->getByBase($currentBase);
@@ -89,7 +89,7 @@ class GiveResources extends AbstractController
 		// load places to compute travel time
 		$startPlace = $currentBase->place;
 		$destinationPlace = $otherBase->place;
-		$timeToTravel = Game::getTimeToTravelCommercial($startPlace, $destinationPlace);
+		$timeToTravel = $getTravelTime($startPlace, $destinationPlace, TravelType::CommercialShipping, $currentPlayerBonusRegistry->getPlayerBonus());
 		$departure = new \DateTimeImmutable();
 		$arrival = $durationHandler->getDurationEnd($departure, $timeToTravel);
 

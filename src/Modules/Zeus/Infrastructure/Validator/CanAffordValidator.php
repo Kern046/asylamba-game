@@ -2,6 +2,7 @@
 
 namespace App\Modules\Zeus\Infrastructure\Validator;
 
+use App\Modules\Ares\Infrastructure\Validator\DTO\HasCommander;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Zeus\Model\CreditHolderInterface;
@@ -29,9 +30,10 @@ class CanAffordValidator extends ConstraintValidator
 
 	private function getCreditHolderFrom($value): CreditHolderInterface
 	{
-		return match (get_class($value)) {
-			Commander::class => $value->player,
-			Player::class, Color::class => $value,
+		return match (true) {
+			$value instanceof HasCommander => $value->getCommander()->player,
+			$value instanceof Commander => $value->player,
+			$value instanceof Player, $value instanceof Color => $value,
 			default => throw new UnexpectedTypeException($value, CreditHolderInterface::class),
 		};
 	}

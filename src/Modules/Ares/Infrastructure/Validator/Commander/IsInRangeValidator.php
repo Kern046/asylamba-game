@@ -44,7 +44,7 @@ class IsInRangeValidator extends ConstraintValidator
 		$length = ($this->getDistanceBetweenPlaces)($commander->base->place, $targetedPlace);
 		$isAlliedSector = ($this->isAlliedFactionSector)($targetedPlace->system->sector, $commander->player->faction);
 
-		if ($length <= Commander::DISTANCEMAX || $isAlliedSector) {
+		if ($length > Commander::DISTANCEMAX && !$isAlliedSector) {
 			$this->context
 				->buildViolation('Cet emplacement est trop éloigné.')
 				->addViolation();

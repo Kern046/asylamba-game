@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Infrastructure\Validator\DTO;
 
 use App\Modules\Ares\Model\Commander;
@@ -8,6 +10,7 @@ use App\Modules\Gaia\Infrastructure\Validator\DTO\HasPlace;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Promethee\Infrastructure\Validator\DTO\HasTechnology;
 use App\Modules\Promethee\Model\Technology;
+use App\Modules\Zeus\Model\CreditHolderInterface;
 
 readonly class Conquest implements HasCommander, HasPlace, HasBasesCount, HasTechnology
 {

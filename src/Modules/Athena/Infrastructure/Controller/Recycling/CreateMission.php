@@ -8,8 +8,11 @@ use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\RecyclingMission;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +25,8 @@ class CreateMission extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		GetTravelTime $getTravelTime,
 		OrbitalBase $currentBase,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		PlaceRepositoryInterface $placeRepository,
@@ -54,7 +59,7 @@ class CreateMission extends AbstractController
 		if (null !== $destinationPlace->player || !in_array($destinationPlace->typeOfPlace, [2, 3, 4, 5])) {
 			throw new BadRequestHttpException('On ne peut pas recycler ce lieu, petit hacker.');
 		}
-		$travelTime = Game::getTimeToTravel($startPlace, $destinationPlace);
+		$travelTime = $getTravelTime($startPlace, $destinationPlace, TravelType::RecyclingShips, $currentPlayerBonusRegistry->getPlayerBonus());
 
 		$sectorFaction = $destinationPlace->system->sector->faction;
 		if (null !== $sectorFaction && $currentPlayer->faction->id !== $sectorFaction->id) {

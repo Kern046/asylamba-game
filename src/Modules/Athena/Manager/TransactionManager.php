@@ -6,11 +6,16 @@ use App\Classes\Library\Game;
 use App\Modules\Athena\Domain\Repository\CommercialTaxRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
+use App\Modules\Zeus\Manager\PlayerBonusManager;
 
 readonly class TransactionManager
 {
 	public function __construct(
+		private GetTravelTime $getTravelTime,
 		private CommercialTaxRepositoryInterface $commercialTaxRepository,
+		private PlayerBonusManager $playerBonusManager,
 	) {
 	}
 
@@ -35,13 +40,9 @@ readonly class TransactionManager
 		}
 		$transactionSystem = $transaction->base->place->system;
 		$baseSystem = $ob->place->system;
+		$playerBonus = $this->playerBonusManager->getBonusByPlayer($transaction->player);
 
-		$time = Game::getTimeTravelCommercial(
-			$transactionSystem,
-			$transaction->base->place->position,
-			$baseSystem,
-			$ob->place->position,
-		);
+		$time = ($this->getTravelTime)($transaction->base->place, $ob->place, TravelType::CommercialShipping, $playerBonus);
 
 		$transactionFaction = $transactionSystem->sector->faction;
 		$baseFaction = $baseSystem->sector->faction;

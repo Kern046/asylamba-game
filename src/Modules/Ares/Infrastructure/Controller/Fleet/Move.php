@@ -6,6 +6,9 @@ use App\Classes\Library\Game;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
@@ -21,6 +24,8 @@ class Move extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		GetTravelTime $getTravelTime,
+		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommanderManager $commanderManager,
 		CommanderRepositoryInterface $commanderRepository,
@@ -47,13 +52,8 @@ class Move extends AbstractController
 		$home = $commander->base;
 
 		// TODO refactor into service
-		$length = Game::getDistance(
-			$home->place->system->xPosition,
-			$place->system->xPosition,
-			$home->place->system->yPosition,
-			$place->system->yPosition,
-		);
-		$duration = Game::getTimeToTravel($home->place, $place, $currentPlayerBonusRegistry->getPlayerBonus());
+		$length = $getDistanceBetweenPlaces($home->place, $place);
+		$duration = $getTravelTime($home->place, $place, TravelType::Fleet, $currentPlayerBonusRegistry->getPlayerBonus());
 
 		if (!$commander->isAffected()) {
 			throw new ConflictHttpException('Cet officier est déjà en déplacement.');

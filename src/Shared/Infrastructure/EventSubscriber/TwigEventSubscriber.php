@@ -47,8 +47,10 @@ class TwigEventSubscriber implements EventSubscriberInterface
 		if (!$this->currentPlayerRegistry->has()) {
 			return;
 		}
+
 		$player = $this->currentPlayerRegistry->get();
 		$currentBase = $this->currentPlayerBasesRegistry->current();
+
 		$this->twig->addGlobal('current_base', $currentBase);
 		$this->twig->addGlobal('current_player_bases', $this->currentPlayerBasesRegistry->all());
 		$this->twig->addGlobal('first_base', $this->currentPlayerBasesRegistry->first());

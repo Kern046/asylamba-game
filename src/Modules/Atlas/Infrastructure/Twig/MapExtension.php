@@ -7,18 +7,19 @@ use App\Modules\Ares\Domain\Specification\Player\CanPlayerAttackPlace;
 use App\Modules\Ares\Domain\Specification\Player\CanPlayerMoveToPlace;
 use App\Modules\Ares\Domain\Specification\Player\CanRecycle;
 use App\Modules\Ares\Domain\Specification\Player\CanSpyPlace;
+use App\Modules\Artemis\Application\Handler\AntiSpyHandler;
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Domain\Specification\CanOrbitalBaseTradeWithPlace;
-use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Gaia\Manager\PlaceManager;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Gaia\Resource\SystemResource;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
-use Symfony\Component\Uid\Uuid;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -26,6 +27,9 @@ use Twig\TwigFunction;
 class MapExtension extends AbstractExtension
 {
 	public function __construct(
+		private readonly GetTravelTime $getTravelTime,
+		private readonly AntiSpyHandler $antiSpyHandler,
+		private readonly GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		private readonly CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
 	) {
@@ -41,21 +45,18 @@ class MapExtension extends AbstractExtension
 	public function getFunctions(): array
 	{
 		return [
-			new TwigFunction('get_base_antispy_radius', fn (OrbitalBase $base) => Game::getAntiSpyRadius($base->antiSpyAverage)),
-			new TwigFunction('get_travel_time', fn (OrbitalBase $defaultBase, Place $place) => Game::getTimeTravel(
-				$defaultBase->place->system,
-				$defaultBase->place->position,
-				$place->system,
-				$place->position,
+			new TwigFunction('get_base_antispy_radius', fn (OrbitalBase $base) => $this->antiSpyHandler->getAntiSpyRadius($base->antiSpyAverage)),
+			new TwigFunction('get_travel_time', fn (OrbitalBase $defaultBase, Place $place) => ($this->getTravelTime)(
+				$defaultBase->place,
+				$place,
+				TravelType::Fleet,
 				$this->currentPlayerBonusRegistry->getPlayerBonus(),
 			)),
 			new TwigFunction('get_place_type', fn (string $type) => Game::convertPlaceType($type)),
 			new TwigFunction('get_system_info', fn (int $systemType, string $info) => SystemResource::getInfo($systemType, $info)),
-			new TwigFunction('get_place_distance', fn (OrbitalBase $defaultBase, Place $place) => Game::getDistance(
-				$defaultBase->place->system->xPosition,
-				$place->system->xPosition,
-				$defaultBase->place->system->yPosition,
-				$place->system->yPosition,
+			new TwigFunction('get_place_distance', fn (OrbitalBase $defaultBase, Place $place) => ($this->getDistanceBetweenPlaces)(
+				$defaultBase->place,
+				$place,
 			)),
 			new TwigFunction('get_max_travel_distance', fn () => Game::getMaxTravelDistance($this->currentPlayerBonusRegistry->getPlayerBonus())),
 			new TwigFunction('get_place_demography', fn (Place $place) => Game::getSizeOfPlanet($place->population)),

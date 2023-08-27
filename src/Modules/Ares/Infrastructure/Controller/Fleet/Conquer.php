@@ -11,6 +11,8 @@ use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Handler\CountPlayerBases;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
@@ -31,6 +33,7 @@ class Conquer extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		GetTravelTime $getTravelTime,
 		OrbitalBase $orbitalBase,
 		CountPlayerBases $countPlayerBases,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
@@ -83,7 +86,7 @@ class Conquer extends AbstractController
 			throw new ValidationFailedException($conquest, $violations);
 		}
 
-		$duration = Game::getTimeToTravel($home->place, $place, $currentPlayerBonusRegistry->getPlayerBonus());
+		$duration = $getTravelTime($home->place, $place, TravelType::Fleet, $currentPlayerBonusRegistry->getPlayerBonus());
 
 		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $duration);
 		// debit credit

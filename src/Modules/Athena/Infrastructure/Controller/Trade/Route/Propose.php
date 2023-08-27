@@ -12,6 +12,7 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
@@ -29,6 +30,7 @@ class Propose extends AbstractController
 		Request $request,
 		OrbitalBase $currentBase,
 		Player $currentPlayer,
+		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		CommercialRouteRepositoryInterface $commercialRouteRepository,
@@ -65,12 +67,7 @@ class Propose extends AbstractController
 		if ($currentBase->player->id === $otherBase->player->id) {
 			throw new ConflictHttpException('Vous ne pouvez pas créer de route commerciale avec votre propre planète');
 		}
-		$distance = Game::getDistance(
-			$currentBase->place->system->xPosition,
-			$otherBase->place->system->xPosition,
-			$currentBase->place->system->yPosition,
-			$otherBase->place->system->yPosition,
-		);
+		$distance = $getDistanceBetweenPlaces($currentBase->place, $otherBase->place);
 		$bonusA = ($currentBase->place->system->sector->id !== $otherBase->place->system->sector->id) ? $this->getParameter('athena.trade.route.sector_bonus') : 1;
 		$bonusB = ($playerFaction->identifier !== $otherFaction->identifier) ? $this->getParameter('athena.trade.route.color_bonus') : 1;
 

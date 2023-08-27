@@ -62,75 +62,9 @@ class Game
 		return $coeffRefinery * $coeffPlanet;
 	}
 
-	public static function getDistance(int $xa, int $xb, int $ya, int $yb): float
-	{
-		$distance = floor(sqrt((($xa - $xb) * ($xa - $xb)) + (($ya - $yb) * ($ya - $yb))));
-
-		return ($distance < 1) ? 1 : $distance;
-	}
-
-	public static function getFleetSpeed(PlayerBonus|null $bonus): float
-	{
-		$b = null != $bonus
-			? Commander::FLEETSPEED * (3 * ($bonus->bonuses->get(PlayerBonusId::SHIP_SPEED) / 100)) : 0;
-
-		return Commander::FLEETSPEED + $b;
-	}
-
 	public static function getMaxTravelDistance($bonus): int
 	{
 		return Commander::DISTANCEMAX;
-	}
-
-	public static function getTimeToTravelCommercial(Place $startPlace, Place $destinationPlace, $bonus = null): float
-	{
-		return round(self::getTimeToTravel($startPlace, $destinationPlace, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
-	}
-
-	public static function getTimeToTravel(Place $startPlace, Place $destinationPlace, PlayerBonus $bonus = null): float
-	{
-		// $startPlace and $destinationPlace are instance of Place
-		return self::getTimeTravel(
-			$startPlace->system,
-			$startPlace->position,
-			$destinationPlace->system,
-			$destinationPlace->position,
-			$bonus
-		);
-	}
-
-	public static function getTimeTravelCommercial(System $systemFrom, int $positionFrom, System $systemTo, int $positionTo, PlayerBonus|null $bonus = null): float
-	{
-		return round(self::getTimeTravel($systemFrom, $positionFrom, $systemTo, $positionTo, $bonus) * self::COMMERCIAL_TIME_TRAVEL);
-	}
-
-	public static function getTimeTravel(System $systemFrom, int $positionFrom, System $systemTo, int $positionTo, PlayerBonus|null $bonus = null): float
-	{
-		return $systemFrom->id === $systemTo->id
-			? Game::getTimeTravelInSystem($positionFrom, $positionTo)
-			: Game::getTimeTravelOutOfSystem(
-				$bonus,
-				$systemFrom->xPosition,
-				$systemFrom->yPosition,
-				$systemTo->xPosition,
-				$systemTo->yPosition,
-			);
-	}
-
-	public static function getTimeTravelInSystem(int $startPosition, int $destinationPosition): float
-	{
-		$distance = abs($startPosition - $destinationPosition);
-
-		return round((Commander::COEFFMOVEINSYSTEM * $distance) * ((40 - $distance) / 50) + 180);
-	}
-
-	public static function getTimeTravelOutOfSystem(PlayerBonus|null $bonus, int $startX, int $startY, int $destinationX, int $destinationY): float
-	{
-		$distance = self::getDistance($startX, $destinationX, $startY, $destinationY);
-		$time = Commander::COEFFMOVEOUTOFSYSTEM;
-		$time += round((Commander::COEFFMOVEINTERSYSTEM * $distance) / self::getFleetSpeed($bonus));
-
-		return $time;
 	}
 
 	public static function getRCPrice(float $distance): float
@@ -147,72 +81,6 @@ class Game
 		}
 
 		return round($income * $bonusA * $bonusB);
-	}
-
-	public static function getAntiSpyRadius(int $investment, int $mode = self::ANTISPY_DISPLAY_MODE): float
-	{
-		return self::ANTISPY_DISPLAY_MODE == $mode
-			// en pixels : sert à l'affichage
-			? sqrt($investment / 3.14) * 20
-			// en position du jeu (250x250)
-			: sqrt($investment / 3.14);
-	}
-
-	public static function getAntiSpyEntryTime(Place $startPlace, Place $destinationPlace, \DateTimeImmutable $arrivalDate): array
-	{
-		// dans le même système
-		if ($startPlace->system->id === $destinationPlace->system->id) {
-			return [true, true, true];
-		} else {
-			$duration = self::getTimeToTravel($startPlace, $destinationPlace);
-
-			$secRemaining = $arrivalDate->getTimestamp() - time();
-			$ratioRemaining = $secRemaining / $duration;
-
-			$distance = self::getDistance(
-				$startPlace->system->xPosition,
-				$destinationPlace->system->yPosition,
-				$startPlace->system->xPosition,
-				$destinationPlace->system->yPosition,
-			);
-			$distanceRemaining = $distance * $ratioRemaining;
-
-			$antiSpyRadius = self::getAntiSpyRadius($destinationPlace->base->iAntiSpy, 1);
-
-			if ($distanceRemaining < $antiSpyRadius / 3) {
-				return [true, true, true];
-			} elseif ($distanceRemaining < $antiSpyRadius / 3 * 2) {
-				$ratio = ($antiSpyRadius / 3) / $distanceRemaining;
-				$sec = $ratio * $secRemaining;
-				$newDate = Utils::addSecondsToDate($arrivalDate, -$sec);
-
-				return [true, true, $newDate];
-			} elseif ($distanceRemaining < $antiSpyRadius) {
-				$ratio = ($antiSpyRadius / 3 * 2) / $distanceRemaining;
-				$sec = $ratio * $secRemaining;
-				$newDate1 = Utils::addSecondsToDate($arrivalDate, -$sec);
-
-				$ratio = ($antiSpyRadius / 3) / $distanceRemaining;
-				$sec = $ratio * $secRemaining;
-				$newDate2 = Utils::addSecondsToDate($arrivalDate, -$sec);
-
-				return [true, $newDate1, $newDate2];
-			} else {
-				$ratio = $antiSpyRadius / $distanceRemaining;
-				$sec = $ratio * $secRemaining;
-				$newDate1 = Utils::addSecondsToDate($arrivalDate, -$sec);
-
-				$ratio = ($antiSpyRadius / 3 * 2) / $distanceRemaining;
-				$sec = $ratio * $secRemaining;
-				$newDate2 = Utils::addSecondsToDate($arrivalDate, -$sec);
-
-				$ratio = ($antiSpyRadius / 3) / $distanceRemaining;
-				$sec = $ratio * $secRemaining;
-				$newDate3 = Utils::addSecondsToDate($arrivalDate, -$sec);
-
-				return [$newDate1, $newDate2, $newDate3];
-			}
-		}
 	}
 
 	public static function getCommercialShipQuantityNeeded(int $transactionType, int $quantity, int $identifier = 0): int

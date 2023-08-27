@@ -14,10 +14,13 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
@@ -33,6 +36,7 @@ class Accept extends AbstractController
 	public function __invoke(
 		Request $request,
 		DurationHandler $durationHandler,
+		GetTravelTime $getTravelTime,
 		OrbitalBase $currentBase,
 		Player $currentPlayer,
 		ColorManager $colorManager,
@@ -45,6 +49,7 @@ class Accept extends AbstractController
 		PlaceManager $placeManager,
 		PlayerRepositoryInterface $playerRepository,
 		PlayerManager $playerManager,
+		PlayerBonusManager $playerBonusManager,
 		TransactionRepositoryInterface $transactionRepository,
 		EntityManagerInterface $entityManager,
 		Uuid $id,
@@ -92,7 +97,12 @@ class Accept extends AbstractController
 		$commercialShipping->departureDate = new \DateTimeImmutable();
 		$commercialShipping->arrivalDate = $durationHandler->getDurationEnd(
 			$commercialShipping->departureDate,
-			Game::getTimeToTravelCommercial($startPlace, $destinationPlace),
+			$getTravelTime(
+				$startPlace,
+				$destinationPlace,
+				TravelType::CommercialShipping,
+				$playerBonusManager->getBonusByPlayer($commercialShipping->player),
+			),
 		);
 		$commercialShipping->statement = CommercialShipping::ST_GOING;
 

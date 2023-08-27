@@ -11,6 +11,9 @@ use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
@@ -31,6 +34,8 @@ class Colonize extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		GetTravelTime $getTravelTime,
 		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommanderArmyHandler $commanderArmyHandler,
@@ -84,13 +89,9 @@ class Colonize extends AbstractController
 
 		$home = $commander->base;
 
-		$length = Game::getDistance(
-			$home->place->system->xPosition,
-			$place->system->xPosition,
-			$home->place->system->yPosition,
-			$place->system->yPosition
-		);
-		$duration = Game::getTimeToTravel($home->place, $place, $currentPlayerBonusRegistry->getPlayerBonus());
+		$length = $getDistanceBetweenPlaces($home->place, $place);
+
+		$duration = $getTravelTime($home->place, $place, TravelType::Fleet, $currentPlayerBonusRegistry->getPlayerBonus());
 
 		// compute price
 		$price = $totalBases * $this->getParameter('ares.coeff.colonization_cost');
@@ -116,6 +117,7 @@ class Colonize extends AbstractController
 		$isFactionSector = $sector->faction?->id === $commander->player->faction->id
 			|| Color::ALLY === $sectorColor?->relations[$currentPlayer->faction->identifier];
 
+		// TODO Replace by specification
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
 			throw new ConflictHttpException('Cet emplacement est trop éloigné.');
 		}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Manager;
 
 use App\Classes\Library\DateTimeConverter;
@@ -13,7 +15,10 @@ use App\Modules\Ares\Message\CommanderTravelMessage;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Model\LiveReport;
 use App\Modules\Ares\Model\Report;
+use App\Modules\Artemis\Application\Handler\AntiSpyHandler;
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Gaia\Application\Handler\GetTravelTime;
+use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
@@ -29,6 +34,8 @@ readonly class CommanderManager implements SchedulerInterface
 {
 	public function __construct(
 		private DurationHandler $durationHandler,
+		private AntiSpyHandler $antiSpyHandler,
+		private GetTravelTime $getTravelTime,
 		private EntityManagerInterface $entityManager,
 		private CommanderRepositoryInterface $commanderRepository,
 		private ReportRepositoryInterface $reportRepository,
@@ -48,14 +55,14 @@ readonly class CommanderManager implements SchedulerInterface
 
 		foreach ($attackingCommanders as $commander) {
 			// va chercher les heures auxquelles il rentre dans les cercles d'espionnage
-			$times = Game::getAntiSpyEntryTime(
+			$times = $this->antiSpyHandler->getAntiSpyEntryTime(
 				$commander->startPlace,
 				$commander->destinationPlace,
-				$commander->getArrivalDate(),
+				$commander,
 			);
 
-			if (strtotime(Utils::now()) >= strtotime($times[0])) {
-				// ajout de l'événement
+			// TODO WARNING I suppose that true values may mean that the attack is already detected but not sure
+			if (true === $times[0] || new \DateTimeImmutable() >= $times[0]) {
 				$incomingCommanders[] = $commander;
 			}
 		}
@@ -217,7 +224,7 @@ readonly class CommanderManager implements SchedulerInterface
 	// comeBack
 	public function comeBack(Place $place, Commander $commander, Place $commanderPlace, $playerBonus): void
 	{
-		$duration = Game::getTimeToTravel($commanderPlace, $place, $playerBonus);
+		$duration = ($this->getTravelTime)($commanderPlace, $place, TravelType::Fleet, $playerBonus);
 
 		$this->move($commander, $commander->base->place, $place, Commander::BACK, $duration);
 	}
