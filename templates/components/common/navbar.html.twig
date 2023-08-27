@@ -541,7 +541,7 @@
 													 data-progress-total-time="{{ commander|travel_total_time }}"
 												>
 													<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
-													<strong>{{ commander_rank }} {{ commander.name }}</strong>
+													<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
 													<em>
 														{{ commander|mission_label }}
 													</em>
