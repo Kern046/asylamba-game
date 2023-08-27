@@ -41,7 +41,7 @@ class IsInRangeValidator extends ConstraintValidator
 		$commander = $value->getCommander();
 		$targetedPlace = $value->getPlace();
 
-		$length = ($this->getDistanceBetweenPlaces)($commander->startPlace, $targetedPlace);
+		$length = ($this->getDistanceBetweenPlaces)($commander->base->place, $targetedPlace);
 		$isAlliedSector = ($this->isAlliedFactionSector)($targetedPlace->system->sector, $commander->player->faction);
 
 		if ($length <= Commander::DISTANCEMAX || $isAlliedSector) {
