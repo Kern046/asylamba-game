@@ -80,7 +80,7 @@ class PlayerManager
 			$placeIds = $this->placeRepository->findPlacesIdsForANewBase($sector);
 			if ([] !== $placeIds) {
 				$placeFound = true;
-				$placeId = $placeIds[rand(0, count($placeIds) - 1)]['id'];
+				$placeId = $placeIds[rand(0, count($placeIds) - 1)];
 				break;
 			}
 		}

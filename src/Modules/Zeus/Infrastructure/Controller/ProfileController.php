@@ -2,8 +2,11 @@
 
 namespace App\Modules\Zeus\Infrastructure\Controller;
 
+use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Manager\CommercialRouteManager;
+use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +19,9 @@ class ProfileController extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		BuildingQueueRepositoryInterface $buildingQueueRepository,
+		TechnologyQueueRepositoryInterface $technologyQueueRepository,
+		ShipQueueRepositoryInterface $shipQueueRepository,
 		CommercialRouteManager $commercialRouteManager,
 		EntityManagerInterface $entityManager,
 	): Response {
@@ -26,14 +32,21 @@ class ProfileController extends AbstractController
 		$playerNextLevelExperience = $baseLevelPlayer * (pow(2, ($currentPlayer->level - 2)));
 		$playerExperienceProgress = ((($currentPlayer->experience - $playerNextLevelExperience) * 200) / $playerMissingExperience);
 
-		// $sessionToken = $session->get('token');
-
 		$playerBases = $orbitalBaseRepository->getPlayerBases($currentPlayer);
 
+		$basesData = [];
+
 		foreach ($playerBases as $orbitalBase) {
+			$baseId = $orbitalBase->id->toRfc4122();
+			$basesData[$baseId] = [
+				'building_queues' => $buildingQueueRepository->getBaseQueues($orbitalBase),
+				'technology_queues' => $technologyQueueRepository->getPlaceQueues($orbitalBase->place),
+				'dock1_ship_queues' => $shipQueueRepository->getByBaseAndDockType($orbitalBase, 1),
+				'dock2_ship_queues' => $shipQueueRepository->getByBaseAndDockType($orbitalBase, 2),
+			];
 			// @TODO: move it to the using part of the code and remove useless data
 			if ($orbitalBase->levelSpatioport > 0) {
-				$commercialRoutesData = $commercialRouteManager->getBaseCommercialData($orbitalBase);
+				$basesData[$baseId]['commercial_routes'] = $commercialRouteManager->getBaseCommercialData($orbitalBase);
 			}
 		}
 
@@ -44,7 +57,7 @@ class ProfileController extends AbstractController
 			'player_missing_experience' => $playerMissingExperience,
 			'player_experience_progress' => $playerExperienceProgress,
 			'building_resource_refund' => $this->getParameter('athena.building.building_queue_resource_refund'),
-			'commercial_routes_data' => $commercialRoutesData ?? null,
+			'bases_data' => $basesData,
 		]);
 	}
 }
