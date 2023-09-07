@@ -12,25 +12,29 @@
 					<img src="{{ asset('build/media/map/place/place' ~ get_base_image(current_base) ~ '.png') }}" alt="{{ current_base.name }}" />
 				</a>
 				<div class="absolute -bottom-8 -left-8 flex items-center bg-stone-800 rounded-md border border-stone-600">
-					<toolbar-toggler>
+					<toolbar-toggler-left>
 						<template v-slot:picto>
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 								<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
 							</svg>
 						</template>
 						<template v-slot:dropdown>
-							<h2>Changer de bases</h2>
-							<div class="overflow">
-								{% for orbital_base in current_player_bases %}
-									<a href="{{ path('switchbase', {'baseId': orbital_base.id}) }}"
-									   {% if orbital_base.id == current_base.id %}class="active"{% endif %}>
-										<em>{{ orbital_base.typeOfBase|scalar_base_type }}</em>
-										<strong>{{ orbital_base.name }}</strong>
-									</a>
-								{% endfor %}
+							<div class="p-3">
+								<h2 class="text-lg faction-text-color mb-2">Changer de bases</h2>
+								<ul class="list-disc list-inside text-[16px]">
+									{% for orbital_base in current_player_bases %}
+										<li>
+											<a href="{{ path('switchbase', {'baseId': orbital_base.id}) }}"
+											   {% if orbital_base.id == current_base.id %}class="active"{% endif %}>
+												<span class="italic mr-2 inline-block">{{ orbital_base.typeOfBase|scalar_base_type }}</span>
+												<strong class="faction-text-color">{{ orbital_base.name }}</strong>
+											</a>
+										</li>
+									{% endfor %}
+								</ul>
 							</div>
 						</template>
-					</toolbar-toggler>
+					</toolbar-toggler-left>
 					<span class="font-semibold text-sm text-white w-20 px-1 border-x border-stone-600">
 						{{ current_base.name }}
 					</span>
