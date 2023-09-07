@@ -158,9 +158,9 @@
 									{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial}) }}
 								</template>
 								<template v-slot:dropdown>
-									<h5 class="text-md font-semibold">Tutoriel</h5>
+									<h5 class="text-lg font-semibold faction-text-color mb-4">Tutoriel</h5>
 
-									<div class="overflow">
+									<div class="overflow text-[16px]">
 										<h6>
 											<span class="number">
 												{{ tutorial_step }}
@@ -169,34 +169,36 @@
 										</h6>
 										<p>{{ tutorial_info(tutorial_step, 'description')|raw }}</p>
 
-										<p>
-											Récompense :<br />
+										<div class="mt-2">
+											<hr class="my-4 faction-bd-md">
+											<p class="faction-text-color">Récompense :</p>
 											{% set credit_reward = tutorial_info(tutorial_step, 'creditReward') %}
 											{% set resource_reward = tutorial_info(tutorial_step, 'resourceReward') %}
 											{% set ship_reward = tutorial_info(tutorial_step, 'shipReward') %}
-
-											{% if credit_reward > 0 %}
-												&nbsp;&nbsp;&nbsp;- {{ credit_reward }} crédits<br />
-											{% endif %}
-
-											{% if resource_reward > 0 %}
-												&nbsp;&nbsp;&nbsp;- {{ resource_reward }} ressources<br />
-											{% endif %}
-
-											{% for key in ship_reward|keys %}
-												{% set value = ship_reward[key] %}
-												{% if value > 0 %}
-													&nbsp;&nbsp;&nbsp;- {{ value }} {{ ship_name(key) }}{{ value|plural }}<br />
+											<ul>
+												{% if credit_reward > 0 %}
+													<li>- <span class="faction-text-color">{{ credit_reward }}</span> crédits</li>
 												{% endif %}
-											{% endfor %}
-										</p>
+
+												{% if resource_reward > 0 %}
+													<li>- <span class="faction-text-color">{{ resource_reward }}</span> ressources</li>
+												{% endif %}
+
+												{% for key in ship_reward|keys %}
+													{% set value = ship_reward[key] %}
+													{% if value > 0 %}
+														<li>- <span class="faction-text-color">{{ value }}</span> {{ ship_name(key) }}{{ value|plural }}</li>
+													{% endif %}
+												{% endfor %}
+											</ul>
+										</div>
 									</div>
 
-									<form action="{{ path('tutorial_validatestep') }}" method="post">
+									<form action="{{ path('tutorial_validatestep') }}" method="post" class="mt-4 relative text-[16px]">
 										{% if current_player.stepDone is same as(true) %}
-											<button type="submit">valider l'étape {{ tutorial_step }}</button>
+											<button class="faction-bg-lt p-2 text-black" type="submit">valider l'étape {{ tutorial_step }}</button>
 										{% else %}
-											<button class="disabled" type="submit" disabled>étape en cours</button>
+											<button class="disabled faction-bg-lt p-2 faction-text-color-disabled" type="submit" disabled>étape en cours</button>
 										{% endif %}
 									</form>
 								</template>
