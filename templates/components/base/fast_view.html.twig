@@ -50,7 +50,7 @@
 					{% set nextTime = building_queue|queue_duration  %}
 					{% set nextTotalTime = nextTotalTime + building_queue|building_queue_time %}
 
-					<div class="item {% if realSizeQueue > 1 %}active{% endif %} progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ nextTime }}" data-progress-total-time="{{ nextTotalTime }}">
+					<div class="item py-2 {% if realSizeQueue > 1 %}active{% endif %} progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ nextTime }}" data-progress-total-time="{{ nextTotalTime }}">
 						<a class="button hb lt" title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">×</a>
 						<img class="picto" src="{{ asset('build/media/orbitalbase/' ~  building_queue|queue_picture ~ '.png') }}" alt="" />
 						<strong>
@@ -88,9 +88,9 @@
 						{% set remainingTime = ship_queue|queue_duration %}
 
 						{% if realSizeQueue > 1 %}
-							<div class="item">
+							<div class="item py-2">
 						{% else %}
-							<div class="item active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
+							<div class="item py-2 active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
 						{% endif %}
 
 						<img class="picto" src="{{ asset('build/media/ship/picto/' ~ ship_queue|ship_queue_picture ~ '.png') }}" alt="" />
@@ -131,9 +131,9 @@
 						{% set remainingTime = ship_queue|queue_duration %}
 
 						{% if realSizeQueue > 1 %}
-							<div class="item">
+							<div class="item py-2">
 						{% else %}
-							<div class="item active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
+							<div class="item py-2 active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
 						{% endif %}
 
 						<img class="picto" src="{{ asset('build/media/ship/picto/' ~ ship_queue|ship_queue_picture ~ '.png') }}" alt="" />
@@ -175,7 +175,7 @@
 						{% set totalTimeTechno = totalTimeTechno + technology_queue|technology_queue_time %}
 						{% set remainingTotalTime = technology_queue|queue_duration %}
 
-						<div class="item active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTotalTime }}" data-progress-total-time="{{ totalTimeTechno }}">
+						<div class="item py-2 active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTotalTime }}" data-progress-total-time="{{ totalTimeTechno }}">
 							<img class="picto" src="{{ asset('build/media/technology/picto/' ~ technology_queue|queue_picture ~ '.png') }}" alt="" />
 							<strong>
 								{{ get_technology_info(technology_queue.technology, 'name') }}

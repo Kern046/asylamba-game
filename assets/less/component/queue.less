@@ -6,7 +6,7 @@
 		position: relative;
 		background: black;
 		border: solid 1px #0A0A0A;
-		border-top: solid 1px #202020;
+		border-top-color: #202020;
 		min-height: 60px;
 		display: block;
 
@@ -65,9 +65,9 @@
 			float: left;
 			width: 40px; height: 40px;
 			margin: 5px; padding: 5px;
-			background: black;
+			background: #151515;
 			border-radius: 100%;
-			border: solid 1px #202020;
+			border: solid 1px @light;
 		}
 
 		strong {
@@ -75,8 +75,8 @@
 			margin: 6px 0 2px 0;
 
 			.level {
-				font-size: 11px;
-				color: #CCC;
+				font-size: 12px;
+				color: @light;
 			}
 		}
 
@@ -94,7 +94,9 @@
 			position: relative;
 			display: block;
 			clear: both;
-			margin: 5px; height: 3px;
+			border-radius: 14px;
+			margin: 5px;
+			height: 10px;
 			background: #4F4F4F;
 		}
 
@@ -103,6 +105,7 @@
 			display: block;
 			height: 100%;
 			background: @light;
+			border-radius: 14px;
 		}
 	}
 

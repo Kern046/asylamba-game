@@ -1,6 +1,6 @@
 {% set next_time = building_queue|queue_duration %}
 
-<div class="item {% if building_queues_count > 1 %}active{% endif %} progress"
+<div class="item py-2 {% if building_queues_count > 1 %}active{% endif %}aueue progress"
 	 data-progress-output="lite"
 	 data-progress-current-time="{{ next_time }}"
 	 data-progress-total-time="{{ next_total_time }}">

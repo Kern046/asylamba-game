@@ -18,6 +18,9 @@
 
 		<link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ faction_id ~ '.png') }}" />
 		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('build/css/main.faction' ~ (faction_id != 0 ? faction_id : 1) ~ '.css') }}" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
 	</head>
 	<body class="color{{ faction_id }} no-scrolling {% if app.request.get('_route') == 'create_character' %}inscription{% endif %}" data-init-sftr="2">
 		{% block body %}{% endblock body %}

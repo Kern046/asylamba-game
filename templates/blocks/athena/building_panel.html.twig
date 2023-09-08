@@ -39,24 +39,34 @@
 						{% set level = i + 1 %}
 						{% set level_data = data[i] %}
 						<tr {% if current_level > level %}class="small-grey"{% elseif current_level == level %}class="active"{% endif %}>
-						<td>{{ level_data.note|raw }}</td>
+						<td><span class="inline-flex items-center gap-2">{{ level_data.note|raw }}</span></td>
 						<td>
-							{{ level_data.resourcePrice }}
-							<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" class="icon-color" />
+							<span class="inline-flex items-center gap-2">
+								{{ level_data.resourcePrice }}
+								<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" class="icon-color" />
+							</span>
 						</td>
 						<td>
-							{{ level_data.time }}
-							<img src="{{ asset('build/media/resources/time.png') }}" alt="relève" class="icon-color" />
+							<span class="inline-flex items-center gap-2">
+								{{ level_data.time }}
+								<img src="{{ asset('build/media/resources/time.png') }}" alt="relève" class="icon-color" />
+							</span>
 						</td>
 						{% for stat_data in level_data.stats %}
 							<td>
-								{{ stat_data.stat }}
-								{% if stat_data.image is defined %}
-									<img src="{{ asset('build/media/resources/' ~ stat_data.image ~ '.png') }}" alt="{{ stat_data.alt }}" class="icon-color" />
-								{% endif %}
+								<span class="inline-flex items-center gap-2">
+									{{ stat_data.stat }}
+									{% if stat_data.image is defined %}
+										<img src="{{ asset('build/media/resources/' ~ stat_data.image ~ '.png') }}" alt="{{ stat_data.alt }}" class="icon-color" />
+									{% endif %}
+								</span>
 							</td>
 						{% endfor %}
-						<td>{{ data[i].points }}</td>
+						<td>
+							<span class="inline-flex items-center gap-2">
+								{{ data[i].points }}
+							</span>
+						</td>
 					</tr>
 				{% endfor %}
 			</table>

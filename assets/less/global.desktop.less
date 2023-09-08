@@ -1,8 +1,8 @@
 html { height: 100%; }
 body { 
 	margin: 0; padding: 0;
-	font-family: 'Roboto', 'Trebuchet MS', 'Arial', sans-serif;
-	font-size: 13px;
+	font-family: 'Titillium Web', sans-serif;
+	font-size: 16px;
 }
 
 .bull {
@@ -11,11 +11,10 @@ body {
 	z-index: 1200;
 	padding: 4px 8px;
 	max-width: 280px;
-	color: white;
-	background: #202020;
+	color: @dark;
+	background: @light;
 	border-radius: 3px;
-	border: solid 1px #4F4F4F;
-	box-shadow: inset 0 0 3px black;
+	box-shadow: inset 0 0 3px @medium;
 
 	&:before {
 		content: '';
@@ -27,11 +26,11 @@ body {
 
 	&.top:before {
 		bottom: -14px;
-		border-color: #4F4F4F transparent transparent transparent;
+		border-color: @light transparent transparent transparent;
 	}
 	&.bottom:before {
 		top: -14px;
-		border-color: transparent transparent #4F4F4F transparent;
+		border-color: transparent transparent @light transparent;
 	}
 	&.left:before {
 		right: 12px;

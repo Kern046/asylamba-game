@@ -118,6 +118,10 @@ input {
 		padding: 10px;
 		line-height: 150%;
 		background: black;
+		font-size: 16px;
+		strong {
+			color: @light;
+		}
 	}
 
 	.alone-button {
@@ -885,7 +889,7 @@ input {
 		text-align: center;
 		font-size: 12px;
 		border-radius: 100%;
-		top: 38px; left: 58px;
+		top: 30px; left: 50px;
 		border: solid 1px white;
 		z-index: 22;
 		background: @medium;
@@ -917,7 +921,6 @@ input {
 
 	.button {
 		display: block;
-		margin: 10px; padding: 5px 10px;
 		width: 240px; line-height: 20px;
 		text-align: right;
 		color: white;
@@ -935,7 +938,7 @@ input {
 		}
 
 		&.disable {
-			background: #202020;
+			background: rgba(@medium, .4);
 			cursor: default;
 		}
 
