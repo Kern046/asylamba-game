@@ -196,7 +196,7 @@
 
 									<form action="{{ path('tutorial_validatestep') }}" method="post" class="mt-4 relative text-[16px]">
 										{% if current_player.stepDone is same as(true) %}
-											<button class="faction-bg-lt p-2 text-black" type="submit">valider l'étape {{ tutorial_step }}</button>
+											<button class="faction-bg-lt p-2 text-black faction-text-color-over-bg" type="submit">valider l'étape {{ tutorial_step }}</button>
 										{% else %}
 											<button class="disabled faction-bg-lt p-2 faction-text-color-disabled" type="submit" disabled>étape en cours</button>
 										{% endif %}
