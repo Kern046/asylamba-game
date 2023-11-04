@@ -12,7 +12,7 @@ export default {
 
 	computed: {
 		style: function () {
-			return this.customStyle ?? 'mt-2 faction-bd-dark border border-solid';
+			return 'mt-2 faction-bd-dark border border-solid ' + (this.customStyle ?? '');
 		},
 
 		uniqueKey: function () {
