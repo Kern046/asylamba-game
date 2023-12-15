@@ -131,6 +131,7 @@
 		{% endif %}
 	{% else %}
 		{% for route in routes %}
+			{% set route_distance = get_route_distance(route) %}
 			{% if route.isProposed and route.destinationBase.player.id == current_player.id %}
 				{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
 					'base': route.originBase,
@@ -169,7 +170,7 @@
 								</span>
 							</div>
 
-							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route.distance) }}px;">
+							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route_distance) }}px;">
 								{% if route.originBase.player.id == current_player.id %}
 									{{ destination_base|raw }}
 								{% else %}
@@ -177,7 +178,7 @@
 								{% endif %}
 
 								<ul class="general">
-									<li>Distance <strong>{{ route.distance }} al.</strong></li>
+									<li>Distance <strong>{{ route_distance }} al.</strong></li>
 									<li>
 										Prix
 										<strong>
@@ -260,7 +261,7 @@
 								</span>
 							</div>
 
-							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route.distance) }}px;">
+							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route_distance) }}px;">
 								{% if route.originBase.player.id == current_player.id %}
 									{{ destination_base|raw }}
 								{% else %}
@@ -270,7 +271,7 @@
 								<ul class="general">
 									<li>
 										Distance
-										<strong>{{ route.distance }} al.</strong>
+										<strong>{{ route_distance }} al.</strong>
 									</li>
 									<li>
 										Revenu par relève

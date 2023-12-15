@@ -2,47 +2,34 @@
 
 namespace App\Modules\Athena\Infrastructure\Twig;
 
-use App\Classes\Library\Game;
+use App\Modules\Athena\Application\Handler\CommercialRoute\GetCommercialRouteIncome;
+use App\Modules\Athena\Application\Handler\CommercialRoute\GetCommercialRoutePrice;
+use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Demeter\Resource\ColorResource;
-use App\Modules\Gaia\Model\Place;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class TradeRouteExtension extends AbstractExtension
 {
 	public function __construct(
-		private CurrentPlayerRegistry $currentPlayerRegistry,
+		private readonly CurrentPlayerRegistry    $currentPlayerRegistry,
+		private readonly GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		private readonly GetCommercialRoutePrice  $getCommercialRoutePrice,
+		private readonly GetCommercialRouteIncome $getCommercialRouteIncome,
 	) {
 	}
 
 	public function getFunctions(): array
 	{
 		return [
-			new TwigFunction('get_route_price', function (float $distance) {
-				$price = Game::getRCPrice($distance);
-
-				if (ColorResource::NEGORA === $this->currentPlayerRegistry->get()->faction->identifier) {
-					// bonus if the player is from Negore
-					$price -= round($price * ColorResource::BONUS_NEGORA_ROUTE / 100);
-				}
-
-				return $price;
-			}),
-			new TwigFunction('get_route_income', function (
-				OrbitalBase $defaultBase,
-				Place $place,
-				float $distance,
-				float $routeSectorBonus,
-				float $routeColorBonus,
-			) {
-				$bonusA = ($defaultBase->place->system->sector->id !== $place->system->sector->id) ? $routeSectorBonus : 1;
-				$bonusB = $this->currentPlayerRegistry->get()->faction->id !== $place->player->faction->id ? $routeColorBonus : 1;
-
-				return Game::getRCIncome($distance, $bonusA, $bonusB);
-			}),
+			new TwigFunction('get_route_price', fn (float $distance) => ($this->getCommercialRoutePrice)($distance, $this->currentPlayerRegistry->get())),
+			new TwigFunction('get_route_income', fn (OrbitalBase $from, OrbitalBase $to) => ($this->getCommercialRouteIncome)($from, $to, $this->currentPlayerRegistry->get())),
+			new TwigFunction('get_route_distance', fn (CommercialRoute $commercialRoute) => ($this->getDistanceBetweenPlaces)(
+				$commercialRoute->originBase->place,
+				$commercialRoute->destinationBase->place,
+			)),
 		];
 	}
 }

@@ -67,22 +67,6 @@ class Game
 		return Commander::DISTANCEMAX;
 	}
 
-	public static function getRCPrice(float $distance): float
-	{
-		return $distance * CommercialRoute::COEF_PRICE;
-	}
-
-	public static function getRCIncome(float $distance, int $bonusA = 1, int $bonusB = 1): float
-	{
-		$income = CommercialRoute::COEF_INCOME_2 * sqrt($distance * CommercialRoute::COEF_INCOME_1);
-		$maxIncome = CommercialRoute::COEF_INCOME_2 * sqrt(100 * CommercialRoute::COEF_INCOME_1);
-		if ($income > $maxIncome) {
-			$income = $maxIncome;
-		}
-
-		return round($income * $bonusA * $bonusB);
-	}
-
 	public static function getCommercialShipQuantityNeeded(int $transactionType, int $quantity, int $identifier = 0): int
 	{
 		return match ($transactionType) {

@@ -20,8 +20,6 @@ class CommercialRoute
 		public OrbitalBase $originBase,
 		public OrbitalBase $destinationBase,
 		public string $imageLink,
-		public int $distance,
-		public int $price,
 		public int $income,
 		public \DateTimeImmutable $proposedAt,
 		public \DateTimeImmutable|null $acceptedAt = null,

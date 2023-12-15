@@ -4,6 +4,8 @@ namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
+use App\Modules\Athena\Application\Handler\CommercialRoute\GetCommercialRouteIncome;
+use App\Modules\Athena\Application\Handler\CommercialRoute\GetCommercialRoutePrice;
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
@@ -31,6 +33,8 @@ class Propose extends AbstractController
 		OrbitalBase $currentBase,
 		Player $currentPlayer,
 		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		GetCommercialRoutePrice $getCommercialRoutePrice,
+		GetCommercialRouteIncome $getCommercialRouteIncome,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		CommercialRouteRepositoryInterface $commercialRouteRepository,
@@ -68,11 +72,8 @@ class Propose extends AbstractController
 			throw new ConflictHttpException('Vous ne pouvez pas créer de route commerciale avec votre propre planète');
 		}
 		$distance = $getDistanceBetweenPlaces($currentBase->place, $otherBase->place);
-		$bonusA = ($currentBase->place->system->sector->id !== $otherBase->place->system->sector->id) ? $this->getParameter('athena.trade.route.sector_bonus') : 1;
-		$bonusB = ($playerFaction->identifier !== $otherFaction->identifier) ? $this->getParameter('athena.trade.route.color_bonus') : 1;
 
-		$price = Game::getRCPrice($distance);
-		$income = Game::getRCIncome($distance, $bonusA, $bonusB);
+		$price = $getCommercialRoutePrice($distance, $currentPlayer);
 
 		if (1 == $distance) {
 			$imageLink = '1-'.rand(1, 3);
@@ -84,16 +85,7 @@ class Propose extends AbstractController
 			$imageLink = '4-'.rand(1, 3);
 		}
 
-		// TODO Refactor faction economic bonuses to merge with palyer bonus management
-		$factionBonus = ColorResource::getInfo($playerFaction->identifier, 'bonus');
-		// compute bonus
-		if (in_array(ColorResource::COMMERCIALROUTEPRICEBONUS, $factionBonus)) {
-			$priceWithBonus = round($price - ($price * ColorResource::BONUS_NEGORA_ROUTE / 100));
-		} else {
-			$priceWithBonus = $price;
-		}
-
-		if (!$currentPlayer->canAfford($priceWithBonus)) {
+		if (!$currentPlayer->canAfford($price)) {
 			throw new ConflictHttpException('impossible de proposer une route commerciale - vous n\'avez pas assez de crédits');
 		}
 		// création de la route
@@ -102,9 +94,8 @@ class Propose extends AbstractController
 			originBase: $currentBase,
 			destinationBase: $otherBase,
 			imageLink: $imageLink,
-			distance: $distance,
-			price: $price,
-			income: $income,
+			// Store the income without bonuses to avoid incorrect data in player|faction financial reports
+			income: $getCommercialRouteIncome($currentBase, $otherBase),
 			proposedAt: new \DateTimeImmutable(),
 			acceptedAt: null,
 			statement: CommercialRoute::PROPOSED,
@@ -112,7 +103,7 @@ class Propose extends AbstractController
 		$commercialRouteRepository->save($cr);
 
 		// débit des crédits au joueur
-		$playerManager->decreaseCredit($currentPlayer, $priceWithBonus);
+		$playerManager->decreaseCredit($currentPlayer, $price);
 
 		$notification = NotificationBuilder::new()
 			->setTitle('Proposition de route commerciale')
@@ -134,9 +125,9 @@ class Propose extends AbstractController
 				'.',
 				NotificationBuilder::divider(),
 				'Les frais de l\'opération vous coûteraient ',
-				Format::numberFormat($priceWithBonus),
+				Format::numberFormat($price),
 				' crédits; Les gains estimés pour cette route sont de ',
-				Format::numberFormat($income),
+				Format::numberFormat($getCommercialRouteIncome($currentBase, $otherBase, $player)),
 				' crédits par relève.',
 				NotificationBuilder::divider(),
 				NotificationBuilder::link(

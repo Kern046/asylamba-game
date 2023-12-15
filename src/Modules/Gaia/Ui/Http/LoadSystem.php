@@ -61,8 +61,6 @@ class LoadSystem extends AbstractController
 			'combat_reports' => $reportRepository->getAttackReportsByPlaces($currentPlayer, $placesIds),
 			'colonization_cost' => $conquestManager->getColonizationCost($currentPlayer, $basesCount),
 			'conquest_cost' => $conquestManager->getConquestCost($currentPlayer, $basesCount),
-			'route_sector_bonus' => $this->getParameter('athena.trade.route.sector_bonus'),
-			'route_color_bonus' => $this->getParameter('athena.trade.route.color_bonus'),
 		]);
 	}
 }

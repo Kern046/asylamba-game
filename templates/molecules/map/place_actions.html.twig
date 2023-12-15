@@ -157,7 +157,7 @@
 						{% set distance = get_place_distance(current_base, place) %}
 
 						{% set price = get_route_price(distance) %}
-						{% set income = get_route_income(current_base, place, distance, route_sector_bonus, route_color_bonus) %}
+						{% set income = get_route_income(current_base, place.base) %}
 
 						<div class="rc">
 							<img src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" alt="" class="planet" />

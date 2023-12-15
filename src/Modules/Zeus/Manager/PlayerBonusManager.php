@@ -98,7 +98,7 @@ class PlayerBonusManager
 			$playerBonus->bonuses->increase(PlayerBonusId::DESTROYER_DEFENSE, -5);
 		}
 
-		if (in_array(ColorResource::COMMERCIALROUTEBONUS, $bonus)) {
+		if (in_array(ColorResource::COMMERCIALROUTEINCOMEBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::COMMERCIAL_INCOME, 5);
 		}
 

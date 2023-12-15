@@ -10,8 +10,6 @@
 		</many-to-one>
 
 		<field name="imageLink" />
-		<field name="distance" type="integer" />
-		<field name="price" type="integer" />
 		<field name="income" type="integer" />
 		<field name="statement" type="integer" />
 		<field name="proposedAt" type="datetime_immutable" />
