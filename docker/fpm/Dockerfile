@@ -14,14 +14,6 @@ RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
 RUN curl -s https://getcomposer.org/installer | php
 RUN mv /var/www/html/composer.phar /usr/bin/composer
 
-COPY cron/ /etc/periodic/
-
-RUN chmod -R a+x /etc/periodic/
-
-COPY docker-entrypoint.sh /entrypoint.sh
-
-RUN chmod a+x /entrypoint.sh
-
 WORKDIR /srv/app
 
 ENTRYPOINT ["/entrypoint.sh"]

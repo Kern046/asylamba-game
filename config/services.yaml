@@ -118,11 +118,6 @@ services:
         resource: '../src/Shared/Infrastructure/Controller/'
         tags: ['controller.service_arguments']
 
-    App\Classes\Scheduler\CyclicActionScheduler:
-        public: true
-        arguments:
-            $dailyScriptHour: "%daily_script_hour%"
-
     App\Classes\Library\Parser:
         arguments:
             $mediaPath: '%media%'

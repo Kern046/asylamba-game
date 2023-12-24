@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Hephaistos\Ui\Cli;
+namespace App\Modules\Hephaistos\Cli;
 
 use App\Classes\Library\Utils;
 use App\Modules\Athena\Domain\Repository\CommercialTaxRepositoryInterface;
@@ -21,6 +21,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Uid\Uuid;
 
 #[AsCommand(
@@ -37,6 +38,7 @@ class PopulateDatabase extends Command
 		private readonly ConversationUserRepositoryInterface $conversationUserRepository,
 		private readonly PlayerRepositoryInterface $playerRepository,
 		private readonly TransactionRepositoryInterface $transactionRepository,
+		#[Autowire('%game.available_factions%')]
 		private readonly array $availableFactions,
 	) {
 		parent::__construct();
@@ -44,7 +46,6 @@ class PopulateDatabase extends Command
 
 	public function execute(InputInterface $input, OutputInterface $output): int
 	{
-		$uuid = Uuid::v4();
 		$output->writeln('Factions creation');
 		$date = new \DateTimeImmutable('-500000 seconds');
 

@@ -12,16 +12,6 @@ services:
             - '../../Repository'
             - '../../Resource'
 
-    App\Modules\Hephaistos\Ui\Cli\PopulateDatabase:
-        arguments:
-            $availableFactions: '%game.available_factions%'
-
-    App\Modules\Hephaistos\Ui\Cli\ScheduleActions:
-        arguments:
-            $schedulers: !tagged_iterator app.scheduler
-
-
-
     App\Modules\Hephaistos\Handler\DailyRoutineHandler:
         arguments:
             $playerInactiveTimeLimit: "%zeus.player.inactive_time_limit%"
