@@ -30,7 +30,8 @@ readonly class CommercialShippingHandler
 
 	public function __invoke(CommercialShippingMessage $message): void
 	{
-		$cs = $this->commercialShippingRepository->get($message->getCommercialShippingId());
+		$cs = $this->commercialShippingRepository->get($message->getCommercialShippingId())
+			?? throw new \RuntimeException(sprintf('Commercial shipping %s not found', $message->getCommercialShippingId()));
 		$transaction = $cs->transaction;
 		$orbitalBase = $cs->originBase;
 		$destOB = $cs->destinationBase;
@@ -48,6 +49,8 @@ readonly class CommercialShippingHandler
 				$timeToTravel = $this->durationHandler->getDiff($cs->getDepartureDate(), $cs->getArrivalDate());
 				$cs->departureDate = $cs->getArrivalDate();
 				$cs->arrivalDate = $this->durationHandler->getDurationEnd($cs->getArrivalDate(), $timeToTravel);
+
+				$this->commercialShippingRepository->save($cs);
 
 				$this->messageBus->dispatch(
 					new CommercialShippingMessage($cs->id),
