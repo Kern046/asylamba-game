@@ -3,7 +3,6 @@
 namespace App\Modules\Athena\Handler\Trade;
 
 use App\Classes\Library\DateTimeConverter;
-use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Manager\CommercialShippingManager;
 use App\Modules\Athena\Message\Trade\CommercialShippingMessage;
@@ -23,7 +22,6 @@ readonly class CommercialShippingHandler
 		private DurationHandler $durationHandler,
 		private CommercialShippingManager $commercialShippingManager,
 		private CommercialShippingRepositoryInterface $commercialShippingRepository,
-		private CommanderRepositoryInterface $commanderRepository,
 		private MessageBusInterface $messageBus,
 		private NotificationRepositoryInterface $notificationRepository,
 		private UrlGeneratorInterface $urlGenerator,
@@ -36,9 +34,8 @@ readonly class CommercialShippingHandler
 		$transaction = $cs->transaction;
 		$orbitalBase = $cs->originBase;
 		$destOB = $cs->destinationBase;
-		$commander =
-			(null !== $transaction && Transaction::TYP_COMMANDER === $transaction->type)
-				? $this->commanderRepository->find($transaction->identifier)
+		$commander = (null !== $transaction && Transaction::TYP_COMMANDER === $transaction->type)
+				? $transaction->commander
 				: null
 		;
 
@@ -48,7 +45,7 @@ readonly class CommercialShippingHandler
 				$this->commercialShippingManager->deliver($cs, $transaction, $destOB, $commander);
 				// prepare commercialShipping for moving back
 				$cs->statement = CommercialShipping::ST_MOVING_BACK;
-				$timeToTravel = strtotime($cs->getArrivalDate()) - strtotime($cs->getDepartureDate());
+				$timeToTravel = $this->durationHandler->getDiff($cs->getDepartureDate(), $cs->getArrivalDate());
 				$cs->departureDate = $cs->getArrivalDate();
 				$cs->arrivalDate = $this->durationHandler->getDurationEnd($cs->getArrivalDate(), $timeToTravel);
 

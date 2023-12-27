@@ -18,9 +18,9 @@ readonly class GetCommercialRouteIncome
 		private BonusApplierInterface $bonusApplier,
 		private GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		#[Autowire('%athena.trade.route.sector_bonus%')]
-		private int $sectorBonus,
+		private float $sectorBonus,
 		#[Autowire('%athena.trade.route.color_bonus%')]
-		private int $factionBonus,
+		private float $factionBonus,
 	) {
 	}
 

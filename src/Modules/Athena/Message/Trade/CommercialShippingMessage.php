@@ -5,9 +5,9 @@ namespace App\Modules\Athena\Message\Trade;
 use App\Shared\Domain\Message\AsyncMessage;
 use Symfony\Component\Uid\Uuid;
 
-class CommercialShippingMessage implements AsyncMessage
+readonly class CommercialShippingMessage implements AsyncMessage
 {
-	public function __construct(private readonly Uuid $commercialShippingId)
+	public function __construct(private Uuid $commercialShippingId)
 	{
 	}
 
