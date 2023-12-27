@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 // @TODO Remove bounds to sessions
 // TODO reapply readonly when service has been simplified
-class PlayerManager
+readonly class PlayerManager
 {
 	public function __construct(
 		private PlayerRepositoryInterface $playerRepository,

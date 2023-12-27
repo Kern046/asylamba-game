@@ -10,55 +10,31 @@ use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Message\BallotMessage;
 use App\Modules\Demeter\Message\CampaignMessage;
 use App\Modules\Demeter\Message\ElectionMessage;
-use App\Modules\Demeter\Message\Law\AllianceDeclarationResultMessage;
-use App\Modules\Demeter\Message\Law\BonusEndMessage;
-use App\Modules\Demeter\Message\Law\ExportCommercialTaxesResultMessage;
-use App\Modules\Demeter\Message\Law\ImportCommercialTaxesResultMessage;
-use App\Modules\Demeter\Message\Law\NonAgressionPactDeclarationResultMessage;
-use App\Modules\Demeter\Message\Law\PeaceDeclarationResultMessage;
-use App\Modules\Demeter\Message\Law\SanctionResultMessage;
-use App\Modules\Demeter\Message\Law\SectorNameResultMessage;
-use App\Modules\Demeter\Message\Law\SectorTaxesResultMessage;
-use App\Modules\Demeter\Message\Law\VoteMessage;
-use App\Modules\Demeter\Message\Law\WarDeclarationResultMessage;
 use App\Modules\Demeter\Message\SenateUpdateMessage;
 use App\Modules\Demeter\Model\Color;
-use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Demeter\Resource\ColorResource;
-use App\Modules\Demeter\Resource\LawResources;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Infrastructure\Validator\IsParliamentMember;
-use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\SchedulerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Contracts\Service\Attribute\Required;
 
-class ColorManager implements SchedulerInterface
+readonly class ColorManager implements SchedulerInterface
 {
-	protected PlayerManager $playerManager;
-
 	public function __construct(
-		private readonly ColorRepositoryInterface $colorRepository,
-		private readonly PlayerRepositoryInterface $playerRepository,
-		private readonly LawRepositoryInterface $lawRepository,
-		private readonly NotificationRepositoryInterface $notificationRepository,
-		private readonly Parser $parser,
-		private readonly MessageBusInterface $messageBus,
-		private readonly UrlGeneratorInterface $urlGenerator,
-		private readonly EntityManagerInterface $entityManager,
-		private readonly NextElectionDateCalculator $nextElectionDateCalculator,
+		private ColorRepositoryInterface        $colorRepository,
+		private PlayerRepositoryInterface       $playerRepository,
+		private NotificationRepositoryInterface $notificationRepository,
+		private Parser                          $parser,
+		private MessageBusInterface             $messageBus,
+		private UrlGeneratorInterface           $urlGenerator,
+		private EntityManagerInterface          $entityManager,
+		private NextElectionDateCalculator      $nextElectionDateCalculator,
 	) {
-	}
-
-	#[Required]
-	public function setPlayerManager(PlayerManager $playerManager): void
-	{
-		$this->playerManager = $playerManager;
 	}
 
 	public function getParsedDescription(Color $color): string
@@ -218,40 +194,5 @@ class ColorManager implements SchedulerInterface
 			}
 		}
 		$this->entityManager->flush();
-	}
-
-	public function uMethod(Color $faction): void
-	{
-		$laws = $this->lawRepository->getByFactionAndStatements($faction, [Law::VOTATION, Law::EFFECTIVE]);
-
-		$now = new \DateTimeImmutable();
-
-		foreach ($laws as $law) {
-			if ($law->isBeingVoted() && $law->voteEndedAt < $now) {
-				$this->messageBus->dispatch(
-					new VoteMessage($law->id),
-					[DateTimeConverter::to_delay_stamp($law->voteEndedAt)],
-				);
-			} elseif ($law->isEffective() && $law->endedAt < $now) {
-				$messageClass = match (LawResources::getInfo($law->type, 'bonusLaw')) {
-					true => BonusEndMessage::class,
-					false => match ($law->type) {
-						Law::SECTORTAX => SectorTaxesResultMessage::class,
-						Law::SECTORNAME => SectorNameResultMessage::class,
-						Law::COMTAXEXPORT => ExportCommercialTaxesResultMessage::class,
-						Law::COMTAXIMPORT => ImportCommercialTaxesResultMessage::class,
-						Law::PEACEPACT => PeaceDeclarationResultMessage::class,
-						Law::WARDECLARATION => WarDeclarationResultMessage::class,
-						Law::TOTALALLIANCE => AllianceDeclarationResultMessage::class,
-						Law::NEUTRALPACT => NonAgressionPactDeclarationResultMessage::class,
-						Law::PUNITION => SanctionResultMessage::class,
-					}
-				};
-				$this->messageBus->dispatch(
-					new $messageClass($law->id),
-					[DateTimeConverter::to_delay_stamp($law->endedAt)],
-				);
-			}
-		}
 	}
 }
