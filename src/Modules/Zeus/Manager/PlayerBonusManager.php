@@ -9,21 +9,35 @@ use App\Modules\Demeter\Resource\LawResources;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Promethee\Model\TechnologyId;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
+use App\Modules\Zeus\Domain\Exception\NoCurrentPlayerSetException;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Zeus\Model\PlayerBonusId;
 
-class PlayerBonusManager
+readonly class PlayerBonusManager
 {
 	public function __construct(
-		private readonly TechnologyRepositoryInterface $technologyRepository,
-		private readonly TechnologyHelper $technologyHelper,
-		private readonly LawRepositoryInterface $lawRepository,
+		private CurrentPlayerRegistry $currentPlayerRegistry,
+		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		private TechnologyRepositoryInterface $technologyRepository,
+		private TechnologyHelper              $technologyHelper,
+		private LawRepositoryInterface        $lawRepository,
 	) {
 	}
 
 	public function getBonusByPlayer(Player $player): PlayerBonus
 	{
+		// Failsafe to avoid reloading the current player bonus
+		try {
+			if ($this->currentPlayerRegistry->get()->id === $player->id && $this->currentPlayerBonusRegistry->isInitialized()) {
+				return $this->currentPlayerBonusRegistry->getPlayerBonus();
+			}
+		} catch (NoCurrentPlayerSetException $exception) {
+		}
+
+
 		$technology = $this->technologyRepository->getPlayerTechnology($player);
 		$playerBonus = new PlayerBonus($player, $technology);
 
