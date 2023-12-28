@@ -2,6 +2,7 @@
 
 namespace App\Modules\Athena\Application\Registry;
 
+use App\Modules\Athena\Domain\Exception\NoCurrentBaseSetException;
 use App\Modules\Athena\Model\OrbitalBase;
 use Symfony\Component\Uid\Uuid;
 
@@ -30,6 +31,10 @@ class CurrentPlayerBasesRegistry
 
 	public function current(): OrbitalBase
 	{
+		if (null === $this->currentBaseId) {
+			throw new NoCurrentBaseSetException();
+		}
+
 		return $this->bases[$this->currentBaseId->toBase32()];
 	}
 
