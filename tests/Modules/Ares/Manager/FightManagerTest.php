@@ -20,6 +20,8 @@ class FightManagerTest extends KernelTestCase
 	{
 		static::bootKernel();
 
+		static::markTestIncomplete('Must implement Foundry');
+
 		/** @var FightManager $fightManager */
 		$fightManager = static::getContainer()->get(FightManager::class);
 

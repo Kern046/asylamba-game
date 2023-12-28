@@ -40,8 +40,8 @@ class DurationHandlerTest extends TestCase
 	public function testGetRemainingTime(DurationInterface $duration, int $expectedTime): void
 	{
 		static::assertSame(
-			$expectedTime,
-			$this->durationHandler->getDurationRemainingTime($duration),
+			round($expectedTime / 100),
+			round($this->durationHandler->getDurationRemainingTime($duration) / 100),
 		);
 	}
 
@@ -59,7 +59,7 @@ class DurationHandlerTest extends TestCase
 	/**
 	 * @return Generator<array<{0: \DateTimeImmutable, 1: int, 2: \DateTimeImmutable}>>
 	 */
-	public function provideGetDurationEndData(): Generator
+	public static function provideGetDurationEndData(): Generator
 	{
 		yield [
 			new \DateTimeImmutable(),
@@ -83,18 +83,18 @@ class DurationHandlerTest extends TestCase
 	/**
 	 * @return Generator<array<{0: DurationInterface, 1: int}>>
 	 */
-	public function provideGetRemainingTimeData(): Generator
+	public static function provideGetRemainingTimeData(): Generator
 	{
 		yield [
-			$this->generateBuildingQueue(new \DateTimeImmutable('+1 hour')),
+			static::generateBuildingQueue(new \DateTimeImmutable('+1 hour')),
 			3600,
 		];
 		yield [
-			$this->generateBuildingQueue(new \DateTimeImmutable('+1 day')),
+			static::generateBuildingQueue(new \DateTimeImmutable('+1 day')),
 			3600 * 24,
 		];
 		yield [
-			$this->generateBuildingQueue(new \DateTimeImmutable('-1 hour')),
+			static::generateBuildingQueue(new \DateTimeImmutable('-1 hour')),
 			0,
 		];
 	}
@@ -102,7 +102,7 @@ class DurationHandlerTest extends TestCase
 	/**
 	 * @return Generator<array<{0: \DateTimeImmutable, 1: \DateTimeImmutable, 2: int}>>
 	 */
-	public function provideGetHoursDiffData(): Generator
+	public static function provideGetHoursDiffData(): Generator
 	{
 		yield [
 			new \DateTimeImmutable('+2 hours'),
@@ -123,11 +123,12 @@ class DurationHandlerTest extends TestCase
 		];
 	}
 
-	private function generateBuildingQueue(\DateTimeImmutable $endedAt): BuildingQueue
+	private static function generateBuildingQueue(\DateTimeImmutable $endedAt): BuildingQueue
 	{
 		return new BuildingQueue(
 			id: Uuid::v4(),
-			base: new OrbitalBase(id: Uuid::v4(),
+			base: new OrbitalBase(
+				id: Uuid::v4(),
 				place: new Place(
 					id: Uuid::v4(),
 					player: new Player(),

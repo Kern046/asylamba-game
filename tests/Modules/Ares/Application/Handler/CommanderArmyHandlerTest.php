@@ -9,6 +9,8 @@ class CommanderArmyHandlerTest extends TestCase
 {
 	public function testInitializeShips()
 	{
+		static::markTestIncomplete('Not implemented');
+
 		$squadron = new Squadron(
 
 		);

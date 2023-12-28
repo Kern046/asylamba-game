@@ -23,7 +23,7 @@ class BuildingLevelHandlerTest extends TestCase
 
 	public function testIncreaseBuildingLevel(): void
 	{
-		$orbitalBase = $this->generateOrbitalBase();
+		$orbitalBase = static::generateOrbitalBase();
 
 		$this->buildingLevelHandler->increaseBuildingLevel($orbitalBase, OrbitalBaseResource::GENERATOR);
 		$this->buildingLevelHandler->increaseBuildingLevel($orbitalBase, OrbitalBaseResource::SPATIOPORT);
@@ -40,7 +40,7 @@ class BuildingLevelHandlerTest extends TestCase
 
 	public function testDecreaseBuildingLevel(): void
 	{
-		$orbitalBase = $this->generateOrbitalBase();
+		$orbitalBase = static::generateOrbitalBase();
 
 		$this->buildingLevelHandler->decreaseBuildingLevel($orbitalBase, OrbitalBaseResource::GENERATOR);
 		$this->buildingLevelHandler->decreaseBuildingLevel($orbitalBase, OrbitalBaseResource::SPATIOPORT);
@@ -107,7 +107,7 @@ class BuildingLevelHandlerTest extends TestCase
 
 	public function testGetInvalidBuildingLevel(): void
 	{
-		$orbitalBase = $this->generateOrbitalBase();
+		$orbitalBase = static::generateOrbitalBase();
 
 		static::expectException(\LogicException::class);
 		static::expectExceptionMessage('Building identifier 99 is not valid');
@@ -117,8 +117,8 @@ class BuildingLevelHandlerTest extends TestCase
 
 	public function testGetInvalidBuildingRealLevel(): void
 	{
-		$orbitalBase = $this->generateOrbitalBase();
-		$buildingQueues = $this->generateBuildingQueues($orbitalBase);
+		$orbitalBase = static::generateOrbitalBase();
+		$buildingQueues = static::generateBuildingQueues($orbitalBase);
 
 		static::expectException(\LogicException::class);
 		static::expectExceptionMessage('Building identifier 99 is not valid');
@@ -129,10 +129,10 @@ class BuildingLevelHandlerTest extends TestCase
 	/**
 	 * @return \Generator{0: OrbitalBase, 1: list<BuildingQueue>, 2: int, 3: int}
 	 */
-	public function provideData(): \Generator
+	public static function provideData(): \Generator
 	{
-		$orbitalBase = $this->generateOrbitalBase();
-		$buildingQueues = $this->generateBuildingQueues($orbitalBase);
+		$orbitalBase = static::generateOrbitalBase();
+		$buildingQueues = static::generateBuildingQueues($orbitalBase);
 
 		yield [
 			$orbitalBase,
@@ -177,13 +177,14 @@ class BuildingLevelHandlerTest extends TestCase
 		];
 	}
 
-	private function generateOrbitalBase(): OrbitalBase
+	private static function generateOrbitalBase(): OrbitalBase
 	{
 		return new OrbitalBase(
 			id: Uuid::v4(),
 			place: new Place(
 				id: Uuid::v4(),
 				player: new Player(),
+				base: null,
 				system: new System(
 					id: Uuid::v4(),
 					sector: null,
@@ -214,21 +215,21 @@ class BuildingLevelHandlerTest extends TestCase
 	/**
 	 * @return list<BuildingQueue>
 	 */
-	private function generateBuildingQueues(OrbitalBase $orbitalBase): array
+	private static function generateBuildingQueues(OrbitalBase $orbitalBase): array
 	{
 		return [
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::GENERATOR, 6),
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::GENERATOR, 5),
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::REFINERY, 4),
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::GENERATOR, 7),
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::REFINERY, 3),
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::COMMERCIAL_PLATEFORME, 1),
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::DOCK1, 1),
-			$this->generateBuildingQueue($orbitalBase, OrbitalBaseResource::DOCK1, 2),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::GENERATOR, 6),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::GENERATOR, 5),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::REFINERY, 4),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::GENERATOR, 7),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::REFINERY, 3),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::COMMERCIAL_PLATEFORME, 1),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::DOCK1, 1),
+			static::generateBuildingQueue($orbitalBase, OrbitalBaseResource::DOCK1, 2),
 		];
 	}
 
-	private function generateBuildingQueue(
+	private static function generateBuildingQueue(
 		OrbitalBase $orbitalBase,
 		int $buildingIdentifier,
 		int $targetLevel,

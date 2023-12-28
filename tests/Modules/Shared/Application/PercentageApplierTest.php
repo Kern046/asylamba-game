@@ -23,7 +23,7 @@ class PercentageApplierTest extends TestCase
 		static::assertSame($expectedResult, PercentageApplier::toFloat($value, $percent));
 	}
 
-	public function provideIntData(): \Generator
+	public static function provideIntData(): \Generator
 	{
 		yield [
 			100.00,
@@ -56,7 +56,7 @@ class PercentageApplierTest extends TestCase
 		];
 	}
 
-	public function provideFloatData(): \Generator
+	public static function provideFloatData(): \Generator
 	{
 		yield [
 			100.00,

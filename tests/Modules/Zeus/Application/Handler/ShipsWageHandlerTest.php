@@ -2,9 +2,17 @@
 
 namespace App\Tests\Modules\Zeus\Application\Handler;
 
-use PHPUnit\Framework\TestCase;
+use App\Modules\Zeus\Application\Handler\ShipsWageHandler;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class ShipsWageHandlerTest extends TestCase
+class ShipsWageHandlerTest extends KernelTestCase
 {
+	public function test(): void
+	{
+		static::bootKernel();
 
+		$shipsWageHandler = static::getContainer()->get(ShipsWageHandler::class);
+
+		static::markTestIncomplete('Not implemented');
+	}
 }

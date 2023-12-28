@@ -3,12 +3,16 @@
 namespace App\Tests\Modules\Zeus\Application\Handler;
 
 use App\Modules\Zeus\Application\Handler\UniversityInvestmentHandler;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class UniversityInvestmentHandlerTest extends TestCase
+class UniversityInvestmentHandlerTest extends KernelTestCase
 {
 	public function testSpend(): void
 	{
-		$handler = new UniversityInvestmentHandler();
+		static::bootKernel();
+
+		$handler = static::getContainer()->get(UniversityInvestmentHandler::class);
+
+		static::markTestIncomplete('Not implemented');
 	}
 }

@@ -18,7 +18,7 @@ class ResearchHelperTest extends TestCase
 		static::assertSame($expectedPrice, $researchHelper->getInfo($research, 'level', $level, 'price'));
 	}
 
-	public function provideData(): \Generator
+	public static function provideData(): \Generator
 	{
 		yield [Research::MATH, 1, 1, 100];
 		yield [Research::PHYS, 1, 1, 3000];

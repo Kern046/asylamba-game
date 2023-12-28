@@ -2,21 +2,25 @@
 
 namespace App\Tests\Modules\Ares\Application\Handler;
 
+use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
 use App\Modules\Ares\Application\Handler\VirtualCommanderHandler;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\Sector;
 use App\Modules\Gaia\Model\System;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Uid\Uuid;
 
-class VirtualCommanderHandlerTest extends TestCase
+class VirtualCommanderHandlerTest extends KernelTestCase
 {
 	/**
 	 * @dataProvider provideData
 	 */
 	public function testCreateVirtualCommander(Place $place, int $expectedSquadronsCount, int $expectedPev): void
 	{
-		$handler = new VirtualCommanderHandler();
+		static::bootKernel();
+
+		$handler = static::getContainer()->get(VirtualCommanderHandler::class);
+		$armyHandler = static::getContainer()->get(CommanderArmyHandler::class);
 
 		$commander = $handler->createVirtualCommander($place);
 
@@ -25,13 +29,13 @@ class VirtualCommanderHandlerTest extends TestCase
 		static::assertSame($expectedSquadronsCount, $commander->level);
 		static::assertCount($expectedSquadronsCount, $commander->squadronsIds);
 		static::assertCount($expectedSquadronsCount, $commander->army);
-		static::assertSame($expectedPev, $commander->getPev());
+		static::assertSame($expectedPev, $armyHandler->getPev($commander));
 	}
 
-	public function provideData(): \Generator
+	public static function provideData(): \Generator
 	{
 		yield [
-			$this->getPlaceMock(
+			static::getPlaceMock(
 				danger: 0,
 				maxDanger: 10,
 				population: 147,
@@ -43,7 +47,7 @@ class VirtualCommanderHandlerTest extends TestCase
 			18,
 		];
 		yield [
-			$this->getPlaceMock(
+			static::getPlaceMock(
 				danger: 3,
 				maxDanger: 10,
 				population: 147,
@@ -55,7 +59,7 @@ class VirtualCommanderHandlerTest extends TestCase
 			36,
 		];
 		yield [
-			$this->getPlaceMock(
+			static::getPlaceMock(
 				danger: 0,
 				maxDanger: 7,
 				population: 100,
@@ -67,7 +71,7 @@ class VirtualCommanderHandlerTest extends TestCase
 			18,
 		];
 		yield [
-			$this->getPlaceMock(
+			static::getPlaceMock(
 				danger: 3,
 				maxDanger: 7,
 				population: 100,
@@ -80,7 +84,7 @@ class VirtualCommanderHandlerTest extends TestCase
 		];
 	}
 
-	private function getPlaceMock(
+	private static function getPlaceMock(
 		int $danger,
 		int $maxDanger,
 		int $population,
