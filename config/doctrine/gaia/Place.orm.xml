@@ -18,7 +18,7 @@
 				<option name="unsigned">true</option>
 			</options>
 		</field>
-		<field name="position" column="position" type="float">
+		<field name="position" column="position" type="smallint">
 			<options>
 				<option name="unsigned">true</option>
 			</options>
@@ -28,7 +28,7 @@
 				<option name="unsigned">true</option>
 			</options>
 		</field>
-		<field name="coefResources" column="coefResources" type="float">
+		<field name="coefResources" column="coefResources" type="smallint">
 			<options>
 				<option name="unsigned">true</option>
 			</options>
