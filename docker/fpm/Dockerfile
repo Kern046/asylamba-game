@@ -15,5 +15,3 @@ RUN curl -s https://getcomposer.org/installer | php
 RUN mv /var/www/html/composer.phar /usr/bin/composer
 
 WORKDIR /srv/app
-
-ENTRYPOINT ["/entrypoint.sh"]
