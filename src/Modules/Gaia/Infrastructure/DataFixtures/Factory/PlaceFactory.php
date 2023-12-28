@@ -16,7 +16,7 @@ class PlaceFactory extends ModelFactory
 			'id' => Uuid::v4(),
 			'player' => null,
 			'base' => null,
-			'system' => SystemFactory::random(),
+			'system' => SystemFactory::randomOrCreate(),
 			'typeOfPlace' => Place::TERRESTRIAL,
 			'position' => self::faker()->randomNumber(1),
 			'population' => self::faker()->numberBetween(50, 250),

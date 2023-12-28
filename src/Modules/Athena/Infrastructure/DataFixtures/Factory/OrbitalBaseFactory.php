@@ -16,8 +16,8 @@ class OrbitalBaseFactory extends ModelFactory
 	{
 		return [
 			'id' => Uuid::v4(),
-			'place' => PlaceFactory::random(),
-			'player' => PlayerFactory::random(),
+			'place' => PlaceFactory::randomOrCreate(),
+			'player' => PlayerFactory::randomOrCreate(),
 			'name' => 'Colonie',
 			'typeOfBase' => OrbitalBase::TYP_NEUTRAL,
 			'levelGenerator' => 1,

@@ -14,7 +14,7 @@ class SystemFactory extends ModelFactory
 	{
 		return [
 			'id' => Uuid::v4(),
-			'sector' => SectorFactory::random(),
+			'sector' => SectorFactory::randomOrCreate(),
 			'faction' => null,
 			'xPosition' => self::faker()->numberBetween(0, 100),
 			'yPosition' => self::faker()->numberBetween(0, 100),
