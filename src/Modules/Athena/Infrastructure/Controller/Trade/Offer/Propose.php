@@ -8,6 +8,8 @@ use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
+use App\Modules\Athena\Domain\Service\CountAvailableCommercialShips;
+use App\Modules\Athena\Domain\Service\CountNeededCommercialShips;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialShippingManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
@@ -22,6 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
 
 class Propose extends AbstractController
@@ -36,53 +39,50 @@ class Propose extends AbstractController
 		CommanderRepositoryInterface $commanderRepository,
 		TransactionRepositoryInterface $transactionRepository,
 		CommercialShippingManager $commercialShippingManager,
+		CountNeededCommercialShips $countNeededCommercialShips,
+		CountAvailableCommercialShips $countAvailableCommercialShips,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
 	): Response {
 		$type = $request->query->get('type') ?? throw new BadRequestHttpException('Missing type');
-		$quantity = $request->request->get('quantity');
+		$quantity = $request->request->getInt('quantity');
 		// TODO ATM the identifier contains ship number or commander UUID. Modify the form to keep only ship number
 		$identifier = $request->query->get('identifier');
 		$price = $request->request->get('price') ?? throw new BadRequestHttpException('Missing price');
 
-		$valid = true;
-
 		// TODO Move to validator component constraint
 		switch ($type) {
 			case Transaction::TYP_RESOURCE:
-				if (false !== $quantity and intval($quantity) > 0) {
-					$identifier = 0;
-				} else {
-					$valid = false;
+				if ($quantity === 0) {
+					throw new BadRequestHttpException('Invalid quantity');
 				}
+				if ($currentBase->resourcesStorage < $quantity) {
+					throw new ConflictHttpException('The current base has not enough resources to make that sale');
+				}
+				$identifier = 0;
 				break;
 			case Transaction::TYP_SHIP:
-				if (false !== $identifier and ShipResource::isAShip($identifier)) {
-					if (ShipResource::isAShipFromDock1($identifier) or ShipResource::isAShipFromDock2($identifier)) {
-						if (false === $quantity) {
-							$quantity = 1;
-						} else {
-							if (intval($quantity) < 1) {
-								$valid = false;
-							}
-						}
-					} else {
-						$valid = false;
-					}
-				} else {
-					$valid = false;
+				if (null === $identifier || (!ShipResource::isAShipFromDock1($identifier) && !ShipResource::isAShipFromDock2($identifier))) {
+					throw new BadRequestHttpException('Invalid ship identifier');
 				}
+
+				if ($quantity === 0) {
+					throw new BadRequestHttpException('Invalid quantity');
+				}
+
+				if ($currentBase->getShipStorage()[$identifier] < $quantity) {
+					throw new ConflictHttpException('The current base has not enough ships to make that sale');
+				}
+
 				break;
 			case Transaction::TYP_COMMANDER:
-				if (false === $identifier or $identifier < 1) {
-					$valid = false;
+				if (null === $identifier || $identifier < 1) {
+					throw new BadRequestHttpException('Invalid commander ID');
 				}
 				break;
 			default:
-				$valid = false;
+				throw new \LogicException('Invalid transaction type');
 		}
-		if (!$valid) {
-			throw new BadRequestHttpException('impossible de faire une proposition sur le marché');
-		}
+		// TODO transform into service
 		$minPrice = Game::getMinPriceRelativeToRate($type, $quantity, $identifier);
 		$maxPrice = Game::getMaxPriceRelativeToRate($type, $quantity, $identifier);
 
@@ -92,49 +92,11 @@ class Propose extends AbstractController
 		} elseif ($price > $maxPrice) {
 			throw new BadRequestHttpException('Le prix que vous avez fixé est trop haut. Une limite supérieure est fixée selon la catégorie de la vente.');
 		}
-		// verif : have we enough commercialShips
-		$totalShips = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::COMMERCIAL_PLATEFORME, 'level', $currentBase->levelCommercialPlateforme, 'nbCommercialShip');
-		$usedShips = 0;
 
-		$commercialShippings = $commercialShippingRepository->getByBase($currentBase);
-
-		foreach ($commercialShippings as $commercialShipping) {
-			if ($commercialShipping->originBase->id === $currentBase->id) {
-				$usedShips += $commercialShipping->shipQuantity;
-			}
-		}
-
+		$remainingShips = $countAvailableCommercialShips($currentBase);
 		// determine commercialShipQuantity needed
-		// TODO Move to service method
-		switch ($type) {
-			case Transaction::TYP_RESOURCE:
-				if ($currentBase->resourcesStorage >= $quantity) {
-					$commercialShipQuantity = Game::getCommercialShipQuantityNeeded($type, $quantity);
-				} else {
-					$valid = false;
-				}
-				break;
-			case Transaction::TYP_SHIP:
-				$inStorage = $currentBase->getShipStorage()[$identifier];
-				if ($inStorage >= $quantity) {
-					$commercialShipQuantity = Game::getCommercialShipQuantityNeeded($type, $quantity, $identifier);
-				} else {
-					$valid = false;
-				}
-				break;
-			case Transaction::TYP_COMMANDER:
-				$commercialShipQuantity = Game::getCommercialShipQuantityNeeded($type, $quantity);
-				break;
-		}
+		$commercialShipQuantity = $countNeededCommercialShips($type, $quantity, $identifier);
 
-		$remainingShips = $totalShips - $usedShips;
-		if (!$valid) {
-			throw match ($type) {
-				Transaction::TYP_RESOURCE => new ConflictHttpException('Vous n\'avez pas assez de ressources en stock.'),
-				Transaction::TYP_SHIP => new ConflictHttpException('Vous n\'avez pas assez de vaisseaux.'),
-				default => new \RuntimeException('Erreur pour une raison étrange, contactez un administrateur.'),
-			};
-		}
 		if ($remainingShips < $commercialShipQuantity) {
 			throw new ConflictHttpException('Vous n\'avez pas assez de vaisseaux de transport disponibles.');
 		}
@@ -143,22 +105,24 @@ class Propose extends AbstractController
 				$orbitalBaseManager->decreaseResources($currentBase, $quantity);
 				break;
 			case Transaction::TYP_SHIP:
-				$inStorage = $currentBase->getShipStorage()[$identifier];
-				$currentBase->addShips($identifier, $inStorage - $quantity);
+				$currentBase->removeShips($identifier, $quantity);
 				break;
 			case Transaction::TYP_COMMANDER:
-				if (($commander = $commanderRepository->get(Uuid::fromString($identifier))) !== null && $commander->player->id === $currentPlayer->id && !$commander->isOnSale()) {
-					$identifier = 0;
-					$commander->statement = Commander::ONSALE;
-					$commanderManager->emptySquadrons($commander);
-				} else {
-					$valid = false;
-				}
-				break;
-		}
+				$commander = $commanderRepository->get(Uuid::fromString($identifier))
+					?? throw $this->createNotFoundException('Commander not found');
 
-		if (!$valid) {
-			throw new ConflictHttpException('Il y a un problème avec votre commandant.');
+				// TODO replace with Voter
+				if ($commander->player->id !== $currentPlayer->id) {
+					throw $this->createAccessDeniedException('This commander does not belong to you');
+				}
+
+				if ($commander->isOnSale()) {
+					throw new ConflictHttpException('This commander is already on sale');
+				}
+				$identifier = 0;
+				$commander->statement = Commander::ONSALE;
+				$commanderManager->emptySquadrons($commander);
+				break;
 		}
 		// création de la transaction
 		$tr = new Transaction(
@@ -168,11 +132,11 @@ class Propose extends AbstractController
 			type: $type,
 			quantity: $quantity,
 			identifier: $identifier,
+			publishedAt: new \DateTimeImmutable(),
+			currentRate: $transactionRepository->getLastCompletedTransaction($type)->currentRate,
 			price: $price,
 			commercialShipQuantity: $commercialShipQuantity,
 			statement: Transaction::ST_PROPOSED,
-			publishedAt: new \DateTimeImmutable(),
-			currentRate: $transactionRepository->getLastCompletedTransaction($type)->currentRate,
 		);
 
 		if ($tr->hasCommander()) {

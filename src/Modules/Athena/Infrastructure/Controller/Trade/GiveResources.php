@@ -6,6 +6,7 @@ use App\Classes\Library\Format;
 use App\Classes\Library\Game;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Athena\Domain\Service\CountNeededCommercialShips;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialShippingManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
@@ -43,6 +44,7 @@ class GiveResources extends AbstractController
 		CommercialShippingManager $commercialShippingManager,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
 		NotificationRepositoryInterface $notificationRepository,
+		CountNeededCommercialShips $countNeededCommercialShips,
 	): Response {
 		$baseId = $request->request->get('baseId') ?? throw new BadRequestHttpException('Missing base id');
 		$quantity = $request->request->get('quantity') ?? throw new BadRequestHttpException('Missing quantity');
@@ -78,7 +80,7 @@ class GiveResources extends AbstractController
 
 		// TODO service to calculate needed commercial ships number
 		$remainingShips = $totalShips - $usedShips;
-		$commercialShipQuantity = Game::getCommercialShipQuantityNeeded(Transaction::TYP_RESOURCE, $resource);
+		$commercialShipQuantity = $countNeededCommercialShips(Transaction::TYP_RESOURCE, $resource);
 
 		if ($remainingShips < $commercialShipQuantity) {
 			throw new ConflictHttpException('envoi de ressources impossible - vous n\'avez pas assez de vaisseaux de transport');

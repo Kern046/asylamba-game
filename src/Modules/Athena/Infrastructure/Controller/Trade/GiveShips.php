@@ -7,6 +7,7 @@ use App\Classes\Library\Game;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
+use App\Modules\Athena\Domain\Service\CountNeededCommercialShips;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\CommercialShippingManager;
 use App\Modules\Athena\Model\CommercialShipping;
@@ -42,6 +43,7 @@ class GiveShips extends AbstractController
 		OrbitalBaseHelper $orbitalBaseHelper,
 		TransactionRepositoryInterface $transactionRepository,
 		NotificationRepositoryInterface $notificationRepository,
+		CountNeededCommercialShips $countNeededCommercialShips,
 	): Response {
 		$baseId = $request->request->get('baseId') ?? throw new BadRequestHttpException('Missing base id');
 
@@ -82,11 +84,11 @@ class GiveShips extends AbstractController
 			throw new BadRequestHttpException('Invalid ship quantity');
 		}
 
-		if ($currentBase->getShipStorage($shipType) < $ships) {
+		if ($currentBase->getShipStorage()[$shipType] < $ships) {
 			throw new ConflictHttpException('You do not have enough ships');
 		}
 
-		$commercialShipQuantity = Game::getCommercialShipQuantityNeeded(Transaction::TYP_SHIP, $ships, $shipType);
+		$commercialShipQuantity = $countNeededCommercialShips(Transaction::TYP_SHIP, $ships, $shipType);
 		$totalShips = $orbitalBaseHelper->getBuildingInfo(6, 'level', $currentBase->levelCommercialPlateforme, 'nbCommercialShip');
 		$usedShips = 0;
 

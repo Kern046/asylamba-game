@@ -50,19 +50,6 @@ class OrbitalBaseHelper
 		};
 	}
 
-	public function getStoragePercent(OrbitalBase $orbitalBase): float
-	{
-		$storageSpace = $this->getBuildingInfo(
-			OrbitalBaseResource::STORAGE,
-			'level',
-			$orbitalBase->levelStorage,
-			'storageSpace',
-		);
-		$storageSpace += $this->bonusApplier->apply($storageSpace, PlayerBonusId::REFINERY_STORAGE);
-
-		return Format::numberFormat($orbitalBase->resourcesStorage / $storageSpace * 100);
-	}
-
 	// @TODO Check for the need of this method ??
 	public function getInfo($buildingNumber, $info, $level = 0, $sup = 'default')
 	{

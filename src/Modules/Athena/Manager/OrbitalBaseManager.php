@@ -10,6 +10,7 @@ use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
@@ -23,15 +24,14 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 readonly class OrbitalBaseManager
 {
 	public function __construct(
+		private GetMaxStorage $getMaxStorage,
 		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		private TechnologyQueueRepositoryInterface $technologyQueueRepository,
 		private CommercialRouteManager $commercialRouteManager,
 		private CommercialShippingRepositoryInterface $commercialShippingRepository,
 		private TransactionRepositoryInterface $transactionRepository,
-		private PlayerBonusManager $playerBonusManager,
 		private RecyclingMissionRepositoryInterface $recyclingMissionRepository,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private OrbitalBaseHelper $orbitalBaseHelper,
 		private EntityManagerInterface $entityManager,
 		private EventDispatcherInterface $eventDispatcher,
 		private CommanderManager $commanderManager,
@@ -111,22 +111,12 @@ readonly class OrbitalBaseManager
 	public function increaseResources(
 		OrbitalBase $orbitalBase,
 		int $resources,
-		bool $offLimits = false,
 		bool $persist = true
 	): void {
-		$playerBonus = $this->playerBonusManager->getBonusByPlayer($orbitalBase->player);
-		$maxStorage = $this->orbitalBaseHelper->getBuildingInfo(
-			OrbitalBaseResource::STORAGE,
-			'level',
-			$orbitalBase->levelStorage,
-			'storageSpace',
+		$orbitalBase->resourcesStorage = min(
+			$orbitalBase->resourcesStorage + $resources,
+			($this->getMaxStorage)(base: $orbitalBase, offLimits: true),
 		);
-		$maxStorage += $maxStorage * $playerBonus->bonuses->get(PlayerBonusId::REFINERY_STORAGE) / 100;
-
-		if (true === $offLimits) {
-			$maxStorage += OrbitalBase::EXTRA_STOCK;
-		}
-		$orbitalBase->resourcesStorage = min($orbitalBase->resourcesStorage + $resources, $maxStorage);
 
 		if (true === $persist) {
 			$this->orbitalBaseRepository->save($orbitalBase);

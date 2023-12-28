@@ -67,21 +67,6 @@ class Game
 		return Commander::DISTANCEMAX;
 	}
 
-	public static function getCommercialShipQuantityNeeded(int $transactionType, int $quantity, int $identifier = 0): int
-	{
-		return match ($transactionType) {
-			// 1000 ressources => 1 commercialShip
-			Transaction::TYP_RESOURCE => intval(ceil($quantity / 1000)),
-			// 1 PEV => 1 commercialShip
-			Transaction::TYP_SHIP => (ShipResource::isAShip($identifier) and $quantity > 0)
-				? $quantity * ShipResource::getInfo($identifier, 'pev')
-				: throw new \LogicException('Invalid ship or quantity'),
-			// 1 commander => 1 commercialShip
-			Transaction::TYP_COMMANDER => 1,
-			default => throw new \LogicException('Unknown transaction type'),
-		};
-	}
-
 	public static function calculateCurrentRate($currentRate, $transactionType, $quantity, $identifier, $price)
 	{
 		// calculate the new rate (when a transaction is accepted)

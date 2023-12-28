@@ -2,10 +2,12 @@
 
 namespace App\Modules\Athena\Infrastructure\Twig;
 
+use App\Classes\Library\Format;
 use App\Classes\Library\Game;
 use App\Classes\Library\Utils;
 use App\Modules\Artemis\Model\SpyReport;
 use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
+use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
 use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -24,6 +26,7 @@ class OrbitalBaseExtension extends AbstractExtension
 		private readonly DurationHandler $durationHandler,
 		private readonly OrbitalBaseHelper $orbitalBaseHelper,
 		private readonly PopulationTaxHandler $populationTaxHandler,
+		private readonly GetMaxStorage $getMaxStorage,
 	) {
 	}
 
@@ -33,7 +36,7 @@ class OrbitalBaseExtension extends AbstractExtension
 			new TwigFilter('base_demography', fn (OrbitalBase $orbitalBase) => Game::getSizeOfPlanet($orbitalBase->place->population)),
 			new TwigFilter('base_type', fn (OrbitalBase $orbitalBase) => PlaceResource::get($orbitalBase->typeOfBase, 'name')),
 			new TwigFilter('scalar_base_type', fn (string $type) => PlaceResource::get($type, 'name')),
-			new TwigFilter('base_storage_percent', fn (OrbitalBase $orbitalBase) => $this->orbitalBaseHelper->getStoragePercent($orbitalBase)),
+			new TwigFilter('base_storage_percent', fn (OrbitalBase $orbitalBase) => Format::numberFormat($orbitalBase->resourcesStorage / ($this->getMaxStorage)($orbitalBase) * 100)),
 			new TwigFilter('base_coords', fn (OrbitalBase $orbitalBase) => Game::formatCoord(
 				$orbitalBase->place->system->xPosition,
 				$orbitalBase->place->system->yPosition,
