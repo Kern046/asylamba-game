@@ -17,7 +17,6 @@ readonly class GetTravelTime
 		private GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		private GetFleetSpeed $getFleetSpeed,
 	) {
-
 	}
 
 	public function __invoke(
@@ -29,7 +28,7 @@ readonly class GetTravelTime
 		$time = $this->calculateTravelTime($from, $to, $playerBonus);
 
 		if ($travelType === TravelType::CommercialShipping) {
-			$time *= Game::COMMERCIAL_TIME_TRAVEL;
+			$time = intval(round($time * Game::COMMERCIAL_TIME_TRAVEL));
 		}
 
 		return $time;
