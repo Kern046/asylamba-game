@@ -8,6 +8,7 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -55,7 +56,7 @@ class CommercialShippingRepository extends DoctrineRepository implements Commerc
 					$qb->expr()->eq('cs.destinationBase', ':base'),
 				),
 			)
-			->setParameter('base', $orbitalBase)
+			->setParameter('base', $orbitalBase->id, UuidType::NAME)
 			->getQuery()
 			->getResult();
 	}

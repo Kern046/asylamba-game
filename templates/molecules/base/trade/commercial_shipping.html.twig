@@ -1,34 +1,34 @@
 <div class="transaction {{ get_transaction_class(commercial_shipping) }}">
-	{% if commercial_shipping.statement != constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_MOVING_BACK') %}
+	{% if not commercial_shipping.isMovingBack %}
 		<div class="product">
-			{% if commercial_shipping.statement == constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_WAITING') %}
-				<a href="{{ path('cancel_offer', {'id': commercial_shipping.rTransaction }) }}"
+			{% if commercial_shipping.isWaiting %}
+				<a href="{{ path('cancel_offer', {'id': commercial_shipping.transaction.id }) }}"
 				   class="hb lt right-link"
 				   title="supprimer cette offre coûtera {{ get_cancellation_price(commercial_shipping) }} crédits"
 				>×</a>
 			{% endif %}
-			{% if commercial_shipping.typeOfTransaction == constant('App\\Modules\\Athena\\Model\\Transaction::TYP_RESOURCE') %}
+			{% if commercial_shipping.transaction.hasResources %}
 				<img src="{{ asset('build/media/market/resources-pack-' ~ commercial_shipping|commercial_shipping_picto ~ '.png') }}" alt="" class="picto" />
 				<div class="offer">
 					{# @TODO seems that resources selling isn't sure about the used property #}
 					{# resourceTransported is used when giving resources, quantity is used when selling. @TODO use only one field #}
-					{{ (commercial_shipping.resourceTransported == 0 ? commercial_shipping.quantity : commercial_shipping.resourceTransported)|number }}
+					{{ (commercial_shipping.resourceTransported == 0 ? commercial_shipping.transaction.quantity : commercial_shipping.resourceTransported)|number }}
 					<img src="{{ asset('build/media/resources/resource.png') }}" alt="" class="icon-color" />
 				</div>
-			{% elseif commercial_shipping.typeOfTransaction == constant('App\\Modules\\Athena\\Model\\Transaction::TYP_COMMANDER') %}
-				<img src="{{ asset('build/media/commander/small/' ~ commercial_shipping.commanderAvatar ~ '.png') }}" alt="" class="picto" />
+			{% elseif commercial_shipping.transaction.hasCommander %}
+				<img src="{{ asset('build/media/commander/small/' ~ commercial_shipping.transaction.commander.avatar ~ '.png') }}" alt="" class="picto" />
 				<div class="offer">
-					<strong>{{ get_commander_rank(commercial_shipping.commanderLevel )}} {{ commercial_shipping.commanderName }}</strong>
-					<em>{{ commercial_shipping.commanderExperience|number }} xp | '{{ commercial_shipping.commanderVictory }} victoire{{ commercial_shipping.commanderVictory|plural }}</em>
+					<strong>{{ commercial_shipping.transaction.commander|commander_rank }} {{ commercial_shipping.transaction.commander.name }}</strong>
+					<em>{{ commercial_shipping.transaction.commander.experience|number }} xp | '{{ commercial_shipping.transaction.commander.palmares }} victoire{{ commercial_shipping.transaction.commander.palmares|plural }}</em>
 				</div>
-			{% elseif commercial_shipping.typeOfTransaction == constant('App\\Modules\\Athena\\Model\\Transaction::TYP_SHIP') %}
-				<img src="{{ asset('build/media/ship/picto/ship' ~ commercial_shipping.identifier ~ '.png') }}" alt="" class="picto" />
+			{% elseif commercial_shipping.transaction.hasShips %}
+				<img src="{{ asset('build/media/ship/picto/ship' ~ commercial_shipping.transaction.identifier ~ '.png') }}" alt="" class="picto" />
 				<div class="offer">
 					<strong>
-						{{ commercial_shipping.quantity }}
-						{{ get_ship_info(commercial_shipping.identifier, 'codeName') }}{{ commercial_shipping.quantity|plural }}
+						{{ commercial_shipping.transaction.quantity }}
+						{{ get_ship_info(commercial_shipping.transaction.identifier, 'codeName') }}{{ commercial_shipping.transaction.quantity|plural }}
 					</strong>
-					<em>{{ get_ship_info(commercial_shipping.identifier, 'name') }} / {{ get_ship_info(commercial_shipping.identifier, 'pev') }} pev</em>
+					<em>{{ get_ship_info(commercial_shipping.transaction.identifier, 'name') }} / {{ get_ship_info(commercial_shipping.transaction.identifier, 'pev') }} pev</em>
 				</div>
 			{% endif %}
 
@@ -38,7 +38,7 @@
 					<span>pour</span>
 				</div>
 				<div class="price">
-					{{ commercial_shipping.price|number }}
+					{{ commercial_shipping.transaction.price|number }}
 					<img src="{{ asset('build/media/resources/credit.png') }}" alt="" class="icon-color" />
 				</div>
 			{% elseif commercial_shipping.resourceTransported == 0 %}
@@ -57,7 +57,7 @@
 		</div>
 	{% endif %}
 
-	{% if commercial_shipping.statement != constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_WAITING') %}
+	{% if not commercial_shipping.isWaiting %}
 		<div class="shipping progress"
 			 data-progress-current-time="{{ commercial_shipping|travel_remaining_time }}"
 			 data-progress-total-time="{{ commercial_shipping|travel_total_time }}"
@@ -75,7 +75,7 @@
 		<img src="{{ asset('build/media/resources/transport.png') }}" alt="" class="icon-color" />
 	</div>
 
-	{% if commercial_shipping.statement == constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_WAITING') %}
+	{% if commercial_shipping.isWaiting %}
 		<div class="time">à quai</div>
 	{% else %}
 		<div class="time progress-text"></div>

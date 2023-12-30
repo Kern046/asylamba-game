@@ -2,18 +2,12 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Offer;
 
-use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
 use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
-use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\CommercialShippingManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Manager\TransactionManager;
 use App\Modules\Athena\Model\Transaction;
-use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
-use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,13 +22,7 @@ class Cancel extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		GetMaxStorage $getMaxStorage,
-		BonusApplierInterface $bonusApplier,
-		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		TransactionManager $transactionManager,
-		CommercialShippingManager $commercialShippingManager,
 		OrbitalBaseManager $orbitalBaseManager,
-		CommanderRepositoryInterface $commanderRepository,
-		OrbitalBaseHelper $orbitalBaseHelper,
 		PlayerManager $playerManager,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
 		TransactionRepositoryInterface $transactionRepository,
@@ -73,8 +61,7 @@ class Cancel extends AbstractController
 				$base->addShips($transaction->identifier, $transaction->quantity);
 				break;
 			case Transaction::TYP_COMMANDER:
-				$commander = $commanderRepository->find($transaction->identifier);
-				$commander->setStatement(Commander::RESERVE);
+				$transaction->commander->statement = Commander::RESERVE;
 				break;
 			default:
 				throw new \LogicException('Invalid transaction type');
