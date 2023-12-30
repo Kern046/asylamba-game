@@ -35,23 +35,23 @@ class CancelTechnologyQueue extends AbstractController
 		}
 		$placeTechnologyQueues = $technologyQueueRepository->getPlaceQueues($currentBase->place);
 
-		$index = $dStart = null;
+		$index = $startedAt = null;
 		$targetLevel = 0;
 		foreach ($placeTechnologyQueues as $i => $queue) {
 			// get the queue to delete
 			if ($queue->technology === $identifier && $queue->targetLevel > $targetLevel) {
 				$index = $i;
 				$targetLevel = $queue->targetLevel;
-				$dStart = $queue->getStartDate();
+				$startedAt = $queue->getStartDate();
 			}
 		}
 
 		// if it's the first, the next must restart by now
 		if (0 == $index) {
-			$dStart = new \DateTimeImmutable();
+			$startedAt = new \DateTimeImmutable();
 		}
 
-		if (null === $index || null === $dStart) {
+		if (null === $index || null === $startedAt) {
 			throw new ConflictHttpException('impossible d\'annuler la technologie');
 		}
 
@@ -60,14 +60,14 @@ class CancelTechnologyQueue extends AbstractController
 			// $oldDate = $queue->dEnd;
 			// TODO maybe carve out this code portion
 			$queue->endedAt = $durationHandler->getDurationEnd(
-				$dStart,
+				$startedAt,
 				$durationHandler->getDiff($queue->getStartDate(), $queue->getEndDate()),
 			);
-			$queue->startedAt = $dStart;
+			$queue->startedAt = $startedAt;
 			// @TODO handle rescheduling
 			// $scheduler->reschedule($queue, $queue->dEnd, $oldDate);
 
-			$dStart = $queue->dEnd;
+			$startedAt = $queue->getEndDate();
 		}
 
 		// @TODO handle cancellation
@@ -78,10 +78,10 @@ class CancelTechnologyQueue extends AbstractController
 		$technologyCreditRefund = $this->getParameter('promethee.technology_queue.credit_refund');
 		// rends les ressources et les crédits au joueur
 		$resourcePrice = $technologyHelper->getInfo($identifier, 'resource', $targetLevel);
-		$resourcePrice = intval(round($technologyResourceRefund));
-		$orbitalBaseManager->increaseResources($currentBase, $resourcePrice, true);
+		$resourcePrice = intval(round($resourcePrice * $technologyResourceRefund));
+		$orbitalBaseManager->increaseResources($currentBase, $resourcePrice);
 		$creditPrice = $technologyHelper->getInfo($identifier, 'credit', $targetLevel);
-		$creditPrice = intval(round($technologyCreditRefund));
+		$creditPrice = intval(round($creditPrice * $technologyCreditRefund));
 		$playerManager->increaseCredit($currentPlayer, $creditPrice);
 		$this->addFlash('success', 'Construction annulée, vous récupérez le '.$technologyResourceRefund * 100 .'% des ressources ainsi que le '.$technologyCreditRefund * 100 .'% des crédits investis pour le développement');
 

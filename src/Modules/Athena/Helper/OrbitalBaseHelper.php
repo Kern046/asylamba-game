@@ -2,22 +2,18 @@
 
 namespace App\Modules\Athena\Helper;
 
-use App\Classes\Library\Format;
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
-use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
-use App\Modules\Zeus\Model\PlayerBonusId;
 
-class OrbitalBaseHelper
+readonly class OrbitalBaseHelper
 {
 	public function __construct(
-		private readonly BonusApplierInterface $bonusApplier,
-		private readonly TechnologyHelper $technologyHelper,
-		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
-		private readonly BuildingLevelHandler $buildingLevelHandler,
+		private TechnologyHelper $technologyHelper,
+		private BuildingQueueRepositoryInterface $buildingQueueRepository,
+		private BuildingLevelHandler $buildingLevelHandler,
 	) {
 	}
 
