@@ -93,11 +93,11 @@ class NotificationRepository extends DoctrineRepository implements NotificationR
 			->delete()
 			->where($qb->expr()->orX(
 				$qb->expr()->andX(
-					$qb->expr()->eq('n.read', false),
+					$qb->expr()->eq('n.read', 0),
 					$qb->expr()->lt('TIMESTAMPDIFF(HOUR, n.sentAt, NOW())', ':unread_timeout')
 				),
 				$qb->expr()->andX(
-					$qb->expr()->eq('n.read', true),
+					$qb->expr()->eq('n.read', 1),
 					$qb->expr()->lt('TIMESTAMPDIFF(HOUR, n.sentAt, NOW())', ':read_timeout')
 				)
 			))
