@@ -77,8 +77,8 @@ class Cancel extends AbstractController
 		$buildingResourceRefund = $this->getParameter('athena.building.building_queue_resource_refund');
 		// give the resources back
 		$resourcePrice = $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $targetLevel, 'resourcePrice');
-		$resourcePrice *= $buildingResourceRefund;
-		$orbitalBaseManager->increaseResources($currentBase, $resourcePrice, true);
+		$resourcePrice = intval(round($resourcePrice * $buildingResourceRefund));
+		$orbitalBaseManager->increaseResources($currentBase, $resourcePrice);
 		$this->addFlash('success', 'Construction annulée, vous récupérez le '.$buildingResourceRefund * 100 .'% du montant investi pour la construction');
 
 		return $this->redirect($request->headers->get('referer'));

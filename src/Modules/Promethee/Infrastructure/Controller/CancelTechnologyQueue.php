@@ -7,11 +7,9 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Promethee\Manager\TechnologyQueueManager;
-use App\Modules\Promethee\Model\TechnologyQueue;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +28,6 @@ class CancelTechnologyQueue extends AbstractController
 		TechnologyQueueRepositoryInterface $technologyQueueRepository,
 		PlayerManager $playerManager,
 		OrbitalBaseManager $orbitalBaseManager,
-		EntityManagerInterface $entityManager,
 		int $identifier,
 	): Response {
 		if (!$technologyHelper->isATechnology($identifier)) {
@@ -75,17 +72,16 @@ class CancelTechnologyQueue extends AbstractController
 
 		// @TODO handle cancellation
 		// $scheduler->cancel($placeTechnologyQueues[$index], $placeTechnologyQueues[$index]->getEndedAt());
-		$entityManager->remove($placeTechnologyQueues[$index]);
-		$entityManager->flush(TechnologyQueue::class);
+		$technologyQueueRepository->remove($placeTechnologyQueues[$index]);
 
 		$technologyResourceRefund = $this->getParameter('promethee.technology_queue.resource_refund');
 		$technologyCreditRefund = $this->getParameter('promethee.technology_queue.credit_refund');
 		// rends les ressources et les crédits au joueur
 		$resourcePrice = $technologyHelper->getInfo($identifier, 'resource', $targetLevel);
-		$resourcePrice *= $technologyResourceRefund;
+		$resourcePrice = intval(round($technologyResourceRefund));
 		$orbitalBaseManager->increaseResources($currentBase, $resourcePrice, true);
 		$creditPrice = $technologyHelper->getInfo($identifier, 'credit', $targetLevel);
-		$creditPrice *= $technologyCreditRefund;
+		$creditPrice = intval(round($technologyCreditRefund));
 		$playerManager->increaseCredit($currentPlayer, $creditPrice);
 		$this->addFlash('success', 'Construction annulée, vous récupérez le '.$technologyResourceRefund * 100 .'% des ressources ainsi que le '.$technologyCreditRefund * 100 .'% des crédits investis pour le développement');
 
