@@ -8,6 +8,7 @@ use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -18,9 +19,13 @@ readonly class DailyRoutineHandler
 		private DurationHandler $durationHandler,
 		private PlayerRepositoryInterface $playerRepository,
 		private NotificationRepositoryInterface $notificationRepository,
+		#[Autowire('%zeus.player.inactive_time_limit%')]
 		private int                       $playerInactiveTimeLimit,
+		#[Autowire('%zeus.player.global_inactive_time%')]
 		private int                       $playerGlobalInactiveTime,
+		#[Autowire('%hermes.notifications.timeout.read%')]
 		private int                       $notificationsReadTimeout,
+		#[Autowire('%hermes.notifications.timeout.unread%')]
 		private int                       $notificationsUnreadTimeout
 	) {
 	}
