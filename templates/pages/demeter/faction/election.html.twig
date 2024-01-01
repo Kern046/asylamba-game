@@ -7,7 +7,7 @@
 
 		{% if app.request.query.get('action') == 'postulate' %}
 			{{ include('components/faction/election/postulate.html.twig') }}
-		{% elseif candidate is defined %}
+		{% elseif candidate is not null %}
 			{{ include('components/faction/election/candidate.html.twig') }}
 		{% else %}
 			{{ include('molecules/common/default.html.twig') }}
