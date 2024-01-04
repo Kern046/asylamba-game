@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\Specification;
 
-class AndSpecification implements Specification
+use Doctrine\ORM\QueryBuilder;
+
+class AndSpecification implements Specification, SelectorSpecification
 {
 	/**
 	 * @var list<Specification>
@@ -25,5 +27,14 @@ class AndSpecification implements Specification
 		}
 
 		return true;
+	}
+
+	public function addMatchingCriteria(QueryBuilder $queryBuilder): void
+	{
+		foreach ($this->specifications as $specification) {
+			if ($specification instanceof SelectorSpecification) {
+				$specification->addMatchingCriteria($queryBuilder);
+			}
+		}
 	}
 }

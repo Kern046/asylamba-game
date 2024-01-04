@@ -6,7 +6,7 @@ namespace App\Tests\Modules\Zeus\Infrastructure;
 
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Infrastructure\DataFixtures\Factory\PlayerFactory;
-use App\Modules\Zeus\Infrastructure\Validator\IsAlive;
+use App\Modules\Zeus\Infrastructure\Validator\IsPlayerAlive;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -26,7 +26,7 @@ class GetAlivePlayersTest extends KernelTestCase
 		PlayerFactory::createMany(5, ['statement' => Player::ACTIVE]);
 		PlayerFactory::createMany(3, ['statement' => Player::DEAD]);
 
-		$alivePlayers = $playerRepository->getBySpecification(new IsAlive());
+		$alivePlayers = $playerRepository->getBySpecification(new IsPlayerAlive());
 
 		static::assertCount(5, $alivePlayers);
 

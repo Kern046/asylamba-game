@@ -8,6 +8,7 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Domain\Specification\SelectorSpecification;
 use Symfony\Component\Uid\Uuid;
 
 interface CommanderRepositoryInterface extends EntityRepositoryInterface
@@ -15,11 +16,9 @@ interface CommanderRepositoryInterface extends EntityRepositoryInterface
 	public function get(Uuid $id): Commander|null;
 
 	/**
-	 * @param list<int> $statements
-	 *
 	 * @return list<Commander>
 	 */
-	public function getAllByStatements(array $statements): array;
+	public function getBySpecification(SelectorSpecification $specification): array;
 
 	/**
 	 * @param list<Uuid> $ids

@@ -8,18 +8,17 @@ use App\Modules\Gaia\Model\Sector;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Domain\Specification\SelectorSpecification;
 use Symfony\Component\Uid\Uuid;
 
 interface OrbitalBaseRepositoryInterface extends EntityRepositoryInterface
 {
 	public function get(Uuid $id): OrbitalBase|null;
 
-    public function getPlaceBase(Place $place): OrbitalBase|null;
-
 	/**
 	 * @return list<OrbitalBase>
 	 */
-	public function getAll(): array;
+	public function getBySpecification(SelectorSpecification $specification): array;
 
 	/**
 	 * @return list<OrbitalBase>
@@ -37,6 +36,4 @@ interface OrbitalBaseRepositoryInterface extends EntityRepositoryInterface
 	 * @return list<OrbitalBase>
 	 */
 	public function getSystemBases(System $system): array;
-
-	public function getPlayerBase(int $id, Player $player): OrbitalBase|null;
 }

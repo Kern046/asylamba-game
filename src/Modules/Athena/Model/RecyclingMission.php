@@ -37,18 +37,28 @@ class RecyclingMission
 	) {
 	}
 
+	public function cancel(): void
+	{
+		$this->statement = static::ST_BEING_DELETED;
+	}
+
+	public function stop(): void
+	{
+		$this->statement = static::ST_DELETED;
+	}
+
 	public function isActive(): bool
 	{
-		return self::ST_ACTIVE === $this->statement;
+		return static::ST_ACTIVE === $this->statement;
 	}
 
 	public function isBeingDeleted(): bool
 	{
-		return self::ST_BEING_DELETED === $this->statement;
+		return static::ST_BEING_DELETED === $this->statement;
 	}
 
 	public function isDeleted(): bool
 	{
-		return self::ST_DELETED === $this->statement;
+		return static::ST_DELETED === $this->statement;
 	}
 }

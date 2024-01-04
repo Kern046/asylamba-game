@@ -25,7 +25,8 @@ class PlayerBonus
 	public function __construct(Player $player, Technology $technology)
 	{
 		$this->rPlayer = $player->id;
-		$this->playerColor = $player->faction;
+		$this->playerColor = $player->faction
+			?? throw new \LogicException(sprintf('Player %s faction cannot be null', $player->name));
 		$this->technology = $technology;
 		$this->bonuses = new StackList();
 	}

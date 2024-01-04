@@ -9,6 +9,7 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Domain\Specification\SelectorSpecification;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -28,14 +29,15 @@ class CommanderRepository extends DoctrineRepository implements CommanderReposit
 		return $this->find($id);
 	}
 
-	public function getAllByStatements(array $statements): array
+	public function getBySpecification(SelectorSpecification $specification): array
 	{
 		$qb = $this->createQueryBuilder('c');
 
-		return $qb
-			->andWhere($qb->expr()->in('c.statement', $statements))
-			->getQuery()
-			->getResult();
+		$qb->join('c.player', 'p');
+
+		$specification->addMatchingCriteria($qb);
+
+		return $qb->getQuery()->getResult();
 	}
 
 	public function getCommandersByIds(array $ids = []): array

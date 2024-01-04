@@ -25,7 +25,7 @@ class IsGovernmentMember extends SelectorCompositeSpecification
 	{
 		return [
 			new IsFromFaction($this->faction),
-			new IsAlive(),
+			new IsPlayerAlive(),
 			new HasStatus([Player::MINISTER, Player::TREASURER, Player::WARLORD, Player::CHIEF]),
 		];
 	}

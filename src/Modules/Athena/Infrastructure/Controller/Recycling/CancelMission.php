@@ -2,36 +2,39 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Recycling;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Manager\RecyclingMissionManager;
-use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Athena\Model\RecyclingMission;
+use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
+use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class CancelMission extends AbstractController
 {
 	public function __invoke(
 		Request $request,
-		OrbitalBase $currentBase,
-		OrbitalBaseManager $orbitalBaseManager,
-		RecyclingMissionManager $recyclingMissionManager,
-		EntityManager $entityManager,
-		int $id,
+		Player $currentPlayer,
+		RecyclingMissionRepositoryInterface $recyclingMissionRepository,
+		Uuid $id,
 	): Response {
-		if (($mission = $recyclingMissionManager->get($id)) !== null && $mission->isActive()) {
-			$mission->statement = RecyclingMission::ST_BEING_DELETED;
+		$mission = $recyclingMissionRepository->get($id)
+			?? throw $this->createNotFoundException('Mission not found');
 
-			$this->addFlash('success', 'Ordre de mission annulé.');
-
-			$entityManager->flush($mission);
-
-			return $this->redirect($request->headers->get('referer'));
-		} else {
-			throw new ErrorException('impossible de supprimer la mission.');
+		if ($mission->base->player->id !== $currentPlayer->id) {
+			throw $this->createAccessDeniedException('This mission does not belong to you');
 		}
+
+		if (!$mission->isActive()) {
+			throw new ConflictHttpException('This mission is not active');
+		}
+
+		$mission->cancel();
+
+		$this->addFlash('success', 'Ordre de mission annulé.');
+
+		$recyclingMissionRepository->save($mission);
+
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

@@ -24,7 +24,7 @@ class IsParliamentMember extends SelectorCompositeSpecification
 	{
 		return [
 			new IsFromFaction($this->faction),
-			new IsAlive(),
+			new IsPlayerAlive(),
 			new HasStatus([Player::PARLIAMENT]),
 		];
 	}

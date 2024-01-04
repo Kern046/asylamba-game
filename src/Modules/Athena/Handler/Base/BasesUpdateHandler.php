@@ -10,6 +10,7 @@ use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Message\Base\BasesUpdateMessage;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
+use App\Modules\Zeus\Infrastructure\Validator\IsPlayerAlive;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Zeus\Model\PlayerBonusId;
@@ -18,21 +19,21 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class BasesUpdateHandler
+readonly class BasesUpdateHandler
 {
 	public function __construct(
-		private readonly EntityManagerInterface $entityManager,
-		private readonly PlayerBonusManager $playerBonusManager,
-		private readonly OrbitalBaseManager $orbitalBaseManager,
-		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private readonly OrbitalBaseHelper $orbitalBaseHelper,
-		private readonly DurationHandler $durationHandler,
+		private EntityManagerInterface $entityManager,
+		private PlayerBonusManager $playerBonusManager,
+		private OrbitalBaseManager $orbitalBaseManager,
+		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private OrbitalBaseHelper $orbitalBaseHelper,
+		private DurationHandler $durationHandler,
 	) {
 	}
 
 	public function __invoke(BasesUpdateMessage $message): void
 	{
-		$bases = $this->orbitalBaseRepository->getAll();
+		$bases = $this->orbitalBaseRepository->getBySpecification(new IsPlayerAlive());
 		$this->entityManager->beginTransaction();
 		$now = new \DateTimeImmutable();
 
@@ -60,7 +61,8 @@ class BasesUpdateHandler
 		$addResources = Game::resourceProduction(
 			$this->orbitalBaseHelper->getBuildingInfo(
 				OrbitalBaseResource::REFINERY,
-				'level', $orbitalBase->levelRefinery,
+				'level',
+				$orbitalBase->levelRefinery,
 				'refiningCoefficient'
 			),
 			$orbitalBase->place->coefResources,

@@ -66,6 +66,11 @@ class Player implements CreditHolderInterface
 		return in_array($this->statement, [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY, Player::BANNED]);
 	}
 
+	public function isAlive(): bool
+	{
+		return static::DEAD !== $this->statement;
+	}
+
 	// @TODO transform into Voter
 	public function canAccess(): bool
 	{

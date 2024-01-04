@@ -4,6 +4,7 @@ namespace App\Modules\Ares\Handler;
 
 use App\Modules\Ares\Application\Handler\CommanderExperienceHandler;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
+use App\Modules\Ares\Domain\Specification\CanEarnSchoolExperience;
 use App\Modules\Ares\Message\CommandersSchoolExperienceMessage;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
@@ -27,7 +28,7 @@ readonly class CommandersSchoolExperienceHandler
 	public function __invoke(CommandersSchoolExperienceMessage $message): void
 	{
 		$now = new \DateTimeImmutable();
-		$commanders = $this->commanderRepository->getAllByStatements([Commander::INSCHOOL]);
+		$commanders = $this->commanderRepository->getBySpecification(new CanEarnSchoolExperience());
 		$this->entityManager->beginTransaction();
 
 		foreach ($commanders as $commander) {

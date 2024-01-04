@@ -2,8 +2,6 @@
 
 namespace App\Modules\Athena\Repository;
 
-use App\Classes\Entity\AbstractRepository;
-use App\Classes\Library\Utils;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Gaia\Model\Place;
@@ -11,6 +9,7 @@ use App\Modules\Gaia\Model\Sector;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Domain\Specification\SelectorSpecification;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -29,16 +28,15 @@ class OrbitalBaseRepository extends DoctrineRepository implements OrbitalBaseRep
 		return $this->find($id);
 	}
 
-	public function getPlaceBase(Place $place): OrbitalBase|null
+	public function getBySpecification(SelectorSpecification $specification): array
 	{
-		return $this->findOneBy([
-			'place' => $place,
-		]);
-	}
+		$qb = $this->createQueryBuilder('ob');
 
-	public function getAll(): array
-	{
-		return $this->findAll();
+		$qb->join('ob.player', 'p');
+
+		$specification->addMatchingCriteria($qb);
+
+		return $qb->getQuery()->getResult();
 	}
 
 	public function getPlayerBases(Player $player): array
@@ -80,13 +78,5 @@ class OrbitalBaseRepository extends DoctrineRepository implements OrbitalBaseRep
 			->setParameter('system_id', $system->id->toBinary())
 			->getQuery()
 			->getResult();
-	}
-
-	public function getPlayerBase(int $id, Player $player): OrbitalBase|null
-	{
-		return $this->findOneBy([
-			'id' => $id,
-			'player' => $player,
-		]);
 	}
 }
