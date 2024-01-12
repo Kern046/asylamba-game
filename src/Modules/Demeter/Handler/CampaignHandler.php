@@ -12,26 +12,27 @@ use App\Modules\Demeter\Message\CampaignMessage;
 use App\Modules\Demeter\Message\ElectionMessage;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Election\Election;
-use App\Modules\Demeter\Resource\ColorResource;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
-class CampaignHandler
+readonly class CampaignHandler
 {
 	public function __construct(
-		private readonly ColorManager $colorManager,
-		private readonly ColorRepositoryInterface $colorRepository,
-		private readonly ElectionRepositoryInterface $electionRepository,
-		private readonly MessageBusInterface $messageBus,
-		private readonly NextElectionDateCalculator $nextElectionDateCalculator,
+		private ColorManager $colorManager,
+		private ColorRepositoryInterface $colorRepository,
+		private ElectionRepositoryInterface $electionRepository,
+		private MessageBusInterface $messageBus,
+		private NextElectionDateCalculator $nextElectionDateCalculator,
 	) {
 	}
 
 	public function __invoke(CampaignMessage $message): void
 	{
-		$faction = $this->colorRepository->get($message->getFactionId());
+		$faction = $this->colorRepository->get($message->getFactionId())
+			?? throw new \RuntimeException(sprintf('Faction %s not found', $message->getFactionId()));
+
 		$this->colorManager->updateStatus($faction);
 
 		$election = new Election(

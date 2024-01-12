@@ -13,18 +13,19 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
-class ElectionHandler
+readonly class ElectionHandler
 {
 	public function __construct(
-		private readonly ColorRepositoryInterface $colorRepository,
-		private readonly NextElectionDateCalculator $nextElectionDateCalculator,
-		private readonly MessageBusInterface $messageBus,
+		private ColorRepositoryInterface   $colorRepository,
+		private NextElectionDateCalculator $nextElectionDateCalculator,
+		private MessageBusInterface        $messageBus,
 	) {
 	}
 
 	public function __invoke(ElectionMessage $message): void
 	{
-		$faction = $this->colorRepository->get($message->getFactionId());
+		$faction = $this->colorRepository->get($message->getFactionId())
+			?? throw new \RuntimeException(sprintf('Faction %s not found', $message->getFactionId()));
 		$faction->electionStatement = Color::ELECTION;
 
 		$this->messageBus->dispatch(
