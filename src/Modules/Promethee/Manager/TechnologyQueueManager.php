@@ -12,12 +12,11 @@ use App\Shared\Application\SchedulerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class TechnologyQueueManager implements SchedulerInterface
+readonly class TechnologyQueueManager implements SchedulerInterface
 {
 	public function __construct(
-		protected EventDispatcherInterface $eventDispatcher,
-		private readonly TechnologyQueueRepositoryInterface $technologyQueueRepository,
-		protected MessageBusInterface $messageBus
+		private TechnologyQueueRepositoryInterface $technologyQueueRepository,
+		private MessageBusInterface $messageBus
 	) {
 	}
 
@@ -31,17 +30,5 @@ class TechnologyQueueManager implements SchedulerInterface
 				[DateTimeConverter::to_delay_stamp($queue->getEndDate())],
 			);
 		}
-	}
-
-	public function add(TechnologyQueue $technologyQueue, Player $player): void
-	{
-		$this->technologyQueueRepository->save($technologyQueue);
-
-		$this->messageBus->dispatch(
-			new TechnologyQueueMessage($technologyQueue->id),
-			[DateTimeConverter::to_delay_stamp($technologyQueue->getEndDate())]
-		);
-
-		$this->eventDispatcher->dispatch(new NewTechnologyQueueEvent($technologyQueue, $player));
 	}
 }

@@ -40,16 +40,20 @@ class TransactionRepository extends DoctrineRepository implements TransactionRep
 
 	public function getProposedTransactions(int $type): array
 	{
-		return $this->findBy(
-			[
-				'type' => $type,
-				'statement' => Transaction::ST_PROPOSED,
-			],
-			[
-				'publishedAt' => 'DESC',
-			],
-			20,
-		);
+		$qb = $this->createQueryBuilder('t');
+
+		$qb
+			->join('t.player', 'p')
+			->where($qb->expr()->andX(
+				$qb->expr()->neq('p.statement', Player::DEAD),
+				$qb->expr()->eq('t.statement', Transaction::ST_PROPOSED),
+				$qb->expr()->eq('t.type', $type),
+			))
+			->orderBy('t.publishedAt', 'DESC')
+			->setMaxResults(20)
+		;
+
+		return $qb->getQuery()->getResult();
 	}
 
 	public function getPlayerPropositions(Player $player, int $type): array

@@ -13,7 +13,7 @@ class BuildingQueue implements QueueableInterface
 		public int $buildingNumber,
 		public int $targetLevel,
 		public \DateTimeImmutable $startedAt,
-		public \DateTimeImmutable $endedAt,
+		public \DateTimeImmutable|null $endedAt = null,
 	) {
 			
 	}
@@ -25,7 +25,7 @@ class BuildingQueue implements QueueableInterface
 
 	public function getEndDate(): \DateTimeImmutable
 	{
-		return $this->endedAt;
+		return $this->endedAt ?? throw new \RuntimeException('Ending date cannot be null');
 	}
 
 	public function getResourceIdentifier(): int

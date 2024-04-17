@@ -2,18 +2,17 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Recycling;
 
-use App\Classes\Library\Game;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\RecyclingMission;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
-use App\Modules\Gaia\Model\Place;
+use App\Modules\Travel\Domain\Model\TravelType;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +25,8 @@ class CreateMission extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		GetTravelTime $getTravelTime,
+		DurationHandler $durationHandler,
+		GetTravelDuration $getTravelDuration,
 		OrbitalBase $currentBase,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		PlaceRepositoryInterface $placeRepository,
@@ -59,7 +59,15 @@ class CreateMission extends AbstractController
 		if (null !== $destinationPlace->player || !in_array($destinationPlace->typeOfPlace, [2, 3, 4, 5])) {
 			throw new BadRequestHttpException('On ne peut pas recycler ce lieu, petit hacker.');
 		}
-		$travelTime = $getTravelTime($startPlace, $destinationPlace, TravelType::RecyclingShips, $currentPlayerBonusRegistry->getPlayerBonus());
+		$departureDate = new \DateTimeImmutable();
+		$arrivalDate = $getTravelDuration(
+			origin: $startPlace,
+			destination: $destinationPlace,
+			departureDate: $departureDate,
+			travelType: TravelType::RecyclingShips,
+			player: $currentPlayer,
+		);
+		$travelTime = $durationHandler->getDiff($departureDate, $arrivalDate);
 
 		$sectorFaction = $destinationPlace->system->sector->faction;
 		if (null !== $sectorFaction && $currentPlayer->faction->id !== $sectorFaction->id) {

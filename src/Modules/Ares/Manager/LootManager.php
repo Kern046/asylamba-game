@@ -3,7 +3,9 @@
 namespace App\Modules\Ares\Manager;
 
 use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
 use App\Modules\Ares\Domain\Event\Fleet\LootEvent;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Model\LiveReport;
@@ -26,6 +28,7 @@ readonly class LootManager
 		private EventDispatcherInterface     $eventDispatcher,
 		private CommanderManager             $commanderManager,
 		private CommanderRepositoryInterface $commanderRepository,
+		private MoveFleet $moveFleet,
 		private OrbitalBaseManager           $orbitalBaseManager,
 		private PlaceManager                 $placeManager,
 		private PlayerBonusManager           $playerBonusManager,
@@ -65,7 +68,12 @@ readonly class LootManager
 				$percentage = (($report->defenderPevAtEnd + 1) / ($report->defenderPevAtBeginning + 1)) * 100;
 				$place->danger = round(($percentage * $place->danger) / 100);
 
-				$this->commanderManager->comeBack($place, $commander, $commanderPlace, $playerBonus);
+				($this->moveFleet)(
+					commander: $commander,
+					origin: $place,
+					destination: $commanderPlace,
+					mission: CommanderMission::Back,
+				);
 				$this->placeManager->sendNotif($place, Place::LOOTEMPTYSSUCCESS, $commander, $report);
 			} else {
 				// si il est mort
@@ -106,7 +114,12 @@ readonly class LootManager
 					if (!$commander->isDead()) {
 						// piller la planète
 						$this->lootAPlayerPlace($commander, $playerBonus, $placeBase);
-						$this->commanderManager->comeBack($place, $commander, $commanderPlace, $playerBonus);
+						($this->moveFleet)(
+							commander: $commander,
+							origin: $place,
+							destination: $commanderPlace,
+							mission: CommanderMission::Back,
+						);
 
 						// suppression des commandants
 						unset($placeCommanders[$aleaNbr]);
@@ -126,7 +139,12 @@ readonly class LootManager
 					}
 				} else {
 					$this->lootAPlayerPlace($commander, $playerBonus, $placeBase);
-					$this->commanderManager->comeBack($place, $commander, $commanderPlace, $playerBonus);
+					($this->moveFleet)(
+						commander: $commander,
+						origin: $place,
+						destination: $commanderPlace,
+						mission: CommanderMission::Back,
+					);
 					$this->placeManager->sendNotif($place, Place::LOOTPLAYERWHITOUTBATTLESUCCESS, $commander);
 				}
 			} else {
@@ -136,9 +154,13 @@ readonly class LootManager
 					// on tente de se poser
 					$this->commanderManager->uChangeBase($commander);
 				} else {
-					// si c'est une base alliée
-					// on repart
-					$this->commanderManager->comeBack($place, $commander, $commanderPlace, $playerBonus);
+					// si c'est une base alliée on repart
+					($this->moveFleet)(
+						commander: $commander,
+						origin: $place,
+						destination: $commanderPlace,
+						mission: CommanderMission::Back,
+					);
 					$this->placeManager->sendNotif($place, Place::CHANGELOST, $commander);
 				}
 			}

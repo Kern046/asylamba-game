@@ -2,27 +2,21 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
+use App\Modules\Athena\Application\Factory\BuildingQueueFactory;
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Infrastructure\Validator\CanMakeBuilding;
 use App\Modules\Athena\Infrastructure\Validator\DTO\BuildingConstructionOrder;
 use App\Modules\Athena\Infrastructure\Validator\IsValidBuilding;
-use App\Modules\Athena\Manager\BuildingQueueManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Model\BuildingQueue;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
-use App\Modules\Promethee\Manager\TechnologyManager;
-use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Model\PlayerBonusId;
-use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints\Sequentially;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -32,16 +26,13 @@ class Build extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		BonusApplierInterface $bonusApplier,
 		OrbitalBase $currentBase,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		OrbitalBaseManager $orbitalBaseManager,
-		TechnologyManager $technologyManager,
 		TechnologyRepositoryInterface $technologyRepository,
-		BuildingQueueManager $buildingQueueManager,
 		BuildingQueueRepositoryInterface $buildingQueueRepository,
 		BuildingLevelHandler $buildingLevelHandler,
-		DurationHandler $durationHandler,
+		BuildingQueueFactory $buildingQueueFactory,
 		ValidatorInterface $validator,
 		int $identifier,
 	): Response {
@@ -71,27 +62,11 @@ class Build extends AbstractController
 			throw new ValidationFailedException($buildingConstructionOrder, $violations);
 		}
 
-		$session = $request->getSession();
 		if (0 === $buildingQueuesCount) {
 			$startedAt = new \DateTimeImmutable();
 		} else {
 			$startedAt = $buildingQueues[$buildingQueuesCount - 1]->endedAt;
 		}
-
-		$time = $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $targetLevel, 'time');
-		$bonus = $bonusApplier->apply($time, PlayerBonusId::GENERATOR_SPEED);
-
-		// build the new building
-		$bq = new BuildingQueue(
-			id: Uuid::v4(),
-			base: $currentBase,
-			buildingNumber: $identifier,
-			targetLevel: $targetLevel,
-			startedAt: $startedAt,
-			endedAt: $durationHandler->getDurationEnd($startedAt, round($time - $bonus)),
-		);
-
-		$buildingQueueManager->add($bq);
 
 		// debit resources
 		$orbitalBaseManager->decreaseResources(
@@ -99,8 +74,16 @@ class Build extends AbstractController
 			$orbitalBaseHelper->getBuildingInfo($identifier, 'level', $currentLevel + 1, 'resourcePrice'),
 		);
 
+		$buildingQueue = $buildingQueueFactory->create(
+			orbitalBase: $currentBase,
+			identifier: $identifier,
+			targetLevel: $targetLevel,
+			startedAt: $startedAt,
+		);
+
+		// TODO remove this
 		// add the event in controller
-		$session->get('playerEvent')->add($bq->getEndDate(), $this->getParameter('event_base'), $currentBase->id);
+		$request->getSession()->get('playerEvent')->add($buildingQueue->getEndDate(), $this->getParameter('event_base'), $currentBase->id);
 
 		$this->addFlash('success', 'Construction programmée');
 

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Ares\Handler;
 
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Manager\ConquestManager;
@@ -18,13 +19,13 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 readonly class CommanderTravelHandler
 {
 	public function __construct(
-		private CommanderManager             $commanderManager,
+		private CommanderManager $commanderManager,
 		private CommanderRepositoryInterface $commanderRepository,
-		private ConquestManager              $conquestManager,
-		private LootManager                  $lootManager,
-		private PlaceManager                 $placeManager,
-		private OrbitalBaseManager           $orbitalBaseManager,
-		private EntityManagerInterface       $entityManager,
+		private ConquestManager $conquestManager,
+		private LootManager $lootManager,
+		private PlaceManager $placeManager,
+		private OrbitalBaseManager $orbitalBaseManager,
+		private EntityManagerInterface $entityManager,
 	) {
 	}
 
@@ -35,10 +36,14 @@ readonly class CommanderTravelHandler
 		}
 
 		match ($commander->travelType) {
-			Commander::MOVE => $this->commanderManager->uChangeBase($commander),
-			Commander::LOOT => $this->lootManager->loot($commander),
-			Commander::COLO => $this->conquestManager->conquer($commander),
-			Commander::BACK => $this->moveBack($commander),
+			CommanderMission::Move => $this->commanderManager->uChangeBase($commander),
+			CommanderMission::Loot => $this->lootManager->loot($commander),
+			CommanderMission::Colo => $this->conquestManager->conquer($commander),
+			CommanderMission::Back => $this->moveBack($commander),
+			default => throw new \LogicException(sprintf(
+				'Commander %s has arrived without mission',
+				$commander->id->toRfc4122(),
+			)),
 		};
 	}
 
@@ -49,7 +54,7 @@ readonly class CommanderTravelHandler
 		$this->commanderManager->endTravel($commander, Commander::AFFECTED);
 
 		if ($commander->resources > 0) {
-			$this->orbitalBaseManager->increaseResources($commander->base, $commander->resources, true);
+			$this->orbitalBaseManager->increaseResources($commander->base, $commander->resources);
 			$commander->resources = 0;
 		}
 		$this->entityManager->flush($commander);

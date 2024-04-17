@@ -15,19 +15,9 @@ use Symfony\Component\Messenger\MessageBusInterface;
 readonly class ShipQueueManager implements SchedulerInterface
 {
 	public function __construct(
-		private EventDispatcherInterface $eventDispatcher,
 		private ShipQueueRepositoryInterface $shipQueueRepository,
 		private MessageBusInterface $messageBus,
 	) {
-	}
-
-	public function add(ShipQueue $shipQueue, Player $player): void
-	{
-		$this->shipQueueRepository->save($shipQueue);
-
-		$this->messageBus->dispatch(new ShipQueueMessage($shipQueue->id), [DateTimeConverter::to_delay_stamp($shipQueue->getEndDate())]);
-
-		$this->eventDispatcher->dispatch(new NewShipQueueEvent($shipQueue, $player));
 	}
 
 	public function schedule(): void

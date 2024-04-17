@@ -2,13 +2,12 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Library\Game;
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
@@ -24,7 +23,7 @@ class Move extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		GetTravelTime $getTravelTime,
+		MoveFleet $moveFleet,
 		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommanderManager $commanderManager,
@@ -51,9 +50,7 @@ class Move extends AbstractController
 		}
 		$home = $commander->base;
 
-		// TODO refactor into service
 		$length = $getDistanceBetweenPlaces($home->place, $place);
-		$duration = $getTravelTime($home->place, $place, TravelType::Fleet, $currentPlayerBonusRegistry->getPlayerBonus());
 
 		if (!$commander->isAffected()) {
 			throw new ConflictHttpException('Cet officier est déjà en déplacement.');
@@ -65,7 +62,12 @@ class Move extends AbstractController
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
 			throw new ConflictHttpException('Cet emplacement est trop éloigné.');
 		}
-		$commanderManager->move($commander, $place, $home->place, Commander::MOVE, $duration);
+		$moveFleet(
+			commander: $commander,
+			origin: $home->place,
+			destination: $place,
+			mission: CommanderMission::Move,
+		);
 
 		$commanderRepository->save($commander);
 

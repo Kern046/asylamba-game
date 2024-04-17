@@ -63,8 +63,6 @@ readonly class PlayerManager
 		// deadify the player
 		$player->name = $futureName;
 		$player->statement = Player::DEAD;
-		$player->bind = null;
-		$player->faction = null;
 
 		$this->entityManager->flush();
 	}

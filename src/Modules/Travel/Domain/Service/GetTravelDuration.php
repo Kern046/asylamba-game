@@ -2,36 +2,56 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Gaia\Application\Handler;
+namespace App\Modules\Travel\Domain\Service;
 
 use App\Classes\Library\Game;
 use App\Modules\Ares\Application\Handler\GetFleetSpeed;
 use App\Modules\Ares\Model\Commander;
-use App\Modules\Gaia\Domain\Model\TravelType;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Shared\Domain\Server\TimeMode;
+use App\Modules\Travel\Domain\Model\TravelType;
+use App\Modules\Zeus\Manager\PlayerBonusManager;
+use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
+use App\Shared\Application\Handler\DurationHandler;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-readonly class GetTravelTime
+readonly class GetTravelDuration
 {
 	public function __construct(
+		private DurationHandler $durationHandler,
 		private GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		private GetFleetSpeed $getFleetSpeed,
+		private PlayerBonusManager $playerBonusManager,
+		#[Autowire('%server_time_mode%')]
+		private TimeMode $timeMode,
 	) {
 	}
 
 	public function __invoke(
-		Place $from,
-		Place $to,
-		TravelType $travelType = TravelType::Fleet,
-		PlayerBonus|null $playerBonus = null,
-	): int {
-		$time = $this->calculateTravelTime($from, $to, $playerBonus);
+		Place              $origin,
+		Place              $destination,
+		\DateTimeImmutable $departureDate,
+		TravelType         $travelType = TravelType::Fleet,
+		Player|null        $player = null,
+	): \DateTimeImmutable {
+		$playerBonus = null !== $player ? $this->playerBonusManager->getBonusByPlayer($player) : null;
+		$time = $this->calculateTravelTime($origin, $destination, $playerBonus);
 
 		if ($travelType === TravelType::CommercialShipping) {
 			$time = intval(round($time * Game::COMMERCIAL_TIME_TRAVEL));
 		}
 
-		return $time;
+		if ($this->timeMode->isFast()) {
+			$time = match ($travelType) {
+				TravelType::Fleet => 300,
+				TravelType::CommercialShipping => 120,
+				TravelType::RecyclingShips => 1800,
+			};
+		}
+
+		return $this->durationHandler->getDurationEnd($departureDate, $time);
 	}
 
 	private function calculateTravelTime(Place $from, Place $to, PlayerBonus|null $playerBonus): int

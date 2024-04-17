@@ -7,19 +7,16 @@ namespace App\Modules\Artemis\Application\Handler;
 use App\Classes\Library\Game;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Model\Place;
-use App\Modules\Zeus\Manager\PlayerBonusManager;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
 use App\Shared\Application\Handler\DurationHandler;
 
 readonly class AntiSpyHandler
 {
 	public function __construct(
 		private DurationHandler $durationHandler,
-		private GetTravelTime $getTravelTime,
+		private GetTravelDuration $getTravelDuration,
 		private GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
-		private PlayerBonusManager $playerBonusManager,
 	) {
 
 	}
@@ -46,12 +43,14 @@ readonly class AntiSpyHandler
 		if ($startPlace->system->id === $destinationPlace->system->id) {
 			return [true, true, true];
 		}
-		$duration = ($this->getTravelTime)(
-			$startPlace,
-			$destinationPlace,
-			TravelType::Fleet,
-			$this->playerBonusManager->getBonusByPlayer($commander->player)
+		$departureDate = new \DateTimeImmutable();
+		$arrivalDate = ($this->getTravelDuration)(
+			origin: $startPlace,
+			destination: $destinationPlace,
+			departureDate: $departureDate,
+			player: $commander->player
 		);
+		$duration = $this->durationHandler->getDiff($departureDate, $arrivalDate);
 
 		$secRemaining = $arrivalDate->getTimestamp() - time();
 		$ratioRemaining = $secRemaining / $duration;

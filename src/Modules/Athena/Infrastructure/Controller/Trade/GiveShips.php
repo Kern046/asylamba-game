@@ -2,43 +2,40 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade;
 
+use App\Classes\Library\DateTimeConverter;
 use App\Classes\Library\Format;
-use App\Classes\Library\Game;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
 use App\Modules\Athena\Domain\Service\CountNeededCommercialShips;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\CommercialShippingManager;
+use App\Modules\Athena\Message\Trade\CommercialShippingMessage;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
-use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
+use App\Modules\Travel\Domain\Model\TravelType;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
 use App\Modules\Zeus\Model\Player;
-use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 class GiveShips extends AbstractController
 {
 	public function __invoke(
 		Request $request,
-		DurationHandler $durationHandler,
-		GetTravelTime $getTravelTime,
-		CommercialShippingManager $commercialShippingManager,
+		GetTravelDuration $getTravelDuration,
 		Player $currentPlayer,
 		OrbitalBase $currentBase,
-		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
+		MessageBusInterface $messageBus,
 		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		TransactionRepositoryInterface $transactionRepository,
@@ -106,14 +103,6 @@ class GiveShips extends AbstractController
 			throw new ConflictHttpException('Missing transport ships to perform this operation');
 		}
 
-		$otherBase = $orbitalBaseRepository->get($baseUuid) ?? throw $this->createNotFoundException('Destination base not found');
-		// load places to compute travel time
-		$startPlace = $currentBase->place;
-		$destinationPlace = $otherBase->place;
-		$timeToTravel = $getTravelTime($startPlace, $destinationPlace, TravelType::CommercialShipping, $currentPlayerBonusRegistry->getPlayerBonus());
-		$departure = new \DateTimeImmutable();
-		$arrival = $durationHandler->getDurationEnd($departure, $timeToTravel);
-
 		// création de la transaction
 		// TODO why a transaction ? Must destroy the price rates
 		// To handle the ships quantity.
@@ -132,7 +121,10 @@ class GiveShips extends AbstractController
 		);
 		$transactionRepository->save($tr);
 
-		// création du convoi
+		$departure = new \DateTimeImmutable();
+		$otherBase = $orbitalBaseRepository->get($baseUuid)
+			?? throw $this->createNotFoundException('Destination base not found');
+
 		$cs = new CommercialShipping(
 			id: Uuid::v4(),
 			player: $currentPlayer,
@@ -142,11 +134,22 @@ class GiveShips extends AbstractController
 			resourceTransported: 0,
 			shipQuantity: $commercialShipQuantity,
 			departureDate: $departure,
-			arrivalDate: $arrival,
+			arrivalDate: $getTravelDuration(
+				origin: $currentBase->place,
+				destination: $otherBase->place,
+				player: $currentPlayer,
+				departureDate: $departure,
+				travelType: TravelType::CommercialShipping,
+			),
 			statement: CommercialShipping::ST_GOING,
 		);
 
-		$commercialShippingManager->add($cs);
+		$commercialShippingRepository->save($cs);
+
+		$messageBus->dispatch(
+			new CommercialShippingMessage($commercialShipping->id),
+			[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivalDate())],
+		);
 
 		$currentBase->removeShips($shipType, $ships);
 

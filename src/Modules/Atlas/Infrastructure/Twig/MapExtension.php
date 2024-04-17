@@ -13,13 +13,14 @@ use App\Modules\Athena\Domain\Specification\CanOrbitalBaseTradeWithPlace;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Gaia\Resource\SystemResource;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -27,9 +28,11 @@ use Twig\TwigFunction;
 class MapExtension extends AbstractExtension
 {
 	public function __construct(
-		private readonly GetTravelTime $getTravelTime,
+		private readonly DurationHandler $durationHandler,
+		private readonly GetTravelDuration $getTravelDuration,
 		private readonly AntiSpyHandler $antiSpyHandler,
 		private readonly GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		private readonly CurrentPlayerRegistry $currentPlayerRegistry,
 		private readonly CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
 	) {
@@ -46,12 +49,17 @@ class MapExtension extends AbstractExtension
 	{
 		return [
 			new TwigFunction('get_base_antispy_radius', fn (OrbitalBase $base) => $this->antiSpyHandler->getAntiSpyRadius($base->antiSpyAverage)),
-			new TwigFunction('get_travel_time', fn (OrbitalBase $defaultBase, Place $place) => ($this->getTravelTime)(
-				$defaultBase->place,
-				$place,
-				TravelType::Fleet,
-				$this->currentPlayerBonusRegistry->getPlayerBonus(),
-			)),
+			new TwigFunction('get_travel_time', function (OrbitalBase $defaultBase, Place $place) {
+				$departureDate = new \DateTimeImmutable();
+				$arrivalDate = ($this->getTravelDuration)(
+					origin: $defaultBase->place,
+					destination: $place,
+					departureDate: $departureDate,
+					player: $this->currentPlayerRegistry->get(),
+				);
+
+				return $this->durationHandler->getDiff($departureDate, $arrivalDate);
+			}),
 			new TwigFunction('get_place_type', fn (string $type) => Game::convertPlaceType($type)),
 			new TwigFunction('get_system_info', fn (int $systemType, string $info) => SystemResource::getInfo($systemType, $info)),
 			new TwigFunction('get_place_distance', fn (OrbitalBase $defaultBase, Place $place) => ($this->getDistanceBetweenPlaces)(

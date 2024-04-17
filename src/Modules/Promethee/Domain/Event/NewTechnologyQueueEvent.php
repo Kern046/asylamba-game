@@ -9,17 +9,16 @@ use App\Modules\Zeus\Resource\TutorialResource;
 use App\Shared\Domain\Event\TrackingEvent;
 use App\Shared\Domain\Event\TutorialEvent;
 
-class NewTechnologyQueueEvent implements TutorialEvent, TrackingEvent
+readonly class NewTechnologyQueueEvent implements TutorialEvent, TrackingEvent
 {
 	public function __construct(
-		public readonly TechnologyQueue $technologyQueue,
-		public readonly Player $player,
+		public TechnologyQueue $technologyQueue,
 	) {
 	}
 
 	public function getTutorialPlayer(): Player
 	{
-		return $this->player;
+		return $this->technologyQueue->player;
 	}
 
 	public function getTutorialStep(): int|null
@@ -33,7 +32,7 @@ class NewTechnologyQueueEvent implements TutorialEvent, TrackingEvent
 
 	public function getTrackingPeopleId(): int
 	{
-		return $this->player->id;
+		return $this->technologyQueue->player->id;
 	}
 
 	public function getTrackingEventName(): string
