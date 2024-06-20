@@ -652,4 +652,33 @@ class GalaxyConfigurationV6 extends GalaxyConfiguration
 
 	// display params
 	public $scale = 20;
+
+	public function getPolygonCentroidFromString($vertices_string): array
+	{
+		// Convert string to array of integers
+		$vertices = array_map('intval', explode(',', $vertices_string));
+
+		$num_points = count($vertices) / 2;
+		$cx = 0;
+		$cy = 0;
+		$area = 0;
+
+		for ($i = 0; $i < $num_points; ++$i) {
+			$x1 = $vertices[2 * $i];
+			$y1 = $vertices[2 * $i + 1];
+			$x2 = $vertices[2 * (($i + 1) % $num_points)];
+			$y2 = $vertices[2 * (($i + 1) % $num_points) + 1];
+
+			$factor = ($x1 * $y2 - $x2 * $y1);
+			$cx += ($x1 + $x2) * $factor;
+			$cy += ($y1 + $y2) * $factor;
+			$area += $factor;
+		}
+
+		$area *= 0.5;
+		$cx /= (6 * $area);
+		$cy /= (6 * $area);
+
+		return ['left' => $cx, 'top' => $cy];
+	}
 }

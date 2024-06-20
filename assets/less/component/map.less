@@ -470,40 +470,9 @@
 		&.ally12 { fill: @medium-12; }
 	}
 
-	.number {
-		position: absolute;
-		z-index: 800;
-		top: 0; left: 0;
-
-		span {
-			position: absolute;
-			color: rgba(255, 255, 255, .8);
-			font-size: 12px;
-			line-height: 22px; width: 22px;
-			text-align: center;
-			border-radius: 100%;
-			box-shadow: 0 0 1px white;
-
-			&.ally0 { background: #0A0A0A; }
-			&.ally1 { background: @dark-1; }
-			&.ally2 { background: @dark-2; }
-			&.ally3 { background: @dark-3; }
-			&.ally4 { background: @dark-4; }
-			&.ally5 { background: @dark-5; }
-			&.ally6 { background: @dark-6; }
-			&.ally7 { background: @dark-7; }
-			&.ally8 { background: @dark-8; }
-			&.ally9 { background: @dark-9; }
-			&.ally10 { background: @dark-10; }
-			&.ally11 { background: @dark-11; }
-			&.ally12 { background: @dark-12; }
-
-			&.active {
-				background: white;
-				color: black;
-				box-shadow: 0 0 10px black;
-			}
-		}
+	g.active polygon, g.active polygon:hover {
+		fill: #1b9448 !important;
+		stroke: #34bf68 !important;
 	}
 }
 
