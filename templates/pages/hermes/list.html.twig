@@ -7,7 +7,8 @@
 	<div class="fix-body">
 		<div class="body">
 			<div class="set-item">
-				<a class="item" href="'.$appRoot.'message/conversation-new">
+{#				<a class="item" href="'.$appRoot.'message/conversation-new">#}
+				<a class="item" href="#">
 					<div class="left">
 						<span>+</span>
 						</div>
@@ -15,7 +16,9 @@
 				</a>
 			</div>
 
-			{% for conv in conversations %}
+			<div class="text-white text-center text-4xl p-4"> Work in progress :) </div>
+
+			{# {% for conv in conversations %}
 
 
 				{% for player in conv.players %}
@@ -96,7 +99,7 @@
 				<a class="common-link" href="{{ url('list_conversations') }}">Retour aux conversations</a>
 			{% else %}
 				<a class="common-link" href="{{ url('list_conversations', {'mode': constant('App\\Modules\\Hermes\\Model\\ConversationUser::CS_ARCHIVED')}) }}">Voir les conversations archivées</a>
-			{% endif %}
+			{% endif %} #}
 			</div>
 		</div>
 	</div>
