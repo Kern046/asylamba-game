@@ -162,12 +162,12 @@
 									{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial}) }}
 								</template>
 								<template v-slot:dropdown>
-									<h5 class="text-lg font-semibold faction-text-color mb-4">Tutoriel</h5>
+									<h5 class="text-xl font-semibold faction-text-color mb-4">Tutoriel</h5>
 
 									<div class="overflow text-[16px]">
-										<h6>
+										<h6 class="faction-text-color font-bold underline">
 											<span class="number">
-												{{ tutorial_step }}
+												{{ tutorial_step }} -
 											</span>
 											{{ tutorial_info(tutorial_step, 'title') }}
 										</h6>
