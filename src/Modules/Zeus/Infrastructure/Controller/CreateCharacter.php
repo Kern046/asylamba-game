@@ -217,10 +217,16 @@ class CreateCharacter extends AbstractController
 						throw new BadRequestHttpException('Cet avatar n\'existe pas ou est invalide');
 					}
 				} elseif (!$session->get('inscription')->exist('pseudo')) {
-					throw new BadRequestHttpException('Votre pseudo est trop long, trop court ou contient des caractères non-autorisés');
+					$this->addFlash('error', 'Votre pseudo est trop long, trop court ou contient des caractères non-autorisés');
+					return $this->redirectToRoute('create_character', [
+						'step' => 'profile',
+					]);
 				}
 			} elseif (!$session->get('inscription')->exist('pseudo')) {
-				throw new BadRequestHttpException('Ce pseudo est déjà utilisé par un autre joueur');
+				$this->addFlash('error', 'Ce pseudo est déjà utilisé par un autre joueur');
+				return $this->redirectToRoute('create_character', [
+					'step' => 'profile',
+				]);
 			}
 		} else {
 			return $this->redirect('/serveurs/message-forbiddenaccess');

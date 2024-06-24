@@ -24,6 +24,15 @@
 						{% else %}
 							<p><input type="text" name="pseudo" id="pseudo" maxlength="15" required placeholder="pseudo" /></p>
 						{% endif %}
+						{% for label, messages in app.flashes %}
+							{% if label == 'error' %}
+								<div class="alert">
+									{% for message in messages %}
+										{{ message }}
+									{% endfor %}
+								</div>
+							{% endif %}
+						{% endfor %}
 
 						<p>Nous déconseillons les noms moins roleplay, essayez de coller avec l'histoire et les moeurs de votre faction.</p>
 						<p>Ce nom ne pourra pas être changé plus tard.</p>
