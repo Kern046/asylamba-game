@@ -16,9 +16,11 @@
 
 	{% if building_queues_count < available_queues %}
 		{% for i in range(building_queues_count, available_queues - 1) %}
-			<div class="item empty">
-				<span class="picto"></span>
-				<strong>Emplacement libre</strong>
+			<div class="item empty py-2">
+				<div class="flex items-center">
+					<span class="picto"></span>
+					<strong>Emplacement libre</strong>
+				</div>
 				<span class="progress-container"></span>
 			</div>
 		{% endfor %}

@@ -159,8 +159,8 @@ echo '<div class="component">';
 						$remainingTime = Utils::interval(Utils::now(), $queue->dEnd, 's');
 
 						echo $realSizeQueue > 1
-							? '<div class="item">'
-							: '<div class="item active progress" data-progress-output="lite" data-progress-current-time="' . $remainingTime . '" data-progress-total-time="' . $totalTimeShips . '">';
+							? '<div class="item py-2">'
+							: '<div class="item py-2 active progress" data-progress-output="lite" data-progress-current-time="' . $remainingTime . '" data-progress-total-time="' . $totalTimeShips . '">';
 						echo '<a href="' . Format::actionBuilder('dequeueship', $sessionToken, ['baseid' => $ob_dock2->getId(), 'dock' => '2', 'queue' => $queue->id]) . '"' . 
 							'class="button hb lt" title="annuler la commande (attention, vous ne récupérerez que ' . $shipResourceRefund * 100 . '% du montant investi)">×</a>';
 						echo  '<img class="picto" src="' . $mediaPath . 'ship/picto/' . ShipResource::getInfo($queue->shipNumber, 'imageLink') . '.png" alt="" />';
@@ -178,9 +178,11 @@ echo '<div class="component">';
 						}
 						echo '</div>';
 					} else {
-						echo '<div class="item empty">';
-							echo '<span class="picto"></span>';
-							echo '<strong>Emplacement libre</strong>';
+						echo '<div class="item empty py-2">';
+							echo '<div class="flex items-center">';
+								echo '<span class="picto"></span>';
+								echo '<strong>Emplacement libre</strong>';
+							echo '</div>';
 							echo '<span class="progress-container"></span>';
 						echo '</div>';
 					}

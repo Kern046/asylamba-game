@@ -21,17 +21,25 @@
 	{% endset %}
 
 	{% if 0 < building_data.building_requirements|length %}
-		<span class="button disable hb lt" title="{{ building_data.building_requirements|map(v => v.message)|join(', ') }}">
-			<span class="text">
-				construction impossible<br/>
-				{{ price }} | {{ time }}
-			</span>
-		</span>
+		<div class="button disable hb lt p-2 my-5" title="{{ building_data.building_requirements|map(v => v.message)|join(', ') }}">
+			<div class="text">
+				<div class="faction-text-color mb-2">construction impossible</div>
+				<div class="inline-flex items-center gap-2">
+					<span class="inline-flex items-center gap-2">{{ price }}</span>
+					<span>|</span>
+					<span class="inline-flex items-center gap-2">{{ time }}</span>
+				</div>
+			</div>
+		</div>
 	{% else %}
-		<a class="button" href="{{ path('build', { 'identifier': building_number }) }}">
+		<a class="button p-2 my-5" href="{{ path('build', { 'identifier': building_number }) }}">
 			<span class="text">
-				augmenter vers le niveau {{ building_data.next_level }}<br/>
-				{{ price }} | {{ time }}
+				<div class="mb-2">augmenter vers le niveau {{ building_data.next_level }}</div>
+				<div class="inline-flex items-center gap-2">
+					<span class="inline-flex items-center gap-2">{{ price }}</span>
+					<span>|</span>
+					<span class="inline-flex items-center gap-2">{{ time }}</span>
+				</div>
 			</span>
 		</a>
 	{% endif %}

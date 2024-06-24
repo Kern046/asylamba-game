@@ -10,4 +10,7 @@ module.exports = {
 	plugins: [
 		require('@tailwindcss/forms'),
 	],
+	safelist: [
+		'py-2',
+	],
 }

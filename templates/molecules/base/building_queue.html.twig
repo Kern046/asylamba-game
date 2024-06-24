@@ -1,26 +1,30 @@
 {% set next_time = building_queue|queue_duration %}
 
-<div class="item {% if building_queues_count > 1 %}active{% endif %} progress"
+<div class="item py-0.5 mt-3 {% if building_queues_count > 1 %}active-{% endif %}queue progress relative"
 	 data-progress-output="lite"
 	 data-progress-current-time="{{ next_time }}"
 	 data-progress-total-time="{{ next_total_time }}">
 	<a href="{{ path('cancel_building_queue', { 'identifier': building_queue.buildingNumber }) }}"
-	   class="button hb lt"
-	   title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">×</a>
-	<img class="picto" src="{{ asset('build/media/orbitalbase/' ~ get_building_info(building_queue.buildingNumber, 'imageLink') ~ '.png') }}" alt="" />
-	<strong>
+	   class="button hb lt absolute bg-stone-800 h-6 w-6 rounded-full border-black text-center align-middle hover:text-stone-300 hover:bg-stone-600"
+	   style="top: -10px; right: -10px;"
+	   title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">
+		×
+	</a>
+	<img class="picto absolute"
+		 style="left:-10px;top:-15px;"
+		 src="{{ asset('build/media/orbitalbase/' ~ get_building_info(building_queue.buildingNumber, 'imageLink') ~ '.png') }}"
+		 alt="{{ get_building_info(building_queue.buildingNumber, 'frenchName') }}" />
+	<em class="pl-9 text-sm">
 		{{ get_building_info(building_queue.buildingNumber, 'frenchName') }}
 		 <span class="level">niv. {{ building_queue.targetLevel }}</span>
-	</strong>
-	{% if building_queues_count > 1 %}
-		<em><span class="progress-text">{{ next_time|lite_seconds }}</span></em>
-		<span class="progress-container"></span>
-	{% else %}
-		<em><span class="progress-text">'{{ next_time|lite_seconds }}</span></em>
-
-		<span class="progress-container">
-			<span style="width: {{ (next_total_time - next_time)|percent(next_total_time) }}%;" class="progress-bar">
-			</span>
+	</em>
+	<div class="mt-2 flex align-middle">
+		<span class="progress-text text-sm pl-0.5">{{ next_time|lite_seconds }}</span>
+		<span class="progress-container flex-grow">
+			{% if building_queues_count == 1 %}
+				<span style="width: {{ (next_total_time - next_time)|percent(next_total_time) }}%;" class="progress-bar">
+				</span>
+			{% endif %}
 		</span>
-	{% endif %}
+	</div>
 </div>

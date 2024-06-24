@@ -358,7 +358,7 @@
 											{% set queue_time = queue|building_queue_time %}
 											{% set queue_duration = queue|queue_duration %}
 											<div class="queue">
-												<div class="item active progress"
+												<div class="item py-2 active progress"
 													 data-progress-no-reload="true"
 													 data-progress-output="lite"
 													 data-progress-current-time="{{ queue_duration }}"
@@ -405,7 +405,7 @@
 										{% if technology_queues_count > 0 %}
 											{% set queue = current_technology_queues[0] %}
 											<div class="queue">
-												<div class="item active progress"
+												<div class="item py-2 active progress"
 													 data-progress-no-reload="true"
 													 data-progress-output="lite"
 													 data-progress-current-time="{{ queue|queue_duration }}"
@@ -451,7 +451,7 @@
 										{% if current_dock1_ship_queues|length > 0 %}
 											{% set queue = current_dock1_ship_queues[0] %}
 											<div class="queue">
-												<div class="item active progress"
+												<div class="item py-2 active progress"
 													 data-progress-no-reload="true"
 													 data-progress-output="lite"
 													 data-progress-current-time="{{ queue|queue_duration }}"
@@ -495,7 +495,7 @@
 										{% if current_dock2_ship_queues|length > 0 %}
 											{% set queue = current_dock2_ship_queues[0] %}
 											<div class="queue">
-												<div class="item active progress"
+												<div class="item py-2 active progress"
 													 data-progress-no-reload="true"
 													 data-progress-output="lite"
 													 data-progress-current-time="{{ queue|queue_duration }}"
@@ -544,7 +544,7 @@
 									{% if incoming_commanders_count > 0 %}
 										<div class="queue">
 											{% for commander in incoming_commanders %}
-												<div class="item active progress"
+												<div class="item py-2 active progress"
 													 data-progress-no-reload="true"
 													 data-progress-output="lite"
 													 data-progress-current-time="{{ commander|travel_remaining_time }}"
@@ -588,7 +588,7 @@
 									{% if outgoing_commanders_count > 0 %}
 										<div class="queue">
 											{% for commander in outgoing_commanders %}
-												<div class="item active progress"
+												<div class="item py-2 active progress"
 													 data-progress-no-reload="true"
 													 data-progress-output="lite"
 													 data-progress-current-time="{{ commander|travel_remaining_time }}"

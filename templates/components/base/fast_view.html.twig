@@ -40,36 +40,20 @@
 
 			<h4>Générateur</h4>
 
-			{% set nextTime = 0 %}
-			{% set nextTotalTime = 0 %}
-			{% set realSizeQueue = 0 %}
+			{% set next_total_time = 0 %}
+			{% set building_queues_count = building_queues|length %}
 
-			<div class="queue">
+			<div class="queue mt-4">
 				{% for building_queue in building_queues %}
-					{% set realSizeQueue = realSizeQueue + 1 %}
-					{% set nextTime = building_queue|queue_duration  %}
-					{% set nextTotalTime = nextTotalTime + building_queue|building_queue_time %}
+					{% set next_total_time = next_total_time + get_building_info(building_queue.buildingNumber, 'level', building_queue.targetLevel, 'time') %}
 
-					<div class="item {% if realSizeQueue > 1 %}active{% endif %} progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ nextTime }}" data-progress-total-time="{{ nextTotalTime }}">
-						<a class="button hb lt" title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">×</a>
-						<img class="picto" src="{{ asset('build/media/orbitalbase/' ~  building_queue|queue_picture ~ '.png') }}" alt="" />
-						<strong>
-							{{ building_queue|queue_name }}
-							 <span class="level">niv. {{ building_queue.targetLevel }}</span>
-						</strong>
-						<em>
-							<span class="progress-text">{{ nextTime|lite_seconds }}</span>
-						</em>
-						{% if realSizeQueue > 1 %}
-							<span class="progress-container"></span>
-						{% else %}
-							<span class="progress-container">
-								<span style="width: {{ (nextTotalTime - nextTime)|percent(nextTotalTime) }}%;" class="progress-bar"></span>
-							</span>
-						{% endif %}
-					</div>
+					{{ include('molecules/base/building_queue.html.twig', {
+						building_queues_count,
+						building_queue,
+						next_total_time,
+					}) }}
 				{% endfor %}
-				{% if orbital_base|base_max_building_queues > building_queues|length %}
+				{% if orbital_base|base_max_building_queues > building_queues_count %}
 					<a href="{{ path('switchbase', { 'baseId': orbital_base.id, 'page': 'generator'}) }}" class="item link">
 						Construire un bâtiment
 					</a>
@@ -88,9 +72,9 @@
 						{% set remainingTime = ship_queue|queue_duration %}
 
 						{% if realSizeQueue > 1 %}
-							<div class="item">
+							<div class="item py-2">
 						{% else %}
-							<div class="item active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
+							<div class="item py-2 active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
 						{% endif %}
 
 						<img class="picto" src="{{ asset('build/media/ship/picto/' ~ ship_queue|ship_queue_picture ~ '.png') }}" alt="" />
@@ -131,9 +115,9 @@
 						{% set remainingTime = ship_queue|queue_duration %}
 
 						{% if realSizeQueue > 1 %}
-							<div class="item">
+							<div class="item py-2">
 						{% else %}
-							<div class="item active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
+							<div class="item py-2 active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTime }}" data-progress-total-time="{{ totalTimeShips }}">
 						{% endif %}
 
 						<img class="picto" src="{{ asset('build/media/ship/picto/' ~ ship_queue|ship_queue_picture ~ '.png') }}" alt="" />
@@ -175,7 +159,7 @@
 						{% set totalTimeTechno = totalTimeTechno + technology_queue|technology_queue_time %}
 						{% set remainingTotalTime = technology_queue|queue_duration %}
 
-						<div class="item active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTotalTime }}" data-progress-total-time="{{ totalTimeTechno }}">
+						<div class="item py-2 active progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ remainingTotalTime }}" data-progress-total-time="{{ totalTimeTechno }}">
 							<img class="picto" src="{{ asset('build/media/technology/picto/' ~ technology_queue|queue_picture ~ '.png') }}" alt="" />
 							<strong>
 								{{ get_technology_info(technology_queue.technology, 'name') }}
