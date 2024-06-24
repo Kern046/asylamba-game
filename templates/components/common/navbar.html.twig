@@ -162,12 +162,12 @@
 									{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial}) }}
 								</template>
 								<template v-slot:dropdown>
-									<h5 class="text-lg font-semibold faction-text-color mb-4">Tutoriel</h5>
+									<h5 class="text-xl font-semibold faction-text-color mb-4">Tutoriel</h5>
 
 									<div class="overflow text-[16px]">
-										<h6>
+										<h6 class="faction-text-color font-bold underline">
 											<span class="number">
-												{{ tutorial_step }}
+												{{ tutorial_step }} -
 											</span>
 											{{ tutorial_info(tutorial_step, 'title') }}
 										</h6>
@@ -288,7 +288,7 @@
 				</div>
 				<nav class="hidden lg:flex lg:space-x-8" aria-label="Global">
 					<div class="flex items-center">
-						<toolbar-toggler>
+						<toolbar-toggler-left>
 							<template v-slot:picto>
 								<div class="p-0 bg-black rounded-full hover:bg-black flex items-center">
 									<span class="bg-stone-900 p-1 border-2 faction-bd-lt rounded-full">
@@ -302,7 +302,7 @@
 								</div>
 							</template>
 							<template v-slot:dropdown>
-								<h2>Raffinerie</h2>
+								<h2 class="font-bold text-lg">Raffinerie</h2>
 								<div class="overflow">
 									<div class="number-box">
 										<span class="label">production par relève</span>
@@ -323,10 +323,14 @@
 										'faction_color': false,
 									}) }}
 
-									<a href="{{ path('refinery') }}" class="more-link">vers la raffinerie</a>
+									<a href="{{ path('refinery') }}"
+									   class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block"
+									>
+										vers la raffinerie
+									</a>
 								</div>
 							</template>
-						</toolbar-toggler>
+						</toolbar-toggler-left>
 
 						<span class="flex items-center bg-black rounded-full mx-2" style="width: 120px;">
 						 	<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
@@ -337,7 +341,7 @@
 
 						<div class="flex items-center bg-stone-900">
 
-							<toolbar-toggler>
+							<toolbar-toggler-left>
 								<template v-slot:picto>
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 										<path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
@@ -347,7 +351,7 @@
 									{% endif %}
 								</template>
 								<template v-slot:dropdown>
-									<h2>Générateur</h2>
+									<h2 class="font-bold text-lg">Générateur</h2>
 									<div class="overflow">
 										{% if building_queues_count > 0 %}
 											{% set queue = current_building_queues[0] %}
@@ -380,13 +384,13 @@
 											<p class="info">Aucun bâtiment en construction pour le moment.</p>
 										{% endif %}
 
-										<a href="{{ path('generator') }}" class="more-link">vers le générateur</a>
+										<a href="{{ path('generator') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers le générateur</a>
 									</div>
 								</template>
-							</toolbar-toggler>
+							</toolbar-toggler-left>
 
 
-							<toolbar-toggler>
+							<toolbar-toggler-left>
 								<template v-slot:picto>
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 										<path fill-rule="evenodd" d="M7 2a1 1 0 00-.707 1.707L7 4.414v3.758a1 1 0 01-.293.707l-4 4C.817 14.769 2.156 18 4.828 18h10.343c2.673 0 4.012-3.231 2.122-5.121l-4-4A1 1 0 0113 8.172V4.414l.707-.707A1 1 0 0013 2H7zm2 6.172V4h2v4.172a3 3 0 00.879 2.12l1.027 1.028a4 4 0 00-2.171.102l-.47.156a4 4 0 01-2.53 0l-.563-.187a1.993 1.993 0 00-.114-.035l1.063-1.063A3 3 0 009 8.172z" clip-rule="evenodd" />
@@ -396,7 +400,7 @@
 									{% endif %}
 								</template>
 								<template v-slot:dropdown>
-									<h2>Technosphère</h2>
+									<h2 class="font-bold text-lg">Technosphère</h2>
 									<div class="overflow">
 										{% if technology_queues_count > 0 %}
 											{% set queue = current_technology_queues[0] %}
@@ -426,13 +430,13 @@
 											<p class="info">Aucune recherche en cours pour le moment.</p>
 										{% endif %}
 
-										<a href="{{ path('technosphere') }}" class="more-link">vers la technosphère</a>
+										<a href="{{ path('technosphere') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers la technosphère</a>
 									</div>
 								</template>
-							</toolbar-toggler>
+							</toolbar-toggler-left>
 
 
-							<toolbar-toggler>
+							<toolbar-toggler-left>
 								<template v-slot:picto>
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 										<path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
@@ -442,7 +446,7 @@
 									{% endif %}
 								</template>
 								<template v-slot:dropdown>
-									<h2>Chantier Alpha</h2>
+									<h2 class="font-bold text-lg">Chantier Alpha</h2>
 									<div class="overflow">
 										{% if current_dock1_ship_queues|length > 0 %}
 											{% set queue = current_dock1_ship_queues[0] %}
@@ -470,13 +474,13 @@
 											<p class="info">Aucun vaisseau en construction pour le moment.</p>
 										{% endif %}
 
-										<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="more-link">vers le chantier alpha</a>
+										<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers le chantier alpha</a>
 									</div>
 								</template>
-							</toolbar-toggler>
+							</toolbar-toggler-left>
 
 
-							<toolbar-toggler>
+							<toolbar-toggler-left>
 								<template v-slot:picto>
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 										<path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
@@ -486,7 +490,7 @@
 									{% endif %}
 								</template>
 								<template v-slot:dropdown>
-									<h2>Chantier de ligne</h2>
+									<h2 class="font-bold text-lg">Chantier de ligne</h2>
 									<div class="overflow">
 										{% if current_dock2_ship_queues|length > 0 %}
 											{% set queue = current_dock2_ship_queues[0] %}
@@ -514,10 +518,10 @@
 											<p class="info">Aucun vaisseau en construction pour le moment.</p>
 										{% endif %}
 
-										<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="more-link">vers le chantier de ligne</a>
+										<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers le chantier de ligne</a>
 									</div>
 								</template>
-							</toolbar-toggler>
+							</toolbar-toggler-left>
 						</div>
 					</div>
 
@@ -525,7 +529,7 @@
 						{% set incoming_commanders_count = incoming_commanders|length %}
 
 
-						<toolbar-toggler>
+						<toolbar-toggler-left>
 							<template v-slot:picto>
 								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
@@ -535,7 +539,7 @@
 								{% endif %}
 							</template>
 							<template v-slot:dropdown>
-								<h2>Attaques entrantes</h2>
+								<h2 class="font-bold text-lg">Attaques entrantes</h2>
 								<div class="overflow">
 									{% if incoming_commanders_count > 0 %}
 										<div class="queue">
@@ -563,13 +567,13 @@
 										<p class="info">Aucune attaques entrantes.</p>
 									{% endif %}
 								</div>
-								<a href="{{ path('fleet') }}" class="more-link">vers l'amirauté</a>
+								<a href="{{ path('fleet') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers l'amirauté</a>
 							</template>
-						</toolbar-toggler>
+						</toolbar-toggler-left>
 
 						{% set outgoing_commanders_count = outgoing_commanders|length %}
 
-						<toolbar-toggler>
+						<toolbar-toggler-left>
 							<template v-slot:picto>
 								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
@@ -579,7 +583,7 @@
 								{% endif %}
 							</template>
 							<template v-slot:dropdown>
-								<h2>Déplacement de vos flottes</h2>
+								<h2 class="font-bold text-lg">Déplacement de vos flottes</h2>
 								<div class="overflow">
 									{% if outgoing_commanders_count > 0 %}
 										<div class="queue">
@@ -607,9 +611,9 @@
 										<p class="info">Aucune flotte en route.</p>
 									{% endif %}
 								</div>
-								<a href="{{ path('fleet') }}" class="more-link">vers l'amirauté</a>
+								<a href="{{ path('fleet') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers l'amirauté</a>
 							</template>
-						</toolbar-toggler>
+						</toolbar-toggler-left>
 					</div>
 				</nav>
 			</div>
