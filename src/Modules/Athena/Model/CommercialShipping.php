@@ -32,6 +32,29 @@ class CommercialShipping implements TravellerInterface
 
 	}
 
+	public function hasResources(): bool
+	{
+		return (null !== $this->transaction)
+			? Transaction::TYP_RESOURCE === $this->transaction->type
+			: $this->resourceTransported > 0;
+	}
+
+	public function hasShips(): bool
+	{
+		// Ships sending actually creates a Transaction entity for now
+		return (null !== $this->transaction)
+			? Transaction::TYP_SHIP === $this->transaction->type
+			: false;
+	}
+
+	public function hasCommander(): bool
+	{
+		// Commander sending without transaction is not implemented
+		return (null !== $this->transaction)
+			? Transaction::TYP_COMMANDER === $this->transaction->type
+			: false;
+	}
+
 	public function isMoving(): bool
 	{
 		return self::ST_GOING === $this->statement;

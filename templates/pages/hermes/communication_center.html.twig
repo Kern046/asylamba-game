@@ -1,0 +1,207 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block body %}
+
+	<div id="background-paralax" class="profil"></div>
+
+	{{ include('molecules/common/subnav.html.twig') }}
+
+	{{ include('molecules/common/movers.html.twig') }}
+	
+	<div id="content">
+		{{ include('molecules/common/advertising.html.twig') }}
+		
+		<div class="component">
+			<div class="head"><h1>Messagerie</h1></div>
+			<div class="fix-body">
+				<div class="body">
+					<div class="set-item">
+						<a class="item" href="{{ url('communication_center', {'conversationId': 'new'}) }}">
+							<div class="left">
+								<span>+</span>
+								</div>
+							<div class="center">Démarrer une nouvelle conversation</div>
+						</a>
+					</div>
+
+					{% for conv in conversations %}
+						{% set conv_name = [] %}
+						{% set counter = 0 %}
+						{% set remaining_players = 0 %}
+						{% set own_last_view = null %}
+
+						{% if conv.isGroupConversation %}
+							{% set conversation_avatar = 'multi' %}
+							{% set conversation_faction_identifier = 0 %}
+						{% else %}
+							{% set conversation_avatar = conv.initiator.avatar %}
+							{% set conversation_faction_identifier = conv.initiator.faction.identifier %}
+						{% endif %}
+
+						{% for conv_participant in conv.players %}
+							{% if conv_participant.player.id != current_player.id %}
+								{% if counter < 5 %}
+									{% set conv_name = conv_name|merge(['<strong>' ~ conv_participant.player.name ~ '</strong>']) %}
+								{% else %}
+									{% set remaining_players = remaining_players + 1 %}
+								{% endif %}
+
+								{% if conv.type == constant('App\\Modules\\Hermes\\Model\\Conversation::TY_SYSTEM') %}
+									{% if conv_participant.playerStatus == constant('App\\Modules\\Hermes\\Model\\ConversationUser::US_ADMIN') %}
+										{% set conversation_avatar = conv_participant.player.avatar %}
+										{% set conversation_faction_identifier = conv_participant.player.faction.identifier %}
+									{% endif %}
+								{% endif %}
+
+								{% set counter = counter + 1 %}
+							{% else %}
+								{% set own_last_view = conv_participant.lastViewedAt %}
+							{% endif %}
+						{% endfor %}
+
+						<a class="conv-item" href="/messages/{{ conv.id }}">
+							<span class="cover">
+								<img src="{{ asset('build/media/avatar/small/' ~ conversation_avatar ~ '.png') }}" alt="" class="picture color{{ conversation_faction_identifier }}'" />
+								<span class="number">{{ conv.messagesCount }}</span>
+								{% if own_last_view.timestamp < conv.lastMessageAt.timestamp %}
+									<span class="new-message"><img src="{{ asset('build/media/common/nav-message.png') }}" alt="" /></span>
+								{% endif %}
+							</span>
+
+							<span class="data">
+								{{ conv.lastMessageAt|date|raw }}
+								<br />
+								{% if conv.title is not empty %}
+									<strong>{{ conv.title }}</strong>
+								{% else %}
+									{{ conv_name|join(',')|raw }}
+								{% endif %}
+							</span>
+						</a>
+					{% endfor %}
+
+					{# TODO pagination is not done right here #}
+					{% if constant('App\\Modules\\Hermes\\Model\\Conversation::CONVERSATION_BY_PAGE') == conversations|length %}
+						<a class="more-item" href="{{ url('communication_center', {
+							page: page + 1,
+							messages_page: messages_page,
+							conversationId: conversation is not null ? conversation.id : null,
+							mode: mode
+						}) }}">
+							Afficher plus de conversations
+						</a>
+					{% endif %}
+
+					{% if constant('App\\Modules\\Hermes\\Model\\ConversationUser::CS_ARCHIVED') == mode %}
+						<a class="common-link" href="{{ url('communication_center') }}">Retour aux conversations</a>
+					{% else %}
+						<a class="common-link" href="{{ url('communication_center', {'mode': constant('App\\Modules\\Hermes\\Model\\ConversationUser::CS_ARCHIVED')}) }}">Voir les conversations archivées</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		
+		{% if start_new_conversation %}
+			<div class="component size2 new-message">
+				<div class="head skin-5">
+					<h2>Démarrer une nouvelle conversation</h2>
+				</div>
+				<div class="fix-body">
+					<div class="body">
+						<form action="{{ url('create_conversation') }}" method="post">
+							<p>Destinataire</p>
+
+
+							<p class="input input-text">
+								<input class="autocomplete-hidden" name="recipients" type="hidden" value="{{ player_id ?? '' }}" />
+								<input autocomplete="off" class="autocomplete-player ac_input" name="name" placeholder="Destinataire" type="text" value="{{ name ?? '' }}"/>
+							</p>
+
+							<p>
+								Message
+							</p>
+							<p class="input input-area">
+						<span class="wysiwyg" data-id="new-message-wysiwyg">
+							{{ get_parser_toolbar()|raw }}
+							<textarea name="content" id="new-message-wysiwyg"></textarea>
+						</span>
+							</p>
+
+							<p><button>Démarrer la conversation</button></p>
+						</form>
+					</div>
+				</div>
+			</div>
+		{% elseif conversation is not null %}
+			<div class="component topic size2">
+				<div class="head skin-5">
+					{% if conversation.title is not null %}
+						<h2>{{ conversation.title }}</h2>
+					{% endif %}
+				</div>
+			<div class="fix-body">
+				<div class="body">
+					{% if constant('App\\Modules\\Hermes\\Model\\Conversation::TY_SYSTEM') != conversation.type %}
+						<div class="message write">
+							<img src="{{ asset('build/media/avatar/small/' ~ current_player.avatar ~ '.png') }}" alt="{{ current_player.name }}" class="avatar" />
+							<div class="content">
+								<form action="{{ url('new_conversation_message', { conversationId: conversation.id }) }}" method="post">
+									<div class="wysiwyg" data-id="new-message">
+										{{ get_parser_toolbar()|raw }}
+										<textarea name="content" id="new-message"></textarea>
+									</div>
+
+									<button>Répondre</button>
+								</form>
+							</div>
+						</div>
+					{% endif %}
+
+					{% for message in messages %}
+						{% set player_faction_statuses = get_faction_info(message.player.faction.identifier, 'status') %}
+						{% set player_status = player_faction_statuses[message.player.status - 1] %}
+
+						{% if 0 < loop.index0 and messages[loop.index0 - 1].createdAt > player_last_viewed_at and message.createdAt <= player_last_viewed_at  %}
+							<div class="system-message">
+								Dernier message lu
+							</div>
+						{% endif %}
+
+						{% if constant('App\\Modules\\Hermes\\Model\\ConversationMessage::TY_STD') == message.type %}
+							<div class="message">
+								<a href="{{ url('embassy', { 'playerId': message.player.id }) }}">
+									<img src="{{ asset('build/media/avatar/medium/' ~ message.player.avatar ~ '.png') }}" alt="{{ message.player.name }}" class="avatar" />
+								</a>
+								<div class="content">
+									<p class="text">
+										{{ message.content|raw }}
+									</p>
+									<p class="footer">
+										{{ player_status }} {{ message.player.name }}
+										{{ message.createdAt|date|raw }}
+									</p>
+								</div>
+							</div>
+						{% else %}
+							<div class="system-message">
+								{{ message.content|raw }}
+							</div>
+						{% endif %}
+					{% endfor %}
+
+					{% if constant('App\\Modules\\Hermes\\Model\\ConversationMessage::MESSAGE_BY_PAGE') == messages|length %}
+						<a class="more-item" href="{{ url('communication_center', {
+							'conversationId': conversation.id,
+							'page': page,
+							'messages_page': messages_page + 1,
+							'mode': mode,
+						}) }}">
+							Afficher les messages suivants
+						</a>
+					{% endif %}
+					</div>
+				</div>
+			</div>
+		{% endif %}
+	</div>
+{% endblock body %}

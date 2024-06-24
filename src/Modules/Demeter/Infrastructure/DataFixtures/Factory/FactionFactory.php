@@ -9,6 +9,9 @@ use App\Modules\Demeter\Resource\ColorResource;
 use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\ModelFactory;
 
+/**
+ * @extends ModelFactory<Color>
+ */
 class FactionFactory extends ModelFactory
 {
 	protected function getDefaults(): array

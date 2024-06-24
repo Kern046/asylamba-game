@@ -17,15 +17,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
-class Start extends AbstractController
+class Create extends AbstractController
 {
 	#[Route(
-		path: '/messages/new',
-		name: 'start_conversation',
-		methods: Request::METHOD_GET,
+		path: '/messages',
+		name: 'create_conversation',
+		methods: Request::METHOD_POST,
 	)]
 	public function __invoke(
 		Request $request,
@@ -61,8 +61,6 @@ class Start extends AbstractController
 		if (count($players) < 1) {
 			throw new ConflictHttpException('Le joueur n\'est pas joignable.');
 		}
-		// création de la date précédente pour que le premier message ne soit pas considéré comme lu
-		$readingDate = new \DateTimeImmutable('-20s');
 
 		// créer la conversation
 		$conv = new Conversation(
@@ -91,7 +89,7 @@ class Start extends AbstractController
 				id: Uuid::v4(),
 				conversation: $conv,
 				player: $player,
-				lastViewedAt: $readingDate,
+				lastViewedAt: null,
 			);
 
 			$entityManager->persist($user);
@@ -113,8 +111,8 @@ class Start extends AbstractController
 
 		$this->addFlash('success', 'La conversation a été créée.');
 
-		return $this->redirectToRoute('conversation', [
-			'id' => $conv->id
+		return $this->redirectToRoute('communication_center', [
+			'conversationId' => $conv->id
 		]);
 	}
 }

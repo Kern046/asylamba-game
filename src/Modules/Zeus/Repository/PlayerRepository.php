@@ -198,13 +198,15 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 	 */
 	public function search(string $search): array
 	{
-		return $this->createQueryBuilder('p')
-			->where('LOWER(p.name) = LOWER(:search)')
-			->setParameter('search', $search)
+		$qb = $this->createQueryBuilder('p');
+
+		$qb
+			->where($qb->expr()->like('LOWER(p.name)', 'LOWER(:search)'))
+			->setParameter('search', "%$search%")
 			->orderBy('p.experience', 'DESC')
-			->setMaxResults(20)
-			->getQuery()
-			->getResult();
+			->setMaxResults(20);
+
+		return $qb->getQuery()->getResult();
 	}
 
 	public function updatePlayerCredits(Player $player, int $credits): mixed

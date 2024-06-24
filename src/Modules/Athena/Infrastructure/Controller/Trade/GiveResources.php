@@ -50,7 +50,7 @@ class GiveResources extends AbstractController
 
 		$baseUuid = Uuid::fromString($baseId);
 		if ($baseUuid === $currentBase->id) {
-			throw new BadRequestHttpException('envoi de ressources impossible - action inutile, vous ressources sont déjà sur cette base orbitale');
+			throw new BadRequestHttpException('envoi de ressources impossible - action inutile, vos ressources sont déjà sur cette base orbitale');
 		}
 		$resource = intval($quantity);
 		if ($resource === 0) {
@@ -93,15 +93,15 @@ class GiveResources extends AbstractController
 			destinationBase: $otherBase,
 			resourceTransported: $resource,
 			shipQuantity: $commercialShipQuantity,
+			statement: CommercialShipping::ST_GOING,
 			departureDate: $departure,
 			arrivalDate: $getTravelDuration(
 				origin: $currentBase->place,
 				destination: $otherBase->place,
 				departureDate: $departure,
-				player: $currentPlayer,
-				travelType: TravelType::CommercialShipping
+				travelType: TravelType::CommercialShipping,
+				player: $currentPlayer
 			),
-			statement: CommercialShipping::ST_GOING,
 		);
 		$commercialShippingRepository->save($cs);
 
