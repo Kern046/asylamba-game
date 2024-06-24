@@ -26,7 +26,7 @@ class ViewList extends AbstractController
 			? ConversationUser::CS_ARCHIVED
 			: ConversationUser::CS_DISPLAY;
 
-		return $this->render('pages/hermes/conversation/list.html.twig', [
+		return $this->render('pages/hermes/list.html.twig', [
 			'conversations' => $conversationRepository->getPlayerConversations($currentPlayer, $mode),
 			'mode' => $mode,
 		]);
