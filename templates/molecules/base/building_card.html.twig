@@ -12,11 +12,11 @@
 		   data-building-current-level="{{ building_data.level }}">+</a>
 	</div>
 	{% set price %}
-		{{ get_building_info(building_number, 'level', (building_data.next_level), 'resourcePrice')|number(-1) }}
+		{{ get_building_resource_cost(building_number, building_data.next_level)|number(-1) }}
 		<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" class="icon-color" />
 	{% endset %}
 	{% set time %}
-		{{ get_building_info(building_number, 'level', (building_data.next_level), 'time')|lite_seconds }}
+		{{ get_building_time_cost(building_number, building_data.next_level)|lite_seconds }}
 		<img src="{{ asset('build/media/resources/time.png') }}" alt="relèves" class="icon-color" />
 	{% endset %}
 

@@ -5,6 +5,7 @@ namespace App\Modules\Athena\Infrastructure\Controller\Ship;
 use App\Classes\Library\Format;
 use App\Modules\Athena\Application\Factory\ShipQueueFactory;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Ship\GetResourceCost;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Helper\ShipHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
@@ -22,14 +23,15 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 class BuildShips extends AbstractController
 {
 	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		OrbitalBase $currentBase,
-		OrbitalBaseManager $orbitalBaseManager,
-		OrbitalBaseHelper $orbitalBaseHelper,
-		ShipHelper $shipHelper,
-		ShipQueueRepositoryInterface $shipQueueRepository,
-		ShipQueueFactory $shipQueueFactory,
+		Request                       $request,
+		Player                        $currentPlayer,
+		OrbitalBase                   $currentBase,
+		OrbitalBaseManager            $orbitalBaseManager,
+		OrbitalBaseHelper             $orbitalBaseHelper,
+		GetResourceCost               $getResourceCost,
+		ShipHelper                    $shipHelper,
+		ShipQueueRepositoryInterface  $shipQueueRepository,
+		ShipQueueFactory              $shipQueueFactory,
 		TechnologyRepositoryInterface $technologyRepository,
 	): Response {
 		$session = $request->getSession();
@@ -77,13 +79,7 @@ class BuildShips extends AbstractController
 		);
 
 		// débit des ressources au joueur
-		$resourcePrice = ShipResource::getInfo($shipIdentifier, 'resourcePrice') * $quantity;
-		// TODO Refactor the way faction bonuses are retrieved and applied
-		if (in_array($shipIdentifier, [ShipResource::CERBERE, ShipResource::PHENIX])) {
-			if (in_array(ColorResource::PRICEBIGSHIPBONUS, ColorResource::getInfo($currentPlayer->faction->identifier, 'bonus'))) {
-				$resourcePrice -= round($resourcePrice * ColorResource::BONUS_EMPIRE_CRUISER / 100);
-			}
-		}
+		$resourcePrice = ($this->getResourcePrice)($shipIdentifier, $quantity, $currentPlayer);
 		$orbitalBaseManager->decreaseResources($currentBase, $resourcePrice);
 
 		// ajout de l'event dans le contrôleur

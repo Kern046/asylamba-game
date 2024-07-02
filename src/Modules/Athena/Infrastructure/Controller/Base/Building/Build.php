@@ -5,6 +5,7 @@ namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 use App\Modules\Athena\Application\Factory\BuildingQueueFactory;
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Base\Building\BuildingDataHandler;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Infrastructure\Validator\CanMakeBuilding;
 use App\Modules\Athena\Infrastructure\Validator\DTO\BuildingConstructionOrder;
@@ -30,6 +31,7 @@ class Build extends AbstractController
 		OrbitalBaseHelper $orbitalBaseHelper,
 		OrbitalBaseManager $orbitalBaseManager,
 		TechnologyRepositoryInterface $technologyRepository,
+		BuildingDataHandler $buildingDataHandler,
 		BuildingQueueRepositoryInterface $buildingQueueRepository,
 		BuildingLevelHandler $buildingLevelHandler,
 		BuildingQueueFactory $buildingQueueFactory,
@@ -71,7 +73,7 @@ class Build extends AbstractController
 		// debit resources
 		$orbitalBaseManager->decreaseResources(
 			$currentBase,
-			$orbitalBaseHelper->getBuildingInfo($identifier, 'level', $currentLevel + 1, 'resourcePrice'),
+			$buildingDataHandler->getBuildingResourceCost($identifier, $targetLevel),
 		);
 
 		$buildingQueue = $buildingQueueFactory->create(

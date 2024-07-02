@@ -10,6 +10,7 @@ use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Domain\Repository\ResearchRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
+use App\Modules\Promethee\Domain\Service\GetTimeCost;
 use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Promethee\Manager\ResearchManager;
 use App\Modules\Promethee\Manager\TechnologyManager;
@@ -31,6 +32,7 @@ class ViewTechnosphere extends AbstractController
 		private readonly ResearchRepositoryInterface $researchRepository,
 		private readonly TechnologyHelper $technologyHelper,
 		private readonly ResearchManager $researchManager,
+		private readonly GetTimeCost $getTimeCost,
 	) {
 	}
 
@@ -136,6 +138,7 @@ class ViewTechnosphere extends AbstractController
 			$timeToBuild = $this->technologyHelper->getInfo($technologyId, 'time', $nextLevel);
 			$timeToBuild -= round($timeToBuild * $totalBonus / 100);
 			// warning : $totalBonus est défini plus haut (ne pas inverser les blocs de code !)
+			$timeToBuild = ($this->getTimeCost)($technologyId, $nextLevel, $currentBase->place->coefHistory);
 
 			$column = $this->technologyHelper->getInfo($technologyId, 'column');
 
