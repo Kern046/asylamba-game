@@ -61,7 +61,7 @@ class Colonize extends AbstractController
 		$coloQuantity = 0;
 		$commanders = $commanderRepository->getPlayerCommanders($currentPlayer, [Commander::MOVING]);
 		foreach ($commanders as $commander) {
-			if (Commander::COLO == $commander->travelType) {
+			if (CommanderMission::Colo === $commander->travelType) {
 				++$coloQuantity;
 			}
 		}
