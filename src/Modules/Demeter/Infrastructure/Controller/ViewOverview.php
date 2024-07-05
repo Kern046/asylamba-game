@@ -69,8 +69,6 @@ class ViewOverview extends AbstractController
 			$data['remaining_coup_time'] = $this->durationHandler->getRemainingTime($endPutsch);
 		}
 
-		dump($data);
-
 		return $this->render('pages/demeter/faction/overview.html.twig', $data);
 	}
 

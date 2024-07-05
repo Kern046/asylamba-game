@@ -18,8 +18,6 @@ class AutocompleteBase extends AbstractController
 			throw new BadRequestHttpException('Missing search parameter');
 		}
 
-		dump($placeRepository->search($search));
-
 		return $this->render('blocks/athena/autocomplete_base.html.twig', [
 			'places' => $placeRepository->search($search),
 		]);
