@@ -7,6 +7,7 @@ namespace App\Modules\Gaia\Handler;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Message\PlaceUpdateMessage;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Shared\Application\Service\CountMissingSystemUpdates;
 use App\Modules\Shared\Domain\Server\TimeMode;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
@@ -18,9 +19,7 @@ readonly class PlaceUpdateHandler
 {
 	public function __construct(
 		private PlaceRepositoryInterface $placeRepository,
-		private DurationHandler $durationHandler,
-		#[Autowire('%server_time_mode%')]
-		private TimeMode $timeMode,
+		private CountMissingSystemUpdates $countMissingSystemUpdates,
 	) {
 	}
 
@@ -29,7 +28,7 @@ readonly class PlaceUpdateHandler
 		$place = $this->placeRepository->get($message->placeId) ?? throw new \RuntimeException(sprintf('Place %s not found', $message->placeId));
 
 		$now = new \DateTimeImmutable();
-		$missingUpdatesCount = $this->countMissingUpdates($place);
+		$missingUpdatesCount = ($this->countMissingSystemUpdates)($place);
 		if (0 === $missingUpdatesCount) {
 			return;
 		}
@@ -75,12 +74,5 @@ readonly class PlaceUpdateHandler
 	private function getProducedResources(Place $place): int
 	{
 		return intval(floor(Place::COEFFRESOURCE * $place->population));
-	}
-
-	private function countMissingUpdates(Place $place): int
-	{
-		return $this->timeMode->isStandard()
-			? $this->durationHandler->getHoursDiff($place->updatedAt, new \DateTimeImmutable())
-			: intval(ceil($this->durationHandler->getDiff($place->updatedAt, new \DateTimeImmutable()) / 600));
 	}
 }

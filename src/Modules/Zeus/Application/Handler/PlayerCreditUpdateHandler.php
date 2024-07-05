@@ -9,6 +9,7 @@ use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Shared\Application\PercentageApplier;
+use App\Modules\Shared\Application\Service\CountMissingSystemUpdates;
 use App\Modules\Shared\Domain\Server\TimeMode;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
@@ -29,7 +30,6 @@ readonly class PlayerCreditUpdateHandler
 {
 	public function __construct(
 		private EntityManagerInterface $entityManager,
-		private DurationHandler $durationHandler,
 		private CommercialRouteIncomeHandler $commercialRouteIncomeHandler,
 		private CommanderRepositoryInterface $commanderRepository,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
@@ -42,8 +42,7 @@ readonly class PlayerCreditUpdateHandler
 		private LoggerInterface $logger,
 		private CurrentPlayerRegistry $currentPlayerRegistry,
 		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		#[Autowire('%server_time_mode%')]
-		private TimeMode $timeMode,
+		private CountMissingSystemUpdates $countMissingSystemUpdates,
 		private int $gaiaId,
 	) {
 	}
@@ -60,7 +59,7 @@ readonly class PlayerCreditUpdateHandler
 		);
 		$initialCredits = $player->credit;
 
-		$missingUpdatesCount = $this->countMissingUpdates($player);
+		$missingUpdatesCount = ($this->countMissingSystemUpdates)($player);
 		if (0 === $missingUpdatesCount) {
 			return;
 		}
@@ -146,12 +145,5 @@ readonly class PlayerCreditUpdateHandler
 	private function getFactionTax(OrbitalBase $base, int $populationTax): int
 	{
 		return PercentageApplier::toInt($base->place->system->sector->tax, $populationTax);
-	}
-
-	private function countMissingUpdates(Player $player): int
-	{
-		return $this->timeMode->isStandard()
-			? $this->durationHandler->getHoursDiff($player->uPlayer, new \DateTimeImmutable())
-			: intval(ceil($this->durationHandler->getDiff($player->uPlayer, new \DateTimeImmutable()) / 600));
 	}
 }

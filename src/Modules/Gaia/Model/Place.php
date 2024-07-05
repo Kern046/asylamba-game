@@ -3,10 +3,11 @@
 namespace App\Modules\Gaia\Model;
 
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Component\Uid\Uuid;
 
-class Place
+class Place implements SystemUpdatable
 {
 	// CONSTANTS
 	public const TYP_EMPTY = 0;
@@ -74,5 +75,10 @@ class Place
 		public \DateTimeImmutable $updatedAt,
 	) {
 			
+	}
+
+	public function lastUpdatedBySystemAt(): \DateTimeImmutable
+	{
+		return $this->updatedAt;
 	}
 }
