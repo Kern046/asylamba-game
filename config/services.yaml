@@ -69,7 +69,7 @@ parameters:
     media: '/media/'
     # active les APIs de confirmation
     # active la création de personnage au niveau 5
-    highmode: true
+    highmode: '%env(bool:HIGH_LEVEL_MODE)%'
     # MISCELLANEOUS #
     #################
     # définition des ids des différants joueurs systèmes
