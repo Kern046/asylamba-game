@@ -65,7 +65,7 @@ class Place
 		public System $system,
 		public int $typeOfPlace,
 		public int $position,
-		public int $population,
+		public float $population,
 		public int $coefResources,
 		public int $coefHistory,
 		public int $resources, 						// de la place si $typeOfBase = 0, sinon de la base
