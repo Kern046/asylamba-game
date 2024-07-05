@@ -11,6 +11,7 @@ use App\Modules\Shared\Application\Service\CountMissingSystemUpdates;
 use App\Modules\Shared\Domain\Server\TimeMode;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -18,6 +19,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 readonly class PlaceUpdateHandler
 {
 	public function __construct(
+		private ClockInterface $clock,
 		private PlaceRepositoryInterface $placeRepository,
 		private CountMissingSystemUpdates $countMissingSystemUpdates,
 	) {
@@ -27,13 +29,12 @@ readonly class PlaceUpdateHandler
 	{
 		$place = $this->placeRepository->get($message->placeId) ?? throw new \RuntimeException(sprintf('Place %s not found', $message->placeId));
 
-		$now = new \DateTimeImmutable();
 		$missingUpdatesCount = ($this->countMissingSystemUpdates)($place);
 		if (0 === $missingUpdatesCount) {
 			return;
 		}
 		// update time
-		$place->updatedAt = $now;
+		$place->updatedAt = $this->clock->now();
 		$initialResources = $place->resources;
 		$maxResources = $this->getMaxResources($place);
 
