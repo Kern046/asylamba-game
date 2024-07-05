@@ -5,6 +5,7 @@ namespace App\Modules\Hermes\Infrastructure\Controller\Conversation;
 use App\Modules\Hermes\Domain\Repository\ConversationMessageRepositoryInterface;
 use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
 use App\Modules\Hermes\Domain\Repository\ConversationUserRepositoryInterface;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Model\ConversationUser;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,6 +33,7 @@ class ViewCommunicationCenter extends AbstractController
 		ConversationRepositoryInterface $conversationRepository,
 		ConversationUserRepositoryInterface $conversationUserRepository,
 		ConversationMessageRepositoryInterface $conversationMessageRepository,
+		NotificationRepositoryInterface $notificationRepository,
 		Player                          $currentPlayer,
 		string|null                     $conversationId = null,
 	): Response {
@@ -77,6 +79,8 @@ class ViewCommunicationCenter extends AbstractController
 			'messages' => $messages,
 			'messages_page' => $messagesPage,
 			'player_last_viewed_at' => $playerLastViewedAt,
+			'notifications' => $notificationRepository->getPlayerNotificationsByArchive($currentPlayer, false),
+			'archived_notifications' => $notificationRepository->getPlayerNotificationsByArchive($currentPlayer, true),
 		]);
 	}
 }

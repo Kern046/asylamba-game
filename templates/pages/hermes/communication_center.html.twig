@@ -203,5 +203,11 @@
 				</div>
 			</div>
 		{% endif %}
+
+		{% include 'components/notifications/last.html.twig' with { notifications } %}
+
+		{% if archived_notifications|length > 0 %}
+
+		{% endif %}
 	</div>
 {% endblock body %}

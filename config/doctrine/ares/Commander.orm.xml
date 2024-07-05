@@ -74,7 +74,7 @@
 				<option name="default">0</option>
 			</options>
 		</field>
-		<field name="travelType" column="travelType" type="smallint" nullable="true">
+		<field name="travelType" column="travelType" type="smallint" enum-type="App\Modules\Ares\Domain\Model\CommanderMission" nullable="true">
 			<options>
 				<option name="unsigned">true</option>
 			</options>

@@ -1,4 +1,9 @@
 ---
+parameters:
+    politics_campaign_duration: 345600
+    politics_election_duration: 172800
+    politics_putsch_duration: 25200
+
 services:
     _defaults:
         autowire: true

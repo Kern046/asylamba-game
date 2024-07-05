@@ -3,6 +3,7 @@
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
 use App\Classes\Library\Format;
+use App\Modules\Athena\Application\Handler\CommercialRoute\GetCommercialRoutePrice;
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\CommercialRoute;
@@ -10,10 +11,12 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
+use App\Modules\Shared\Application\PercentageApplier;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,6 +32,8 @@ class Accept extends AbstractController
 		Request                            $request,
 		Player                             $currentPlayer,
 		OrbitalBase                        $currentBase,
+		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		GetCommercialRoutePrice			   $getCommercialRoutePrice,
 		CommercialRouteRepositoryInterface $commercialRouteRepository,
 		OrbitalBaseHelper                  $orbitalBaseHelper,
 		PlayerManager                      $playerManager,
@@ -67,10 +72,11 @@ class Accept extends AbstractController
 		}
 		// compute bonus if the player is from Negore
 		// TODO move to BonusApplier logic
+		$distance = $getDistanceBetweenPlaces($proposerBase->place, $acceptorBase->place);
+		$price = $getCommercialRoutePrice($distance, $currentPlayer);
 		if (ColorResource::NEGORA === $currentPlayer->faction->identifier) {
-			$price = round($cr->price - ($cr->price * ColorResource::BONUS_NEGORA_ROUTE / 100));
-		} else {
-			$price = $cr->price;
+			$bonus = PercentageApplier::toFloat($price, ColorResource::BONUS_NEGORA_ROUTE);
+			$price = round($price - $bonus);
 		}
 
 		if ($currentPlayer->credit < $price) {

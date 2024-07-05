@@ -79,7 +79,7 @@ class BuildShips extends AbstractController
 		);
 
 		// débit des ressources au joueur
-		$resourcePrice = ($this->getResourcePrice)($shipIdentifier, $quantity, $currentPlayer);
+		$resourcePrice = ($getResourceCost)($shipIdentifier, $quantity, $currentPlayer);
 		$orbitalBaseManager->decreaseResources($currentBase, $resourcePrice);
 
 		// ajout de l'event dans le contrôleur

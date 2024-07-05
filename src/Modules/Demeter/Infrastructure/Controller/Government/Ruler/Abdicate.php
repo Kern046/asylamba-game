@@ -2,6 +2,7 @@
 
 namespace App\Modules\Demeter\Infrastructure\Controller\Government\Ruler;
 
+use App\Modules\Demeter\Application\Election\NextElectionDateCalculator;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
@@ -22,6 +23,7 @@ class Abdicate extends AbstractController
 		PlayerRepositoryInterface $playerRepository,
 		NotificationRepositoryInterface $notificationRepository,
 		EntityManagerInterface $entityManager,
+		NextElectionDateCalculator $nextElectionDateCalculator,
 	): Response {
 		$faction = $currentPlayer->faction;
 
@@ -29,7 +31,7 @@ class Abdicate extends AbstractController
 			throw $this->createAccessDeniedException('Vous n\'êtes pas le chef de votre faction.');
 		}
 
-		$mandateDuration = ColorResource::getInfo($faction->identifier, 'mandateDuration');
+		$mandateDuration = $nextElectionDateCalculator->getMandateDuration($faction);
 
 		if ($faction->isDemocratic()) {
 			if (!$faction->isInMandate()) {

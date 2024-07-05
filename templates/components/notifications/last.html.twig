@@ -1,0 +1,36 @@
+<div class="component">
+	<div class="head skin-2">
+		<h2>Notifications</h2>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="tool">
+				<span><a href="{{ path('read_all_notifications') }}">tout marquer comme lu</a></span>
+				<span><a href="{{ path('delete_all_notifications') }}" class="hb lt" title="tout supprimer">×</a></span>
+				<span><a href="#" class="hb lt sh" data-target="info-notif" title="plus d\'information">?</a></span>
+			</div>
+
+			<p class="info" id="info-notif" style="display:none;">
+				Les notifications sont les messages que vous recevez du gouvernement de votre ou vos planètes. Ces messages vous avertissent de
+				toutes les actions qui prennent fin dans le jeu, comme les attaques et les développements technologiques par exemple.
+				Elles vous permettent d’avoir un compte rendu de toutes vos activités sur Asylamba.<br/>Au bout d\'un certain temps, elles seront automatiquement supprimées, sauf si vous les archivez.
+			</p>
+
+			{% if notifications|length > 0 %}
+				{% for notification in notifications %}
+					<div class="notif {% if notification.read is not same as(true) %}unreaded{% endif %}" data-notif-id="{{ notification.id }}">
+						<h4 class="read-notif switch-class-parent" data-class="open">{{ notification.title }}</h4>
+						<div class="content">{{ notification.content|raw }}</div>
+						<div class="footer">
+							<a href="{{ path('archive_notification', {'id': notification.id}) }}">archiver</a> ou
+							<a href="{{ path('delete_notification', {'id': notification.id}) }}">supprimer</a><br />
+							— {{ notification.sentAt|date|raw }}
+						</div>
+					</div>
+				{% endfor %}
+			{% else %}
+				<p>Il n\'y a aucune notification dans votre boîte de réception.</p>
+			{% endif %}
+		</div>
+	</div>
+</div>

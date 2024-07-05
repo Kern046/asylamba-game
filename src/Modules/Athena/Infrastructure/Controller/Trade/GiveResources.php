@@ -106,8 +106,8 @@ class GiveResources extends AbstractController
 		$commercialShippingRepository->save($cs);
 
 		$messageBus->dispatch(
-			new CommercialShippingMessage($commercialShipping->id),
-			[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivalDate())],
+			new CommercialShippingMessage($cs->id),
+			[DateTimeConverter::to_delay_stamp($cs->getArrivalDate())],
 		);
 
 		$orbitalBaseManager->decreaseResources($currentBase, $resource);
