@@ -9,6 +9,7 @@ use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Shared\Application\PercentageApplier;
+use App\Modules\Shared\Domain\Server\TimeMode;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use App\Modules\Zeus\Domain\Message\PlayerCreditUpdateMessage;
@@ -19,6 +20,7 @@ use App\Modules\Zeus\Model\PlayerFinancialReport;
 use App\Shared\Application\Handler\DurationHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 
@@ -40,6 +42,8 @@ readonly class PlayerCreditUpdateHandler
 		private LoggerInterface $logger,
 		private CurrentPlayerRegistry $currentPlayerRegistry,
 		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		#[Autowire('%server_time_mode%')]
+		private TimeMode $timeMode,
 		private int $gaiaId,
 	) {
 	}
@@ -56,8 +60,8 @@ readonly class PlayerCreditUpdateHandler
 		);
 		$initialCredits = $player->credit;
 
-		$hoursDiff = $this->durationHandler->getHoursDiff($player->uPlayer, new \DateTimeImmutable());
-		if (0 === $hoursDiff) {
+		$missingUpdatesCount = $this->countMissingUpdates($player);
+		if (0 === $missingUpdatesCount) {
 			return;
 		}
 		$this->currentPlayerRegistry->set($player);
@@ -66,7 +70,7 @@ readonly class PlayerCreditUpdateHandler
 
 		$this->entityManager->beginTransaction();
 
-		for ($i = 0; $i < $hoursDiff; ++$i) {
+		for ($i = 0; $i < $missingUpdatesCount; ++$i) {
 			$playerFinancialReport = new PlayerFinancialReport(
 				id: Uuid::v4(),
 				player: $player,
@@ -142,5 +146,12 @@ readonly class PlayerCreditUpdateHandler
 	private function getFactionTax(OrbitalBase $base, int $populationTax): int
 	{
 		return PercentageApplier::toInt($base->place->system->sector->tax, $populationTax);
+	}
+
+	private function countMissingUpdates(Player $player): int
+	{
+		return $this->timeMode->isStandard()
+			? $this->durationHandler->getHoursDiff($player->uPlayer, new \DateTimeImmutable())
+			: intval(ceil($this->durationHandler->getDiff($player->uPlayer, new \DateTimeImmutable()) / 600));
 	}
 }

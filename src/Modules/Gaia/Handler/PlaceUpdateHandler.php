@@ -7,7 +7,10 @@ namespace App\Modules\Gaia\Handler;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Message\PlaceUpdateMessage;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Shared\Domain\Server\TimeMode;
+use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -16,6 +19,8 @@ readonly class PlaceUpdateHandler
 	public function __construct(
 		private PlaceRepositoryInterface $placeRepository,
 		private DurationHandler $durationHandler,
+		#[Autowire('%server_time_mode%')]
+		private TimeMode $timeMode,
 	) {
 	}
 
@@ -24,8 +29,8 @@ readonly class PlaceUpdateHandler
 		$place = $this->placeRepository->get($message->placeId) ?? throw new \RuntimeException(sprintf('Place %s not found', $message->placeId));
 
 		$now = new \DateTimeImmutable();
-		$hoursDiff = $this->durationHandler->getHoursDiff($place->updatedAt, $now);
-		if (0 === $hoursDiff) {
+		$missingUpdatesCount = $this->countMissingUpdates($place);
+		if (0 === $missingUpdatesCount) {
 			return;
 		}
 		// update time
@@ -33,14 +38,14 @@ readonly class PlaceUpdateHandler
 		$initialResources = $place->resources;
 		$maxResources = $this->getMaxResources($place);
 
-		$place->resources += $this->getProducedResources($place) * $hoursDiff;
+		$place->resources += $this->getProducedResources($place) * $missingUpdatesCount;
 		$place->resources = abs($place->resources - $initialResources);
 		if ($place->resources > $maxResources) {
 			$place->resources = $maxResources;
 		}
 
 		if (null === $place->player) {
-			$this->updateNpcPlace($place, $hoursDiff);
+			$this->updateNpcPlace($place, $missingUpdatesCount);
 		}
 
 		$this->placeRepository->save($place);
@@ -70,5 +75,12 @@ readonly class PlaceUpdateHandler
 	private function getProducedResources(Place $place): int
 	{
 		return intval(floor(Place::COEFFRESOURCE * $place->population));
+	}
+
+	private function countMissingUpdates(Place $place): int
+	{
+		return $this->timeMode->isStandard()
+			? $this->durationHandler->getHoursDiff($place->updatedAt, new \DateTimeImmutable())
+			: intval(ceil($this->durationHandler->getDiff($place->updatedAt, new \DateTimeImmutable()) / 600));
 	}
 }
