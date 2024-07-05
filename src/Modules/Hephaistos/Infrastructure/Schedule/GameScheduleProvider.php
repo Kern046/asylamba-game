@@ -29,7 +29,7 @@ readonly class GameScheduleProvider implements ScheduleProviderInterface
 	{
 		[$hourlySchedule, $nightlySchedule] = match ($this->timeMode) {
 			TimeMode::Standard => ['0 * * * *', '0 3 * * *'],
-			TimeMode::Fast => ['*/10 * * * *', '* */1 * * *'],
+			TimeMode::Fast => ['*/10 * * * *', '0 * * * *'],
 		};
 
 		return (new Schedule())->add(
