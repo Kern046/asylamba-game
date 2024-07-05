@@ -6,13 +6,14 @@ use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Domain\Model\TravellerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
-class Commander implements TravellerInterface, \JsonSerializable
+class Commander implements TravellerInterface, \JsonSerializable, SystemUpdatable
 {
 	// variables de combat
 	/** @var list<int> */
@@ -231,5 +232,10 @@ class Commander implements TravellerInterface, \JsonSerializable
 			'id' => $this->id,
 			'name' => $this->name,
 		];
+	}
+
+	public function lastUpdatedBySystemAt(): \DateTimeImmutable
+	{
+		return $this->updatedAt;
 	}
 }

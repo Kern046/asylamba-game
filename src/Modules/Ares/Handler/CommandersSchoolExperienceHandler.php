@@ -7,19 +7,21 @@ use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Domain\Specification\CanEarnSchoolExperience;
 use App\Modules\Ares\Message\CommandersSchoolExperienceMessage;
 use App\Modules\Ares\Model\Commander;
+use App\Modules\Shared\Application\Service\CountMissingSystemUpdates;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Model\PlayerBonusId;
-use App\Shared\Application\Handler\DurationHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
 readonly class CommandersSchoolExperienceHandler
 {
 	public function __construct(
-		private DurationHandler $durationHandler,
+		private ClockInterface $clock,
 		private EntityManagerInterface $entityManager,
 		private CommanderRepositoryInterface $commanderRepository,
+		private CountMissingSystemUpdates $countMissingSystemUpdates,
 		private PlayerBonusManager $playerBonusManager,
 		private CommanderExperienceHandler $commanderExperienceHandler,
 	) {
@@ -27,23 +29,23 @@ readonly class CommandersSchoolExperienceHandler
 
 	public function __invoke(CommandersSchoolExperienceMessage $message): void
 	{
-		$now = new \DateTimeImmutable();
 		$commanders = $this->commanderRepository->getBySpecification(new CanEarnSchoolExperience());
 		$this->entityManager->beginTransaction();
 
 		foreach ($commanders as $commander) {
 			// If the commander was updated recently, we skip him
-			if (0 === ($hoursDiff = $this->durationHandler->getHoursDiff($commander->updatedAt, $now))) {
+			$missingUpdatesCount = ($this->countMissingSystemUpdates)($commander);
+			if (0 === $missingUpdatesCount) {
 				continue;
 			}
 
-			$commander->updatedAt = new \DateTimeImmutable();
+			$commander->updatedAt = $this->clock->now();
 			$orbitalBase = $commander->base;
 
 			$playerBonus = $this->playerBonusManager->getBonusByPlayer($commander->player);
 			$playerBonus = $playerBonus->bonuses;
 
-			for ($i = 0; $i < $hoursDiff; ++$i) {
+			for ($i = 0; $i < $missingUpdatesCount; ++$i) {
 				$invest = $orbitalBase->iSchool;
 				$invest += $invest * $playerBonus->get(PlayerBonusId::COMMANDER_INVEST) / 100;
 
