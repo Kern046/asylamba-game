@@ -77,6 +77,20 @@ class Place implements SystemUpdatable
 			
 	}
 
+	public function getMaxResources(): int
+	{
+		return intval(
+			ceil($this->population / static::COEFFPOPRESOURCE)
+			* static::COEFFMAXRESOURCE
+			* ($this->maxDanger + 1)
+		);
+	}
+
+	public function getProducedResources(): int
+	{
+		return intval(floor(static::COEFFRESOURCE * $this->population));
+	}
+
 	public function lastUpdatedBySystemAt(): \DateTimeImmutable
 	{
 		return $this->updatedAt;

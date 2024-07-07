@@ -58,7 +58,7 @@ readonly class PlayerManager
 			if (($otherPlayer = $this->playerRepository->getByName($futureName)) === null) {
 				break;
 			}
-			$this->entityManager->clear($otherPlayer);
+			$this->entityManager->clear();
 		}
 		// deadify the player
 		$player->name = $futureName;

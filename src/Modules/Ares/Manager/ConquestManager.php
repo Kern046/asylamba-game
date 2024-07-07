@@ -115,8 +115,8 @@ readonly class ConquestManager
 						$r->attackerStatement = Report::DELETED;
 						$r->defenderStatement = Report::DELETED;
 					}
-					$this->entityManager->flush(Report::class);
-					$this->entityManager->clear(Report::class);
+					$this->entityManager->flush();
+					$this->entityManager->clear();
 
 					// mort du commandant
 					// arrêt des combats

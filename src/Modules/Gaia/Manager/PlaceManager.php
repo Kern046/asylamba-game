@@ -51,7 +51,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' est arrivé sur ',
@@ -69,7 +69,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' s\'est posé sur ',
@@ -87,7 +87,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' n\'est pas arrivé sur ',
@@ -105,7 +105,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' a pillé la planète rebelle située aux coordonnées ',
@@ -174,7 +174,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' a pillé la planète ',
@@ -297,7 +297,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' a pillé la planète non défendue ',
@@ -355,7 +355,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' n\'a pas attaqué la planète ',
@@ -373,7 +373,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' a colonisé la planète rebelle située aux coordonnées ',
@@ -441,7 +441,7 @@ readonly class PlaceManager
 					->setContent(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' a conquis la planète non défendue ',
@@ -496,7 +496,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' n\'a pas attaqué la planète ',
@@ -514,7 +514,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' est de retour sur votre base ',
@@ -550,7 +550,7 @@ readonly class PlaceManager
 					->setContent(NotificationBuilder::paragraph(
 						'Votre officier ',
 						NotificationBuilder::link(
-							$this->urlGenerator->generate('fleet', ['id' => $commander->id]),
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
 							$commander->name,
 						),
 						' a conquis la planète ',

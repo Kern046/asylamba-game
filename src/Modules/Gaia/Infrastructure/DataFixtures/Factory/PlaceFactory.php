@@ -8,6 +8,9 @@ use App\Modules\Gaia\Model\Place;
 use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\ModelFactory;
 
+/**
+ * @extends ModelFactory<Place>
+ */
 class PlaceFactory extends ModelFactory
 {
 	protected function getDefaults(): array

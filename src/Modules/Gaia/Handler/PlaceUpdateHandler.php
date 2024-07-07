@@ -27,7 +27,8 @@ readonly class PlaceUpdateHandler
 
 	public function __invoke(PlaceUpdateMessage $message): void
 	{
-		$place = $this->placeRepository->get($message->placeId) ?? throw new \RuntimeException(sprintf('Place %s not found', $message->placeId));
+		$place = $this->placeRepository->get($message->placeId)
+			?? throw new \RuntimeException(sprintf('Place %s not found', $message->placeId));
 
 		$missingUpdatesCount = ($this->countMissingSystemUpdates)($place);
 		if (0 === $missingUpdatesCount) {
@@ -35,45 +36,15 @@ readonly class PlaceUpdateHandler
 		}
 		// update time
 		$place->updatedAt = $this->clock->now();
-		$initialResources = $place->resources;
-		$maxResources = $this->getMaxResources($place);
-
-		$place->resources += $this->getProducedResources($place) * $missingUpdatesCount;
-		$place->resources = abs($place->resources - $initialResources);
-		if ($place->resources > $maxResources) {
-			$place->resources = $maxResources;
-		}
-
-		if (null === $place->player) {
-			$this->updateNpcPlace($place, $missingUpdatesCount);
-		}
+		$place->resources = min(
+			$place->resources + $place->getProducedResources() * $missingUpdatesCount,
+			$place->getMaxResources(),
+		);
+		$place->danger = min(
+			$place->danger + Place::REPOPDANGER * $missingUpdatesCount,
+			$place->maxDanger,
+		);
 
 		$this->placeRepository->save($place);
-	}
-
-	private function updateNpcPlace(Place $place, int $hoursDiff): void
-	{
-		$initialDanger = $place->danger;
-
-		$place->danger += Place::REPOPDANGER * $hoursDiff;
-		$place->danger = abs($place->danger - $initialDanger);
-		// Same thing here
-		if ($place->danger > $place->maxDanger) {
-			$place->danger = $place->maxDanger - $initialDanger;
-		}
-	}
-
-	private function getMaxResources(Place $place): int
-	{
-		return intval(
-			ceil($place->population / Place::COEFFPOPRESOURCE)
-			* Place::COEFFMAXRESOURCE
-			* ($place->maxDanger + 1)
-		);
-	}
-
-	private function getProducedResources(Place $place): int
-	{
-		return intval(floor(Place::COEFFRESOURCE * $place->population));
 	}
 }

@@ -287,7 +287,7 @@ class GalaxyGenerator
 				$this->placeRepository->save($place);
 
 				if (0 === $this->nbPlace % 20) {
-					$this->entityManager->clear(Place::class);
+					$this->entityManager->clear();
 				}
 			}
 		}

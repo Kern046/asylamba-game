@@ -3,7 +3,6 @@
 namespace App\Tests\Modules\Shared\Application\Service;
 
 use App\Modules\Demeter\Infrastructure\DataFixtures\Factory\FactionFactory;
-use App\Modules\Gaia\Infrastructure\DataFixtures\Factory\PlaceFactory;
 use App\Modules\Shared\Application\Service\CountMissingSystemUpdates;
 use App\Modules\Zeus\Infrastructure\DataFixtures\Factory\PlayerFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
