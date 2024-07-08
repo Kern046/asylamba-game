@@ -4,7 +4,6 @@ namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
-use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Infrastructure\Validator\CanMakeBuilding;
 use App\Modules\Athena\Infrastructure\Validator\DTO\BuildingConstructionOrder;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -23,7 +22,6 @@ class ViewGenerator extends AbstractController
 {
 	public function __construct(
 		private readonly BuildingLevelHandler $buildingLevelHandler,
-		private readonly OrbitalBaseHelper $orbitalBaseHelper,
 		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
 		private readonly ValidatorInterface $validator,
 	) {
