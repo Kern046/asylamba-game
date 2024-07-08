@@ -41,13 +41,19 @@ class Propose extends AbstractController
 		NotificationRepositoryInterface $notificationRepository,
 		PlayerManager $playerManager,
 	): Response {
-		$baseTo = $request->query->get('destinationBase') ?? throw new BadRequestHttpException('Missing destination base');
+		if (0 === $currentBase->levelSpatioport) {
+			throw $this->createAccessDeniedException('You cannot propose a trading route without a spatioport');
+		}
+
+		$baseTo = $request->query->get('destinationBase')
+			?? throw new BadRequestHttpException('Missing destination base');
 
 		if (!Uuid::isValid($baseTo)) {
 			throw new BadRequestHttpException('Invalid destination base ID');
 		}
 
-		$otherBase = $orbitalBaseRepository->get(Uuid::fromString($baseTo)) ?? throw $this->createNotFoundException('Destination base not found');
+		$otherBase = $orbitalBaseRepository->get(Uuid::fromString($baseTo))
+			?? throw $this->createNotFoundException('Destination base not found');
 
 		$nbrMaxCommercialRoute = $orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::SPATIOPORT, 'level', $currentBase->levelSpatioport, 'nbRoutesMax');
 
@@ -55,7 +61,7 @@ class Propose extends AbstractController
 		$alreadyARoute = null !== $commercialRouteRepository->getExistingRoute($currentBase, $otherBase);
 
 		// TODO transform into validation constraint
-		if (($commercialRouteRepository->countBaseRoutes($currentBase) >= $nbrMaxCommercialRoute) || $alreadyARoute || $currentBase->levelSpatioport === 0 || $otherBase->levelSpatioport === 0) {
+		if (($commercialRouteRepository->countBaseRoutes($currentBase) >= $nbrMaxCommercialRoute) || $alreadyARoute || $otherBase->levelSpatioport === 0) {
 			throw new ConflictHttpException('Impossible de proposer une route commerciale');
 		}
 		$player = $otherBase->player;

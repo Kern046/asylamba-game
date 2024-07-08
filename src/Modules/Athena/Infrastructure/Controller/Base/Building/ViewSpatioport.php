@@ -18,8 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ViewSpatioport extends AbstractController
 {
-	const MIN_DISTANCE = 75;
-	const MAX_DISTANCE = 125;
+	private const MIN_DISTANCE = 75;
+	private const MAX_DISTANCE = 125;
 
 	public function __invoke(
 		Request $request,
@@ -31,6 +31,10 @@ class ViewSpatioport extends AbstractController
 		ColorManager $colorManager,
 		ColorRepositoryInterface $colorRepository,
 	): Response {
+		if ($currentBase->levelSpatioport === 0) {
+			return $this->redirectToRoute('base_overview');
+		}
+
 		$mode = $request->query->get('mode', 'list');
 
 		$inGameFactions = $colorRepository->getInGameFactions();

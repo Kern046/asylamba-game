@@ -9,7 +9,6 @@ use App\Modules\Athena\Domain\Repository\RecyclingLogRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\RecyclingLogManager;
-use App\Modules\Athena\Manager\RecyclingMissionManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\RecyclingMission;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
@@ -24,6 +23,10 @@ class ViewRecycling extends AbstractController
 		RecyclingMissionRepositoryInterface $recyclingMissionRepository,
 		RecyclingLogRepositoryInterface     $recyclingLogRepository,
 	): Response {
+		if (0 === $currentBase->levelRecycling) {
+			return $this->redirectToRoute('base_overview');
+		}
+
 		// load recycling missions
 		$baseMissions = $recyclingMissionRepository->getBaseActiveMissions($currentBase);
 		$missionsLogs = $recyclingLogRepository->getBaseActiveMissionsLogs($currentBase);

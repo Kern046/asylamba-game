@@ -47,6 +47,10 @@ class ViewTechnosphere extends AbstractController
 		TechnologyRepositoryInterface $technologyRepository,
 		OrbitalBaseHelper $orbitalBaseHelper,
 	): Response {
+		if ($currentBase->levelTechnosphere === 0) {
+			return $this->redirectToRoute('base_overview');
+		}
+
 		$technologyResourceRefund = $this->getParameter('promethee.technology_queue.resource_refund');
 
 		$technology = $technologyRepository->getPlayerTechnology($currentPlayer);

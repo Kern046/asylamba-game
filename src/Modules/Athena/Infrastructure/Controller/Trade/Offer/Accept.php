@@ -54,6 +54,10 @@ class Accept extends AbstractController
 		EntityManagerInterface $entityManager,
 		Uuid $id,
 	): Response {
+		if (0 === $currentBase->levelCommercialPlateforme) {
+			throw $this->createAccessDeniedException('YOu cannot accept offers without a trading platform');
+		}
+
 		$transaction = $transactionRepository->get($id)
 			?? throw $this->createNotFoundException('Transaction not found');
 		$commercialShipping = $commercialShippingRepository->getByTransaction($transaction)

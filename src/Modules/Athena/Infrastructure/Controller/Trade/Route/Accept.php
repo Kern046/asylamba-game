@@ -14,8 +14,6 @@ use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
 use App\Modules\Shared\Application\PercentageApplier;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
