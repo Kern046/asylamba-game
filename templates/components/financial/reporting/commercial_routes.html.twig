@@ -11,6 +11,8 @@
 					{% for base in player_bases %}
 						{% set base_data = bases_data[base.id.toRfc4122()] %}
 
+						{% dump(base_data) %}
+
 						<li>
 							{% if base_data['routes_count'] > 0 %}
 								<span class="buttons">
@@ -29,10 +31,10 @@
 							{% if base_data['routes_count'] > 0 %}
 								<ul class="sub-list-type-1" id="rc-base-{{ base.id }}">
 									{% for route in base_data['routes'] %}
-										{% if route.statement == constant('App\\Modules\\Athena\\Model\\CommercialRoute::ACTIVE') %}
+										{% if route.isActive %}
 											<li>
 												<span class="label">
-													{{- route.baseName1 == base.name ? route.baseName2 : route.baseName1 -}}
+													{{- route.originBase.name == base.name ? route.destinationBase.name : route.originBase.name -}}
 												</span>
 												<span class="value">
 													{{- route.income|number -}}

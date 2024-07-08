@@ -78,7 +78,7 @@ class OrbitalBaseExtension extends AbstractExtension
 			)),
 			new TwigFunction('get_base_fleet_cost', fn (OrbitalBase $base) => Game::getFleetCost($base->shipStorage, false)),
 			// TODO check if bonus must be applied here (previously Game::getTaxFromPopulation without bonus applied)
-			new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => $this->populationTaxHandler->getPopulationTax($base)->initial),
+			new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => $this->populationTaxHandler->getPopulationTax($base)),
 			// @TODO Improve that part
 			new TwigFunction('get_base_image', fn (OrbitalBase $base) => sprintf(
 				'1-%s',
