@@ -236,7 +236,7 @@
 			<div class="box" data-id="1">
 				<h2>Envoyer des recycleurs</h2>
 				<div class="box-content">
-					{% if place.system.sector.faction is null or place.system.sector.faction.id != current_player.faction.id %}
+					{% if place.system.sector.faction is not null and place.system.sector.faction.id != current_player.faction.id %}
 						Vous ne pouvez envoyer des recycleurs que dans des secteurs non-revendiqués ou contrôlés par votre faction.
 					{% elseif place.typeOfPlace == constant('App\\Modules\\Gaia\\Model\\Place::EMPTYZONE') %}
 						Cet endroit regorgait autrefois de ressources ou de gaz mais de nombreux recycleurs sont déjà passés par là et n\'ont laissé que le vide de l'espace.
