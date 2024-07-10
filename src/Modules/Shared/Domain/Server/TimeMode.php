@@ -8,6 +8,7 @@ enum TimeMode: string
 {
 	case Standard = 'standard';
 	case Fast = 'fast';
+
 	public function isStandard(): bool
 	{
 		return self::Standard === $this;

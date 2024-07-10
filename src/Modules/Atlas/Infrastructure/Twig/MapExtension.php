@@ -9,6 +9,7 @@ use App\Modules\Ares\Domain\Specification\Player\CanRecycle;
 use App\Modules\Ares\Domain\Specification\Player\CanSpyPlace;
 use App\Modules\Artemis\Application\Handler\AntiSpyHandler;
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Recycling\GetMissionTime;
 use App\Modules\Athena\Domain\Specification\CanOrbitalBaseTradeWithPlace;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -32,6 +33,7 @@ class MapExtension extends AbstractExtension
 		private readonly GetTravelDuration $getTravelDuration,
 		private readonly AntiSpyHandler $antiSpyHandler,
 		private readonly GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		private readonly GetMissionTime $getMissionTime,
 		private readonly CurrentPlayerRegistry $currentPlayerRegistry,
 		private readonly CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
@@ -96,6 +98,7 @@ class MapExtension extends AbstractExtension
 
 				return $specification->isSatisfiedBy($place);
 			}),
+			new TwigFunction('get_recycling_mission_time', fn (OrbitalBase $orbitalBase, Place $place) => ($this->getMissionTime)($orbitalBase->place, $place, $this->currentPlayerRegistry->get())),
 		];
 	}
 

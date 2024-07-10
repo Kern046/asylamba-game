@@ -252,17 +252,16 @@
 						{# @TODO move this logic to a dedicated service #}
 						{% set active_ships = recycling_missions|reduce((carry, rm) => carry + rm.recyclerQuantity + rm.addToNextMission) %}
 						{% set available_recyclers = total_ships - active_ships %}
-						{% set recyclers_travel_time = (2 * get_travel_time(current_base, place) + constant('App\\Modules\\Athena\\Model\\RecyclingMission::RECYCLING_TIME'))|lite_seconds  %}
 
 						<span class="label-box">
-								<span class="key">Recycleurs libres</span>
-								<span class="val">{{ available_recyclers|number }}</span>
-							</span>
+							<span class="key">Recycleurs libres</span>
+							<span class="val">{{ available_recyclers|number }}</span>
+						</span>
 
 						<span class="label-box">
-								<span class="key">Temps de cycle</span>
-								<span class="val">{{ recyclers_travel_time }}</span>
-							</span>
+							<span class="key">Temps de cycle</span>
+							<span class="val">{{ get_recycling_mission_time(current_base, place)|lite_seconds }}</span>
+						</span>
 
 						<form class="spy-form" method="post" action="{{ path('create_recycling_mission', {'targetId': place.id}) }}">
 							<input type="text" name="quantity" value="{{ available_recyclers }}" />

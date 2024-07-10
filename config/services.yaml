@@ -146,4 +146,6 @@ services:
         arguments:
             $environment: '%kernel.environment%'
 
+    App\Modules\Travel\Domain\Service\CalculateTravelTime:
+
     App\Modules\Travel\Domain\Service\GetTravelDuration:

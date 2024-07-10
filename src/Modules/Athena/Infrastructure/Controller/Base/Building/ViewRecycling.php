@@ -7,16 +7,24 @@ use App\Classes\Library\Game;
 use App\Classes\Library\Utils;
 use App\Modules\Athena\Domain\Repository\RecyclingLogRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Recycling\GetMissionTime;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\RecyclingLogManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\RecyclingMission;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
+use App\Modules\Travel\Domain\Model\TravelType;
+use App\Modules\Travel\Domain\Service\CalculateTravelTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
 class ViewRecycling extends AbstractController
 {
+	public function __construct(
+		private readonly CalculateTravelTime $calculateTravelTime,
+		private readonly GetMissionTime $getMissionTime,
+	) {
+	}
+
 	public function __invoke(
 		OrbitalBase                         $currentBase,
 		OrbitalBaseHelper                   $orbitalBaseHelper,
@@ -65,9 +73,10 @@ class ViewRecycling extends AbstractController
 
 		// @TODO Infamous patch
 		$percent = Utils::interval(Utils::now(), date('Y-m-d H:i:s', strtotime($mission->endedAt->format('c')) - $mission->cycleTime), 's') / $mission->cycleTime * 100;
-		$travelTime = ($mission->cycleTime - RecyclingMission::RECYCLING_TIME) / 2;
+		$travelTime = ($this->calculateTravelTime)($mission->base->place, $mission->target, TravelType::RecyclingShips, $mission->base->player);
 		$beginRECY = Format::percent($travelTime, $mission->cycleTime);
-		$endRECY = Format::percent($travelTime + RecyclingMission::RECYCLING_TIME, $mission->cycleTime);
+		$recyclingTime = ($this->getMissionTime)($mission->base->place, $mission->target, $mission->base->player) - ($travelTime * 2);
+		$endRECY = Format::percent($travelTime + $recyclingTime, $mission->cycleTime);
 
 		return [
 			'mission' => $mission,
