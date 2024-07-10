@@ -6,6 +6,7 @@ use App\Classes\Library\DateTimeConverter;
 use App\Modules\Athena\Domain\Repository\RecyclingLogRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Domain\Service\Recycling\ExtractPoints;
+use App\Modules\Athena\Domain\Service\Recycling\GetMissionTime;
 use App\Modules\Athena\Domain\Service\Recycling\RecycleCredits;
 use App\Modules\Athena\Domain\Service\Recycling\RecycleResources;
 use App\Modules\Athena\Domain\Service\Recycling\RecycleShips;
@@ -35,6 +36,7 @@ readonly class RecyclingMissionHandler
 		private OrbitalBaseManager                  $orbitalBaseManager,
 		private PlaceManager                        $placeManager,
 		private PlayerManager                       $playerManager,
+		private GetMissionTime	$getMissionTime,
 		private NotificationRepositoryInterface                 $notificationRepository,
 		private RecyclingMissionRepositoryInterface $recyclingMissionRepository,
 		private RecyclingLogRepositoryInterface     $recyclingLogRepository,
@@ -199,7 +201,8 @@ readonly class RecyclingMissionHandler
 			$mission->statement = RecyclingMission::ST_DELETED;
 		}
 
-		// update u
+		// update the cycle time in case the time mode has changed or new bonuses apply since the previous occurrence
+		$mission->cycleTime = ($this->getMissionTime)($orbitalBase->place, $targetPlace, $player);
 		$mission->endedAt = $this->durationHandler->getDurationEnd($mission->endedAt, $mission->cycleTime);
 		// Schedule the next mission if there is still resources
 		if (!$mission->isDeleted()) {
