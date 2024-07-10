@@ -11,8 +11,6 @@
 					{% for base in player_bases %}
 						{% set base_data = bases_data[base.id.toRfc4122()] %}
 
-						{% dump(base_data) %}
-
 						<li>
 							{% if base_data['routes_count'] > 0 %}
 								<span class="buttons">
