@@ -111,7 +111,7 @@ readonly class PlayerCreditUpdateHandler
 	): void {
 		// Process all player bases income and losses
 		foreach ($bases as $base) {
-			$populationTax = $this->populationTaxHandler->getPopulationTax($base)->total;
+			$populationTax = $this->populationTaxHandler->getPopulationTax($base)->getTotal();
 
 			$routesIncome = $this->commercialRouteIncomeHandler->getCommercialRouteIncome($base)->total;
 

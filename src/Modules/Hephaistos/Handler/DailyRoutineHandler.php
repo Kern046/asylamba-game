@@ -8,6 +8,7 @@ use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Application\Handler\DurationHandler;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -15,6 +16,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 readonly class DailyRoutineHandler
 {
 	public function __construct(
+		private ClockInterface $clock,
 		private PlayerManager             $playerManager,
 		private DurationHandler $durationHandler,
 		private PlayerRepositoryInterface $playerRepository,
@@ -42,7 +44,7 @@ readonly class DailyRoutineHandler
 		// @TODO understand this strange loop condition
 		for ($i = $nbPlayers - 1; $i >= 0; --$i) {
 			$player = $players[$i];
-			$hoursSinceLastConnection = $this->durationHandler->getHoursDiff($player->dLastConnection, new \DateTimeImmutable());
+			$hoursSinceLastConnection = $this->durationHandler->getHoursDiff($player->dLastConnection, $this->clock->now());
 			if ($hoursSinceLastConnection >= $this->playerInactiveTimeLimit) {
 				$this->playerManager->kill($player);
 			} elseif ($hoursSinceLastConnection >= $this->playerGlobalInactiveTime && Player::ACTIVE === $player->statement) {
