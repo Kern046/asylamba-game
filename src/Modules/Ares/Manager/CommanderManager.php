@@ -204,7 +204,7 @@ readonly class CommanderManager implements SchedulerInterface
 		$bonus = $playerBonus->bonuses->get(PlayerBonusId::SHIP_CONTAINER);
 
 		$storage = $this->commanderArmyHandler->getPevToLoot($commander) * Commander::COEFFLOOT;
-		$storage += round($storage * ((2 * $bonus) / 100));
+		$storage += intval(round($storage * ((2 * $bonus) / 100)));
 
 		$resourcesLooted = ($storage > $place->resources) ? $place->resources : $storage;
 
