@@ -183,7 +183,7 @@ class ChangeBaseType extends AbstractController
 				++$movingQtyLine1;
 			}
 		}
-		$secondLineCommanders = $this->commanderRepository->getBaseCommanders($currentBase, 2);
+		$secondLineCommanders = $this->commanderRepository->getCommandersByLine($currentBase, 2);
 		$totalQtyLine2 = count($secondLineCommanders);
 		$movingQtyLine2 = 0;
 		foreach ($secondLineCommanders as $commander) {
