@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Application\Handler\Battle;
 
 use App\Modules\Ares\Domain\Model\ShipStat;
@@ -52,14 +54,14 @@ readonly class ShipFightHandler
 
 		$attackDamage = $this->shipStatsHandler->getStats($ship, ShipStat::Attack, $playerBonus)[$attackNumber];
 
-		$damages = ceil(
+		$damages = intval(ceil(
 			log((
 				$attackDamage
 				/ $this->shipStatsHandler->getStats($targetShip, ShipStat::Defense, $playerBonus)
 			) + 1)
 			* 4
 			* $attackDamage
-		);
+		));
 
 		$this->logger->debug('{shipType} {attackerId} of commander {commanderName} has inflicted {damage} damage points to {targetType} {targetId} with attack number {attackNumber}. Life before: {life}', [
 			'shipType' => $this->shipStatsHandler->getStats($ship, ShipStat::CodeName, $playerBonus),
@@ -77,7 +79,7 @@ readonly class ShipFightHandler
 
 	private function doesDodge(Ship $ship, PlayerBonus|null $playerBonus = null): bool
 	{
-		$avoidance = rand(0, $this->shipStatsHandler->getStats($ship, ShipStat::Speed, $playerBonus));
+		$avoidance = rand(0, intval(round($this->shipStatsHandler->getStats($ship, ShipStat::Speed, $playerBonus))));
 
 		return $avoidance > 80;
 	}
