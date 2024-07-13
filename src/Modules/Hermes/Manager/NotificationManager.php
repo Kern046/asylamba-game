@@ -5,9 +5,9 @@ namespace App\Modules\Hermes\Manager;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 
-class NotificationManager
+readonly class NotificationManager
 {
-	public function __construct(private readonly NotificationRepositoryInterface $notificationRepository)
+	public function __construct(private NotificationRepositoryInterface $notificationRepository)
 	{
 
 	}
