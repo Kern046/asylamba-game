@@ -129,8 +129,10 @@
 						</li>
 					</ul>
 
+					{% dump(mission_logs) %}
+
 					<h4>Dernières livraisons</h4>
-					{% for log in mission_logs|filter(log => log.rRecycling == mission.id) %}
+					{% for log in mission_logs|filter(log => log.mission.id == mission.id) %}
 						{% set wedge = {
 							'ressource': log.resources,
 							'crédit': log.credits,
@@ -160,7 +162,7 @@
 									,
 								{%- endif %}
 							{% endfor %}
-							<em>{{ log.dLog|date|raw }}</em>
+							<em>{{ log.createdAt|date|raw }}</em>
 						</p>
 					{% endfor %}
 				</div>
