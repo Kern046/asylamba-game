@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class Pin extends AbstractController
 {
@@ -19,13 +20,13 @@ class Pin extends AbstractController
 		EntityManagerInterface $entityManager,
 		FactionNewsManager $factionNewsManager,
 		FactionNewsRepositoryInterface $factionNewsRepository,
-		int $id
+		Uuid $id,
 	): Response {
 		$factionNews = $factionNewsRepository->getFactionNews($currentPlayer->faction);
 		$newExists = false;
 		// This way of doing things remove all previous pins
 		foreach ($factionNews as $factionNew) {
-			if ($factionNew->id == $id) {
+			if ($factionNew->id === $id) {
 				$newExists = true;
 				$factionNew->pinned = 1;
 			} else {
