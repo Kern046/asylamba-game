@@ -45,7 +45,7 @@ class ViewEmbassy extends AbstractController
 		}
 
 		if (null !== ($factionId = $request->query->get('faction')) || null === $playerId) {
-			$factionId ??= $currentPlayer->faction->id;
+			$factionId ??= $currentPlayer->faction->identifier;
 
 			if (null !== ($faction = $colorRepository->getOneByIdentifier($factionId)) && $faction->isInGame) {
 				$data = [
