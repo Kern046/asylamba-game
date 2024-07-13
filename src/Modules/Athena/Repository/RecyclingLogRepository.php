@@ -7,6 +7,7 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\RecyclingLog;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 
 /**
  * @extends DoctrineRepository<RecyclingLog>
@@ -25,7 +26,7 @@ class RecyclingLogRepository extends DoctrineRepository implements RecyclingLogR
 		$qb
 			->join('rl.mission', 'rm')
 			->where('rm.base = :base')
-			->setParameter('base', $base)
+			->setParameter('base', $base->id, UuidType::NAME)
 			->orderBy('rl.createdAt', 'DESC');
 
 		return $qb->getQuery()->getResult();

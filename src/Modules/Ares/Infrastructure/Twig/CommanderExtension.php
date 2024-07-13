@@ -7,6 +7,7 @@ namespace App\Modules\Ares\Infrastructure\Twig;
 use App\Classes\Library\Game;
 use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
 use App\Modules\Ares\Application\Handler\CommanderExperienceHandler;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Resource\CommanderResources;
@@ -27,10 +28,10 @@ class CommanderExtension extends AbstractExtension
 	{
 		return [
 			new TwigFilter('mission_label', fn (Commander $commander) => match ($commander->travelType) {
-				Commander::MOVE => 'déplacement vers ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
-				Commander::LOOT => 'pillage de ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
-				Commander::COLO => 'colonisation de ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
-				Commander::BACK => 'retour vers ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
+				CommanderMission::Move => 'déplacement vers ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
+				CommanderMission::Loot => 'pillage de ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
+				CommanderMission::Colo => 'colonisation de ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
+				CommanderMission::Back => 'retour vers ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
 				default => 'autre'
 			}),
 			new TwigFilter('commander_rank', fn (Commander $commander) => $this->getCommanderLevel($commander->level)),

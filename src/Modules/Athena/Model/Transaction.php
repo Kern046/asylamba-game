@@ -5,6 +5,8 @@ namespace App\Modules\Athena\Model;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class Transaction
 {
@@ -45,6 +47,10 @@ class Transaction
 		// if ($type == TYP_COMMANDER) 	--> rCommander
 		public \DateTimeImmutable $publishedAt,
 		public float $currentRate,
+		#[Assert\Expression(
+			"this.type == " . self::TYP_COMMANDER . " and value == null",
+			message: 'A commander transaction must have a commander set',
+		)]
 		public Commander|null $commander = null,
 		public int $price = 0,
 		public int $commercialShipQuantity = 0,	// ship needed for the transport

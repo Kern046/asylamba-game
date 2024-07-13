@@ -6,6 +6,7 @@ use App\Classes\Library\DateTimeConverter;
 use App\Modules\Athena\Domain\Repository\RecyclingLogRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Domain\Service\Recycling\ExtractPoints;
+use App\Modules\Athena\Domain\Service\Recycling\GetMissionTime;
 use App\Modules\Athena\Domain\Service\Recycling\RecycleCredits;
 use App\Modules\Athena\Domain\Service\Recycling\RecycleResources;
 use App\Modules\Athena\Domain\Service\Recycling\RecycleShips;
@@ -21,6 +22,7 @@ use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Shared\Application\Handler\DurationHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -35,6 +37,7 @@ readonly class RecyclingMissionHandler
 		private OrbitalBaseManager                  $orbitalBaseManager,
 		private PlaceManager                        $placeManager,
 		private PlayerManager                       $playerManager,
+		private GetMissionTime	$getMissionTime,
 		private NotificationRepositoryInterface                 $notificationRepository,
 		private RecyclingMissionRepositoryInterface $recyclingMissionRepository,
 		private RecyclingLogRepositoryInterface     $recyclingLogRepository,
@@ -44,6 +47,7 @@ readonly class RecyclingMissionHandler
 		private RecycleCredits $recycleCredits,
 		private RecycleShips $recycleShips,
 		private UrlGeneratorInterface $urlGenerator,
+		private LoggerInterface $logger,
 	) {
 	}
 
@@ -52,6 +56,11 @@ readonly class RecyclingMissionHandler
 		$mission = $this->recyclingMissionRepository->get($message->getRecyclingMissionId());
 		$orbitalBase = $mission->base;
 		$targetPlace = $mission->target;
+
+		$this->logger->debug('Processing recycling mission {missionId}. Initial target resources : {targetResources}', [
+			'missionId' => $mission->id->toRfc4122(),
+			'targetResources' => $targetPlace->resources,
+		]);
 
 		$player = $orbitalBase->player;
 
@@ -64,6 +73,9 @@ readonly class RecyclingMissionHandler
 		}
 
 		if (Place::EMPTYZONE === $targetPlace->typeOfPlace) {
+			$this->logger->debug('Mission {missionId} target has become empty',[
+				'missionId' => $mission->id->toRfc4122(),
+			]);
 			// the place become an empty place
 			$targetPlace->resources = 0;
 
@@ -199,7 +211,16 @@ readonly class RecyclingMissionHandler
 			$mission->statement = RecyclingMission::ST_DELETED;
 		}
 
-		// update u
+		$this->logger->debug('Recycling mission {missionId} has been processed. Final target resources : {targetResources}', [
+			'missionId' => $mission->id->toRfc4122(),
+			'targetResources' => $targetPlace->resources,
+			'refinedCredits' => $creditRecycled,
+			'refinedResources' => $resourceRecycled,
+			'refinedShips' => $buyShip,
+		]);
+
+		// update the cycle time in case the time mode has changed or new bonuses apply since the previous occurrence
+		$mission->cycleTime = ($this->getMissionTime)($orbitalBase->place, $targetPlace, $player);
 		$mission->endedAt = $this->durationHandler->getDurationEnd($mission->endedAt, $mission->cycleTime);
 		// Schedule the next mission if there is still resources
 		if (!$mission->isDeleted()) {

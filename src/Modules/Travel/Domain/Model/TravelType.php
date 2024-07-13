@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Gaia\Domain\Model;
+namespace App\Modules\Travel\Domain\Model;
 
 enum TravelType: string
 {

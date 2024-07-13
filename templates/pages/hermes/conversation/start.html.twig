@@ -1,0 +1,34 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block body %}
+	<div class="component size2 new-message">
+		<div class="head skin-5">
+			<h2>Démarrer une nouvelle conversation</h2>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				<form action="{{ url('create_conversation') }}" method="post">
+					<p>Destinataire</p>
+
+
+					<p class="input input-text">
+						<input class="autocomplete-hidden" name="recipients" type="hidden" value="{{ player_id }}" />
+						<input autocomplete="off" class="autocomplete-player ac_input" name="name" placeholder="Destinataire" type="text" value="{{ name }}"/>
+					</p>
+
+					<p>
+						Message
+						</p>
+					<p class="input input-area">
+						<span class="wysiwyg" data-id="new-message-wysiwyg">
+							{{ get_parser_toolbar()|raw }}
+							<textarea name="content" id="new-message-wysiwyg"></textarea>
+						</span>
+					</p>
+
+					<p><button>Démarrer la conversation</button></p>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endblock body %}

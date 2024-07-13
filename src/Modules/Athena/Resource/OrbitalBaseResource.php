@@ -30,25 +30,32 @@ class OrbitalBaseResource
 	 * 7 - storage
 	 * 8 - recycling
 	 * 9 - spatioport.
+	 * @var list<int> $orbitalBaseBuildings
 	 **/
-	public static $orbitalBaseBuildings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+	public static array $orbitalBaseBuildings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 	/**
 	 * pegase = 0, satyre = 1, chimere = 2, sirene = 3, dryade = 4 and meduse = 5.
+	 * @var list<int> $dock1Ships
 	 **/
-	public static $dock1Ships = [0, 1, 2, 3, 4, 5];
+	public static array $dock1Ships = [0, 1, 2, 3, 4, 5];
 
 	/**
 	 * griffon = 6, cyclope = 7, minotaure = 8, hydre = 9, cerbere = 10, phenix = 11.
+	 * @var list<int> $dock2Ships
 	 **/
-	public static $dock2Ships = [6, 7, 8, 9, 10, 11];
+	public static array $dock2Ships = [6, 7, 8, 9, 10, 11];
 
 	/**
 	 * motherShip1 = 12, motherShip2 = 13, motherShip3 = 14.
+	 * @var list<int> $dock3Ships
 	 **/
-	public static $dock3Ships = [12, 13, 14];
+	public static array $dock3Ships = [12, 13, 14];
 
-	public static $building = [
+	/**
+	 * @var list<array<string, mixed>> $building
+	 */
+	public static array $building = [
 		[
 			'name' => 'generator',
 			'column' => 'levelGenerator',

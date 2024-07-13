@@ -22,6 +22,7 @@ parameters:
 
     server_id: 0
     server_start_time: '%env(SERVER_START_TIME)%'
+    server_time_mode: '%env(enum:App\\Modules\\Shared\\Domain\\Server\\TimeMode:SERVER_TIME_MODE)%'
 
     security_api_key: '%env(SECURITY_API_KEY)%'
     security_server_key: '%env(SECURITY_SERVER_KEY)%'
@@ -68,7 +69,7 @@ parameters:
     media: '/media/'
     # active les APIs de confirmation
     # active la création de personnage au niveau 5
-    highmode: true
+    highmode: '%env(bool:HIGH_LEVEL_MODE)%'
     # MISCELLANEOUS #
     #################
     # définition des ids des différants joueurs systèmes
@@ -109,6 +110,13 @@ services:
             - '../src/views/'
             - '../src/Modules/'
 
+    App\Modules\Shared\:
+        resource: '../src/Modules/Shared/'
+        exclude:
+            - '../src/Modules/Shared/Application/PercentageApplier'
+            - '../src/Modules/Shared/Domain/'
+            - '../src/Modules/Shared/Infrastructure/'
+
     Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
 
     # add more service definitions when explicit configuration is needed
@@ -137,3 +145,7 @@ services:
     App\Shared\Infrastructure\EventListener\MixpanelListener:
         arguments:
             $environment: '%kernel.environment%'
+
+    App\Modules\Travel\Domain\Service\CalculateTravelTime:
+
+    App\Modules\Travel\Domain\Service\GetTravelDuration:

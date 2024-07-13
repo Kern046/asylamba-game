@@ -6,16 +6,16 @@ use App\Classes\Library\Game;
 use App\Modules\Athena\Domain\Repository\CommercialTaxRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
-use App\Modules\Zeus\Manager\PlayerBonusManager;
+use App\Modules\Travel\Domain\Model\TravelType;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
+use App\Shared\Application\Handler\DurationHandler;
 
 readonly class TransactionManager
 {
 	public function __construct(
-		private GetTravelTime $getTravelTime,
+		private DurationHandler $durationHandler,
+		private GetTravelDuration $getTravelDuration,
 		private CommercialTaxRepositoryInterface $commercialTaxRepository,
-		private PlayerBonusManager $playerBonusManager,
 	) {
 	}
 
@@ -40,9 +40,16 @@ readonly class TransactionManager
 		}
 		$transactionSystem = $transaction->base->place->system;
 		$baseSystem = $ob->place->system;
-		$playerBonus = $this->playerBonusManager->getBonusByPlayer($transaction->player);
 
-		$time = ($this->getTravelTime)($transaction->base->place, $ob->place, TravelType::CommercialShipping, $playerBonus);
+		$departureDate = new \DateTimeImmutable();
+		$arrivalDate = ($this->getTravelDuration)(
+			origin: $transaction->base->place,
+			destination: $ob->place,
+			departureDate: $departureDate,
+			travelType: TravelType::CommercialShipping,
+			player: $transaction->player,
+		);
+		$time = $this->durationHandler->getDiff($departureDate, $arrivalDate);
 
 		$transactionFaction = $transactionSystem->sector->faction;
 		$baseFaction = $baseSystem->sector->faction;

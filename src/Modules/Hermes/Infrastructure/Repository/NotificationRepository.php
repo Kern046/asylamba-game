@@ -94,11 +94,11 @@ class NotificationRepository extends DoctrineRepository implements NotificationR
 			->where($qb->expr()->orX(
 				$qb->expr()->andX(
 					$qb->expr()->eq('n.read', 0),
-					$qb->expr()->lt('DATE_DIFF(n.sentAt, CURRENT_DATE())', ':unread_timeout')
+					$qb->expr()->gt('DATE_DIFF(CURRENT_DATE(), n.sentAt)', ':unread_timeout')
 				),
 				$qb->expr()->andX(
 					$qb->expr()->eq('n.read', 1),
-					$qb->expr()->lt('DATE_DIFF(n.sentAt, CURRENT_DATE())', ':read_timeout')
+					$qb->expr()->gt('DATE_DIFF(CURRENT_DATE(), n.sentAt)', ':read_timeout')
 				)
 			))
 			->setParameter('unread_timeout', $unreadTimeout)

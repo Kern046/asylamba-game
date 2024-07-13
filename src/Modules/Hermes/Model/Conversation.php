@@ -2,6 +2,7 @@
 
 namespace App\Modules\Hermes\Model;
 
+use App\Modules\Zeus\Model\Player;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
@@ -24,6 +25,36 @@ class Conversation
 		public Collection $players = new ArrayCollection(),
 	) {
 			
+	}
+
+	public function hasPlayer(Player $player): bool
+	{
+		foreach ($this->players as $conversationUser) {
+			if ($conversationUser->player->id === $player->id) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public function getPlayerPart(Player $player): ConversationUser
+	{
+		foreach ($this->players as $conversationUser) {
+			if ($conversationUser->player->id === $player->id) {
+				return $conversationUser;
+			}
+		}
+		throw new \RuntimeException('Player not part of this conversation');
+	}
+
+	public function getInitiator(): Player
+	{
+		return $this->players->first()->player;
+	}
+
+	public function isGroupConversation(): bool
+	{
+		return 2 > $this->players->count();
 	}
 
 	public function getLastPage(): int

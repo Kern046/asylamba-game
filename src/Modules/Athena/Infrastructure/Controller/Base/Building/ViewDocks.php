@@ -35,6 +35,11 @@ class ViewDocks extends AbstractController
 		ShipHelper $shipHelper,
 		string $dockType,
 	): Response {
+		if (OrbitalBase::DOCK_TYPE_MANUFACTURE === $dockType && $currentBase->levelDock1 === 0 ||
+			OrbitalBase::DOCK_TYPE_SHIPYARD === $dockType && $currentBase->levelDock2 === 0) {
+			return $this->redirectToRoute('base_overview');
+		}
+
 		$playerBonuses = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses;
 
 		if (OrbitalBase::DOCK_TYPE_MANUFACTURE === $dockType) {

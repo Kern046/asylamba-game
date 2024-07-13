@@ -11,12 +11,10 @@ use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
 use App\Modules\Athena\Domain\Service\CountAvailableCommercialShips;
 use App\Modules\Athena\Domain\Service\CountNeededCommercialShips;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\CommercialShippingManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
-use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,8 +22,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Propose extends AbstractController
 {
@@ -38,10 +36,10 @@ class Propose extends AbstractController
 		CommanderManager $commanderManager,
 		CommanderRepositoryInterface $commanderRepository,
 		TransactionRepositoryInterface $transactionRepository,
-		CommercialShippingManager $commercialShippingManager,
 		CountNeededCommercialShips $countNeededCommercialShips,
 		CountAvailableCommercialShips $countAvailableCommercialShips,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
+		ValidatorInterface $validator,
 	): Response {
 		$type = $request->query->get('type') ?? throw new BadRequestHttpException('Missing type');
 		$quantity = $request->request->getInt('quantity');
@@ -134,14 +132,13 @@ class Propose extends AbstractController
 			identifier: $identifier,
 			publishedAt: new \DateTimeImmutable(),
 			currentRate: $transactionRepository->getLastCompletedTransaction($type)->currentRate,
+			commander: $commander ?? null,
 			price: $price,
 			commercialShipQuantity: $commercialShipQuantity,
 			statement: Transaction::ST_PROPOSED,
 		);
 
-		if ($tr->hasCommander()) {
-			$tr->commander = $commander ?? throw new \RuntimeException('Commander is unreachable');
-		}
+		$validator->validate($tr);
 
 		$transactionRepository->save($tr);
 
@@ -154,7 +151,7 @@ class Propose extends AbstractController
 			shipQuantity: $commercialShipQuantity,
 			statement: CommercialShipping::ST_WAITING,
 		);
-		$commercialShippingManager->add($cs);
+		$commercialShippingRepository->save($cs);
 
 		$transactionRepository->save($tr);
 

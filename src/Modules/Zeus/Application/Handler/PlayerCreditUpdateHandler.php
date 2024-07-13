@@ -9,6 +9,8 @@ use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Shared\Application\PercentageApplier;
+use App\Modules\Shared\Application\Service\CountMissingSystemUpdates;
+use App\Modules\Shared\Domain\Server\TimeMode;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use App\Modules\Zeus\Domain\Message\PlayerCreditUpdateMessage;
@@ -19,6 +21,7 @@ use App\Modules\Zeus\Model\PlayerFinancialReport;
 use App\Shared\Application\Handler\DurationHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 
@@ -27,7 +30,6 @@ readonly class PlayerCreditUpdateHandler
 {
 	public function __construct(
 		private EntityManagerInterface $entityManager,
-		private DurationHandler $durationHandler,
 		private CommercialRouteIncomeHandler $commercialRouteIncomeHandler,
 		private CommanderRepositoryInterface $commanderRepository,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
@@ -40,6 +42,7 @@ readonly class PlayerCreditUpdateHandler
 		private LoggerInterface $logger,
 		private CurrentPlayerRegistry $currentPlayerRegistry,
 		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		private CountMissingSystemUpdates $countMissingSystemUpdates,
 		private int $gaiaId,
 	) {
 	}
@@ -56,8 +59,8 @@ readonly class PlayerCreditUpdateHandler
 		);
 		$initialCredits = $player->credit;
 
-		$hoursDiff = $this->durationHandler->getHoursDiff($player->uPlayer, new \DateTimeImmutable());
-		if (0 === $hoursDiff) {
+		$missingUpdatesCount = ($this->countMissingSystemUpdates)($player);
+		if (0 === $missingUpdatesCount) {
 			return;
 		}
 		$this->currentPlayerRegistry->set($player);
@@ -66,7 +69,7 @@ readonly class PlayerCreditUpdateHandler
 
 		$this->entityManager->beginTransaction();
 
-		for ($i = 0; $i < $hoursDiff; ++$i) {
+		for ($i = 0; $i < $missingUpdatesCount; ++$i) {
 			$playerFinancialReport = new PlayerFinancialReport(
 				id: Uuid::v4(),
 				player: $player,
@@ -108,7 +111,7 @@ readonly class PlayerCreditUpdateHandler
 	): void {
 		// Process all player bases income and losses
 		foreach ($bases as $base) {
-			$populationTax = $this->populationTaxHandler->getPopulationTax($base)->total;
+			$populationTax = $this->populationTaxHandler->getPopulationTax($base)->getTotal();
 
 			$routesIncome = $this->commercialRouteIncomeHandler->getCommercialRouteIncome($base)->total;
 

@@ -126,7 +126,7 @@ class ViewInvestments extends AbstractController
 			$populationTax = $this->populationTaxHandler->getPopulationTax($base);
 			$data['totalTaxIn'] += $populationTax->initial;
 			$data['totalTaxInBonus'] += $populationTax->bonus;
-			$data['totalTaxOut'] += $populationTax->total * $base->place->system->sector->tax / 100;
+			$data['totalTaxOut'] += $populationTax->getTotal() * $base->place->system->sector->tax / 100;
 			$data['totalInvest'] += $base->iSchool + $base->iAntiSpy;
 			$data['totalShipsFees'] += Game::getFleetCost($base->shipStorage, false);
 

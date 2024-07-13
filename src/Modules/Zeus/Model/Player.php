@@ -1,19 +1,11 @@
 <?php
 
-/**
- * Player.
- *
- * @author Gil Clavien
- * @copyright Expansion - le jeu
- *
- * @update 20.05.13
- */
-
 namespace App\Modules\Zeus\Model;
 
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Shared\Domain\Model\SystemUpdatable;
 
-class Player implements CreditHolderInterface
+class Player implements CreditHolderInterface, SystemUpdatable
 {
 	public int|null $id = 0;
 	public string|null $bind = null;
@@ -127,5 +119,9 @@ class Player implements CreditHolderInterface
 	public function canAfford(int $amount): bool
 	{
 		return $this->credit >= $amount;
+	}
+	public function lastUpdatedBySystemAt(): \DateTimeImmutable
+	{
+		return $this->uPlayer;
 	}
 }

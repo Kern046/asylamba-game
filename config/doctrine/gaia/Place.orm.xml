@@ -23,7 +23,7 @@
 				<option name="unsigned">true</option>
 			</options>
 		</field>
-		<field name="population" column="population" type="smallint">
+		<field name="population" column="population" type="float">
 			<options>
 				<option name="unsigned">true</option>
 			</options>

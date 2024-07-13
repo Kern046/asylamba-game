@@ -2,6 +2,7 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
@@ -44,7 +45,7 @@ class Cancel extends AbstractController
 		$commander->startPlace = $rDestinationPlace;
 		$commander->departedAt = new \DateTimeImmutable();
 		$commander->arrivedAt = $newArrivalDate;
-		$commander->travelType = Commander::BACK;
+		$commander->travelType = CommanderMission::Back;
 
 		$this->addFlash('success', 'Déplacement annulé.');
 

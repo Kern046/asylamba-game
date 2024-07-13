@@ -26,9 +26,8 @@ readonly class PopulationTaxHandler
 		$bonus = intval($this->bonusApplier->apply($tax, PlayerBonusId::POPULATION_TAX));
 
 		return new PopulationTax(
-			initial: $tax,
+			initial: intval(round($tax)),
 			bonus: $bonus,
-			total: $tax + $bonus,
 		);
 	}
 }

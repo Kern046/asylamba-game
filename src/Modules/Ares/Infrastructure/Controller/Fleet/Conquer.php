@@ -2,20 +2,16 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Library\Game;
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Infrastructure\Validator\Commander\CanConquer;
 use App\Modules\Ares\Infrastructure\Validator\DTO\Conquest;
-use App\Modules\Ares\Manager\CommanderManager;
-use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Handler\CountPlayerBases;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Resource\ColorResource;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
-use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +19,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -33,12 +28,10 @@ class Conquer extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		GetTravelTime $getTravelTime,
 		OrbitalBase $orbitalBase,
 		CountPlayerBases $countPlayerBases,
-		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		CommanderManager $commanderManager,
 		CommanderRepositoryInterface $commanderRepository,
+		MoveFleet $moveFleet,
 		PlaceRepositoryInterface $placeRepository,
 		PlayerManager $playerManager,
 		TechnologyRepositoryInterface $technologyRepository,
@@ -53,14 +46,14 @@ class Conquer extends AbstractController
 			throw new BadRequestHttpException('Invalid place id');
 		}
 
-		$place = $placeRepository->get(Uuid::fromString($placeId)) ?? throw $this->createNotFoundException('Place not found');
+		$place = $placeRepository->get(Uuid::fromString($placeId))
+			?? throw $this->createNotFoundException('Place not found');
 
 		$commander = $commanderRepository->get($id) ?? throw $this->createNotFoundException('Commander not found');
 		// TODO Voter
 		if ($commander->player->id !== $currentPlayer->id) {
 			throw $this->createAccessDeniedException('Ce commandant ne vous appartient pas');
 		}
-		$home = $commander->base;
 
 		$totalBases = $countPlayerBases($currentPlayer);
 		// compute price
@@ -86,9 +79,12 @@ class Conquer extends AbstractController
 			throw new ValidationFailedException($conquest, $violations);
 		}
 
-		$duration = $getTravelTime($home->place, $place, TravelType::Fleet, $currentPlayerBonusRegistry->getPlayerBonus());
-
-		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $duration);
+		$moveFleet(
+			commander: $commander,
+			origin: $commander->base->place,
+			destination: $place,
+			mission: CommanderMission::Colo,
+		);
 		// debit credit
 		$playerManager->decreaseCredit($currentPlayer, $price);
 

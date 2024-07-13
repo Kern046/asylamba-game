@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Ares\Manager;
 
 use App\Classes\Library\DateTimeConverter;
-use App\Classes\Library\Game;
-use App\Classes\Library\Utils;
 use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
 use App\Modules\Ares\Application\Handler\VirtualCommanderHandler;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
 use App\Modules\Ares\Message\CommanderTravelMessage;
@@ -17,8 +17,6 @@ use App\Modules\Ares\Model\LiveReport;
 use App\Modules\Ares\Model\Report;
 use App\Modules\Artemis\Application\Handler\AntiSpyHandler;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
@@ -35,9 +33,9 @@ readonly class CommanderManager implements SchedulerInterface
 	public function __construct(
 		private DurationHandler $durationHandler,
 		private AntiSpyHandler $antiSpyHandler,
-		private GetTravelTime $getTravelTime,
 		private EntityManagerInterface $entityManager,
 		private CommanderRepositoryInterface $commanderRepository,
+		private MoveFleet $moveFleet,
 		private ReportRepositoryInterface $reportRepository,
 		private PlayerBonusManager $playerBonusManager,
 		private PlaceManager $placeManager,
@@ -95,29 +93,6 @@ readonly class CommanderManager implements SchedulerInterface
 		}
 	}
 
-	public function move(
-		Commander $commander,
-		Place $rDestinationPlace,
-		Place $rStartPlace,
-		int $travelType,
-		int $duration,
-	): void {
-		$commander->destinationPlace = $rDestinationPlace;
-		$commander->startPlace = $rStartPlace;
-		$commander->travelType = $travelType;
-		$commander->statement = Commander::MOVING;
-
-		$commander->departedAt = (3 != $travelType) ? new \DateTimeImmutable() : $commander->getArrivalDate();
-		$date = \DateTime::createFromImmutable($commander->getDepartureDate());
-		$date->modify(sprintf('+%d seconds', $duration));
-		$commander->arrivedAt = \DateTimeImmutable::createFromMutable($date);
-
-		$this->messageBus->dispatch(
-			new CommanderTravelMessage($commander->id),
-			[DateTimeConverter::to_delay_stamp($commander->getArrivalDate())],
-		);
-	}
-
 	public function getPosition(Commander $commander, $x1, $y1, $x2, $y2): array
 	{
 		$x = $x1;
@@ -149,7 +124,12 @@ readonly class CommanderManager implements SchedulerInterface
 		// TODO replace with specification
 		if ($place->player->id !== $commander->player->id || Place::TYP_ORBITALBASE !== $place->typeOfPlace) {
 			// retour forcé
-			$this->comeBack($place, $commander, $commanderPlace, $playerBonus);
+			($this->moveFleet)(
+				commander: $commander,
+				origin: $place,
+				destination: $commanderPlace,
+				mission: CommanderMission::Back,
+			);
 			$this->placeManager->sendNotif($place, Place::CHANGELOST, $commander);
 			$this->entityManager->flush();
 
@@ -219,22 +199,12 @@ readonly class CommanderManager implements SchedulerInterface
 		$commander->statement = $statement;
 	}
 
-	// HELPER
-
-	// comeBack
-	public function comeBack(Place $place, Commander $commander, Place $commanderPlace, $playerBonus): void
-	{
-		$duration = ($this->getTravelTime)($commanderPlace, $place, TravelType::Fleet, $playerBonus);
-
-		$this->move($commander, $commander->base->place, $place, Commander::BACK, $duration);
-	}
-
 	public function lootAnEmptyPlace(Place $place, Commander $commander, PlayerBonus $playerBonus): void
 	{
 		$bonus = $playerBonus->bonuses->get(PlayerBonusId::SHIP_CONTAINER);
 
 		$storage = $this->commanderArmyHandler->getPevToLoot($commander) * Commander::COEFFLOOT;
-		$storage += round($storage * ((2 * $bonus) / 100));
+		$storage += intval(round($storage * ((2 * $bonus) / 100)));
 
 		$resourcesLooted = ($storage > $place->resources) ? $place->resources : $storage;
 

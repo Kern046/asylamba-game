@@ -91,7 +91,7 @@ class ViewOverview extends AbstractController
 		// @TODO Rename these keys to give more meaning
 		return [
 			'total_mandate' => $this->durationHandler->getDiff($startMandate, $endMandate),
-			'remaining_mandate' => $this->durationHandler->getDiff($now, $startMandate),
+			'remaining_mandate' => $this->durationHandler->getDiff($startMandate, $now),
 			'total_before_campaign' => $this->durationHandler->getDiff($startMandate, $startCampaign),
 			'total_campaign_election' => $totalCampaignElection,
 			'total_campaign' => $this->durationHandler->getDiff($startCampaign, $endCampaign),

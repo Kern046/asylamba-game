@@ -6,6 +6,7 @@ use App\Classes\Library\Game;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Resource\ColorResource;
+use App\Modules\Promethee\Application\Factory\TechnologyQueueFactory;
 use App\Modules\Promethee\Domain\Repository\ResearchRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
@@ -38,18 +39,14 @@ class SearchTechnology extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		OrbitalBase $currentBase,
-		TechnologyQueueManager $technologyQueueManager,
 		TechnologyQueueRepositoryInterface $technologyQueueRepository,
 		TechnologyRepositoryInterface $technologyRepository,
-
 		OrbitalBaseManager $orbitalBaseManager,
 		PlayerManager $playerManager,
-		DurationHandler $durationHandler,
+		TechnologyQueueFactory $technologyQueueFactory,
 		string $identifier,
-	): Response
-	{
+	): Response {
 		if (!$this->technologyHelper->isATechnology($identifier) || $this->technologyHelper->isATechnologyNotDisplayed($identifier)) {
 			throw new BadRequestHttpException('la technologie indiquée n\'est pas valide');
 		}
@@ -73,32 +70,17 @@ class SearchTechnology extends AbstractController
 				'les conditions ne sont pas remplies pour développer une technologie',
 			);
 		}
-		// construit la nouvelle techno
-		$time = $this->technologyHelper->getInfo($identifier, 'time', $targetLevel);
-		$bonusPercent = $currentPlayerBonusRegistry->getPlayerBonus()->bonuses->get(PlayerBonusId::TECHNOSPHERE_SPEED);
-		if (ColorResource::APHERA == $currentPlayer->faction->identifier) {
-			// bonus if the player is from Aphera
-			$bonusPercent += ColorResource::BONUS_APHERA_TECHNO;
-		}
-
-		// ajout du bonus du lieu
-		$bonusPercent += Game::getImprovementFromScientificCoef($currentBase->place->coefHistory);
-		$bonus = round($time * $bonusPercent / 100);
-
 		$createdAt =
 			(0 === $nbTechnologyQueues)
 				? new \DateTimeImmutable()
-				: $technologyQueues[$nbTechnologyQueues - 1]->getEndDate();;
-		$tq = new TechnologyQueue(
-			id: Uuid::v4(),
-			player: $currentPlayer,
-			place: $currentBase->place,
-			technology: $identifier,
+				: $technologyQueues[$nbTechnologyQueues - 1]->getEndDate();
+
+		$technologyQueueFactory->create(
+			orbitalBase: $currentBase,
+			identifier: $identifier,
 			targetLevel: $targetLevel,
-			startedAt: $createdAt,
-			endedAt: $durationHandler->getDurationEnd($createdAt, round($time - $bonus)),
+			createdAt: $createdAt,
 		);
-		$technologyQueueManager->add($tq, $currentPlayer);
 
 		$orbitalBaseManager->decreaseResources($currentBase, $this->technologyHelper->getInfo($identifier, 'resource', $targetLevel));
 

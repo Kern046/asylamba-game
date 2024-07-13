@@ -16,7 +16,7 @@
 		<meta name="description" content="Kalaxia, jeu de stratégie multijoueurs" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ faction_id ~ '.png') }}" />
+		<link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ (faction_id != 0 ? faction_id : 1) ~ '.png') }}" />
 		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('build/css/main.faction' ~ (faction_id != 0 ? faction_id : 1) ~ '.css') }}" />
 	</head>
 	<body class="color{{ faction_id }} {% block bodyClasses %}no-scrolling{% endblock bodyClasses %} {% if app.request.get('_route') == 'create_character' %}inscription{% endif %}" data-init-sftr="2">

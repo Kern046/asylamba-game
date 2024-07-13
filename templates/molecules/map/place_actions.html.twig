@@ -236,7 +236,7 @@
 			<div class="box" data-id="1">
 				<h2>Envoyer des recycleurs</h2>
 				<div class="box-content">
-					{% if place.system.sector.faction is null or place.system.sector.faction.id != current_player.faction.id %}
+					{% if place.system.sector.faction is not null and place.system.sector.faction.id != current_player.faction.id %}
 						Vous ne pouvez envoyer des recycleurs que dans des secteurs non-revendiqués ou contrôlés par votre faction.
 					{% elseif place.typeOfPlace == constant('App\\Modules\\Gaia\\Model\\Place::EMPTYZONE') %}
 						Cet endroit regorgait autrefois de ressources ou de gaz mais de nombreux recycleurs sont déjà passés par là et n\'ont laissé que le vide de l'espace.
@@ -252,17 +252,16 @@
 						{# @TODO move this logic to a dedicated service #}
 						{% set active_ships = recycling_missions|reduce((carry, rm) => carry + rm.recyclerQuantity + rm.addToNextMission) %}
 						{% set available_recyclers = total_ships - active_ships %}
-						{% set recyclers_travel_time = (2 * get_travel_time(current_base, place) + constant('App\\Modules\\Athena\\Model\\RecyclingMission::RECYCLING_TIME'))|lite_seconds  %}
 
 						<span class="label-box">
-								<span class="key">Recycleurs libres</span>
-								<span class="val">{{ available_recyclers|number }}</span>
-							</span>
+							<span class="key">Recycleurs libres</span>
+							<span class="val">{{ available_recyclers|number }}</span>
+						</span>
 
 						<span class="label-box">
-								<span class="key">Temps de cycle</span>
-								<span class="val">{{ recyclers_travel_time }}</span>
-							</span>
+							<span class="key">Temps de cycle</span>
+							<span class="val">{{ get_recycling_mission_time(current_base, place)|lite_seconds }}</span>
+						</span>
 
 						<form class="spy-form" method="post" action="{{ path('create_recycling_mission', {'targetId': place.id}) }}">
 							<input type="text" name="quantity" value="{{ available_recyclers }}" />

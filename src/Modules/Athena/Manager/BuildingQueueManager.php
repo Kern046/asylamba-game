@@ -15,9 +15,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class BuildingQueueManager implements SchedulerInterface
 {
 	public function __construct(
-		private readonly MessageBusInterface $messenger,
+		private readonly MessageBusInterface              $messageBus,
 		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
-		private readonly EventDispatcherInterface $eventDispatcher,
 	) {
 	}
 
@@ -26,19 +25,10 @@ class BuildingQueueManager implements SchedulerInterface
 		$buildingQueues = $this->buildingQueueRepository->getAll();
 
 		foreach ($buildingQueues as $buildingQueue) {
-			$this->messenger->dispatch(new BuildingQueueMessage($buildingQueue->id), [DateTimeConverter::to_delay_stamp($buildingQueue->getEndDate())]);
+			$this->messageBus->dispatch(
+				new BuildingQueueMessage($buildingQueue->id),
+				[DateTimeConverter::to_delay_stamp($buildingQueue->getEndDate())]
+			);
 		}
-	}
-
-	public function add(BuildingQueue $buildingQueue): void
-	{
-		$this->buildingQueueRepository->save($buildingQueue);
-
-		$this->messenger->dispatch(
-			new BuildingQueueMessage($buildingQueue->id),
-			[DateTimeConverter::to_delay_stamp($buildingQueue->getEndDate()),
-		]);
-
-		$this->eventDispatcher->dispatch(new NewBuildingQueueEvent($buildingQueue));
 	}
 }

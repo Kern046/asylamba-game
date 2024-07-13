@@ -38,18 +38,6 @@ readonly class CommercialShippingManager implements SchedulerInterface
 		}
 	}
 
-	public function add(CommercialShipping $commercialShipping): void
-	{
-		$this->commercialShippingRepository->save($commercialShipping);
-
-		if (!$commercialShipping->isWaiting()) {
-			$this->messageBus->dispatch(
-				new CommercialShippingMessage($commercialShipping->id),
-				[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivalDate())],
-			);
-		}
-	}
-
 	/**
 	 * TODO: add more data and links in notifications.
 	 */

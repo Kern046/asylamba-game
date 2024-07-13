@@ -21,36 +21,36 @@ class ShipResource
 
 	public const COST_REDUCTION = 0.8;
 
-	private static $ships = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+	private static array $ships = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
 	/**
 	 * pegase = 0, satyre = 1, sirene = 2, dryade = 3, chimere = 4 and meduse = 5.
 	 **/
-	private static $dock1Ships = [0, 1, 2, 3, 4, 5];
+	private static array $dock1Ships = [0, 1, 2, 3, 4, 5];
 
 	/**
 	 * griffon = 6, cyclope = 7, minotaure = 8, hydre = 9, cerbere = 10, phenix = 11.
 	 **/
-	private static $dock2Ships = [6, 7, 8, 9, 10, 11];
+	private static array $dock2Ships = [6, 7, 8, 9, 10, 11];
 
-	private static $femaleShipNames = [2, 3, 4, 5, 9];
+	private static array $femaleShipNames = [2, 3, 4, 5, 9];
 
-	public static function isAShip($ship)
+	public static function isAShip(int $ship): bool
 	{
 		return in_array($ship, self::$ships);
 	}
 
-	public static function isAShipFromDock1($ship)
+	public static function isAShipFromDock1(int $ship): bool
 	{
 		return in_array($ship, self::$dock1Ships);
 	}
 
-	public static function isAShipFromDock2($ship)
+	public static function isAShipFromDock2(int $ship): bool
 	{
 		return in_array($ship, self::$dock2Ships);
 	}
 
-	public static function isAFemaleShipName($ship)
+	public static function isAFemaleShipName(int $ship): bool
 	{
 		return in_array($ship, self::$femaleShipNames);
 	}
@@ -71,7 +71,7 @@ class ShipResource
 		return count(self::$ship);
 	}
 
-	private static $ship = [
+	private static array $ship = [
 		[
 			'codeName' => 'Pégase',
 			'name' => 'Chasseur Léger',

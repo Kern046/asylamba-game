@@ -11,7 +11,7 @@
 					{% for base in player_bases %}
 						{% set base_tax = get_base_tax(base, tax_coeff) %}
 						{# @TODO move that logic somewhere legit #}
-						{% set base_tax_out = (base_tax + (base_tax * tax_coeff) / 100) * base.place.system.sector.tax / 100 %}
+						{% set base_tax_out = base_tax.total * base.place.system.sector.tax / 100 %}
 
 						<li>
 							<span class="label">{{ base.name }} [{{ base.place.system.sector.tax }}% de taxe]</span>

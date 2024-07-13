@@ -3,15 +3,12 @@
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
 use App\Classes\Library\Format;
+use App\Modules\Athena\Application\Handler\CommercialRoute\GetCommercialRoutePrice;
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
-use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
-use App\Modules\Athena\Manager\CommercialRouteManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -28,6 +25,8 @@ class Refuse extends AbstractController
 		Player                             $currentPlayer,
 		OrbitalBase                        $currentBase,
 		CommercialRouteRepositoryInterface $commercialRouteRepository,
+		GetCommercialRoutePrice $getCommercialRoutePrice,
+		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		PlayerRepositoryInterface          $playerRepository,
 		PlayerManager                      $playerManager,
 		NotificationRepositoryInterface    $notificationRepository,
@@ -44,7 +43,11 @@ class Refuse extends AbstractController
 		$refusingBase = $cr->destinationBase;
 
 		// rend les crédits au proposant
-		$playerManager->increaseCredit($proposerBase->player, $cr->price);
+		$price = $getCommercialRoutePrice(
+			$getDistanceBetweenPlaces($proposerBase->place, $refusingBase->place),
+			$proposerBase->player,
+		);
+		$playerManager->increaseCredit($proposerBase->player, $price);
 
 		// notification
 		$notification = NotificationBuilder::new()
@@ -67,7 +70,7 @@ class Refuse extends AbstractController
 				'.',
 				NotificationBuilder::divider(),
 				'Les ',
-				Format::numberFormat($cr->price),
+				Format::numberFormat($price),
 				' crédits bloqués sont à nouveau disponibles.',
 			))
 			->for($proposerBase->player);

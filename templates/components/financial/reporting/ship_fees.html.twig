@@ -11,11 +11,11 @@
 					{% for base in player_bases %}
 						{% set base_fleet_cost = get_base_fleet_cost(base) %}
 						{% set base_commanders = commanders_by_base[base.id.toRfc4122()] is defined ? commanders_by_base[base.id.toRfc4122()] : [] %}
-						{% set total_base = base_fleet_cost + base_commanders|reduce(
+						{% set base_transaction = transactions|filter(t => t.base.id == base.id)|reduce((carry, t) => carry + get_ship_transaction_cost(t))|default(0) %}
+
+						{% set total_base = base_fleet_cost + base_transaction + base_commanders|reduce(
 							(carry, commander) => carry + get_fleet_cost(commander)
 						) %}
-						{% set base_transaction = transactions|filter(t => t.rPlace == base.id)|reduce((carry, t) => carry + get_ship_transaction_cost(t))|default(0) %}
-
 						<li>
 							<span class="buttons">
 								<a href="#" class="sh" data-target="ships-base-{{ base.id }}">↓</a>

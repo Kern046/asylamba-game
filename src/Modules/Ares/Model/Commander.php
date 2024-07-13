@@ -2,16 +2,18 @@
 
 namespace App\Modules\Ares\Model;
 
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Domain\Model\TravellerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
-class Commander implements TravellerInterface, \JsonSerializable
+class Commander implements TravellerInterface, \JsonSerializable, SystemUpdatable
 {
 	// variables de combat
 	/** @var list<int> */
@@ -27,7 +29,7 @@ class Commander implements TravellerInterface, \JsonSerializable
 	public \DateTimeImmutable|null $departedAt = null;
 	public \DateTimeImmutable|null $arrivedAt = null;
 	public int $resources = 0;
-	public int|null $travelType = null;
+	public CommanderMission|null $travelType = null;
 	public Place|null $startPlace = null;
 	public Place|null $destinationPlace = null;
 	// Tableau d'objets squadron
@@ -139,22 +141,22 @@ class Commander implements TravellerInterface, \JsonSerializable
 
 	public function isTransferring(): bool
 	{
-		return self::MOVE === $this->travelType;
+		return CommanderMission::Move === $this->travelType;
 	}
 
 	public function isLooting(): bool
 	{
-		return self::LOOT === $this->travelType;
+		return CommanderMission::Loot === $this->travelType;
 	}
 
 	public function isInvading(): bool
 	{
-		return self::COLO === $this->travelType;
+		return CommanderMission::Colo === $this->travelType;
 	}
 
 	public function isComingBack(): bool
 	{
-		return self::BACK === $this->travelType;
+		return CommanderMission::Back === $this->travelType;
 	}
 
 	public function isVictorious(): bool
@@ -230,5 +232,10 @@ class Commander implements TravellerInterface, \JsonSerializable
 			'id' => $this->id,
 			'name' => $this->name,
 		];
+	}
+
+	public function lastUpdatedBySystemAt(): \DateTimeImmutable
+	{
+		return $this->updatedAt;
 	}
 }

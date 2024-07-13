@@ -47,9 +47,10 @@ class HasUnlockedBuildingValidator extends ConstraintValidator
 	{
 		$data = OrbitalBaseResource::$building[$buildingConstructionOrder->getBuildingIdentifier()];
 
-		if (!in_array('techno', $data)) {
+		if (!array_key_exists('techno', $data)) {
 			return;
 		}
+
 
 		if (1 !== $buildingConstructionOrder->getTechnology()->getTechnology($data['techno'])) {
 			$this->context

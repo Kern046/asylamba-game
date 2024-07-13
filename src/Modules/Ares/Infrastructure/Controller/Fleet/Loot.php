@@ -2,18 +2,18 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Library\Game;
 use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
 use App\Modules\Ares\Domain\Event\Fleet\PlannedLootEvent;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Model\Place;
+use App\Modules\Travel\Domain\Model\TravelType;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,14 +24,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Uid\Uuid;
 
 class Loot extends AbstractController
 {
 	public function __construct(
-		private readonly CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		private readonly CommanderManager $commanderManager,
 		private readonly CommanderRepositoryInterface $commanderRepository,
 		private readonly EntityManagerInterface $entityManager,
 		private readonly EventDispatcherInterface $eventDispatcher,
@@ -47,7 +44,7 @@ class Loot extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
-		GetTravelTime $getTravelTime,
+		MoveFleet $moveFleet,
 		PlaceRepositoryInterface $placeRepository,
 		CommanderArmyHandler $commanderArmyHandler,
 		Uuid $id,
@@ -59,8 +56,10 @@ class Loot extends AbstractController
 		}
 
 		// @TODO simplify this hell
-		$place = $placeRepository->get(Uuid::fromString($placeId)) ?? throw $this->createNotFoundException('Place not found');
-		$commander = $this->commanderRepository->get($id) ?? throw $this->createNotFoundException('Commander not found');
+		$place = $placeRepository->get(Uuid::fromString($placeId))
+			?? throw $this->createNotFoundException('Place not found');
+		$commander = $this->commanderRepository->get($id)
+			?? throw $this->createNotFoundException('Commander not found');
 
 		if ($commander->player->id !== $currentPlayer->id) {
 			throw $this->createAccessDeniedException('This commander does not belong to you');
@@ -71,13 +70,6 @@ class Loot extends AbstractController
 		// TODO replace with proper services
 		$length = $getDistanceBetweenPlaces($home->place, $place);
 
-		$duration = $getTravelTime(
-			$home->place,
-			$place,
-			TravelType::Fleet,
-			$this->currentPlayerBonusRegistry->getPlayerBonus(),
-		);
-
 		if (0 === $commanderArmyHandler->getPev($commander)) {
 			throw new ConflictHttpException('You cannot send a commander with an empty fleet');
 		}
@@ -85,7 +77,7 @@ class Loot extends AbstractController
 		$sector = $place->system->sector;
 		$sectorColor = $sector->faction;
 		// Move that part in a Specification class
-		$isFactionSector = $sectorColor->id === $currentPlayer->faction->id || Color::ALLY == $sectorColor->relations[$currentPlayer->faction->identifier];
+		$isFactionSector = $sectorColor?->id === $currentPlayer->faction->id || Color::ALLY === $sectorColor?->relations[$currentPlayer->faction->identifier];
 
 		// Move that part in a Specification class
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
@@ -107,8 +99,12 @@ class Loot extends AbstractController
 		if (Place::TERRESTRIAL !== $place->typeOfPlace) {
 			throw new ConflictHttpException('This place is not inhabited');
 		}
-
-		$this->commanderManager->move($commander, $place, $commander->base->place, Commander::LOOT, $duration);
+		$moveFleet(
+			commander: $commander,
+			origin: $home->place,
+			destination: $place,
+			mission: CommanderMission::Loot,
+		);
 
 		$this->addFlash('success', 'Flotte envoyée.');
 

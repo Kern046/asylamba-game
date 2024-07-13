@@ -2,9 +2,8 @@
 				  xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
 				  xsi:schemaLocation="https://doctrine-project.org/schemas/orm/doctrine-mapping
                           https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-
 	<entity name="App\Modules\Demeter\Model\Forum\FactionNews" table="factionNews">
-		<id name="id" type="integer" column="uuid" />
+		<id name="id" type="uuid" />
 
 		<many-to-one field="faction" target-entity="App\Modules\Demeter\Model\Color">
 

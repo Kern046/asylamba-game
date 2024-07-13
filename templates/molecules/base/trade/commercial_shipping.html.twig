@@ -7,7 +7,7 @@
 				   title="supprimer cette offre coûtera {{ get_cancellation_price(commercial_shipping) }} crédits"
 				>×</a>
 			{% endif %}
-			{% if commercial_shipping.transaction.hasResources %}
+			{% if commercial_shipping.hasResources %}
 				<img src="{{ asset('build/media/market/resources-pack-' ~ commercial_shipping|commercial_shipping_picto ~ '.png') }}" alt="" class="picto" />
 				<div class="offer">
 					{# @TODO seems that resources selling isn't sure about the used property #}
@@ -15,13 +15,13 @@
 					{{ (commercial_shipping.resourceTransported == 0 ? commercial_shipping.transaction.quantity : commercial_shipping.resourceTransported)|number }}
 					<img src="{{ asset('build/media/resources/resource.png') }}" alt="" class="icon-color" />
 				</div>
-			{% elseif commercial_shipping.transaction.hasCommander %}
+			{% elseif commercial_shipping.hasCommander %}
 				<img src="{{ asset('build/media/commander/small/' ~ commercial_shipping.transaction.commander.avatar ~ '.png') }}" alt="" class="picto" />
 				<div class="offer">
 					<strong>{{ commercial_shipping.transaction.commander|commander_rank }} {{ commercial_shipping.transaction.commander.name }}</strong>
 					<em>{{ commercial_shipping.transaction.commander.experience|number }} xp | '{{ commercial_shipping.transaction.commander.palmares }} victoire{{ commercial_shipping.transaction.commander.palmares|plural }}</em>
 				</div>
-			{% elseif commercial_shipping.transaction.hasShips %}
+			{% elseif commercial_shipping.hasShips %}
 				<img src="{{ asset('build/media/ship/picto/ship' ~ commercial_shipping.transaction.identifier ~ '.png') }}" alt="" class="picto" />
 				<div class="offer">
 					<strong>

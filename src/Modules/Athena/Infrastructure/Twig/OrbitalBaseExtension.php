@@ -7,6 +7,8 @@ use App\Classes\Library\Game;
 use App\Classes\Library\Utils;
 use App\Modules\Artemis\Model\SpyReport;
 use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
+use App\Modules\Athena\Domain\Service\Base\Building\BuildingDataHandler;
+use App\Modules\Athena\Domain\Service\Base\Building\GetTimeCost;
 use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
 use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
@@ -23,6 +25,8 @@ use Twig\TwigFunction;
 class OrbitalBaseExtension extends AbstractExtension
 {
 	public function __construct(
+		private readonly BuildingDataHandler $buildingDataHandler,
+		private readonly GetTimeCost $getTimeCost,
 		private readonly DurationHandler $durationHandler,
 		private readonly OrbitalBaseHelper $orbitalBaseHelper,
 		private readonly PopulationTaxHandler $populationTaxHandler,
@@ -66,13 +70,15 @@ class OrbitalBaseExtension extends AbstractExtension
 				$orbitalBase->place->coefResources,
 			)),
 			new TwigFunction('get_building_info', fn (int $buildingNumber, string $info, int $level = 0, string $sub = 'default') => $this->orbitalBaseHelper->getInfo($buildingNumber, $info, $level, $sub)),
+			new TwigFunction('get_building_resource_cost', fn (int $buildingNumber, int $level) => $this->buildingDataHandler->getBuildingResourceCost($buildingNumber, $level)),
+			new TwigFunction('get_building_time_cost', fn (int $buildingNumber, int $level) => ($this->getTimeCost)($buildingNumber, $level)),
 			new TwigFunction('get_building_level_range', fn (int $currentLevel) => \range(
 				($currentLevel < 3) ? 1 : $currentLevel - 2,
 				(($currentLevel > 35) ? 41 : $currentLevel + 5) - 1,
 			)),
 			new TwigFunction('get_base_fleet_cost', fn (OrbitalBase $base) => Game::getFleetCost($base->shipStorage, false)),
 			// TODO check if bonus must be applied here (previously Game::getTaxFromPopulation without bonus applied)
-			new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => $this->populationTaxHandler->getPopulationTax($base)->initial),
+			new TwigFunction('get_base_tax', fn (OrbitalBase $base, int $taxCoeff) => $this->populationTaxHandler->getPopulationTax($base)),
 			// @TODO Improve that part
 			new TwigFunction('get_base_image', fn (OrbitalBase $base) => sprintf(
 				'1-%s',

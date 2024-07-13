@@ -92,7 +92,7 @@ class PlaceRepository extends DoctrineRepository implements PlaceRepositoryInter
 			))
 			->orderBy('pl.id', 'DESC')
 			->setMaxResults(20)
-			->setParameter('search', $search);
+			->setParameter('search', "%$search%");
 
 		return $qb->getQuery()->getResult();
 	}

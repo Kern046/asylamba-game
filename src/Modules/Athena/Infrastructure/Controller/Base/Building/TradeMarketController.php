@@ -31,6 +31,10 @@ class TradeMarketController extends AbstractController
 		TransactionRepositoryInterface $transactionRepository,
 		string                         $mode,
 	): Response {
+		if ($currentBase->levelCommercialPlateforme === 0) {
+			return $this->redirectToRoute('base_overview');
+		}
+
 		return $this->render('pages/athena/trade_market.html.twig', [
 			'mode' => $mode,
 			'max_ships' => $orbitalBaseHelper->getInfo(

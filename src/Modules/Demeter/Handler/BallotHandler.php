@@ -166,7 +166,7 @@ readonly class BallotHandler
 		foreach ($users as $user) {
 			$user->conversationStatus = ConversationUser::CS_DISPLAY;
 		}
-		$mandateDuration = ColorResource::getInfo($color->identifier, 'mandateDuration');
+		$mandateDuration = $this->nextElectionDateCalculator->getMandateDuration($color);
 		if ($hadVoted) {
 			/*			$date = new DateTime($this->dLastElection);
 						$date->modify('+' . $this->mandateDuration + self::ELECTIONTIME + self::CAMPAIGNTIME . ' second');

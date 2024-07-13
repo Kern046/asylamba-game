@@ -7,6 +7,7 @@ use App\Modules\Hermes\Model\Conversation;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends DoctrineRepository<Conversation>
@@ -30,6 +31,11 @@ class ConversationRepository extends DoctrineRepository implements ConversationR
 		return $qb->getQuery()->getSingleResult();
 	}
 
+	public function getOne(Uuid $id): Conversation|null
+	{
+		return $this->find($id);
+	}
+
 	public function countPlayerConversations(Player $player): int
 	{
 		$qb = $this->createQueryBuilder('c');
@@ -44,16 +50,16 @@ class ConversationRepository extends DoctrineRepository implements ConversationR
 		return $qb->getQuery()->getSingleScalarResult();
 	}
 
-	public function getPlayerConversations(Player $player, int $mode): array
+	public function getPlayerConversations(Player $player, int $mode, int $page = 1): array
 	{
 		$qb = $this->createQueryBuilder('c');
 
 		$qb
-			->select('COUNT(c.id)')
 			->leftJoin('c.players', 'cu')
 			->where('cu.player = :player')
 			->andWhere('cu.conversationStatus = :mode')
 			->orderBy('c.lastMessageAt', 'DESC')
+			->setFirstResult(($page - 1) * Conversation::CONVERSATION_BY_PAGE)
 			->setMaxResults(Conversation::CONVERSATION_BY_PAGE)
 			->setParameter('player', $player)
 			->setParameter('mode', $mode);

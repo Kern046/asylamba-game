@@ -22,7 +22,7 @@ readonly class CountPlayerBases
 
 		$conquerringCommanders = count(array_filter(
 			$this->commanderRepository->getPlayerCommanders($player, [Commander::MOVING]),
-			fn(Commander $commander) => Commander::COLO === $commander->travelType,
+			fn(Commander $commander) => CommanderMission::Colo === $commander->travelType,
 		));
 
 		return $playerBases + $conquerringCommanders;

@@ -12,7 +12,7 @@ class Format
 	 *     : str => retourne la chaine (ou s si non spécifié) si number est supérieur à 1
 	 * arg :
 	 */
-	public static function addPlural($number, $return = '', $expression = '')
+	public static function addPlural(int $number, string $return = '', string $expression = ''): string
 	{
 		if ($number > 1) {
 			return ('' == $expression and '' == $return)
@@ -20,12 +20,12 @@ class Format
 				: $return;
 		} else {
 			return ('' == $expression)
-				? null
+				? ''
 				: $expression;
 		}
 	}
 
-	public static function ordinalNumber($nbr)
+	public static function ordinalNumber(int $nbr): string
 	{
 		switch ($nbr) {
 			case 1:
@@ -47,7 +47,7 @@ class Format
 		}
 	}
 
-	public static function plural($number, $return = '', $expression = '')
+	public static function plural(int $number, string $return = '', string $expression = ''): string
 	{
 		return self::addPlural($number, $return, $expression);
 	}

@@ -2,8 +2,9 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Library\Game;
 use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
@@ -12,12 +13,12 @@ use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
-use App\Modules\Gaia\Application\Handler\GetTravelTime;
-use App\Modules\Gaia\Domain\Model\TravelType;
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Model\TechnologyId;
+use App\Modules\Travel\Domain\Model\TravelType;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -35,12 +36,11 @@ class Colonize extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
-		GetTravelTime $getTravelTime,
+		MoveFleet $moveFleet,
 		CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommanderArmyHandler $commanderArmyHandler,
 		ColorRepositoryInterface $colorRepository,
-		CommanderManager $commanderManager,
 		CommanderRepositoryInterface $commanderRepository,
 		TechnologyRepositoryInterface $technologyRepository,
 		PlaceRepositoryInterface $placeRepository,
@@ -61,7 +61,7 @@ class Colonize extends AbstractController
 		$coloQuantity = 0;
 		$commanders = $commanderRepository->getPlayerCommanders($currentPlayer, [Commander::MOVING]);
 		foreach ($commanders as $commander) {
-			if (Commander::COLO == $commander->travelType) {
+			if (CommanderMission::Colo === $commander->travelType) {
 				++$coloQuantity;
 			}
 		}
@@ -82,7 +82,8 @@ class Colonize extends AbstractController
 			throw new BadRequestHttpException('Invalid place id');
 		}
 
-		$place = $placeRepository->get(Uuid::fromString($placeId)) ?? throw $this->createNotFoundException('Place not found');
+		$place = $placeRepository->get(Uuid::fromString($placeId))
+			?? throw $this->createNotFoundException('Place not found');
 		if (Place::TERRESTRIAL !== $place->typeOfPlace) {
 			throw new ConflictHttpException('Ce lieu n\'est pas habitable.');
 		}
@@ -90,8 +91,6 @@ class Colonize extends AbstractController
 		$home = $commander->base;
 
 		$length = $getDistanceBetweenPlaces($home->place, $place);
-
-		$duration = $getTravelTime($home->place, $place, TravelType::Fleet, $currentPlayerBonusRegistry->getPlayerBonus());
 
 		// compute price
 		$price = $totalBases * $this->getParameter('ares.coeff.colonization_cost');
@@ -121,7 +120,12 @@ class Colonize extends AbstractController
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
 			throw new ConflictHttpException('Cet emplacement est trop éloigné.');
 		}
-		$commanderManager->move($commander, $place, $commander->base->place, Commander::COLO, $duration);
+		$moveFleet(
+			commander: $commander,
+			origin: $home->place,
+			destination: $place,
+			mission: CommanderMission::Colo,
+		);
 
 		// debit credit
 		$playerManager->decreaseCredit($currentPlayer, $price);

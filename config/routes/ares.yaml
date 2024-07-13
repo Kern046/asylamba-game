@@ -10,10 +10,6 @@ commanders:
     resource: './ares/commanders.yaml'
     prefix: /commanders
 
-fleet:
-    path: /fleet
-    controller: App\Modules\Ares\Infrastructure\Controller\FleetController
-
 fleet_headquarters:
     path: /fleet/headquarters
     controller: App\Modules\Ares\Infrastructure\Controller\ViewHeadquarters

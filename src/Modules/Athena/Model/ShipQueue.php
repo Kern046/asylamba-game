@@ -20,7 +20,7 @@ class ShipQueue implements QueueableInterface
 		public Uuid $id,
 		public OrbitalBase $base,
 		public \DateTimeImmutable $startedAt,
-		public \DateTimeImmutable $endedAt,
+		public \DateTimeImmutable|null $endedAt = null,
 		public int $dockType = 0,
 		public int $shipNumber = 0,
 		public int $quantity = 1,
@@ -34,7 +34,7 @@ class ShipQueue implements QueueableInterface
 
 	public function getEndDate(): \DateTimeImmutable
 	{
-		return $this->endedAt;
+		return $this->endedAt ?? throw new \RuntimeException('Ending date cannot be null');
 	}
 
 	public function getResourceIdentifier(): int

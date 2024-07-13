@@ -1,31 +1,22 @@
 <?php
 
-/**
- * Commercial Route Manager.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @update 20.05.13
- */
+declare(strict_types=1);
 
 namespace App\Modules\Athena\Manager;
 
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
-use Symfony\Component\HttpFoundation\RequestStack;
 
-class CommercialRouteManager
+readonly class CommercialRouteManager
 {
 	public function __construct(
-		private readonly OrbitalBaseHelper $orbitalBaseHelper,
-		private readonly CurrentPlayerRegistry $currentPlayerRegistry,
-		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
+		private OrbitalBaseHelper                  $orbitalBaseHelper,
+		private CurrentPlayerRegistry              $currentPlayerRegistry,
+		private CommercialRouteRepositoryInterface $commercialRouteRepository,
 	) {
 	}
 

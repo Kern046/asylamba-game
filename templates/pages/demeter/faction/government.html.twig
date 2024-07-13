@@ -25,7 +25,7 @@
 		{{ include('components/faction/news/list.html.twig') }}
 
 		{% if faction_news_to_edit is not null %}
-			{{ include('components/faction/news/edit.html.twig', { faction_news_to_edit }) }}
+			{{ include('components/faction/news/edit.html.twig', { news: faction_news_to_edit }) }}
 		{% else %}
 			{{ include('components/faction/news/create.html.twig') }}
 		{% endif %}

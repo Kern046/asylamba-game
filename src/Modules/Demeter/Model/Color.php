@@ -56,11 +56,6 @@ class Color implements CreditHolderInterface
 	// const
 	public const NBRGOVERNMENT = 6;
 
-	// @TODO make those configurable
-	public const CAMPAIGNTIME = 345600;
-	public const ELECTIONTIME = 172800;
-	public const PUTSCHTIME = 25200;
-
 	public const PUTSCHPERCENTAGE = 15;
 
 	public const ALIVE = 1;

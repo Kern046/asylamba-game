@@ -8,7 +8,7 @@
 	<div class="fix-body">
 		<div class="body">
 			<form class="sell-form"
-				  data-shipcom-size="constant('App\\Modules\\Athena\\Model\\CommercialShipping::WEDGE') "
+				  data-shipcom-size="{{ constant('App\\Modules\\Athena\\Model\\CommercialShipping::WEDGE') }}"
 				  data-resource-rate="1"
 				  data-max-quantity="{{ current_base.resourcesStorage }}"
 				  data-rate="{{ resources_current_rate }}"

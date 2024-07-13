@@ -3,10 +3,11 @@
 namespace App\Modules\Gaia\Model;
 
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Component\Uid\Uuid;
 
-class Place
+class Place implements SystemUpdatable
 {
 	// CONSTANTS
 	public const TYP_EMPTY = 0;
@@ -65,7 +66,7 @@ class Place
 		public System $system,
 		public int $typeOfPlace,
 		public int $position,
-		public int $population,
+		public float $population,
 		public int $coefResources,
 		public int $coefHistory,
 		public int $resources, 						// de la place si $typeOfBase = 0, sinon de la base
@@ -74,5 +75,24 @@ class Place
 		public \DateTimeImmutable $updatedAt,
 	) {
 			
+	}
+
+	public function getMaxResources(): int
+	{
+		return intval(
+			ceil($this->population / static::COEFFPOPRESOURCE)
+			* static::COEFFMAXRESOURCE
+			* ($this->maxDanger + 1)
+		);
+	}
+
+	public function getProducedResources(): int
+	{
+		return intval(floor(static::COEFFRESOURCE * $this->population));
+	}
+
+	public function lastUpdatedBySystemAt(): \DateTimeImmutable
+	{
+		return $this->updatedAt;
 	}
 }

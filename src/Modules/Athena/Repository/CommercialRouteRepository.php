@@ -252,7 +252,7 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 					$qb->expr()->eq('cr.statement', CommercialRoute::ACTIVE),
 				),
 			)
-			->setParameter('base', $base)
+			->setParameter('base', $base->id, UuidType::NAME)
 			->getQuery()
 			->getSingleScalarResult() ?? 0;
 	}
@@ -273,7 +273,7 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 					([] !== $statements) ? $qb->expr()->in('cr.statement', $statements) : null,
 				),
 			)
-			->setParameter('base', $base)
+			->setParameter('base', $base->id, UuidType::NAME)
 			->getQuery()
 			->getSingleScalarResult();
 	}

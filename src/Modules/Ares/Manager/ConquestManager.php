@@ -2,6 +2,8 @@
 
 namespace App\Modules\Ares\Manager;
 
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
@@ -28,6 +30,7 @@ readonly class ConquestManager
 	public function __construct(
 		private CommanderManager $commanderManager,
 		private CommanderRepositoryInterface $commanderRepository,
+		private MoveFleet $moveFleet,
 		private PlaceManager $placeManager,
 		private OrbitalBasePointsHandler $orbitalBasePointsHandler,
 		private OrbitalBaseManager $orbitalBaseManager,
@@ -112,8 +115,8 @@ readonly class ConquestManager
 						$r->attackerStatement = Report::DELETED;
 						$r->defenderStatement = Report::DELETED;
 					}
-					$this->entityManager->flush(Report::class);
-					$this->entityManager->clear(Report::class);
+					$this->entityManager->flush();
+					$this->entityManager->clear();
 
 					// mort du commandant
 					// arrêt des combats
@@ -162,9 +165,13 @@ readonly class ConquestManager
 					// on tente de se poser
 					$this->commanderManager->uChangeBase($commander);
 				} else {
-					// si c'est une base alliée
-					// on repart
-					$this->commanderManager->comeBack($place, $commander, $commander->startPlace, $playerBonus);
+					// si c'est une base alliée on repart
+					($this->moveFleet)(
+						commander: $commander,
+						origin: $place,
+						destination: $commander->startPlace,
+						mission: CommanderMission::Back,
+					);
 					$this->placeManager->sendNotif($place, Place::CHANGELOST, $commander);
 				}
 			}

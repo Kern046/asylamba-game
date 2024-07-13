@@ -10,24 +10,29 @@ use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Message\Base\BasesUpdateMessage;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
+use App\Modules\Shared\Application\Service\CountMissingSystemUpdates;
+use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
 use App\Modules\Zeus\Infrastructure\Validator\IsPlayerAlive;
 use App\Modules\Zeus\Manager\PlayerBonusManager;
 use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Zeus\Model\PlayerBonusId;
 use App\Shared\Application\Handler\DurationHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
 readonly class BasesUpdateHandler
 {
 	public function __construct(
+		private ClockInterface $clock,
+		private BonusApplierInterface $bonusApplier,
 		private EntityManagerInterface $entityManager,
 		private PlayerBonusManager $playerBonusManager,
+		private CountMissingSystemUpdates $countMissingSystemUpdates,
 		private OrbitalBaseManager $orbitalBaseManager,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		private OrbitalBaseHelper $orbitalBaseHelper,
-		private DurationHandler $durationHandler,
 	) {
 	}
 
@@ -35,18 +40,17 @@ readonly class BasesUpdateHandler
 	{
 		$bases = $this->orbitalBaseRepository->getBySpecification(new IsPlayerAlive());
 		$this->entityManager->beginTransaction();
-		$now = new \DateTimeImmutable();
 
 		foreach ($bases as $base) {
-			$hoursDiff = $this->durationHandler->getHoursDiff($base->updatedAt, $now);
-			if (0 === $hoursDiff) {
+			$missingUpdatesCount = ($this->countMissingSystemUpdates)($base);
+			if (0 === $missingUpdatesCount) {
 				continue;
 			}
 
 			$playerBonus = $this->playerBonusManager->getBonusByPlayer($base->player);
-			$base->updatedAt = $now;
+			$base->updatedAt = $this->clock->now();
 
-			for ($i = 0; $i < $hoursDiff; ++$i) {
+			for ($i = 0; $i < $missingUpdatesCount; ++$i) {
 				$this->updateResources($base, $playerBonus);
 				$this->updateAntiSpy($base);
 			}
@@ -67,9 +71,9 @@ readonly class BasesUpdateHandler
 			),
 			$orbitalBase->place->coefResources,
 		);
-		$addResources += $addResources * $playerBonus->bonuses->get(PlayerBonusId::REFINERY_REFINING) / 100;
+		$addResources += $this->bonusApplier->apply($addResources, PlayerBonusId::REFINERY_REFINING, $playerBonus);
 
-		$this->orbitalBaseManager->increaseResources($orbitalBase, (int) $addResources, false, false);
+		$this->orbitalBaseManager->increaseResources($orbitalBase, (int) $addResources, false);
 	}
 
 	protected function updateAntiSpy(OrbitalBase $orbitalBase): void

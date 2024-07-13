@@ -2,6 +2,7 @@
 
 namespace App\Modules\Athena\Manager;
 
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
@@ -45,7 +46,7 @@ readonly class OrbitalBaseManager
 	{
 		$coloQuantity = \count(\array_filter(
 			$movingCommanders,
-			fn (Commander $commander) => Commander::COLO == $commander->travelType,
+			fn (Commander $commander) => CommanderMission::Colo === $commander->travelType,
 		));
 
 		return $coloQuantity + $this->currentPlayerBasesRegistry->count();

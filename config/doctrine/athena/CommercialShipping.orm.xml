@@ -9,9 +9,7 @@
 			<join-column nullable="false" />
 		</many-to-one>
 		<many-to-one field="destinationBase" target-entity="App\Modules\Athena\Model\OrbitalBase" />
-		<one-to-one field="transaction" target-entity="App\Modules\Athena\Model\Transaction">
-			<join-column nullable="false" />
-		</one-to-one>
+		<one-to-one field="transaction" target-entity="App\Modules\Athena\Model\Transaction" />
 
 		<field name="resourceTransported" type="integer" nullable="true" />
 		<field name="shipQuantity" type="integer" />
