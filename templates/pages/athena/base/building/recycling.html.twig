@@ -129,8 +129,6 @@
 						</li>
 					</ul>
 
-					{% dump(mission_logs) %}
-
 					<h4>Dernières livraisons</h4>
 					{% for log in mission_logs|filter(log => log.mission.id == mission.id) %}
 						{% set wedge = {
