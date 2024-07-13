@@ -5,6 +5,7 @@ namespace App\Modules\Athena\Infrastructure\Controller\Recycling;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Domain\Service\Recycling\GetMissionTime;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
+use App\Modules\Athena\Manager\RecyclingMissionManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\RecyclingMission;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
@@ -28,6 +29,7 @@ class CreateMission extends AbstractController
 		OrbitalBaseHelper                   $orbitalBaseHelper,
 		PlaceRepositoryInterface            $placeRepository,
 		RecyclingMissionRepositoryInterface $recyclingMissionRepository,
+		RecyclingMissionManager $recyclingMissionManager,
 		Uuid                                $targetId,
 	): Response {
 		$quantity = $request->request->getInt('quantity', 0);
@@ -73,7 +75,7 @@ class CreateMission extends AbstractController
 			endedAt: new \DateTimeImmutable(sprintf('+%d seconds', $missionTime)),
 		);
 
-		$recyclingMissionRepository->save($rm);
+		$recyclingMissionManager->add($rm);
 
 		$this->addFlash('success', 'Votre mission a été lancée.');
 
