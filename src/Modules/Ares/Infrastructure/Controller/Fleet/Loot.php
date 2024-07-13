@@ -77,7 +77,7 @@ class Loot extends AbstractController
 		$sector = $place->system->sector;
 		$sectorColor = $sector->faction;
 		// Move that part in a Specification class
-		$isFactionSector = $sectorColor->id === $currentPlayer->faction->id || Color::ALLY == $sectorColor->relations[$currentPlayer->faction->identifier];
+		$isFactionSector = $sectorColor?->id === $currentPlayer->faction->id || Color::ALLY === $sectorColor?->relations[$currentPlayer->faction->identifier];
 
 		// Move that part in a Specification class
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
