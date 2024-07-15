@@ -27,21 +27,20 @@ class PutCommanderInSchool extends AbstractController
 		}
 		$orbitalBase = $commander->base;
 
-		if (Commander::RESERVE == $commander->statement) {
+		if ($commander->isInReserve()) {
 			$commanders = $commanderRepository->getBaseCommanders($commander->base, [Commander::INSCHOOL]);
 
-			if (count($commanders) < PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
-				$commander->statement = Commander::INSCHOOL;
-				$commander->updatedAt = new \DateTimeImmutable();
-			} else {
+			if (count($commanders) >= PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
 				throw new ConflictHttpException('Votre école est déjà pleine.');
 			}
-		} elseif (Commander::INSCHOOL == $commander->statement) {
+			$commander->statement = Commander::INSCHOOL;
+		} elseif ($commander->isInSchool()) {
 			$commander->statement = Commander::RESERVE;
-			$commander->updatedAt = new \DateTimeImmutable();
 		} else {
 			throw new ConflictHttpException('Vous ne pouvez rien faire avec cet officier.');
 		}
+		$commander->updatedAt = new \DateTimeImmutable();
+
 		$commanderRepository->save($commander);
 
 		return $this->redirectToRoute('school');

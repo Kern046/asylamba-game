@@ -82,6 +82,7 @@ readonly class CommanderManager implements SchedulerInterface
 
 	public function emptySquadrons(Commander $commander): void
 	{
+		$this->commanderArmyHandler->setArmy($commander);
 		$orbitalBase = $commander->base;
 
 		$nbSquadrons = count($commander->squadronsIds);

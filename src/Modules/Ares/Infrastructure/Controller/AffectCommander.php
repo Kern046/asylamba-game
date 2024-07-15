@@ -74,12 +74,11 @@ class AffectCommander extends AbstractController
 			if (count($baseCommanders) < PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
 				$commander->statement = Commander::INSCHOOL;
 				$this->addFlash('success', 'Votre officier '.$commander->name.' a été remis à l\'école');
-				$commanderManager->emptySquadrons($commander);
 			} else {
 				$commander->statement = Commander::RESERVE;
 				$this->addFlash('success', 'Votre officier '.$commander->name.' a été remis dans la réserve de l\'armée');
-				$commanderManager->emptySquadrons($commander);
 			}
+			$commanderManager->emptySquadrons($commander);
 			$commanderRepository->save($commander);
 
 			return $this->redirectToRoute('school');
