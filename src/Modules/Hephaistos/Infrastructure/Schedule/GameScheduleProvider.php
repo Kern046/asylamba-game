@@ -6,6 +6,7 @@ namespace App\Modules\Hephaistos\Infrastructure\Schedule;
 
 use App\Modules\Ares\Message\CommandersSchoolExperienceMessage;
 use App\Modules\Athena\Message\Base\BasesUpdateMessage;
+use App\Modules\Atlas\Application\Message\RankingCreationMessage;
 use App\Modules\Gaia\Message\PlacesUpdateMessage;
 use App\Modules\Hephaistos\Message\DailyRoutineMessage;
 use App\Modules\Shared\Domain\Server\TimeMode;
@@ -40,6 +41,7 @@ readonly class GameScheduleProvider implements ScheduleProviderInterface
 			RecurringMessage::cron($hourlySchedule, new PlayersCreditsUpdateMessage()),
 			// Night schedule
 			RecurringMessage::cron($nightlySchedule, new DailyRoutineMessage()),
+			RecurringMessage::cron($nightlySchedule, new RankingCreationMessage()),
 		);
 	}
 }

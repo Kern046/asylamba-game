@@ -25,6 +25,7 @@ class ViewPlayerRankings extends AbstractController
 		// load current player
 		$p = $playerRankingRepository->getPlayerLastRanking($currentPlayer);
 
+		// TDO refactor with property accessor
 		$positionGetter = fn (PlayerRanking|null $p, callable $positionFieldGetter) => (
 			null === $p ||
 			'top' === $request->query->get('mode') ||
@@ -41,33 +42,25 @@ class ViewPlayerRankings extends AbstractController
 
 		$ranking = $rankingRepository->getLastRanking();
 
-		$bestPlayer = $playerRankingRepository->getBestPlayerRanking()?->player;
-
-		$generalRankings = $playerRankingRepository->getRankingsByRange($ranking, 'generalPosition', $generalPosition, PlayerRanking::STEP);
-
-		$experienceRankings = $playerRankingRepository->getRankingsByRange($ranking, 'experiencePosition', $experiencePosition, PlayerRanking::STEP);
-
-		$fightRankings = $playerRankingRepository->getRankingsByRange($ranking, 'fightPosition', $fightPosition, PlayerRanking::STEP);
-
-		$resourcesRankings = $playerRankingRepository->getRankingsByRange($ranking, 'resourcesPosition', $resourcesPosition, PlayerRanking::STEP);
-
-		$armiesRankings = $playerRankingRepository->getRankingsByRange($ranking, 'armiesPosition', $armiesPosition, PlayerRanking::STEP);
-
-		$butcherRankings = $playerRankingRepository->getRankingsByRange($ranking, 'butcherPosition', $butcherPosition, PlayerRanking::STEP);
-
-		$traderRankings = $playerRankingRepository->getRankingsByRange($ranking, 'traderPosition', $traderPosition, PlayerRanking::STEP);
-
-		return $this->render('pages/atlas/player_rankings.html.twig', [
-			'best_player' => $bestPlayer,
-			'general_rankings' => $generalRankings,
-			'experience_rankings' => $experienceRankings,
-			'fight_rankings' => $fightRankings,
-			'resources_rankings' => $resourcesRankings,
-			'armies_rankings' => $armiesRankings,
-			'butcher_rankings' => $butcherRankings,
-			'trader_rankings' => $traderRankings,
-			'active_players_count' => $playerRepository->countActivePlayers(),
-			'all_players_count' => $playerRepository->countAllPlayers(),
-		]);
+		return $this->render(
+			'pages/atlas/player_rankings.html.twig',
+			null !== $ranking
+				? [
+					'has_ranking' => true,
+					'best_player' => $playerRankingRepository->getBestPlayerRanking()?->player,
+					// TODO Refactor with a closure
+					'general_rankings' => $playerRankingRepository->getRankingsByRange($ranking, 'generalPosition', $generalPosition, PlayerRanking::STEP),
+					'experience_rankings' => $playerRankingRepository->getRankingsByRange($ranking, 'experiencePosition', $experiencePosition, PlayerRanking::STEP),
+					'fight_rankings' => $playerRankingRepository->getRankingsByRange($ranking, 'fightPosition', $fightPosition, PlayerRanking::STEP),
+					'resources_rankings' => $playerRankingRepository->getRankingsByRange($ranking, 'resourcesPosition', $resourcesPosition, PlayerRanking::STEP),
+					'armies_rankings' => $playerRankingRepository->getRankingsByRange($ranking, 'armiesPosition', $armiesPosition, PlayerRanking::STEP),
+					'butcher_rankings' => $playerRankingRepository->getRankingsByRange($ranking, 'butcherPosition', $butcherPosition, PlayerRanking::STEP),
+					'trader_rankings' => $playerRankingRepository->getRankingsByRange($ranking, 'traderPosition', $traderPosition, PlayerRanking::STEP),
+					'active_players_count' => $playerRepository->countActivePlayers(),
+					'all_players_count' => $playerRepository->countAllPlayers(),
+				] : [
+					'has_ranking' => false,
+				],
+		);
 	}
 }

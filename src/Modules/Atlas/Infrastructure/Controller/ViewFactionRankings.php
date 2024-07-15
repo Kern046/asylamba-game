@@ -7,12 +7,14 @@ use App\Modules\Atlas\Domain\Repository\FactionRankingRepositoryInterface;
 use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Atlas\Repository\RankingRepository;
 use App\Shared\Application\Handler\DurationHandler;
+use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
 class ViewFactionRankings extends AbstractController
 {
 	public function __invoke(
+		ClockInterface $clock,
 		DurationHandler $durationHandler,
 		FactionRankingRepositoryInterface $factionRankingRepository,
 		RankingRepository $rankingRepository,
@@ -23,22 +25,27 @@ class ViewFactionRankings extends AbstractController
 
 		$ranking = $rankingRepository->getLastRanking();
 
-		$pointsRankings = $factionRankingRepository->getRankingsByField($ranking, 'pointsPosition');
-		$generalRankings = $factionRankingRepository->getRankingsByField($ranking, 'generalPosition');
-		$wealthRankings = $factionRankingRepository->getRankingsByField($ranking, 'wealthPosition');
-		$territorialRankings = $factionRankingRepository->getRankingsByField($ranking, 'territorialPosition');
+		if (null !== $ranking) {
+			$pointsRankings = $factionRankingRepository->getRankingsByField($ranking, 'pointsPosition');
+			$generalRankings = $factionRankingRepository->getRankingsByField($ranking, 'generalPosition');
+		}
 
-		$bestFaction = ($durationHandler->getHoursDiff($serverStartTime, new \DateTimeImmutable()) > $hoursBeforeRankingStart)
-			? $pointsRankings[0] ?? null
-			: $generalRankings[0] ?? null;
-
-		return $this->render('pages/atlas/faction_rankings.html.twig', [
-			'best_faction' => $bestFaction,
-			'points_rankings' => $pointsRankings,
-			'general_rankings' => $generalRankings,
-			'wealth_rankings' => $wealthRankings,
-			'territorial_rankings' => $territorialRankings,
-			'points_to_win' => $this->getParameter('points_to_win'),
-		]);
+		return $this->render(
+			'pages/atlas/faction_rankings.html.twig',
+			null !== $ranking
+				? [
+					'has_ranking' => true,
+					'best_faction' => ($durationHandler->getHoursDiff($serverStartTime, $clock->now()) > $hoursBeforeRankingStart)
+						? $pointsRankings[0] ?? null
+						: $generalRankings[0] ?? null,
+					'points_rankings' => $pointsRankings,
+					'general_rankings' => $generalRankings,
+					'wealth_rankings' => $factionRankingRepository->getRankingsByField($ranking, 'wealthPosition'),
+					'territorial_rankings' => $factionRankingRepository->getRankingsByField($ranking, 'territorialPosition'),
+					'points_to_win' => $this->getParameter('points_to_win'),
+				] : [
+					'has_ranking' => false,
+				],
+		);
 	}
 }

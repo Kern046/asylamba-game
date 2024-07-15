@@ -1,7 +1,7 @@
 {% extends 'layouts/atlas/ranking.html.twig' %}
 
 {% block content %}
-	{% if general_rankings|length > 0 %}
+	{% if has_ranking %}
 		{{ include('components/rankings/faction/best_faction.html.twig', { best_faction }) }}
 		{{ include('components/rankings/faction/points_rankings.html.twig', { points_rankings, points_to_win }) }}
 		{{ include('components/rankings/faction/general_rankings.html.twig', { general_rankings }) }}

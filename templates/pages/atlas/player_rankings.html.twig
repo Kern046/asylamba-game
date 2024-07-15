@@ -3,7 +3,7 @@
 {% block content %}
 	{{ include('molecules/common/advertising.html.twig') }}
 
-	{% if general_rankings|length > 0 %}
+	{% if has_ranking %}
 		{{ include('components/rankings/player/best_player.html.twig', { best_player }) }}
 		{{ include('components/rankings/player/general.html.twig', { general_rankings }) }}
 		{{ include('components/rankings/player/experience.html.twig', { experience_rankings }) }}
