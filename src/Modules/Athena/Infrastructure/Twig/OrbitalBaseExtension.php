@@ -62,6 +62,7 @@ class OrbitalBaseExtension extends AbstractExtension
 			// TODO Move to specification
 			new TwigFunction('can_leave_base', fn (OrbitalBase $orbitalBase) => $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt) < ($this->getCoolDownBeforeLeavingBase)()),
 			new TwigFunction('get_time_until_cooldown_end', fn (OrbitalBase $orbitalBase) => ($this->getCoolDownBeforeLeavingBase)() - $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt)),
+			new TwigFunction('get_cooldown_before_leaving_base', fn () => ($this->getCoolDownBeforeLeavingBase)()),
 			new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, int $level = null) => Game::resourceProduction(
 				$this->orbitalBaseHelper->getBuildingInfo(
 					OrbitalBaseResource::REFINERY,
