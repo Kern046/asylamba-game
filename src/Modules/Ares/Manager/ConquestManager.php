@@ -136,7 +136,7 @@ readonly class ConquestManager
 					$place->player = $commander->player;
 
 					// changer l'appartenance de la base (et de la place)
-					$this->orbitalBaseManager->changeOwnerById($place->id, $placeBase, $commander->player, $baseCommanders);
+					$this->orbitalBaseManager->changeOwner($placeBase, $commander->player);
 
 					$commander->base = $placeBase;
 
@@ -149,12 +149,14 @@ readonly class ConquestManager
 					$this->notificationManager->patchForMultiCombats($commander->player, $place->player, $commander->getArrivalDate());
 					// défaite
 				} else {
-					for ($i = 0; $i < count($place->commanders); ++$i) {
+					// TODO check if these instructions still have use
+					/*$baseCommandersCount = count($baseCommanders);
+					for ($i = 0; $i < $baseCommandersCount; ++$i) {
 						if (Commander::DEAD == $place->commanders[$i]->statement) {
 							unset($place->commanders[$i]);
 							$place->commanders = array_merge($place->commanders);
 						}
-					}
+					}*/
 
 					$this->placeManager->sendNotifForConquest($place, Place::CONQUERPLAYERWHITBATTLEFAIL, $commander, $reportIds);
 				}

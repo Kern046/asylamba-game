@@ -3,6 +3,7 @@
 namespace App\Modules\Athena\Manager;
 
 use App\Modules\Ares\Domain\Model\CommanderMission;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
@@ -30,6 +31,7 @@ readonly class OrbitalBaseManager
 		private TechnologyQueueRepositoryInterface $technologyQueueRepository,
 		private CommercialRouteManager $commercialRouteManager,
 		private CommercialShippingRepositoryInterface $commercialShippingRepository,
+		private CommanderRepositoryInterface $commanderRepository,
 		private TransactionRepositoryInterface $transactionRepository,
 		private RecyclingMissionRepositoryInterface $recyclingMissionRepository,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
@@ -52,11 +54,9 @@ readonly class OrbitalBaseManager
 		return $coloQuantity + $this->currentPlayerBasesRegistry->count();
 	}
 
-	/**
-	 * @param Commander[] $baseCommanders
-	 */
-	public function changeOwnerById($id, OrbitalBase $base, Player $newOwner, $baseCommanders): void
+	public function changeOwner(OrbitalBase $base, Player|null $newOwner): void
 	{
+		$baseCommanders = $this->commanderRepository->getBaseCommanders($base);
 		// changement de possesseur des offres du marché
 		$transactions = $this->transactionRepository->getBasePropositions($base);
 

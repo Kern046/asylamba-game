@@ -9,6 +9,7 @@ use App\Modules\Artemis\Model\SpyReport;
 use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
 use App\Modules\Athena\Domain\Service\Base\Building\BuildingDataHandler;
 use App\Modules\Athena\Domain\Service\Base\Building\GetTimeCost;
+use App\Modules\Athena\Domain\Service\Base\GetCoolDownBeforeLeavingBase;
 use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
 use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
@@ -27,6 +28,7 @@ class OrbitalBaseExtension extends AbstractExtension
 	public function __construct(
 		private readonly BuildingDataHandler $buildingDataHandler,
 		private readonly GetTimeCost $getTimeCost,
+		private readonly GetCoolDownBeforeLeavingBase $getCoolDownBeforeLeavingBase,
 		private readonly DurationHandler $durationHandler,
 		private readonly OrbitalBaseHelper $orbitalBaseHelper,
 		private readonly PopulationTaxHandler $populationTaxHandler,
@@ -58,8 +60,8 @@ class OrbitalBaseExtension extends AbstractExtension
 			new TwigFunction('get_planet_size', fn (int|float $population) => Game::getSizeOfPlanet($population)),
 			new TwigFunction('get_base_type_info', fn (string $baseType, string $info) => PlaceResource::get($baseType, $info)),
 			// TODO Move to specification
-			new TwigFunction('can_leave_base', fn (OrbitalBase $orbitalBase) => $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt) < OrbitalBase::COOL_DOWN),
-			new TwigFunction('get_time_until_cooldown_end', fn (OrbitalBase $orbitalBase) => OrbitalBase::COOL_DOWN - $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt)),
+			new TwigFunction('can_leave_base', fn (OrbitalBase $orbitalBase) => $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt) < ($this->getCoolDownBeforeLeavingBase)()),
+			new TwigFunction('get_time_until_cooldown_end', fn (OrbitalBase $orbitalBase) => ($this->getCoolDownBeforeLeavingBase)() - $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt)),
 			new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, int $level = null) => Game::resourceProduction(
 				$this->orbitalBaseHelper->getBuildingInfo(
 					OrbitalBaseResource::REFINERY,
@@ -87,7 +89,7 @@ class OrbitalBaseExtension extends AbstractExtension
 			// @TODO move to a rightful place
 			new TwigFunction('get_ship_transaction_cost', fn (Transaction $transaction) => ShipResource::getInfo($transaction->identifier, 'cost') * ShipResource::COST_REDUCTION * $transaction->quantity),
 			new TwigFunction('can_leave_orbital_base', function (OrbitalBase $orbitalBase) {
-				$canLeaveBase = new CanLeaveOrbitalBase();
+				$canLeaveBase = new CanLeaveOrbitalBase(($this->getCoolDownBeforeLeavingBase)());
 
 				return $canLeaveBase->isSatisfiedBy($orbitalBase);
 			}),

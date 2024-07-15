@@ -8,6 +8,9 @@ use Symfony\Component\Uid\Uuid;
 
 class CurrentPlayerBasesRegistry
 {
+	/**
+	 * @var array<string, OrbitalBase>
+	 */
 	private array $bases = [];
 
 	private Uuid|null $currentBaseId = null;

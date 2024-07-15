@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Gaia\Manager;
 
 use App\Classes\Redis\RedisManager;
@@ -7,13 +9,13 @@ use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Model\Sector;
 
-class SectorManager
+readonly class SectorManager
 {
 	public function __construct(
-		private readonly RedisManager $redisManager,
-		private readonly SystemRepositoryInterface $systemRepository,
-		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private readonly array $scores = [],
+		private RedisManager                   $redisManager,
+		private SystemRepositoryInterface      $systemRepository,
+		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private array                          $scores = [],
 	) {
 	}
 
@@ -50,7 +52,7 @@ class SectorManager
 		$scores[0] = 0;
 		arsort($scores);
 
-		$this->redisManager->getConnection()->set('sector:'.$sector->id, serialize($scores));
+		$this->redisManager->getConnection()->set('sector:' . $sector->id, serialize($scores));
 
 		return $scores;
 	}

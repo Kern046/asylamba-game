@@ -7,13 +7,13 @@ use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Event\PlaceOwnerChangeEvent;
 
-class SystemListener
+readonly class SystemListener
 {
 	public function __construct(
-		private readonly ColorRepositoryInterface $colorRepository,
-		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private readonly SystemRepositoryInterface $systemRepository,
-		private readonly array $scores
+		private ColorRepositoryInterface       $colorRepository,
+		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private SystemRepositoryInterface      $systemRepository,
+		private array                          $scores,
 	) {
 	}
 
@@ -24,7 +24,11 @@ class SystemListener
 		$bases = $this->orbitalBaseRepository->getSystemBases($system);
 
 		foreach ($bases as $base) {
-			$factionIdentifier = $base->player->faction->identifier;
+			$factionIdentifier = $base->player?->faction?->identifier;
+
+			if (null === $factionIdentifier) {
+				continue;
+			}
 
 			$scores[$factionIdentifier] = ($scores[$factionIdentifier] ?? 0) + $this->scores[$base->typeOfBase];
 		}

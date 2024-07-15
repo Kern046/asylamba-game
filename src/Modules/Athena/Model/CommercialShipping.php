@@ -18,7 +18,7 @@ class CommercialShipping implements TravellerInterface
 	// attributes
 	public function __construct(
 		public Uuid $id,
-		public Player $player,
+		public Player|null $player,
 		public OrbitalBase $originBase,
 		public OrbitalBase|null $destinationBase = null,
 		public Transaction|null $transaction = null,

@@ -30,7 +30,7 @@ class OrbitalBase implements SystemUpdatable
 	public function __construct(
 		public Uuid $id,
 		public Place $place,
-		public Player $player,
+		public Player|null $player,
 		public string $name,
 		public int $typeOfBase = 0,
 		public int $levelGenerator = 1,

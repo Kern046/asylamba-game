@@ -3,7 +3,7 @@
 		<id name="id" column="id" type="uuid" />
 
 		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player">
-			<join-column nullable="false" />
+			<join-column nullable="true" />
 		</many-to-one>
 		<many-to-one field="originBase" target-entity="App\Modules\Athena\Model\OrbitalBase">
 			<join-column nullable="false" />
