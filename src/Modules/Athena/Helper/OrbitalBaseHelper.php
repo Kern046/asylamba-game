@@ -69,7 +69,7 @@ readonly class OrbitalBaseHelper
 				return OrbitalBaseResource::$building[$buildingNumber][$info][$level];
 			} elseif ('level' == $info) {
 				if ($level <= 0 or $level > count(OrbitalBaseResource::$building[$buildingNumber]['level'])) {
-					return false;
+					return null;
 				}
 				if ('time' == $sup) {
 					return OrbitalBaseResource::$building[$buildingNumber][$info][$level - 1][0];
@@ -111,7 +111,7 @@ readonly class OrbitalBaseHelper
 			throw new \ErrorException('1er argument invalide (entre 0 et 7) dans getBuildingInfo de OrbitalBaseResource');
 		}
 
-		return false;
+		return null;
 	}
 
 	public function haveRights($buildingId, $level, $type, $sup): bool

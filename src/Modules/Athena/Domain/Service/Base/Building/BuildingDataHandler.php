@@ -39,12 +39,12 @@ readonly class BuildingDataHandler
 		return $this->orbitalBaseHelper->getBuildingInfo($identifier, 'description');
 	}
 
-	public function getBuildingTimeCost(int $identifier, int $targetLevel): int
+	public function getBuildingTimeCost(int $identifier, int $targetLevel): int|null
 	{
 		return $this->orbitalBaseHelper->getBuildingInfo($identifier, 'level', $targetLevel, 'time');
 	}
 
-	public function getBuildingResourceCost(int $identifier, int $targetLevel): int
+	public function getBuildingResourceCost(int $identifier, int $targetLevel): int|null
 	{
 		return $this->orbitalBaseHelper->getBuildingInfo($identifier, 'level', $targetLevel, 'resourcePrice');
 	}

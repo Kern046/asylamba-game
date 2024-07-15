@@ -14,6 +14,7 @@ class CanMakeBuilding extends Sequentially
 			'constraints' => [
 				new HasRightBaseType(),
 				new HasUnlockedBuilding(),
+				new IsValidTargetLevel(),
 				new CanOrderBuilding($buildingQueuesCount),
 			],
 		]);

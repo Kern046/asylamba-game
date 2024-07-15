@@ -24,7 +24,10 @@
 		<span class="button disable hb lt" title="{{ building_data.building_requirements|map(v => v.message)|join(', ') }}">
 			<span class="text">
 				construction impossible<br/>
-				{{ price }} | {{ time }}
+
+				{% if building_data.next_level <= get_building_info(building_number, 'maxLevel', current_base.typeOfBase) %}
+					{{ price }} | {{ time }}
+				{% endif %}
 			</span>
 		</span>
 	{% else %}

@@ -18,8 +18,6 @@ class OrbitalBase implements SystemUpdatable
 
 	public const MAXCOMMANDERSTANDARD = 2;
 	public const MAXCOMMANDERMILITARY = 5;
-
-	public const COOL_DOWN = 12;
 	public const EXTRA_STOCK = 25000;
 
 	public const MAXCOMMANDERINMESS = 20;

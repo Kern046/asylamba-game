@@ -16,7 +16,6 @@ class CanOrderBuilding extends Compound
 		return [
 			new HasResourcesForBuilding(),
 			new HasFreeBuildingSlots($this->buildingQueuesCount),
-			new IsValidTargetLevel(),
 		];
 	}
 }
