@@ -142,7 +142,8 @@ readonly class RecyclingMissionHandler
 		}
 
 		// if the sector change its color between 2 recyclings
-		if ($player->faction->id !== $targetPlace->system->sector->faction?->id) {
+		// TODO transform into specification and factorize
+		if (null !== $targetPlace->system->sector->faction && $player->faction->id !== $targetPlace->system->sector->faction?->id) {
 			$mission->stop();
 
 			$this->notificationRepository->save(NotificationBuilder::new()
