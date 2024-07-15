@@ -1,7 +1,7 @@
 {% set rate = 400 / galaxy_configuration.galaxy.size %}
 {% set minimap_param = constant('App\\Classes\\Container\\Params::SHOW_MAP_MINIMAP') %}
 
-<div id="map-content" {% if false == app.request.cookies.get('p' ~ minimap_param, default_map_parameters[minimap_param]) %}style="display:none;"{% endif %}>
+<div id="map-content" v-pre v-once {% if false == app.request.cookies.get('p' ~ minimap_param, default_map_parameters[minimap_param]) %}style="display:none;"{% endif %}>
 	<div class="mini-map">
 		<svg class="sectors" viewBox="0, 0, 400, 400" xmlns="http://www.w3.org/2000/svg">
 			{% for sector in sectors %}

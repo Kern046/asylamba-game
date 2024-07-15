@@ -1,9 +1,9 @@
-<div id="systems">
+<div id="systems" v-pre>
 	{% set current_player_bases_sector_ids = player_bases|map(b => b.place.system) %}
 
 	{% for system in systems %}
 		{% set has_bases_in = system.id in current_player_bases_sector_ids %}
-		<a href="#"
+		<a href="#" v-pre
 			class="loadSystem {{ current_system_id }} {% if system.id == current_system_id %}active{% endif %}"
 			data-system-id="{{ system.id.toRfc4122() }}"
 			data-x-position="{{ system.xPosition }}"
@@ -19,14 +19,14 @@
 	{% for sector in sectors %}
 		{% set sectorCenterX = sector.xBarycentric * galaxy_configuration.scale %}
 		{% set sectorCenterY = sector.yBarycentric * galaxy_configuration.scale %}
-		<span
+		<span v-pre
 		class="sector-number color{{ sector.faction.identifier ?? 0 }} sh"
 		data-target="sector-info-{{ sector.identifier }}"
 		style="left: {{ sectorCenterX }}px; top: {{ sectorCenterY }}px">
 			{{ sector.identifier }}
 		</span>
 
-		<div id="sector-info-{{ sector.identifier }}" class="sector-info color{{ sector.faction.identifier ?? 0 }}" style="left: {{ sectorCenterX + 55 }}px; top: {{ sectorCenterY - 10 }}px">
+		<div v-pre id="sector-info-{{ sector.identifier }}" class="sector-info color{{ sector.faction.identifier ?? 0 }}" style="left: {{ sectorCenterX + 55 }}px; top: {{ sectorCenterY - 10 }}px">
 			<h2>{{ sector.name }}</h2>
 			<p>
 				<a href="#">+</a>

@@ -29,6 +29,8 @@
 	{% endif %}
 	{# map sytems #}
 	<div id="map"
+		 {# Skip VueJS compilation for this element and all its children. Avoid performance issue #}
+		 v-pre v-once
 		data-begin-x-position="{{ default_position.x }}"
 		data-begin-y-position="{{ default_position.y }}"
 		data-map-size="{{ map_size }}"
