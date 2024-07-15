@@ -85,7 +85,7 @@
 												{% set player_status = get_faction_info(playerFactionIdentifier, 'status')[place.player.status - 1] %}
 												{{ player_status }}
 												<span class="player-name">
-													<a href="{{ path('embassy', {'playerId': place.player.id }) }}" class="color{{ playerFactionIdentifier }}">
+													<a href="{{ path('embassy', {'player': place.player.id }) }}" class="color{{ playerFactionIdentifier }}">
 														{{ place.player.name }}
 													</a>
 												</span>

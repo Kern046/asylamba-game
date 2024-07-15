@@ -1,7 +1,7 @@
 <div id="subnav">
 	<button class="move-side-bar top" data-dir="up"> </button>
 	<div class="overflow">
-		<a href="{{ path('embassy', {'faction': current_player.faction.id }) }}" class="item {% if app.request.query.has('faction') %}active{% endif %}">
+		<a href="{{ path('embassy', {'faction': current_player.faction.identifier }) }}" class="item {% if app.request.query.has('faction') %}active{% endif %}">
 			<span class="picto">
 				<img src="{{ asset('build/media/rank/faction.png') }}" alt="" />
 			</span>

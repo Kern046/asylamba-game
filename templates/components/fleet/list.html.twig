@@ -101,7 +101,7 @@
 										</a>
 
 										{% if commander.player.id != current_player.id %}
-											 (<a href="{{ path('embassy', {'playerId': commander.player.id }) }}">{{ commander.player.name }}</a>)
+											 (<a href="{{ path('embassy', {'player': commander.player.id }) }}">{{ commander.player.name }}</a>)
 										{% endif %}
 									</span>
 								</div>
