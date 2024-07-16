@@ -49,7 +49,7 @@ class GiveShips extends AbstractController
 		}
 
 		$baseUuid = Uuid::fromString($baseId);
-		if ($currentBase->id === $baseUuid) {
+		if ($currentBase->id->equals($baseUuid)) {
 			throw new BadRequestHttpException('You cannot send ships to your current base');
 		}
 
@@ -147,11 +147,13 @@ class GiveShips extends AbstractController
 		$commercialShippingRepository->save($cs);
 
 		$messageBus->dispatch(
-			new CommercialShippingMessage($commercialShipping->id),
-			[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivalDate())],
+			new CommercialShippingMessage($cs->id),
+			[DateTimeConverter::to_delay_stamp($cs->getArrivalDate())],
 		);
 
 		$currentBase->removeShips($shipType, $ships);
+
+		$orbitalBaseRepository->save($currentBase);
 
 		if ($currentBase->player->id !== $otherBase->player->id) {
 

@@ -49,7 +49,7 @@ class GiveResources extends AbstractController
 		}
 
 		$baseUuid = Uuid::fromString($baseId);
-		if ($baseUuid === $currentBase->id) {
+		if ($currentBase->id->equals($baseUuid)) {
 			throw new BadRequestHttpException('envoi de ressources impossible - action inutile, vos ressources sont déjà sur cette base orbitale');
 		}
 		$resource = intval($quantity);
