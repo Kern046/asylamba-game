@@ -10,7 +10,7 @@
 
 		</many-to-one>
 
-		<field name="general" type="smallint" />
+		<field name="general" type="integer" />
 		<field name="generalPosition" type="smallint" />
 		<field name="generalVariation" type="smallint" />
 		<field name="experience" type="integer" />
