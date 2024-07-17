@@ -54,7 +54,7 @@ class PlayerRankingRepository extends DoctrineRepository implements PlayerRankin
 	public function getBestPlayerRanking(): PlayerRanking|null
 	{
 		return $this->findOneBy([], [
-			'generalPosition' => 'DESC',
+			'generalPosition' => 'ASC',
 		]);
 	}
 
