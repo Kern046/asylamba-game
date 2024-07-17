@@ -7,6 +7,7 @@ namespace App\Modules\Atlas\Infrastructure\Controller;
 use App\Modules\Atlas\Domain\Repository\PlayerRankingRepositoryInterface;
 use App\Modules\Atlas\Domain\Repository\RankingRepositoryInterface;
 use App\Modules\Atlas\Model\PlayerRanking;
+use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,17 +17,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ViewMore extends AbstractController
 {
-	#[Route(
-		path: '/rankings/more',
-		name: 'load_more_rankings',
-		methods: Request::METHOD_GET,
-	)]
 	public function __invoke(
 		Request $request,
+		Player $currentPlayer,
 		RankingRepositoryInterface $rankingRepository,
 		PlayerRankingRepositoryInterface $playerRankingRepository,
 	): Response {
-		$direction = $request->query->get('dir') ?? throw new BadRequestHttpException('Missing dir');
+		$direction = $request->query->get('direction') ?? throw new BadRequestHttpException('Missing direction');
 		$current = $request->query->get('current') ?? throw new BadRequestHttpException('Missing current');
 		$type = $request->query->get('type') ?? throw new BadRequestHttpException('Missing type');
 
@@ -55,6 +52,13 @@ class ViewMore extends AbstractController
 
 		$playerRankings = $playerRankingRepository->getRankingsByRange($ranking, $fty.'Position', $bot - 1, $size);
 
-		return new Response();
+		return $this->render('components/rankings/player/rankings_part.html.twig', [
+			'current_player' => $currentPlayer,
+			'player_rankings' => $playerRankings,
+			'direction' => $direction,
+			'type' => $type,
+			'bot' => $bot,
+			'fty' => $fty,
+		]);
 	}
 }

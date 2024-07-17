@@ -12,3 +12,4 @@ faction_rankings:
 
 view_more_rankings:
     path: /rankings/more
+    controller: App\Modules\Atlas\Infrastructure\Controller\ViewMore
