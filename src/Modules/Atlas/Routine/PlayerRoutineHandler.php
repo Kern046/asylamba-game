@@ -197,7 +197,7 @@ class PlayerRoutineHandler
 				armies: $listA[$playerId]['armies'],
 				armiesPosition: $armiesPosition,
 				armiesVariation: $oldRanking ? $oldRanking->armiesPosition - $armiesPosition : 0,
-				resources: $listR[$playerId]['resources'],
+				resources: intval(round($listR[$playerId]['resources'])),
 				resourcesPosition: $resourcesPosition,
 				resourcesVariation: $oldRanking ? $oldRanking->resourcesPosition - $resourcesPosition : 0,
 				createdAt: new \DateTimeImmutable(),

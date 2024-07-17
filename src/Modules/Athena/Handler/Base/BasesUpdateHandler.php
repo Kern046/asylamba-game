@@ -73,7 +73,7 @@ readonly class BasesUpdateHandler
 		);
 		$addResources += $this->bonusApplier->apply($addResources, PlayerBonusId::REFINERY_REFINING, $playerBonus);
 
-		$this->orbitalBaseManager->increaseResources($orbitalBase, (int) $addResources, false);
+		$this->orbitalBaseManager->increaseResources($orbitalBase, intval(round($addResources)), false);
 	}
 
 	protected function updateAntiSpy(OrbitalBase $orbitalBase): void
