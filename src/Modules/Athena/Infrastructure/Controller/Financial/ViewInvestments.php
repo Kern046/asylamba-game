@@ -3,6 +3,7 @@
 namespace App\Modules\Athena\Infrastructure\Controller\Financial;
 
 use App\Classes\Library\Game;
+use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
@@ -23,6 +24,7 @@ class ViewInvestments extends AbstractController
 {
 	public function __construct(
 		private readonly BonusApplierInterface $bonusApplier,
+		private readonly CommanderArmyHandler $commanderArmyHandler,
 		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
 		private readonly PopulationTaxHandler $populationTaxHandler,
 	) {
@@ -55,6 +57,7 @@ class ViewInvestments extends AbstractController
 				if (!isset($carry[$commanderBaseId])) {
 					$carry[$commanderBaseId] = [];
 				}
+				$this->commanderArmyHandler->setArmy($commander);
 				$carry[$commanderBaseId][] = $commander;
 
 				return $carry;
