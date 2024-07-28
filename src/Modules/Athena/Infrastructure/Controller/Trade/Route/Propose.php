@@ -74,7 +74,7 @@ class Propose extends AbstractController
 			throw new ConflictHttpException('impossible de proposer une route commerciale à ce joueur, vos factions sont en guerre.');
 		}
 		// TODO move to validation constraint
-		if ($currentBase->player->id->equals($otherBase->player->id)) {
+		if ($currentBase->player->id === $otherBase->player->id) {
 			throw new ConflictHttpException('Vous ne pouvez pas créer de route commerciale avec votre propre planète');
 		}
 		$distance = $getDistanceBetweenPlaces($currentBase->place, $otherBase->place);
