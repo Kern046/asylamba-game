@@ -29,10 +29,12 @@ class LawRepository extends DoctrineRepository implements LawRepositoryInterface
 		return $this->findBy([
 			'faction' => $faction,
 			'statement' => $statements,
+		], [
+			'createdAt' => 'DESC',
 		]);
 	}
 
-	public function lawExists(Color $faction, string $type): bool
+	public function lawExists(Color $faction, int $type): bool
 	{
 		return $this->count([
 			'faction' => $faction,

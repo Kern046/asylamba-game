@@ -84,7 +84,7 @@ readonly class CommercialRouteManager
 		}
 	}
 
-	public function freezeRoute(Color $faction, Color $otherFaction): void
+	public function toggleRoutesFreeze(Color $faction, Color $otherFaction): void
 	{
 		$freeze = Color::ENEMY === $faction->relations[$otherFaction->identifier]
 			|| Color::ENEMY === $otherFaction->relations[$faction->identifier];

@@ -7,9 +7,13 @@ use Symfony\Component\Uid\Uuid;
 
 class VoteLaw
 {
-	public Uuid $id;
-	public Law $law;
-	public Player $player;
-	public int $vote;
-	public \DateTimeImmutable $dVotation;
+	public function __construct(
+		public Uuid $id,
+		public Law $law,
+		public Player $player,
+		public int $vote,
+		public \DateTimeImmutable $votedAt,
+	) {
+
+	}
 }

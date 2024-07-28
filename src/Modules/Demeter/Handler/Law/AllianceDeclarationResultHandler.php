@@ -9,6 +9,7 @@ use App\Modules\Demeter\Message\Law\AllianceDeclarationResultMessage;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Model\Law\Law;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 readonly class AllianceDeclarationResultHandler
@@ -24,11 +25,13 @@ readonly class AllianceDeclarationResultHandler
 	{
 		$law = $this->lawRepository->get($message->getLawId());
 		$color = $law->faction;
-		$enemyColor = $this->colorRepository->get($law->options['rColor']);
+		$this->colorRepository->refresh($color);
+		$enemyColor = $this->colorRepository->getOneByIdentifier($law->options['rColor']);
 
-		$color->colorLink[$law->options['rColor']] = Color::ALLY;
+		$color->relations[$law->options['rColor']] = Color::ALLY;
+
 		$law->statement = Law::OBSOLETE;
-		$this->commercialRouteManager->freezeRoute($color, $enemyColor);
+		$this->commercialRouteManager->toggleRoutesFreeze($color, $enemyColor);
 		$this->colorRepository->save($color);
 		$this->lawRepository->save($law);
 	}

@@ -20,5 +20,5 @@ interface LawRepositoryInterface extends EntityRepositoryInterface
 	 */
 	public function getByFactionAndStatements(Color $faction, array $statements = []): array;
 
-	public function lawExists(Color $faction, string $type): bool;
+	public function lawExists(Color $faction, int $type): bool;
 }

@@ -29,4 +29,12 @@ abstract class DoctrineRepository extends ServiceEntityRepository implements Ent
 		$this->getEntityManager()->remove($entity);
 		$this->getEntityManager()->flush();
 	}
+
+	/**
+	 * @param T $entity
+	 */
+	public function refresh(object $entity): void
+	{
+		$this->getEntityManager()->refresh($entity);
+	}
 }

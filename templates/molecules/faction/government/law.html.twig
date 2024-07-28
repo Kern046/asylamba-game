@@ -39,7 +39,7 @@
 							<select name="rsector">
 								<option value="-1">Choisissez un secteur</option>
 								{% for sector in faction_sectors %}
-									<option value="{{ sector.id }}">{{ sector.name }} (#{{ sector.id }})</option>
+									<option value="{{ sector.id }}">{{ sector.name }} (#{{ sector.identifier }})</option>
 								{% endfor %}
 							</select>
 

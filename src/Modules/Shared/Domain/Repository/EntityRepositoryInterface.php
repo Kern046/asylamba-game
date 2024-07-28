@@ -16,4 +16,9 @@ interface EntityRepositoryInterface
 	 * @param T $entity
 	 */
 	public function remove(object $entity): void;
+
+	/**
+	 * @param T $entity
+	 */
+	public function refresh(object $entity): void;
 }

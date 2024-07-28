@@ -114,7 +114,7 @@ services:
         resource: '../src/Modules/Shared/'
         exclude:
             - '../src/Modules/Shared/Application/PercentageApplier'
-            - '../src/Modules/Shared/Domain/'
+            - '../src/Modules/Shared/Domain/{!Service}'
             - '../src/Modules/Shared/Infrastructure/'
 
     Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~

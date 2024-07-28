@@ -23,7 +23,7 @@ readonly class SectorTaxesResultHandler
 		$faction = $law->faction;
 		$sector = $this->sectorRepository->get($law->options['rSector']);
 
-		if ($sector->faction->id === $faction->id) {
+		if ($sector->faction->id->equals($faction->id)) {
 			$sector->tax = $law->options['taxes'];
 		}
 		$law->statement = Law::OBSOLETE;

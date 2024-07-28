@@ -6,13 +6,17 @@ use App\Modules\Demeter\Domain\Repository\Law\VoteLawRepositoryInterface;
 use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Demeter\Resource\LawResources;
+use App\Modules\Shared\Domain\Service\GameTimeConverter;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class FactionExtension extends AbstractExtension
 {
 	public function __construct(
+		private readonly DurationHandler $durationHandler,
+		private readonly GameTimeConverter $gameTimeConverter,
 		private readonly VoteLawRepositoryInterface $voteLawRepository,
 	) {
 	}
@@ -26,7 +30,11 @@ class FactionExtension extends AbstractExtension
 			new TwigFunction('get_faction_bonuses', fn (int $factionIdentifier) => ColorResource::getInfo($factionIdentifier, 'bonus')),
 			new TwigFunction('get_law_info', fn (int $lawType, string $info) => LawResources::getInfo($lawType, $info)),
 			new TwigFunction('has_voted_law', fn (Law $law, Player $player) => $this->voteLawRepository->hasVoted($player, $law)),
-			new TwigFunction('get_law_duration', fn (Law $law) => max((strtotime($law->dEnd) - strtotime($law->dEndVotation)) / 3600, 1)),
+			new TwigFunction('get_law_duration', function (Law $law): int {
+				$seconds = $this->durationHandler->getDiff($law->voteEndedAt, $law->endedAt);
+
+				return $this->gameTimeConverter->convertSecondsToGameCycles($seconds);
+			}),
 			new TwigFunction('get_bonus_text', fn (int $bonusIdentifier) => ColorResource::getBonus($bonusIdentifier)),
 		];
 	}

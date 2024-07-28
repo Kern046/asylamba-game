@@ -24,12 +24,13 @@ readonly class WarDeclarationResultHandler
 	{
 		$law = $this->lawRepository->get($message->getLawId());
 		$color = $law->faction;
-		$enemyColor = $this->colorRepository->get($law->options['rColor']);
+		$this->colorRepository->refresh($color);
+		$enemyColor = $this->colorRepository->getOneByIdentifier($law->options['rColor']);
 
-		$color->colorLink[$law->options['rColor']] = Color::ENEMY;
-		$enemyColor->colorLink[$color->id->toRfc4122()] = Color::ENEMY;
+		$enemyColor->relations[$color->identifier] = Color::ENEMY;
+		$color->relations[$law->options['rColor']] = Color::ENEMY;
 		$law->statement = Law::OBSOLETE;
-		$this->commercialRouteManager->freezeRoute($color, $enemyColor);
+		$this->commercialRouteManager->toggleRoutesFreeze($color, $enemyColor);
 		$this->colorRepository->save($color);
 		$this->lawRepository->save($law);
 	}

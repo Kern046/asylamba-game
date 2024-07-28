@@ -282,29 +282,38 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 	{
 		$qb = $this->createQueryBuilder('cr');
 
-		$qb
-			->update('cr')
-			->set('cr.statement', (true === $freeze) ? CommercialRoute::STANDBY : CommercialRoute::ACTIVE)
+		$subQuery = $this->getEntityManager()->createQueryBuilder();
+		$subQuery
+			->select('cr.id')
+			->from(CommercialRoute::class, 'cr')
 			->leftJoin('cr.originBase', 'ob1')
 			->leftJoin('ob1.player', 'pl1')
 			->leftJoin('cr.destinationBase', 'ob2')
 			->leftJoin('ob2.player', 'pl2')
-			->where($qb->expr()->andX(
-				$qb->expr()->orX(
-					$qb->expr()->andX(
-						$qb->expr()->eq('pl1.faction', ':faction'),
-						$qb->expr()->eq('pl2.faction', ':other_faction'),
+			->where($subQuery->expr()->andX(
+				$subQuery->expr()->orX(
+					$subQuery->expr()->andX(
+						$subQuery->expr()->eq('pl1.faction', ':faction'),
+						$subQuery->expr()->eq('pl2.faction', ':other_faction'),
 					),
-					$qb->expr()->andX(
-						$qb->expr()->eq('pl1.faction', ':other_faction'),
-						$qb->expr()->eq('pl2.faction', ':faction'),
+					$subQuery->expr()->andX(
+						$subQuery->expr()->eq('pl1.faction', ':other_faction'),
+						$subQuery->expr()->eq('pl2.faction', ':faction'),
 					),
 				),
-				$qb->expr()->eq(
+				$subQuery->expr()->eq(
 					'cr.statement',
 					(true === $freeze) ? CommercialRoute::ACTIVE : CommercialRoute::STANDBY,
 				),
 			))
+			->setParameter('faction', $faction->id, UuidType::NAME)
+			->setParameter('other_faction', $otherFaction->id, UuidType::NAME)
+		;
+
+		$qb
+			->update(CommercialRoute::class, 'commercial_route')
+			->set('commercial_route.statement', (true === $freeze) ? CommercialRoute::STANDBY : CommercialRoute::ACTIVE)
+			->where($qb->expr()->in('commercial_route.id', $subQuery->getDQL()))
 			->getQuery()->execute([
 				'faction' => $faction,
 				'other_faction' => $otherFaction,

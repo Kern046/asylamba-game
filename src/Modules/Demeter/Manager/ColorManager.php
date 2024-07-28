@@ -140,7 +140,7 @@ readonly class ColorManager implements SchedulerInterface
 					il est de votre devoir de voter pour l\'acceptation ou non de ladite loi.',
 				NotificationBuilder::divider(),
 				NotificationBuilder::link(
-					$this->urlGenerator->generate('view_senate'),
+					$this->urlGenerator->generate('faction_senate'),
 					$isFromChief ? 'voir les lois appliquées' : 'voir les lois en cours de vote',
 				),
 			));

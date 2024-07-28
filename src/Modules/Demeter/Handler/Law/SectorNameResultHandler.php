@@ -7,6 +7,7 @@ use App\Modules\Demeter\Message\Law\SectorNameResultMessage;
 use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 readonly class SectorNameResultHandler
@@ -21,7 +22,7 @@ readonly class SectorNameResultHandler
 	{
 		$law = $this->lawRepository->get($message->getLawId());
 		$faction = $law->faction;
-		$sector = $this->sectorRepository->get($law->options['rSector']);
+		$sector = $this->sectorRepository->get(Uuid::fromString($law->options['rSector']));
 
 		if ($sector->faction->id === $faction->id) {
 			$sector->name = $law->options['name'];
