@@ -16,9 +16,7 @@ class UpdateUniversityInvestments extends AbstractController
 		Player $currentPlayer,
 		PlayerManager $playerManager,
 	): Response {
-		if (0 === ($investment = $request->request->getInt('credit'))) {
-			throw new BadRequestHttpException('Montant invalide');
-		}
+		$investment = abs($request->request->getInt('credit'));
 
 		if (500000 < $investment) {
 			throw new BadRequestHttpException(
