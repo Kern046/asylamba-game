@@ -54,7 +54,7 @@ class UpdateSquadron extends AbstractController
 		$base = $orbitalBaseRepository->get(Uuid::fromString($payload['base_id'])) ?? throw $this->createNotFoundException('Base not found');
 
 		// TODO add check on belonging player for multifleet
-		if ($commander->base->id !== $base->id) {
+		if (!$commander->base->id->equals($base->id)) {
 			throw new ConflictHttpException('This commander is not located on this base');
 		}
 

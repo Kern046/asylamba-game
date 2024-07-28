@@ -115,14 +115,14 @@ class MapExtension extends AbstractExtension
 		];
 
 		foreach ($routes as $route) {
-			if ($route->destinationBase->id === $defaultBase->id && CommercialRoute::PROPOSED == $route->statement) {
+			if ($route->destinationBase->id->equals($defaultBase->id) && CommercialRoute::PROPOSED == $route->statement) {
 				--$data['slots'];
 			}
-			if ($place->id !== $route->originBase->place->id && $place->id !== $route->destinationBase->place->id) {
+			if (!$place->id->equals($route->originBase->place->id) && !$place->id->equals($route->destinationBase->place->id)) {
 				continue;
 			}
 			$data = array_merge($data, match ($route->statement) {
-				CommercialRoute::PROPOSED => ($defaultBase->id === $route->originBase->id)
+				CommercialRoute::PROPOSED => ($defaultBase->id->equals($route->originBase->id))
 						? ['proposed' => true]
 						: ['not_accepted' => true],
 				CommercialRoute::ACTIVE => ['send_resources' => true],

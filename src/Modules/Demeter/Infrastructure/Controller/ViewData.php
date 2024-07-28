@@ -146,11 +146,11 @@ class ViewData extends AbstractController
 				$percents = ['color'.$faction->identifier => 0];
 				$scores = unserialize($this->redisManager->getConnection()->get('sector:'.$sector->identifier));
 
-				if (!isset($scores[$faction->identifier]) && $sector->faction?->id !== $faction->id) {
+				if (!isset($scores[$faction->identifier]) && !$sector->faction?->id->equals($faction->id)) {
 					unset($sectors[$key]);
 					continue;
 				}
-				if ('Secteurs conquis' === $type && $sector->faction?->id !== $faction->id) {
+				if ('Secteurs conquis' === $type && !$sector->faction?->id->equals($faction->id)) {
 					continue;
 				}
 
@@ -163,7 +163,7 @@ class ViewData extends AbstractController
 
 				arsort($percents);
 
-				if ($sector?->faction->id === $faction->id || ($scores[$faction->identifier] > 0)) {
+				if ($sector?->faction->id->equals($faction->id) || ($scores[$faction->identifier] > 0)) {
 					$types[$type] = $sector;
 				}
 			}

@@ -238,7 +238,7 @@ class FactionRoutineHandler
 	protected function calculateTerritorialRanking(Color $faction, array $sectors): void
 	{
 		foreach ($sectors as $sector) {
-			if ($sector->faction?->id === $faction->id) {
+			if ($sector->faction?->id->equals($faction->id)) {
 				$this->results[$sector->faction->identifier]['territorial'] += $sector->points;
 			}
 		}

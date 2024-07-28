@@ -26,7 +26,7 @@ class Pin extends AbstractController
 		$newExists = false;
 		// This way of doing things remove all previous pins
 		foreach ($factionNews as $factionNew) {
-			if ($factionNew->id === $id) {
+			if ($factionNew->id->equals($id)) {
 				$newExists = true;
 				$factionNew->pinned = 1;
 			} else {

@@ -41,13 +41,13 @@ class Delete extends AbstractController
 		$proposerBase = $cr->originBase;
 		$linkedBase = $cr->destinationBase;
 
-		if ($cr->originBase->id === $currentBase->id) {
+		if ($cr->originBase->id->equals($currentBase->id)) {
 			$notifReceiver = $linkedBase->player;
 			$myBaseName = $proposerBase->name;
 			$otherBaseName = $linkedBase->name;
 			$myBaseId = $proposerBase->place->id;
 			$otherBaseId = $linkedBase->place->id;
-		} elseif ($cr->destinationBase->id === $currentBase->id) {
+		} elseif ($cr->destinationBase->id->equals($currentBase->id)) {
 			$notifReceiver = $proposerBase->player;
 			$myBaseName = $linkedBase->name;
 			$otherBaseName = $proposerBase->name;

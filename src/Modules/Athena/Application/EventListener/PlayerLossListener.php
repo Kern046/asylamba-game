@@ -25,7 +25,7 @@ class PlayerLossListener
 
 		$oldPlayerBases = $this->orbitalBaseRepository->getPlayerBases($previousOwner);
 		$nbOldPlayerBases = count($oldPlayerBases);
-		if (0 === $nbOldPlayerBases || (1 === $nbOldPlayerBases && $oldPlayerBases[0]->id === $base->id)) {
+		if (0 === $nbOldPlayerBases || (1 === $nbOldPlayerBases && $oldPlayerBases[0]->id->equals($base->id))) {
 			$this->playerManager->reborn($previousOwner);
 		}
 	}

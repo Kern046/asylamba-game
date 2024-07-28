@@ -97,7 +97,7 @@ readonly class LootManager
 			// planète à joueur : si $this->rColor != commandant->rColor
 			// si il peut l'attaquer
 			// TODO move to spec
-			if (($place->player->faction->id !== $commander->player->faction->id && $place->player->level > 1 && Color::ALLY !== $commanderColor->relations[$place->player->faction->identifier]) || null === $place->player) {
+			if ((!$place->player->faction->id->equals($commander->player->faction->id) && $place->player->level > 1 && Color::ALLY !== $commanderColor->relations[$place->player->faction->identifier]) || null === $place->player) {
 				$dCommanders = [];
 				foreach ($placeCommanders as $dCommander) {
 					if ($dCommander->isAffected() && 1 == $dCommander->line) {

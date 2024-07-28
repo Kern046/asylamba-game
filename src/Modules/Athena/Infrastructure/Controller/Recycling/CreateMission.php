@@ -60,7 +60,7 @@ class CreateMission extends AbstractController
 		}
 
 		$sectorFaction = $destinationPlace->system->sector->faction;
-		if (null !== $sectorFaction && $currentPlayer->faction->id !== $sectorFaction->id) {
+		if (null !== $sectorFaction && !$currentPlayer->faction->id->equals($sectorFaction->id)) {
 			throw $this->createAccessDeniedException('Vous pouvez recycler uniquement dans les secteurs de votre faction ainsi que dans les secteurs neutres.');
 		}
 		$missionTime = $getMissionTime($startPlace, $destinationPlace, $currentPlayer);

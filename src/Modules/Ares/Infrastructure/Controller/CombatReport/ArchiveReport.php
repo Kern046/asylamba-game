@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Infrastructure\Controller\CombatReport;
 
 use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
@@ -19,17 +21,17 @@ class ArchiveReport extends AbstractController
 		Uuid $id
 	): Response {
 		if (($report = $reportRepository->get($id)) !== null) {
-			if ($currentPlayer->id === $report->rPlayerAttacker) {
-				if (Report::STANDARD === $report->statementAttacker) {
-					$report->statementAttacker = Report::ARCHIVED;
+			if ($currentPlayer->id === $report->attacker->id) {
+				if (Report::STANDARD === $report->attackerStatement) {
+					$report->attackerStatement = Report::ARCHIVED;
 				} else {
-					$report->statementAttacker = Report::STANDARD;
+					$report->attackerStatement = Report::STANDARD;
 				}
-			} elseif ($currentPlayer->id === $report->rPlayerDefender) {
-				if (Report::STANDARD == $report->statementDefender) {
-					$report->statementDefender = Report::ARCHIVED;
+			} elseif ($currentPlayer->id === $report->defender->id) {
+				if (Report::STANDARD == $report->defenderStatement) {
+					$report->defenderStatement = Report::ARCHIVED;
 				} else {
-					$report->statementDefender = Report::STANDARD;
+					$report->defenderStatement = Report::STANDARD;
 				}
 			} else {
 				throw new AccessDeniedHttpException('Ce rapport ne vous appartient pas.');

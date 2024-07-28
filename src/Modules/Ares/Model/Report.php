@@ -36,6 +36,9 @@ class Report
 	public int $defenderStatement = self::STANDARD;
 	public bool $hasBeenPunished = false;
 
+	/**
+	 * @param array $squadrons
+	 */
 	public function __construct(
 		public Uuid $id,
 		public Player $attacker,
@@ -114,7 +117,7 @@ class Report
 				// TODO Handle differently this weird way to get differences between armies
 				// First round: squadrons are added in the begin army
 				if (0 == $sq[3]) {
-					if ($sq[4]->id === $this->attackerCommander->id) {
+					if ($this->attackerCommander->id->equals($sq[4]->id)) {
 						$this->attackerArmyInBegin[] = $sq;
 					} else {
 						$this->defenderArmyInBegin[] = $sq;
@@ -124,7 +127,7 @@ class Report
 					$this->fight[] = $sq;
 				// End army is stored, Round value is -1 at this point
 				} else {
-					if ($sq[4]->id === $this->attackerCommander->id) {
+					if ($this->attackerCommander->id->equals($sq[4]->id)) {
 						$this->attackerArmyAtEnd[] = $sq;
 					} else {
 						$this->defenderArmyAtEnd[] = $sq;

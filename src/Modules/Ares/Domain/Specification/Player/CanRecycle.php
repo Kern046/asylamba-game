@@ -12,6 +12,6 @@ class CanRecycle extends PlayerSpecification
 	public function isSatisfiedBy($candidate): bool
 	{
 		return null === $candidate->system->sector->faction
-			|| $candidate->system->sector->faction->id === $this->player->faction->id;
+			|| $candidate->system->sector->faction->id->equals($this->player->faction->id);
 	}
 }

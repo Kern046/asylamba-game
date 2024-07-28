@@ -37,7 +37,7 @@ class ChooseMinister extends AbstractController
 		$rPlayer = $request->request->get('rplayer') ?? throw new BadRequestHttpException('Missing player ID');
 
 		$appointee = $playerRepository->get($rPlayer) ?? throw $this->createNotFoundException('Player not found');
-		if ($appointee->faction->id !== $currentPlayer->faction->id) {
+		if (!$appointee->faction->id->equals($currentPlayer->faction->id)) {
 			throw $this->createAccessDeniedException('This player is from another faction');
 		}
 		if (!$appointee->isParliamentMember()) {

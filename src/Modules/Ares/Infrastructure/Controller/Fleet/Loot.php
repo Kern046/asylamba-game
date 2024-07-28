@@ -77,7 +77,7 @@ class Loot extends AbstractController
 		$sector = $place->system->sector;
 		$sectorColor = $sector->faction;
 		// Move that part in a Specification class
-		$isFactionSector = $sectorColor?->id === $currentPlayer->faction->id || Color::ALLY === $sectorColor?->relations[$currentPlayer->faction->identifier];
+		$isFactionSector = $sectorColor?->id->equals($currentPlayer->faction->id) || Color::ALLY === $sectorColor?->relations[$currentPlayer->faction->identifier];
 
 		// Move that part in a Specification class
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
@@ -92,7 +92,7 @@ class Loot extends AbstractController
 		$faction = $currentPlayer->faction;
 
 		// Move that part in a Specification class
-		if (null !== $targetPlayer && ($faction->id === $targetPlayer->faction->id || Color::ALLY === $faction->relations[$targetPlayer->faction->identifier])) {
+		if (null !== $targetPlayer && ($faction->id->equals($targetPlayer->faction->id) || Color::ALLY === $faction->relations[$targetPlayer->faction->identifier])) {
 			throw new ConflictHttpException('You cannot loot an ally planet');
 		}
 

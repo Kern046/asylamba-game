@@ -21,7 +21,7 @@ class Delete extends AbstractController
 			throw $this->createNotFoundException('Cette annonce n\'existe pas.');
 		}
 		// TODO replace with voter
-		if (!$currentPlayer->isGovernmentMember() || $currentPlayer->faction->id !== $factionNew->faction->id) {
+		if (!$currentPlayer->isGovernmentMember() || !$currentPlayer->faction->id->equals($factionNew->faction->id)) {
 			throw $this->createAccessDeniedException('Vous n\'avez pas le droit de supprimer cette annonce');
 		}
 

@@ -26,8 +26,8 @@ readonly class GetCommercialRouteIncome
 
 	public function __invoke(OrbitalBase $from, OrbitalBase $to, Player $player = null): int
 	{
-		$bonusA = ($from->place->system->sector->id !== $to->place->system->sector->id) ? $this->sectorBonus : 1;
-		$bonusB = ($from->player->faction->id !== $to->player->faction->id) ? $this->factionBonus : 1;
+		$bonusA = (!$from->place->system->sector->id->equals($to->place->system->sector->id)) ? $this->sectorBonus : 1;
+		$bonusB = (!$from->player->faction->id->equals($to->player->faction->id)) ? $this->factionBonus : 1;
 
 		$distance = ($this->getDistanceBetweenPlaces)($from->place, $to->place);
 

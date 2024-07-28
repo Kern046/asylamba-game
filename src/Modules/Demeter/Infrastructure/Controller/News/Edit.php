@@ -27,7 +27,7 @@ class Edit extends AbstractController
 			?? throw $this->createNotFoundException('Faction news not found');
 
 		// TODO Replace with voter
-		if (!$currentPlayer->isGovernmentMember() || $currentPlayer->faction->id !== $factionNew->faction->id) {
+		if (!$currentPlayer->isGovernmentMember() || !$currentPlayer->faction->id->equals($factionNew->faction->id)) {
 			throw $this->createAccessDeniedException('Vous n\'avez pas le droit pour créer une annonce.');
 		}
 

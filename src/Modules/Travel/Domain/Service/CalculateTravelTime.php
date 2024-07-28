@@ -33,7 +33,7 @@ readonly class CalculateTravelTime
 				TravelType::CommercialShipping => 120,
 				TravelType::RecyclingShips => 600,
 			},
-			TimeMode::Standard => $from->system->id === $to->system->id
+			TimeMode::Standard => $from->system->id->equals($to->system->id)
 				? $this->getTimeTravelInSystem($from, $to)
 				: $this->getTimeTravelOutOfSystem($from, $to, $player),
 		};

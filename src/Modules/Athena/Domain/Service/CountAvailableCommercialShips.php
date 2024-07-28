@@ -32,7 +32,7 @@ readonly class CountAvailableCommercialShips
 		$commercialShippings = $this->commercialShippingRepository->getByBase($base);
 
 		foreach ($commercialShippings as $commercialShipping) {
-			if ($commercialShipping->originBase->id === $base->id) {
+			if ($commercialShipping->originBase->id->equals($base->id)) {
 				$usedShips += $commercialShipping->shipQuantity;
 			}
 		}

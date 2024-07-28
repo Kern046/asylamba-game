@@ -109,7 +109,7 @@ readonly class ConquestManager
 						$commander->getArrivalDate(),
 					);
 					foreach ($reports as $r) {
-						if ($r->id === $report->id) {
+						if ($r->id->equals($report->id)) {
 							continue;
 						}
 						$r->attackerStatement = Report::DELETED;

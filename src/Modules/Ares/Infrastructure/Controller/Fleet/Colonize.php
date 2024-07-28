@@ -113,7 +113,7 @@ class Colonize extends AbstractController
 		$sector = $place->system->sector;
 
 		$sectorColor = $sector->faction;
-		$isFactionSector = $sector->faction?->id === $commander->player->faction->id
+		$isFactionSector = $sector->faction?->id->equals($commander->player->faction->id)
 			|| Color::ALLY === $sectorColor?->relations[$currentPlayer->faction->identifier];
 
 		// TODO Replace by specification

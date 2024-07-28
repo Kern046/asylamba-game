@@ -47,7 +47,7 @@ class Abdicate extends AbstractController
 		$heir = $playerRepository->get($playerId) ?? throw $this->createNotFoundException('Player not found');
 
 		// TODO Replace with a voter
-		if ($heir->faction->id !== $faction->id) {
+		if (!$heir->faction->id->equals($faction->id)) {
 			throw new BadRequestHttpException('Selected player is from another faction');
 		}
 		if (!$heir->isParliamentMember()) {

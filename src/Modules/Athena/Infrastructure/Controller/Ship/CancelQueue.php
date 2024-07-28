@@ -40,7 +40,7 @@ class CancelQueue extends AbstractController
 		for ($i = 0; $i < $nbShipQueues; ++$i) {
 			$shipQueue = $shipQueues[$i];
 			// get the index of the queue
-			if ($shipQueue->id === $id) {
+			if ($shipQueue->id->equals($id)) {
 				$index = $i;
 				$startDate = $shipQueue->getStartDate();
 				$shipNumber = $shipQueue->shipNumber;

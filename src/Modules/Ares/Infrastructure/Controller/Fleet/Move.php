@@ -45,7 +45,7 @@ class Move extends AbstractController
 		}
 		$place = $placeRepository->get(Uuid::fromString($placeId)) ?? throw $this->createNotFoundException('Place not found');
 
-		if ($commander->player->faction->id !== $place?->player?->faction->id) {
+		if (!$commander->player->faction->id->equals($place?->player?->faction->id)) {
 			throw new ConflictHttpException('Vous ne pouvez pas envoyer une flotte sur une planète qui ne vous appartient pas.');
 		}
 		$home = $commander->base;
@@ -57,7 +57,7 @@ class Move extends AbstractController
 		}
 		$sector = $place->system->sector;
 		// TODO add an interface for faction assets entities to create a shortcut method to check the owning faction
-		$isFactionSector = $sector->faction?->id === $commander->player->faction->id;
+		$isFactionSector = $sector->faction?->id->equals($commander->player->faction->id);
 
 		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
 			throw new ConflictHttpException('Cet emplacement est trop éloigné.');

@@ -40,7 +40,7 @@ readonly class AntiSpyHandler
 	{
 		$arrivalDate = $commander->getArrivalDate();
 		// dans le même système
-		if ($startPlace->system->id === $destinationPlace->system->id) {
+		if ($startPlace->system->id->equals($destinationPlace->system->id)) {
 			return [true, true, true];
 		}
 		$departureDate = new \DateTimeImmutable();

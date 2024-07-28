@@ -92,7 +92,7 @@ class GiveShips extends AbstractController
 		// TODO make service
 		$commercialShippings = $commercialShippingRepository->getByBase($currentBase);
 		foreach ($commercialShippings as $commercialShipping) {
-			if ($commercialShipping->originBase->id === $currentBase->id) {
+			if ($commercialShipping->originBase->id->equals($currentBase->id)) {
 				$usedShips += $commercialShipping->shipQuantity;
 			}
 		}

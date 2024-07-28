@@ -131,7 +131,7 @@ readonly class LawFactory
 		$sector = $this->sectorRepository->get(Uuid::fromString($rSector))
 			?? throw new \InvalidArgumentException('Sector not found');
 		// TODO Replace with Voter
-		if ($sector->faction->id !== $currentPlayer->faction->id) {
+		if (!$sector->faction->id->equals($currentPlayer->faction->id)) {
 			// TODO Replace with custom exception
 			throw new \UnexpectedValueException('Ce secteur n\'est pas sous votre contrôle.');
 		}
@@ -161,7 +161,7 @@ readonly class LawFactory
 		$name = $this->parser->protect($name);
 		$sector = $this->sectorRepository->get(Uuid::fromString($rSector))
 			?? throw new \InvalidArgumentException('Ce secteur n\'existe pas.');
-		if ($sector->faction->id !== $currentPlayer->faction->id) {
+		if (!$sector->faction->id->equals($currentPlayer->faction->id)) {
 			throw new \UnexpectedValueException('Ce secteur n\'est pas sous votre contrôle.');
 		}
 		return [
@@ -185,7 +185,7 @@ readonly class LawFactory
 
 		$commercialTaxes = $this->commercialTaxRepository->getFactionsTax($currentPlayer->faction, $relatedFaction);
 
-		if ($relatedFaction->id === $currentPlayer->faction->id && $taxes > 15) {
+		if ($relatedFaction->id->equals($currentPlayer->faction->id) && $taxes > 15) {
 			throw new \DomainException('Pas plus que 15.');
 		} elseif ($taxes > 15 || $taxes < 2) {
 			throw new \DomainException('Entre 2 et 15.');
@@ -217,7 +217,7 @@ readonly class LawFactory
 
 		$commercialTaxes = $this->commercialTaxRepository->getFactionsTax($currentPlayer->faction, $relatedFaction);
 
-		if ($relatedFaction->id === $currentPlayer->faction->id && $taxes > 15) {
+		if ($relatedFaction->id->equals($currentPlayer->faction->id) && $taxes > 15) {
 			throw new \DomainException('Pas plus que 15.');
 		} elseif ($taxes > 15 || $taxes < 2) {
 			throw new \DomainException('Entre 2 et 15.');
@@ -363,7 +363,7 @@ readonly class LawFactory
 			throw new \InvalidArgumentException('l\'amende doit être un entier positif.');
 		}
 		$targetPlayer = $this->playerRepository->get($rPlayer);
-		if ($targetPlayer->faction->id !== $currentPlayer->faction->id) {
+		if (!$targetPlayer->faction->id->equals($currentPlayer->faction->id)) {
 			throw new \UnexpectedValueException('Ce joueur n\'est pas de votre faction.');
 		}
 

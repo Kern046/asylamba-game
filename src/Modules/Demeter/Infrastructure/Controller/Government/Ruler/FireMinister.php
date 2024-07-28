@@ -30,7 +30,7 @@ class FireMinister extends AbstractController
 
 		$minister = $playerRepository->get($id) ?? throw $this->createNotFoundException('Player not found');
 
-		if ($minister->faction->id !== $currentPlayer->faction->id) {
+		if (!$minister->faction->id->equals($currentPlayer->faction->id)) {
 			throw new ConflictHttpException('Vous ne pouvez pas virer un joueur d\'une autre faction.');
 		}
 

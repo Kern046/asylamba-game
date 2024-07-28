@@ -24,7 +24,7 @@ readonly class SectorNameResultHandler
 		$faction = $law->faction;
 		$sector = $this->sectorRepository->get(Uuid::fromString($law->options['rSector']));
 
-		if ($sector->faction->id === $faction->id) {
+		if ($sector->faction->id->equals($faction->id)) {
 			$sector->name = $law->options['name'];
 		}
 		$law->statement = Law::OBSOLETE;

@@ -60,7 +60,7 @@ class ViewHeadquarters extends AbstractController
 		$session = $request->getSession();
 		$obsets = [];
 		foreach ($this->currentPlayerBasesRegistry->all() as $orbitalBase) {
-			if ($request->cookies->get('p'.Params::LIST_ALL_FLEET, Params::$params[Params::LIST_ALL_FLEET]) || $orbitalBase->id === $this->currentPlayerBasesRegistry->current()->id) {
+			if ($request->cookies->get('p'.Params::LIST_ALL_FLEET, Params::$params[Params::LIST_ALL_FLEET]) || $orbitalBase->id->equals($this->currentPlayerBasesRegistry->current()->id)) {
 				$obsets[] = [
 					'info' => [
 						'id' => $orbitalBase->id,
@@ -86,7 +86,7 @@ class ViewHeadquarters extends AbstractController
 		$attackingCommanders = $this->commanderRepository->getIncomingAttacks($currentPlayer);
 		for ($i = 0; $i < count($obsets); ++$i) {
 			foreach ($attackingCommanders as $commander) {
-				if ($commander->destinationPlace->id === $obsets[$i]['info']['id']) {
+				if ($commander->destinationPlace->id->equals($obsets[$i]['info']['id'])) {
 					$obsets[$i]['fleets'][] = $commander;
 				}
 			}
@@ -99,7 +99,7 @@ class ViewHeadquarters extends AbstractController
 
 		for ($i = 0; $i < count($obsets); ++$i) {
 			foreach ($commanders as $commander) {
-				if ($commander->base->id === $obsets[$i]['info']['id']) {
+				if ($commander->base->id->equals($obsets[$i]['info']['id'])) {
 					$obsets[$i]['fleets'][] = $commander;
 				}
 			}

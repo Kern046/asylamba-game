@@ -79,11 +79,11 @@ class TradeMarketController extends AbstractController
 		$commercialShippings = $this->commercialShippingRepository->getByBase($currentBase);
 
 		foreach ($commercialShippings as $commercialShipping) {
-			if ($commercialShipping->originBase->id === $currentBase->id) {
+			if ($commercialShipping->originBase->id->equals($currentBase->id)) {
 				$commercialShippingsData['used_ships'] += $commercialShipping->shipQuantity;
 				$commercialShippingsData['outgoing'][$commercialShipping->statement][] = $commercialShipping;
 			}
-			if ($commercialShipping->destinationBase?->id === $currentBase->id) {
+			if ($commercialShipping->destinationBase?->id->equals($currentBase->id)) {
 				$commercialShippingsData['incoming'][$commercialShipping->statement][] = $commercialShipping;
 			}
 		}

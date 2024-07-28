@@ -37,7 +37,7 @@ class VoteForCandidate extends AbstractController
 		$candidate = $this->candidateRepository->get($candidateId) ?? throw new NotFoundHttpException('Candidate not found');
 		$hasApproved = $request->query->getBoolean('hasApproved');
 
-		if ($election->faction->id !== $currentPlayer->faction->id) {
+		if (!$election->faction->id->equals($currentPlayer->faction->id)) {
 			throw new ConflictHttpException('Cette election ne se déroule pas dans votre faction.');
 		}
 
