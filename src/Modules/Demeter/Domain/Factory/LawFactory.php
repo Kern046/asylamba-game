@@ -239,21 +239,21 @@ readonly class LawFactory
 	 */
 	public function createNeutralPactLaw(Color|null $faction, array $payload): array
 	{
-		$rColor = $payload['rcolor']
-			?? throw new \InvalidArgumentException('Informations manquantes.');
+		$factionIdentifier = intval($payload['rcolor']
+			?? throw new \InvalidArgumentException('Informations manquantes.'));
 
-		if ($rColor < 1 || $rColor > (ColorResource::size() - 1) || $rColor === $faction->identifier) {
+		if ($factionIdentifier < 1 || $factionIdentifier > (ColorResource::size() - 1) || $factionIdentifier === $faction->identifier) {
 			throw new \InvalidArgumentException('Cette faction n\'existe pas ou il s\'agit de la votre.');
 		}
 
-		if (Color::NEUTRAL === $faction->relations[$rColor]) {
+		if (Color::NEUTRAL === $faction->relations[$factionIdentifier]) {
 			throw new \DomainException('Vous considérez déjà cette faction comme neutre.');
 		}
 
 		return [
-			'rColor' => $rColor,
+			'rColor' => $factionIdentifier,
 			'display' => [
-				'Faction' => ColorResource::getInfo($rColor, 'officialName'),
+				'Faction' => ColorResource::getInfo($factionIdentifier, 'officialName'),
 			],
 		];
 	}
@@ -264,9 +264,9 @@ readonly class LawFactory
 	 */
 	public function createPeacePactLaw(Color|null $faction, array $payload): array
 	{
-		$rColor = $payload['rcolor']
-			?? throw new \InvalidArgumentException('Informations manquantes.');
-		if ($rColor < 1 || $rColor > (ColorResource::size() - 1) || $rColor === $faction->identifier) {
+		$factionIdentifier = intval($payload['rcolor']
+			?? throw new \InvalidArgumentException('Informations manquantes.'));
+		if ($factionIdentifier < 1 || $factionIdentifier > (ColorResource::size() - 1) || $factionIdentifier === $faction->identifier) {
 			throw new \InvalidArgumentException('Cette faction n\'existe pas ou il s\'agit de la votre.');
 		}
 		$nbrPact = 0;
@@ -279,14 +279,14 @@ readonly class LawFactory
 			throw new \DomainException('Vous ne pouvez faire que 2 pactes de ce type.');
 		}
 
-		if (Color::PEACE === $faction->relations[$rColor]) {
+		if (Color::PEACE === $faction->relations[$factionIdentifier]) {
 			throw new \DomainException('Vous considérez déjà cette faction comme votre alliée.');
 		}
 
 		return [
-			'rColor' => $rColor,
+			'rColor' => $factionIdentifier,
 			'display' => [
-				'Faction' => ColorResource::getInfo($rColor, 'officialName'),
+				'Faction' => ColorResource::getInfo($factionIdentifier, 'officialName'),
 			],
 		];
 	}
@@ -297,9 +297,9 @@ readonly class LawFactory
 	 */
 	public function createTotalAllianceLaw(Color|null $faction, array $payload): array
 	{
-		$rColor = $payload['rcolor']
-			?? throw new \InvalidArgumentException('Informations manquantes.');
-		if ($rColor < 1 || $rColor > (ColorResource::size() - 1) || $rColor === $faction->identifier) {
+		$factionIdentifier = intval($payload['rcolor']
+			?? throw new \InvalidArgumentException('Informations manquantes.'));
+		if ($factionIdentifier < 1 || $factionIdentifier > (ColorResource::size() - 1) || $factionIdentifier === $faction->identifier) {
 			throw new \InvalidArgumentException('Cette faction n\'existe pas ou il s\'agit de la votre.');
 		}
 		$allyYet = false;
@@ -312,14 +312,14 @@ readonly class LawFactory
 			throw new \DomainException('Vous ne pouvez considérez qu\'une seule faction comme alliée.');
 		}
 
-		if (Color::ALLY === $faction->relations[$rColor]) {
+		if (Color::ALLY === $faction->relations[$factionIdentifier]) {
 			throw new \DomainException('Vous considérez déjà cette faction comme votre alliée.');
 		}
 
 		return [
-			'rColor' => $rColor,
+			'rColor' => $factionIdentifier,
 			'display' => [
-				'Faction' => ColorResource::getInfo($rColor, 'officialName'),
+				'Faction' => ColorResource::getInfo($factionIdentifier, 'officialName'),
 			],
 		];
 	}
@@ -330,20 +330,20 @@ readonly class LawFactory
 	 */
 	public function createWarDeclarationLaw(Color|null $faction, array $payload): array
 	{
-		$rColor = $payload['rcolor']
-			?? throw new \InvalidArgumentException('Informations manquantes.');
+		$factionIdentifier = intval($payload['rcolor']
+			?? throw new \InvalidArgumentException('Informations manquantes.'));
 
-		if ($rColor < 1 || $rColor > (ColorResource::size() - 1) || $rColor === $faction->identifier) {
+		if ($factionIdentifier < 1 || $factionIdentifier > (ColorResource::size() - 1) || $factionIdentifier === $faction->identifier) {
 			throw new \DomainException('Cette faction n\'existe pas ou il s\'agit de la votre.');
 		}
-		if (Color::ENEMY === $faction->relations[$rColor]) {
+		if (Color::ENEMY === $faction->relations[$factionIdentifier]) {
 			throw new \DomainException('Vous considérez déjà cette faction comme votre ennemie.');
 		}
 
 		return [
-			'rColor' => $rColor,
+			'rColor' => $factionIdentifier,
 			'display' => [
-				'Faction' => ColorResource::getInfo($rColor, 'officialName')
+				'Faction' => ColorResource::getInfo($factionIdentifier, 'officialName')
 			],
 		];
 	}
@@ -356,8 +356,8 @@ readonly class LawFactory
 	{
 		$rPlayer = $payload['rplayer']
 			?? throw new \InvalidArgumentException('Missing player id');
-		$credits = intval($payload['credits'])
-			?? throw new \InvalidArgumentException('Missing fine amount');
+		$credits = intval($payload['credits']
+			?? throw new \InvalidArgumentException('Missing fine amount'));
 
 		if ($credits <= 0) {
 			throw new \InvalidArgumentException('l\'amende doit être un entier positif.');
