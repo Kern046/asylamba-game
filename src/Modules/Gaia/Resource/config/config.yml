@@ -22,10 +22,6 @@ services:
         arguments:
             $availableFactions: "%game.available_factions%"
             $limitConquestSector: "%gaia.limit_conquest_sector%"
-
-    App\Modules\Gaia\Manager\SectorManager:
-        arguments:
-            $scores: "%gaia.scores%"
             
     App\Modules\Gaia\Galaxy\GalaxyConfiguration:
         public: true

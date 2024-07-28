@@ -8,13 +8,17 @@ use App\Classes\Redis\RedisManager;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Model\Sector;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 readonly class SectorManager
 {
+	private const CONTROLLED_SYSTEM_POINTS = 2;
+
 	public function __construct(
 		private RedisManager                   $redisManager,
 		private SystemRepositoryInterface      $systemRepository,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		#[Autowire('%gaia.scores%')]
 		private array                          $scores = [],
 	) {
 	}
@@ -46,8 +50,8 @@ readonly class SectorManager
 				continue;
 			}
 			$scores[$system->faction->identifier] = (!empty($scores[$system->faction->identifier]))
-				? $scores[$system->faction->identifier] + 2
-				: 2;
+				? $scores[$system->faction->identifier] + self::CONTROLLED_SYSTEM_POINTS
+				: self::CONTROLLED_SYSTEM_POINTS;
 		}
 		$scores[0] = 0;
 		arsort($scores);

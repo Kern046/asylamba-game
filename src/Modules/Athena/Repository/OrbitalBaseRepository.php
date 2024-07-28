@@ -4,13 +4,13 @@ namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\Sector;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
 use App\Shared\Domain\Specification\SelectorSpecification;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -63,7 +63,7 @@ class OrbitalBaseRepository extends DoctrineRepository implements OrbitalBaseRep
 			->join('ob.place', 'place')
 			->join('place.system', 'system')
 			->where('system.sector = :sector')
-			->setParameter('sector', $sector)
+			->setParameter('sector', $sector->id, UuidType::NAME)
 			->getQuery()
 			->getResult();
 	}
@@ -74,8 +74,8 @@ class OrbitalBaseRepository extends DoctrineRepository implements OrbitalBaseRep
 
 		return $qb
 			->join('ob.place', 'place')
-			->where('IDENTITY(place.system) = :system_id')
-			->setParameter('system_id', $system->id->toBinary())
+			->where('place.system = :system')
+			->setParameter('system', $system->id, UuidType::NAME)
 			->getQuery()
 			->getResult();
 	}
