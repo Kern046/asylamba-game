@@ -26,13 +26,7 @@ services:
     App\Modules\Gaia\Galaxy\GalaxyConfiguration:
         public: true
         class: "%gaia.galaxy_configuration.class%"
-        
-    App\Modules\Gaia\EventListener\SectorListener:
-        arguments:
-            $sectorMinimalScore: "%gaia.sector_minimal_score%"
-        tags:
-            - {name: "kernel.event_listener", event: "gaia.place_owner_change", method: "onPlaceOwnerChange", priority: 1}
-            
+
     App\Modules\Gaia\EventListener\SystemListener:
         arguments:
             $scores: "%gaia.scores%"

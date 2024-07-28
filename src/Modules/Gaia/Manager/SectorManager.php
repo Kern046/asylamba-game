@@ -6,6 +6,8 @@ namespace App\Modules\Gaia\Manager;
 
 use App\Classes\Redis\RedisManager;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Model\Sector;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -15,11 +17,15 @@ readonly class SectorManager
 	private const CONTROLLED_SYSTEM_POINTS = 2;
 
 	public function __construct(
+		private ColorRepositoryInterface $colorRepository,
 		private RedisManager                   $redisManager,
 		private SystemRepositoryInterface      $systemRepository,
+		private SectorRepositoryInterface $sectorRepository,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		#[Autowire('%gaia.scores%')]
 		private array                          $scores = [],
+		#[Autowire('%gaia.sector_minimal_score%')]
+		private int $sectorMinimalScore,
 	) {
 	}
 
@@ -55,6 +61,24 @@ readonly class SectorManager
 		}
 		$scores[0] = 0;
 		arsort($scores);
+
+		$newColor = key($scores);
+		$score = $scores[$newColor];
+		$hasEnoughPoints = $score >= $this->sectorMinimalScore;
+
+		$currentFactionIdentifier = $sector->faction?->identifier ?? 0;
+
+		if (!$hasEnoughPoints) {
+			// If this is a prime sector, we do not pull back the color from the sector
+			// TODO check behavior if another faction has taken the prime sector before
+			if (!$sector->prime) {
+				$sector->faction = null;
+			}
+		} elseif ($currentFactionIdentifier !== $newColor && $score > $scores[$currentFactionIdentifier]) {
+			$sector->faction = $this->colorRepository->getOneByIdentifier($newColor);
+		}
+
+		$this->sectorRepository->save($sector);
 
 		$this->redisManager->getConnection()->set('sector:' . $sector->id, serialize($scores));
 
