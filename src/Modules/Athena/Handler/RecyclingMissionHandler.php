@@ -64,7 +64,7 @@ readonly class RecyclingMissionHandler
 
 		$player = $orbitalBase->player;
 
-		if (!$player->isAlive()) {
+		if (null === $player || !$player->isAlive()) {
 			$mission->stop();
 
 			$this->recyclingMissionRepository->save($mission);
