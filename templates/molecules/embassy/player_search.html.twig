@@ -21,7 +21,7 @@
 
 				{% if player.id != current_player.id %}
 					<hr />
-					<p><a href="{{ path('new_message', {'player': player.id}) }}" style="text-decoration: none; color: white; border-bottom: solid 1px #4f4f4f">Envoyer un message</a></p>
+					<p><a href="{{ path('communication_center', {'conversationId': 'new', 'sendto': player.id}) }}" style="text-decoration: none; color: white; border-bottom: solid 1px #4f4f4f">Envoyer un message</a></p>
 				{% endif %}
 			</div>
 		</div>

@@ -192,6 +192,7 @@ class PopulateDatabase extends Command
 		$conv = new Conversation(
 			id: Uuid::v4(),
 			title: 'Jean-Mi, administrateur système',
+			messagesCount: 0,
 			createdAt: new \DateTimeImmutable(),
 			lastMessageAt: new \DateTimeImmutable(),
 			type: Conversation::TY_SYSTEM,
@@ -215,6 +216,7 @@ class PopulateDatabase extends Command
 			$conv = new Conversation(
 				id: Uuid::v4(),
 				title: 'Communication de '.ColorResource::getInfo($player->faction->identifier, 'popularName'),
+				messagesCount: 0,
 				createdAt: new \DateTimeImmutable(),
 				lastMessageAt: new \DateTimeImmutable(),
 				type: Conversation::TY_SYSTEM,

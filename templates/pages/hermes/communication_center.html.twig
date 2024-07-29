@@ -35,7 +35,7 @@
 							{% set conversation_faction_identifier = 0 %}
 						{% else %}
 							{% set conversation_avatar = conv.initiator.avatar %}
-							{% set conversation_faction_identifier = conv.initiator.faction.identifier %}
+							{% set conversation_faction_identifier = conv.initiator.faction.identifier ?? 0 %}
 						{% endif %}
 
 						{% for conv_participant in conv.players %}
@@ -49,7 +49,7 @@
 								{% if conv.type == constant('App\\Modules\\Hermes\\Model\\Conversation::TY_SYSTEM') %}
 									{% if conv_participant.playerStatus == constant('App\\Modules\\Hermes\\Model\\ConversationUser::US_ADMIN') %}
 										{% set conversation_avatar = conv_participant.player.avatar %}
-										{% set conversation_faction_identifier = conv_participant.player.faction.identifier %}
+										{% set conversation_faction_identifier = conv_participant.player.faction.identifier ?? 0 %}
 									{% endif %}
 								{% endif %}
 
@@ -63,7 +63,7 @@
 							<span class="cover">
 								<img src="{{ asset('build/media/avatar/small/' ~ conversation_avatar ~ '.png') }}" alt="" class="picture color{{ conversation_faction_identifier }}'" />
 								<span class="number">{{ conv.messagesCount }}</span>
-								{% if own_last_view.timestamp < conv.lastMessageAt.timestamp %}
+								{% if own_last_view.timestamp ?? null < conv.lastMessageAt.timestamp %}
 									<span class="new-message"><img src="{{ asset('build/media/common/nav-message.png') }}" alt="" /></span>
 								{% endif %}
 							</span>
@@ -111,10 +111,9 @@
 						<form action="{{ url('create_conversation') }}" method="post">
 							<p>Destinataire</p>
 
-
 							<p class="input input-text">
-								<input class="autocomplete-hidden" name="recipients" type="hidden" value="{{ player_id ?? '' }}" />
-								<input autocomplete="off" class="autocomplete-player ac_input" name="name" placeholder="Destinataire" type="text" value="{{ name ?? '' }}"/>
+								<input class="autocomplete-hidden" name="recipients" type="hidden" value="{{ recipient_id ?? '' }}" />
+								<input autocomplete="off" class="autocomplete-player ac_input" name="name" placeholder="Destinataire" type="text" value="{{ recipient_name ?? '' }}"/>
 							</p>
 
 							<p>

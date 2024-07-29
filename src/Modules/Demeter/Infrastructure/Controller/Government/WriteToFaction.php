@@ -9,6 +9,7 @@ use App\Modules\Hermes\Model\ConversationMessage;
 use App\Modules\Hermes\Model\ConversationUser;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ class WriteToFaction extends AbstractController
 		PlayerRepositoryInterface $playerRepository,
 		ConversationRepositoryInterface $conversationRepository,
 		ConversationMessageRepositoryInterface $conversationMessageRepository,
+		EntityManagerInterface $entityManager,
 		Parser $parser,
 	): Response {
 		$message = $request->request->get('message') ?? throw new BadRequestHttpException('Missing message body');
@@ -45,11 +47,12 @@ class WriteToFaction extends AbstractController
 		$conversation = $conversationRepository->getOneByPlayer($factionAccount)
 			?? throw $this->createNotFoundException('Faction conversation not found');
 
+		$conversation->messagesCount++;
 		$conversation->lastMessageAt = new \DateTimeImmutable();
 
 		// désarchiver tout les users
 		foreach ($conversation->players as $user) {
-			$user->convStatement = ConversationUser::CS_DISPLAY;
+			$user->conversationStatus = ConversationUser::CS_DISPLAY;
 		}
 
 		// création du message
@@ -58,10 +61,12 @@ class WriteToFaction extends AbstractController
 			conversation: $conversation,
 			player: $currentPlayer,
 			content: $content,
-			createdAt: new \DateTimeImmutable(), type: ConversationMessage::TY_STD,
+			createdAt: new \DateTimeImmutable(),
+			type: ConversationMessage::TY_STD,
 		);
 
 		$conversationMessageRepository->save($message);
+		$entityManager->flush();
 
 		return $this->redirect($request->headers->get('referer'));
 	}

@@ -160,6 +160,7 @@ readonly class BallotHandler
 	): void {
 		// préparation de la conversation
 		$conv->lastMessageAt = new \DateTimeImmutable();
+		$conv->messagesCount++;
 
 		// désarchiver tous les users
 		$users = $conv->players;

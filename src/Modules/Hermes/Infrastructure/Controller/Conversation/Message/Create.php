@@ -57,13 +57,14 @@ class Create extends AbstractController
 
 			// désarchiver tout les users
 			foreach ($conversation->players as $conversationUser) {
-				$conversationUser->convStatement = ConversationUser::CS_DISPLAY;
+				$conversationUser->conversationStatus = ConversationUser::CS_DISPLAY;
 
-				if ($conversationUser->player->id == $currentPlayer->id) {
+				if ($conversationUser->player->id === $currentPlayer->id) {
 					$conversationUser->lastViewedAt = new \DateTimeImmutable();
 				}
 			}
 
+			$conversation->messagesCount++;
 			// création du message
 			$message = new ConversationMessage(
 				id: Uuid::v4(),
@@ -75,6 +76,7 @@ class Create extends AbstractController
 			);
 
 			$conversationMessageRepository->save($message);
+			$conversationRepository->save($conversation);
 		}
 		return $this->redirectToRoute('communication_center', [
 			'conversationId' => $conversation->id,

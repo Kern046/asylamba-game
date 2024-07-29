@@ -15,8 +15,11 @@ use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Gaia\Event\PlaceOwnerChangeEvent;
 use App\Modules\Gaia\Galaxy\GalaxyConfiguration;
 use App\Modules\Gaia\Manager\PlaceManager;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
+use App\Modules\Hermes\Domain\Repository\ConversationUserRepositoryInterface;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
+use App\Modules\Hermes\Model\ConversationUser;
 use App\Modules\Promethee\Domain\Repository\ResearchRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Helper\ResearchHelper;
@@ -29,6 +32,7 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -40,10 +44,12 @@ class CreateCharacter extends AbstractController
 {
 	public function __construct(
 		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly ConversationRepositoryInterface $conversationRepository,
+		private readonly ConversationUserRepositoryInterface $conversationUserRepository,
 		private readonly PlayerRepositoryInterface $playerRepository,
 		private readonly PlayerManager $playerManager,
 		private readonly GalaxyConfiguration $galaxyConfiguration,
-		private readonly NotificationManager $notificationManager,
+		private readonly NotificationRepositoryInterface $notificationRepository,
 		private readonly TechnologyRepositoryInterface $technologyRepository,
 		private readonly ResearchHelper $researchHelper,
 		private readonly EventDispatcherInterface $eventDispatcher,
@@ -55,6 +61,8 @@ class CreateCharacter extends AbstractController
 		private readonly ResearchRepositoryInterface $researchRepository,
 		private readonly EntityManagerInterface $entityManager,
 		private readonly Security $security,
+		#[Autowire('%id_jeanmi%')]
+		private readonly int $jeanMiId,
 	) {
 	}
 
@@ -303,7 +311,7 @@ class CreateCharacter extends AbstractController
 				$godFather = $this->playerRepository->get($session->get('rgodfather'))
 					?? throw new BadRequestHttpException('Godfather not found');
 
-				$player->godfather = $godFather;
+				$player->godFather = $godFather;
 			}
 
 			$player->status = Player::STANDARD;
@@ -344,19 +352,25 @@ class CreateCharacter extends AbstractController
 			$this->playerRepository->save($player);
 
 			if (null !== $godFather) {
-				// send a message to the godfather
-				$n = new Notification(
-					id: Uuid::v4(),
-					player: $player->godfather,
-					title: 'Votre filleul s\'est inscrit',
-				);
-				$n->addBeg()->addTxt('Un de vos amis a créé un compte.')->addSep();
-				$n->addTxt('Vous pouvez le contacter, son nom de joueur est ');
-				$n->addLnk('embassy/player-'.$player->getId(), '"'.$player->name.'"')->addTxt('.');
-				$n->addBrk()->addTxt('Vous venez de gagner 1000 crédits. Vous en gagnerez 1 million de plus lorsqu\'il atteindra le niveau 3.');
-				$n->addEnd();
+				$n = NotificationBuilder::new()
+					->setTitle('Votre filleul s\'est inscrit')
+					->setContent(
+						NotificationBuilder::paragraph(
+							'Un de vos amis a créé un compte.',
+							NotificationBuilder::divider(),
+							NotificationBuilder::link(
+								$this->generateUrl('embassy', ['player' => $player->id]),
+								$player->name,
+							),
+							'.',
+						),
+						NotificationBuilder::paragraph(
+							'Vous venez de gagner 1000 crédits. Vous en gagnerez 1 million de plus lorsqu\'il atteindra le niveau 3.',
+						),
+					)
+					->for($player->godFather);
 
-				$this->notificationManager->add($n);
+				$this->notificationRepository->save($n);
 
 				// add 1000 credits to the godfather
 				$this->playerManager->increaseCredit($godFather, 1000);
@@ -484,30 +498,12 @@ class CreateCharacter extends AbstractController
 			$session->remove('prebindkey');
 
 			// ajout aux conversation de faction et techniques
-			$readingDate = new \DateTimeImmutable();
-
-//			if (($factionAccount = $this->playerRepository->getFactionAccount($player->faction)) !== null) {
-//				$this->conversationManager->load(
-//					[
-//					'cu.rPlayer' => [$this->getParameter('id_jeanmi'), $factionAccount->id],
-//				],
-//					[],
-//					[0, 2]
-//				);
-//
-//				for ($i = 0; $i < $this->conversationManager->size(); ++$i) {
-//					$user = new ConversationUser(
-//						id: Uuid::v4(),
-//						conversation: '',
-//						player: $player,
-//						lastViewedAt: $readingDate,
-//						playerStatus: ConversationUser::US_STANDARD,
-//						conversationStatus: ConversationUser::CS_ARCHIVED,
-//					);
-//
-//					$this->conversationUserManager->add($user);
-//				}
-//			}
+			if (($factionAccount = $this->playerRepository->getFactionAccount($player->faction)) !== null) {
+				$this->addPlayerToConversation($player, $factionAccount);
+			}
+			if (($systemAccount = $this->playerRepository->get($this->jeanMiId)) !== null) {
+				$this->addPlayerToConversation($player, $systemAccount);
+			}
 			// redirection vers connection
 			return $this->redirectToRoute('connect', [
 				'bindKey' => $this->security->crypt($this->security->buildBindkey($player->bind)),
@@ -521,6 +517,22 @@ class CreateCharacter extends AbstractController
 				'step' => 'place-choice',
 			]);
 		}
+	}
+
+	private function addPlayerToConversation(Player $registeringPlayer, Player $conversationOwner): void
+	{
+		$conversation = $this->conversationRepository->getOneByPlayer($conversationOwner);
+
+		$playerConversation = new ConversationUser(
+			id: Uuid::v4(),
+			conversation: $conversation,
+			player: $registeringPlayer,
+			lastViewedAt: new \DateTimeImmutable(),
+			playerStatus: ConversationUser::US_STANDARD,
+			conversationStatus: ConversationUser::CS_ARCHIVED,
+		);
+
+		$this->conversationUserRepository->save($playerConversation);
 	}
 
 	private function createPlayerTechnology(Player $player, bool $isHighLevel): void

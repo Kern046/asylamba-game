@@ -22,10 +22,10 @@ readonly class SectorManager
 		private SystemRepositoryInterface      $systemRepository,
 		private SectorRepositoryInterface $sectorRepository,
 		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		#[Autowire('%gaia.scores%')]
-		private array                          $scores = [],
 		#[Autowire('%gaia.sector_minimal_score%')]
 		private int $sectorMinimalScore,
+		#[Autowire('%gaia.scores%')]
+		private array $scores = [],
 	) {
 	}
 

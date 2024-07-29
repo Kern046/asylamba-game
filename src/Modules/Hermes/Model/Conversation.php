@@ -49,7 +49,12 @@ class Conversation
 
 	public function getInitiator(): Player
 	{
-		return $this->players->first()->player;
+		foreach ($this->players as $conversationUser) {
+			if ($conversationUser->playerStatus === ConversationUser::US_ADMIN) {
+				return $conversationUser->player;
+			}
+		}
+		throw new \RuntimeException(sprintf('There is no initiator for conversation %s', $this->id->toRfc4122()));
 	}
 
 	public function isGroupConversation(): bool

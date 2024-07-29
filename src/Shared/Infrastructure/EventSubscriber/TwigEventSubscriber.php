@@ -72,7 +72,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
 
 		$this->twig->addGlobal('current_player', $currentPlayer);
 		$this->twig->addGlobal('current_player_faction_id', $currentPlayer->faction->identifier);
-		$this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerConversations($currentPlayer));
+		$this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerUnreadConversations($currentPlayer));
 		$this->twig->addGlobal('current_player_notifications', $this->notificationRepository->getUnreadNotifications($currentPlayer));
 	}
 }

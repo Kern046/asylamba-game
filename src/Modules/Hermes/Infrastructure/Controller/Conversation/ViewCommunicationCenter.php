@@ -7,6 +7,7 @@ use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
 use App\Modules\Hermes\Domain\Repository\ConversationUserRepositoryInterface;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Model\ConversationUser;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Clock\ClockAwareTrait;
@@ -34,6 +35,7 @@ class ViewCommunicationCenter extends AbstractController
 		ConversationUserRepositoryInterface $conversationUserRepository,
 		ConversationMessageRepositoryInterface $conversationMessageRepository,
 		NotificationRepositoryInterface $notificationRepository,
+		PlayerRepositoryInterface	    $playerRepository,
 		Player                          $currentPlayer,
 		string|null                     $conversationId = null,
 	): Response {
@@ -45,10 +47,15 @@ class ViewCommunicationCenter extends AbstractController
 		$messagesPage = $request->query->get('messages_page', 1);
 		$conversation = $playerLastViewedAt = null;
 		$messages = [];
+		$recipient = null;
 
 		if (null !== $conversationId) {
 			if ('new' === $conversationId) {
 				$startNewConversation = true;
+
+				if (!empty($recipientId = $request->query->get('sendto'))) {
+					$recipient = $playerRepository->get($recipientId);
+				}
 			} else {
 				if (!Uuid::isValid($conversationId)) {
 					throw new BadRequestHttpException('Invalid Conversation ID');
@@ -79,6 +86,8 @@ class ViewCommunicationCenter extends AbstractController
 			'messages' => $messages,
 			'messages_page' => $messagesPage,
 			'player_last_viewed_at' => $playerLastViewedAt,
+			'recipient_id' => $recipient?->id,
+			'recipient_name' => $recipient?->name,
 			'notifications' => $notificationRepository->getPlayerNotificationsByArchive($currentPlayer, false),
 			'archived_notifications' => $notificationRepository->getPlayerNotificationsByArchive($currentPlayer, true),
 		]);

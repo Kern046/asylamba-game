@@ -66,6 +66,7 @@ class Create extends AbstractController
 		$conv = new Conversation(
 			id: Uuid::v4(),
 			type: Conversation::TY_USER,
+			messagesCount: 1,
 			createdAt: new \DateTimeImmutable(),
 			lastMessageAt: new \DateTimeImmutable(),
 		);

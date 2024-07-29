@@ -36,7 +36,7 @@ class ConversationRepository extends DoctrineRepository implements ConversationR
 		return $this->find($id);
 	}
 
-	public function countPlayerConversations(Player $player): int
+	public function countPlayerUnreadConversations(Player $player): int
 	{
 		$qb = $this->createQueryBuilder('c');
 
@@ -44,7 +44,10 @@ class ConversationRepository extends DoctrineRepository implements ConversationR
 			->select('COUNT(c.id)')
 			->leftJoin('c.players', 'cu')
 			->where('cu.player = :player')
-			->andWhere('cu.lastViewedAt < c.lastMessageAt')
+			->andWhere($qb->expr()->orX(
+				$qb->expr()->isNull('cu.lastViewedAt'),
+				$qb->expr()->lt('cu.lastViewedAt', 'c.lastMessageAt'),
+			))
 			->setParameter('player', $player);
 
 		return $qb->getQuery()->getSingleScalarResult();

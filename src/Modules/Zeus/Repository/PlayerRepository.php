@@ -139,7 +139,7 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 		$qb
 			->where('p.faction = :faction')
 			->andWhere($qb->expr()->in('p.statement', [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]))
-			->setParameter('faction', $faction)
+			->setParameter('faction', $faction->id, UuidType::NAME)
 			->orderBy('p.name', 'ASC');
 
 		return $qb->getQuery()->getResult();
