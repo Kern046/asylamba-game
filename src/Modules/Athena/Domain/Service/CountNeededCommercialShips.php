@@ -10,7 +10,7 @@ use App\Modules\Athena\Resource\ShipResource;
 
 class CountNeededCommercialShips
 {
-	public function __invoke(int $transactionType, int $quantity = 1, int $identifier = 0): int
+	public function __invoke(int $transactionType, int $quantity = 1, int|string $identifier = 0): int
 	{
 		return match ($transactionType) {
 			// 1000 ressources => 1 commercialShip
