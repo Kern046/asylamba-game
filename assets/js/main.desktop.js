@@ -1047,9 +1047,17 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 
 		var id = $(this).data('id');
+		const allGroupsSectors = document.querySelectorAll('.tactical-map svg g')
+		let countGroupsSectors = 0
 
-		$('.tactical-map .number span').removeClass('active');
-		$('#sector' + id).addClass('active');
+		allGroupsSectors.forEach(el => {
+			el.classList.remove('active')
+			countGroupsSectors++
+			if (allGroupsSectors.length === countGroupsSectors) {
+				e.target.closest("g").classList.add('active')
+			}
+		})
+
 		$('#input-sector-id').val(id);
 	});
 

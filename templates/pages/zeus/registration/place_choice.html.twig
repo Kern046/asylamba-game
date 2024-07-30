@@ -36,29 +36,23 @@
 							<svg class="sectors" viewBox="0, 0, 750, 750" xmlns="http://www.w3.org/2000/svg" style="width: 580px; height: 580px;">
 								{% for sector in sectors %}
 									{% set faction_identifier = sector.faction|default({identifier: 0}).identifier %}
-									<polygon data-id="{{ sector.id }}"
-										class="ally{{ faction_identifier }} {{ faction_identifier == app.session.get('inscription').get('ally') ? 'enabled' : 'disabled' }}"
-										points="{{ galaxy_configuration.getSectorCoord(sector.identifier, rate, 0) }}"
-									/>
+									{% set sectorCoord = galaxy_configuration.getSectorCoord(sector.identifier, rate, 0) %}
+									{% set centroid = galaxy_configuration.getPolygonCentroidFromString(sectorCoord) %}
+									<g class="ally{{ faction_identifier }}" data-sector="{{ sector.identifier }}">
+										<polygon data-id="{{ sector.id }}"
+												 class="ally{{ faction_identifier }} {{ faction_identifier == app.session.get('inscription').get('ally') ? 'enabled' : 'disabled' }}"
+												 points="{{ galaxy_configuration.getSectorCoord(sector.identifier, rate, 0) }}"
+										>
+										</polygon>
+										<text x="{{ centroid.left }}" y="{{ centroid.top }}" text-anchor="middle" fill="white" font-size="14">{{ sector.identifier }}</text>
+									</g>
 								{% endfor %}
 
 							</svg>
-							<div class="number">
-								{% for sector in sectors %}
-									{% set positionX = galaxy_configuration.sectors[loop.index - 1]['display'][0] * rate / 1.35 %}
-									{% set positionY = galaxy_configuration.sectors[loop.index - 1]['display'][1] * rate / 1.35 %}
-
-									<span id="sector{{ sector.identifier }}"
-										  class="ally{{ sector.faction and sector.faction.identifier == app.session.get('inscription').get('ally') ? sector.faction.identifier : 0 }}"
-										  style="top: {{ positionY }}px; left: {{ positionX }}px;">
-										{{- sector.identifier -}}
-									</span>
-								{% endfor %}
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
+			</div>
 
 			<div class="component inscription color{{ app.session.get('inscription').get('ally') }}">
 				<div class="head">
