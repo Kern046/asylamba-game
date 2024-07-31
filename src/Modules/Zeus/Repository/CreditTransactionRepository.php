@@ -7,9 +7,8 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Domain\Repository\CreditTransactionRepositoryInterface;
 use App\Modules\Zeus\Model\CreditHolderInterface;
 use App\Modules\Zeus\Model\CreditTransaction;
-use App\Modules\Zeus\Model\FactionToPlayerCreditTransaction;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Model\PlayerToFactionCreditTransaction;
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -24,17 +23,22 @@ class CreditTransactionRepository extends DoctrineRepository implements CreditTr
 
 	public function getAllBySender(CreditHolderInterface $sender): array
 	{
-		return $this->findBy([
-			'sender' => $sender,
-		], [
-			'createdAt' => 'DESC',
-		], 20);
+		return $this->findBy(
+			match (ClassUtils::getClass($sender)) {
+				Color::class => ['factionSender' => $sender],
+				Player::class => ['playerSender' => $sender],
+			},
+			[
+				'createdAt' => 'DESC',
+			],
+			20,
+		);
 	}
 
 	public function getAllByPlayerReceiver(Player $player): array
 	{
 		return $this->findBy([
-			'receiver' => $player,
+			'playerReceiver' => $player,
 		], [
 			'createdAt' => 'DESC',
 		], 20);
@@ -42,29 +46,21 @@ class CreditTransactionRepository extends DoctrineRepository implements CreditTr
 
 	public function getAllByFactionReceiverFromMembers(Color $faction): array
 	{
-		$qb = $this->getEntityManager()->createQueryBuilder();
-
-		$qb->select('ct')
-			->from(PlayerToFactionCreditTransaction::class, 'ct')
-			->where('ct.receiver = :faction')
-			->orderBy('ct.createdAt', 'DESC')
-			->setMaxResults(20)
-			->setParameter('faction', $faction);
-
-		return $qb->getQuery()->getResult();
+		return $this->findBy([
+			'factionReceiver' => $faction,
+			'factionSender' => null,
+		], [
+			'createdAt' => 'DESC',
+		], 20);
 	}
 
 	public function getAllByFactionReceiverFromFactions(Color $faction): array
 	{
-		$qb = $this->getEntityManager()->createQueryBuilder();
-
-		$qb->select('ct')
-			->from(FactionToPlayerCreditTransaction::class, 'ct')
-			->where('ct.receiver = :faction')
-			->orderBy('ct.createdAt', 'DESC')
-			->setMaxResults(20)
-			->setParameter('faction', $faction);
-
-		return $qb->getQuery()->getResult();
+		return $this->findBy([
+			'factionReceiver' => $faction,
+			'playerSender' => null,
+		], [
+			'createdAt' => 'DESC',
+		], 20);
 	}
 }

@@ -6,11 +6,11 @@
 
 			{% for transaction in receivings %}
 				<div class="player color{{ transaction.senderColor }}">
-					<a href="{{ path('embassy', {'playerId': transaction.rSender }) }}">
+					<a href="{{ transaction.senderLink }}">
 						<img src="{{ asset('build/media/avatar/small/' ~ transaction.senderAvatar ~ '.png') }}" alt="{{ transaction.senderName }}" class="picto" />
 					</a>
 
-					<span class="title">{{ get_faction_info(transaction.senderColor, 'status')[transaction.senderStatus - 1] }}</span>
+					<span class="title">{{ transaction.senderStatus }}</span>
 					<strong class="name">{{ transaction.senderName }}</strong>
 					<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
 				</div>

@@ -8,7 +8,7 @@ use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\CreditTransactionRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
-use App\Modules\Zeus\Model\FactionToPlayerCreditTransaction;
+use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,10 +54,12 @@ class SendCredits extends AbstractController
 		$playerManager->increaseCredit($receiver, $credit);
 
 		// create the transaction
-		$ct = new FactionToPlayerCreditTransaction(
-			sender: $faction,
-			receiver: $receiver,
+		$ct = new CreditTransaction(
 			id: Uuid::v4(),
+			playerSender: null,
+			playerReceiver: $receiver,
+			factionSender: $faction,
+			factionReceiver: null,
 			amount: $credit,
 			createdAt: new \DateTimeImmutable(),
 			comment: $text,
@@ -74,7 +76,7 @@ class SendCredits extends AbstractController
 				NotificationBuilder::resourceBox(
 					NotificationBuilder::RESOURCE_TYPE_CREDIT,
 					$credit,
-					(1 == $credit ? 'crédit reçu' : 'crédits reçus'),
+					1 == $credit ? 'crédit reçu' : 'crédits reçus',
 				),
 			))
 			->for($receiver);

@@ -5,13 +5,13 @@
 			<h4>Derniers envois</h4>
 
 			{% for transaction in sendings %}
-				<div class="player color{{ transaction.formatedReceiverColor }}">
-					<a href="{{ transaction.formatedReceiverLink }}">
-						<img src="{{ asset('build/media/avatar/small/' ~ transaction.formatedReceiverAvatar ~ '.png') }}" alt="{{ transaction.formatedReceiverName }}" class="picto" />
+				<div class="player color{{ transaction.receiverColor }}">
+					<a href="{{ transaction.receiverLink }}">
+						<img src="{{ asset('build/media/avatar/small/' ~ transaction.receiverAvatar ~ '.png') }}" alt="{{ transaction.receiverName }}" class="picto" />
 					</a>
 
-					<span class="title">{{ transaction.formatedReceiverStatus }}</span>
-					<strong class="name">{{ transaction.formatedReceiverName }}</strong>
+					<span class="title">{{ transaction.receiverStatus }}</span>
+					<strong class="name">{{ transaction.receiverName }}</strong>
 					<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
 				</div>
 			{% endfor %}

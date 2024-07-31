@@ -2,6 +2,7 @@
 
 namespace App\Modules\Athena\Application\Handler;
 
+use App\Modules\Ares\Domain\Model\CommanderMission;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;

@@ -2,9 +2,7 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Financial;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Library\Utils;
-use App\Modules\Zeus\Manager\CreditTransactionManager;
+use App\Modules\Zeus\Domain\Repository\CreditTransactionRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
@@ -12,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class SendCreditsToFaction extends AbstractController
 {
@@ -20,8 +18,7 @@ class SendCreditsToFaction extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		PlayerManager $playerManager,
-		CreditTransactionManager $creditTransactionManager,
-		EntityManager $entityManager,
+		CreditTransactionRepositoryInterface $creditTransactionRepository,
 	): Response {
 		$credit = $request->request->getInt('quantity');
 
@@ -33,24 +30,22 @@ class SendCreditsToFaction extends AbstractController
 			throw new BadRequestHttpException('envoi de crédits impossible - vous ne pouvez pas envoyer plus que ce que vous possédez');
 		}
 
-		if (null === ($faction = $currentPlayer->getRColor())) {
-			throw new NotFoundHttpException('envoi de crédits impossible - faction introuvable');
-		}
 		// make the transaction
 		$playerManager->decreaseCredit($currentPlayer, $credit);
-		$faction->increaseCredit($credit);
+		$currentPlayer->faction->increaseCredit($credit);
 
 		// create the transaction
-		$ct = new CreditTransaction();
-		$ct->rSender = $currentPlayer->getId();
-		$ct->type = CreditTransaction::TYP_FACTION;
-		$ct->rReceiver = $currentPlayer->getRColor();
-		$ct->amount = $credit;
-		$ct->dTransaction = Utils::now();
-		$ct->comment = null;
-		$creditTransactionManager->add($ct);
-
-		$entityManager->flush();
+		$ct = new CreditTransaction(
+			id: Uuid::v4(),
+			playerSender: $currentPlayer,
+			playerReceiver: null,
+			factionReceiver: $currentPlayer->faction,
+			factionSender: null,
+			createdAt: new \DateTimeImmutable(),
+			amount: $credit,
+			comment: null,
+		);
+		$creditTransactionRepository->save($ct);
 
 		$this->addFlash('success', 'Crédits envoyés');
 

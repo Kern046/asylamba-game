@@ -5,28 +5,28 @@
 
 	<entity name="App\Modules\Zeus\Model\CreditTransaction"
 			table="creditTransaction"
-			repository-class="App\Modules\Zeus\Repository\CreditTransactionRepository"
-			inheritance-type="SINGLE_TABLE">
-		<discriminator-column name="discr" type="string" length="25" />
-		<discriminator-map>
-			<discriminator-mapping value="player_to_player" class="App\Modules\Zeus\Model\PlayerToPlayerCreditTransaction" />
-			<discriminator-mapping value="player_to_faction" class="App\Modules\Zeus\Model\PlayerToFactionCreditTransaction" />
-			<discriminator-mapping value="faction_to_player" class="App\Modules\Zeus\Model\FactionToPlayerCreditTransaction" />
-			<discriminator-mapping value="faction_to_faction" class="App\Modules\Zeus\Model\FactionToFactionCreditTransaction" />
-		</discriminator-map>
+			repository-class="App\Modules\Zeus\Repository\CreditTransactionRepository">
+		<id name="id" type="uuid" />
 
-		<id name="id" type="integer" column="id">
-			<generator strategy="AUTO" />
-			<options>
-				<option name="unsigned">true</option>
-			</options>
-		</id>
+		<many-to-one field="factionSender" target-entity="App\Modules\Demeter\Model\Color">
+			<join-column name="faction_sender" />
+		</many-to-one>
+		<many-to-one field="factionReceiver" target-entity="App\Modules\Demeter\Model\Color">
+			<join-column name="faction_receiver" />
+		</many-to-one>
+		<many-to-one field="playerSender" target-entity="App\Modules\Zeus\Model\Player">
+			<join-column name="player_sender" />
+		</many-to-one>
+		<many-to-one field="playerReceiver" target-entity="App\Modules\Zeus\Model\Player">
+			<join-column name="player_receiver" />
+		</many-to-one>
+
 		<field name="amount" type="integer">
 			<options>
 				<option name="unsigned">true</option>
 			</options>
 		</field>
 		<field name="createdAt" type="datetime_immutable" column="createdAt" />
-		<field name="comment" type="text" />
+		<field name="comment" type="text" nullable="true" />
 	</entity>
 </doctrine-mapping>

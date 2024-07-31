@@ -3,22 +3,25 @@
 	<div class="fix-body">
 		<div class="body">
 			<h4>Envoi de crédits</h4>
-			<p>Seul le trésorier du gouvernement peut faire des versements à des membres.</p>
-			<form action="{{ path('send_credits_from_faction') }}" method="post">
-				<p><label for="send-credit-target">Destinataire</label></p>
-				<p class="input input-text">
-					<input type="hidden" class="autocomplete-hidden" name="playerid" />
-					<input type="text" id="send-credit-target" class="autocomplete-player" name="name" />
-					</p>
-	
-				<p><label for="send-credit-credit">Nombre de crédit</label></p>
-				<p class="input input-text"><input type="text" id="send-credit-credit" name="quantity" /></p>
-	
-				<p><label for="send-credit-message">Votre message (* facultatif)</label></p>
-				<p class="input input-area"><textarea id="send-credit-message" name="text"></textarea></p>
-	
-				<p class="button"><button type="submit" {% if not current_player.isTreasurer %}disabled{% endif %}>Envoyer</button></p>
-			</form>
+			{% if not current_player.isTreasurer %}
+				<p>Seul le trésorier du gouvernement peut faire des versements à des membres.</p>
+			{% else %}
+				<form action="{{ path('send_credits_from_faction') }}" method="post">
+					<p><label for="send-credit-target">Destinataire</label></p>
+					<p class="input input-text">
+						<input type="hidden" class="autocomplete-hidden" name="playerid" />
+						<input type="text" id="send-credit-target" class="autocomplete-player" name="name" />
+						</p>
+
+					<p><label for="send-credit-credit">Montant</label></p>
+					<p class="input input-text"><input type="number" id="send-credit-credit" name="quantity" min="1" max="{{ current_player.faction.credits }}" /></p>
+
+					<p><label for="send-credit-message">Votre message (* facultatif)</label></p>
+					<p class="input input-area"><textarea id="send-credit-message" name="text"></textarea></p>
+
+					<p class="button"><button type="submit">Envoyer</button></p>
+				</form>
+			{% endif %}
 		</div>
 	</div>
 </div>
@@ -30,12 +33,11 @@
 			<h4>Dernières transactions</h4>
 			{% for transaction in credit_transactions %}
 				<div class="player color' . $transaction->receiverColor . '">
-					<a href="{{ path('embassy', {'player': transaction.rReceiver}) }}">
+					<a href="{{ transaction.receiverLink }}">
 						<img src="{{ asset('build/media/avatar/small/' ~ transaction.receiverAvatar ~ '.png') }}" class="picto" alt="{{ transaction.receiverName }}">
 					</a>
 
-					{% set statuses = get_faction_info(transaction.receiverColor, 'status') %}
-					<span class="title">{{ statuses[transaction.receiverStatus - 1] }}</span>
+					<span class="title">{{ transaction.receiverStatus }}</span>
 					<strong class="name">{{ transaction.receiverName }}</strong>
 					<span class="experience">{{ transaction.amount|number }} crédits</span>
 				</div>
