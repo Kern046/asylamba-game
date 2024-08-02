@@ -154,59 +154,67 @@
 								</svg>
 							</toolbar-picto>
 
-							<toolbar-toggler>
-								<template v-slot:picto>
+							{% if current_player.hasCompletedTutorial %}
+								<toolbar-picto href="#" alt="tutoriel">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 										<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
 									</svg>
-									{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial}) }}
-								</template>
-								<template v-slot:dropdown>
-									<h5 class="text-xl font-semibold faction-text-color mb-4">Tutoriel</h5>
+								</toolbar-picto>
+							{% else %}
+								<toolbar-toggler>
+									<template v-slot:picto>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+											<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+										</svg>
+										{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial}) }}
+									</template>
+									<template v-slot:dropdown>
+										<h5 class="text-xl font-semibold faction-text-color mb-4">Tutoriel</h5>
 
-									<div class="overflow text-[16px]">
-										<h6 class="faction-text-color font-bold underline">
-											<span class="number">
-												{{ tutorial_step }} -
-											</span>
-											{{ tutorial_info(tutorial_step, 'title') }}
-										</h6>
-										<p>{{ tutorial_info(tutorial_step, 'description')|raw }}</p>
+										<div class="overflow text-[16px]">
+											<h6 class="faction-text-color font-bold underline">
+												<span class="number">
+													{{ tutorial_step }} -
+												</span>
+												{{ tutorial_info(tutorial_step, 'title') }}
+											</h6>
+											<p>{{ tutorial_info(tutorial_step, 'description')|raw }}</p>
 
-										<div class="mt-2">
-											<hr class="my-4 faction-bd-md">
-											<p class="faction-text-color">Récompense :</p>
-											{% set credit_reward = tutorial_info(tutorial_step, 'creditReward') %}
-											{% set resource_reward = tutorial_info(tutorial_step, 'resourceReward') %}
-											{% set ship_reward = tutorial_info(tutorial_step, 'shipReward') %}
-											<ul>
-												{% if credit_reward > 0 %}
-													<li>- <span class="faction-text-color">{{ credit_reward }}</span> crédits</li>
-												{% endif %}
-
-												{% if resource_reward > 0 %}
-													<li>- <span class="faction-text-color">{{ resource_reward }}</span> ressources</li>
-												{% endif %}
-
-												{% for key in ship_reward|keys %}
-													{% set value = ship_reward[key] %}
-													{% if value > 0 %}
-														<li>- <span class="faction-text-color">{{ value }}</span> {{ ship_name(key) }}{{ value|plural }}</li>
+											<div class="mt-2">
+												<hr class="my-4 faction-bd-md">
+												<p class="faction-text-color">Récompense :</p>
+												{% set credit_reward = tutorial_info(tutorial_step, 'creditReward') %}
+												{% set resource_reward = tutorial_info(tutorial_step, 'resourceReward') %}
+												{% set ship_reward = tutorial_info(tutorial_step, 'shipReward') %}
+												<ul>
+													{% if credit_reward > 0 %}
+														<li>- <span class="faction-text-color">{{ credit_reward }}</span> crédits</li>
 													{% endif %}
-												{% endfor %}
-											</ul>
-										</div>
-									</div>
 
-									<form action="{{ path('tutorial_validatestep') }}" method="post" class="mt-4 relative text-[16px]">
-										{% if current_player.stepDone is same as(true) %}
-											<button class="faction-bg-lt p-2 text-black faction-text-color-over-bg" type="submit">valider l'étape {{ tutorial_step }}</button>
-										{% else %}
-											<button class="disabled faction-bg-lt p-2 faction-text-color-disabled" type="submit" disabled>étape en cours</button>
-										{% endif %}
-									</form>
-								</template>
-							</toolbar-toggler>
+													{% if resource_reward > 0 %}
+														<li>- <span class="faction-text-color">{{ resource_reward }}</span> ressources</li>
+													{% endif %}
+
+													{% for key in ship_reward|keys %}
+														{% set value = ship_reward[key] %}
+														{% if value > 0 %}
+															<li>- <span class="faction-text-color">{{ value }}</span> {{ ship_name(key) }}{{ value|plural }}</li>
+														{% endif %}
+													{% endfor %}
+												</ul>
+											</div>
+										</div>
+
+										<form action="{{ path('tutorial_validatestep') }}" method="post" class="mt-4 relative text-[16px]">
+											{% if current_player.stepDone is same as(true) %}
+												<button class="faction-bg-lt p-2 text-black faction-text-color-over-bg" type="submit">valider l'étape {{ tutorial_step }}</button>
+											{% else %}
+												<button class="disabled faction-bg-lt p-2 faction-text-color-disabled" type="submit" disabled>étape en cours</button>
+											{% endif %}
+										</form>
+									</template>
+								</toolbar-toggler>
+							{% endif %}
 
 							<toolbar-toggler>
 								<template v-slot:picto>

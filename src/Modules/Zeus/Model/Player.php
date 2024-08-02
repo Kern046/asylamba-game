@@ -4,6 +4,7 @@ namespace App\Modules\Zeus\Model;
 
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Domain\Model\SystemUpdatable;
+use App\Modules\Zeus\Resource\TutorialResource;
 
 class Player implements CreditHolderInterface, SystemUpdatable
 {
@@ -123,5 +124,10 @@ class Player implements CreditHolderInterface, SystemUpdatable
 	public function lastUpdatedBySystemAt(): \DateTimeImmutable
 	{
 		return $this->uPlayer;
+	}
+
+	public function hasCompletedTutorial(): bool
+	{
+		return !TutorialResource::stepExists($this->stepTutorial);
 	}
 }

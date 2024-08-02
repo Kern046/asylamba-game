@@ -119,12 +119,9 @@ class ValidateStep extends AbstractController
 			$alert .= 'La prochaine étape vous attend.';
 			$this->addFlash('success', $alert);
 
-			$nextStep = $stepTutorial;
+			$nextStep = $stepTutorial++;
 			if (TutorialResource::isLastStep($stepTutorial)) {
-				$nextStep = 0;
 				$this->addFlash('success', 'Bravo, vous avez terminé le tutoriel. Bonne continuation et bon amusement sur Asylamba, vous pouvez maintenant voler de vos propres ailes !');
-			} else {
-				++$nextStep;
 			}
 
 			// verify if the next step is already done
