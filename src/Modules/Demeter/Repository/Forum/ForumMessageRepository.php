@@ -9,6 +9,7 @@ use App\Modules\Demeter\Model\Forum\ForumMessage;
 use App\Modules\Demeter\Model\Forum\ForumTopic;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends DoctrineRepository<ForumMessage>
@@ -20,12 +21,17 @@ class ForumMessageRepository extends DoctrineRepository implements ForumMessageR
 		parent::__construct($registry, ForumMessage::class);
 	}
 
-	public function getTopicMessages(ForumTopic $topic): array
+	public function get(Uuid $id): ForumMessage|null
+	{
+		return $this->find($id);
+	}
+
+	public function getTopicMessages(ForumTopic $topic, int $limit = 20, int $offset = 0): array
 	{
 		return $this->findBy([
 			'topic' => $topic,
 		], [
 			'createdAt' => 'DESC',
-		]);
+		], $limit, $offset);
 	}
 }

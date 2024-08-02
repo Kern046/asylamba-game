@@ -19,7 +19,29 @@ faction_data:
     controller: App\Modules\Demeter\Infrastructure\Controller\ViewData
 
 faction_forum:
-    path: /faction/forum
+    path: /faction/forum/{forumId}
+    controller: App\Modules\Demeter\Infrastructure\Controller\ViewForum
+    defaults:
+        forumId: null
+
+view_forum_topic:
+    path: /faction/forum/{forumId}/topics/{topicId}
+    controller: App\Modules\Demeter\Infrastructure\Controller\Forum\ViewTopic
+
+write_forum_message:
+    path: /faction/forum/{forumId}/topics/{topicId}/messages
+    controller: App\Modules\Demeter\Infrastructure\Controller\Forum\WriteMessage
+    methods: ['POST']
+
+edit_forum_message:
+    path: /faction/forum/{forumId}/topics/{topicId}/messages/{messageId}
+    controller: App\Modules\Demeter\Infrastructure\Controller\Forum\EditMessage
+    methods: ['POST']
+
+create_forum_topic:
+    path: /faction/forum/{forumId}/topics
+    controller: App\Modules\Demeter\Infrastructure\Controller\Forum\CreateTopic
+    methods: ['POST']
 
 faction_senate:
     path: /faction/senate

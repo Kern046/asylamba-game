@@ -16,6 +16,7 @@ class ForumTopic
 		public Color $faction,
 		// TODO check if this property is used
 		public int $statement = 1,
+		public int $messagesCount = 0,
 		public bool $isUp = false,
 		public bool $isClosed = false,
 		public bool $isArchived = false,
