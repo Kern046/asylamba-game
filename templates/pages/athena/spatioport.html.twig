@@ -5,7 +5,7 @@
 		<div class="head skin-1">
 			<img src="{{ asset('build/media/orbitalbase/spatioport.png') }}" alt="" />
 			<h2>
-				{{- get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::COMMERCIAL_PLATEFORME'), 'frenchName') -}}
+				{{- get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'), 'frenchName') -}}
 			</h2>
 			<em>Niveau {{ current_base.levelSpatioport }}</em>
 		</div>
@@ -83,12 +83,12 @@
 						<h4>Chercher des partenaires commerciaux...</h4>
 						{% for faction in in_game_factions %}
 							<p>
-								<label for="ckb-faction-{{ faction.id }}">
+								<label for="ckb-faction-{{ faction.identifier }}">
 									<input type="checkbox"
-										   name="faction-{{ faction.id }}"
-										   id="ckb-faction-{{ faction.id }}"
-										   {% if app.request.method == 'GET' or app.request.request.has('faction-' ~ faction.id) %}checked{% endif %} />
-									{{ get_faction_info(faction.id, 'demonym') }}
+										   name="faction-{{ faction.identifier }}"
+										   id="ckb-faction-{{ faction.identifier }}"
+										   {% if app.request.method == 'GET' or app.request.request.has('faction-' ~ faction.identifier) %}checked{% endif %} />
+									{{ get_faction_info(faction.identifier, 'demonym') }}
 								</label>
 							</p>
 						{% endfor %}
@@ -114,7 +114,7 @@
 			<div class="fix-body">
 				<div class="body">
 					{% for base in search_results %}
-						<a href="{{ path('map', {'place': base.rPlace}) }}" class="player color{{ base.playerColor }}">
+						<a href="{{ path('map', {'place': base.placeId }) }}" class="player color{{ base.factionIdentifier }}">
 							<img src="{{ asset('build/media/avatar/small/' ~ base.playerAvatar ~ '.png') }}" alt="" class="picto">
 							<span class="title">{{ base.playerName }}</span>
 							<strong class="name">{{ base.baseName }}</strong>
@@ -131,22 +131,13 @@
 		{% endif %}
 	{% else %}
 		{% for route in routes %}
-			{% if route.isProposed and route.playerId2 == current_player.id %}
+			{% if route.isProposed and route.destinationBase.player.id == current_player.id %}
+				{% set route_distance = get_route_distance(route) %}
 				{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base_id': route.rOrbitalBase,
-					'base_name': route.baseName1,
-					'base_type': route.baseType1,
-					'player_id': route.playerId1,
-					'player_name': route.playerName1,
-					'population': route.population1,
+					'base': route.originBase,
 				}) %}
 				{% set destination_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base_id': route.rOrbitalBaseLinked,
-					'base_name': route.baseName2,
-					'base_type': route.baseType2,
-					'player_id': route.playerId2,
-					'player_name': route.playerName2,
-					'population': route.population2,
+					'base': route.destinationBase,
 				}) %}
 				<div class="component rc">
 					<div class="head skin-5">
@@ -157,19 +148,19 @@
 					<div class="fix-body">
 						<div class="body">
 							<div class="tool">
-								{% if route.price > current_player.credit %}
+								{% set price = get_route_price(route_distance) %}
+								{% if price > current_player.credit %}
 									<span><a href="#">pas assez de crédits pour accepter</a></span>
 								{% elseif routes_data.total >= routes_data.max %}
 									<span><a href="#">pas d'emplacement libre pour accepter</a></span>
 								{% else %}
-									{% set price = route.price %}
 									{# @TODO move this calculation in a dedicated service #}
 									{% if is_player_from_negora %}
 										{% set price = price - (price * negora_commercial_bonus / 100)|round %}
 									{% endif %}
-									<span><a href="{{ path('accept_commercial_route', {'baseId': route.rOrbitalBaseLinked, 'id': route.id}) }}">accepter pour {{ price|number }} crédits</a></span>
+									<span><a href="{{ path('accept_commercial_route', {'baseId': route.destinationBase.id, 'id': route.id}) }}">accepter pour {{ price|number }} crédits</a></span>
 								{% endif %}
-								<span><a href="{{ path('refuse_commercial_route', {'baseId': route.rOrbitalBaseLinked, 'id': route.id }) }}" class="hb lt" title="refuser l'offre">x</a></span>
+								<span><a href="{{ path('refuse_commercial_route', {'baseId': route.destinationBase.id, 'id': route.id }) }}" class="hb lt" title="refuser l'offre">x</a></span>
 							</div>
 
 							<div class="number-box grey">
@@ -179,23 +170,23 @@
 								</span>
 							</div>
 
-							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route.distance) }}px;">
-								{% if route.playerId1 == current_player.id %}
+							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route_distance) }}px;">
+								{% if route.originBase.player.id == current_player.id %}
 									{{ destination_base|raw }}
 								{% else %}
 									{{ origin_base|raw }}
 								{% endif %}
 
 								<ul class="general">
-									<li>Distance <strong>{{ route.distance }} al.</strong></li>
+									<li>Distance <strong>{{ route_distance }} al.</strong></li>
 									<li>
 										Prix
 										<strong>
-											{{ route.price|number }}
+											{{ price|number }}
 											{% if is_player_from_negora %}
-												<span class="bonus">- {{ (negora_commercial_bonus * route.price / 100)|number }}</span>
+												<span class="bonus">- {{ (negora_commercial_bonus * price / 100)|number }}</span>
 											{% endif %}
-											 <img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
+											 <img src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" class="icon-color" />
 										</strong>
 									</li>
 									<li>
@@ -210,18 +201,18 @@
 									</li>
 									<li>
 										Population touchée
-										<strong>{{ (route.population1 + route.population2)|number }} millions</strong>
+										<strong>{{ (route.originBase.place.population + route.destinationBase.place.population)|number }} millions</strong>
 									</li>
 
 									{% if not route.isProposed %}
 										<li>
 											En service depuis<br />
-											{{ route.dCreation|date|raw }}
+											{{ route.acceptedAt|date|raw }}
 										</li>
 									{% endif %}
 								</ul>
 
-								{% if route.playerId1 == current_player.id %}
+								{% if route.originBase.player.id == current_player.id %}
 									{{ origin_base|raw }}
 								{% else %}
 									{{ destination_base|raw }}
@@ -234,22 +225,13 @@
 		{% endfor %}
 
 		{% for route in routes %}
-			{% if not route.isProposed or route.playerId2 != current_player.id %}
+			{% if not route.isProposed or route.destinationBase.player.id != current_player.id %}
+				{% set route_distance = get_route_distance(route) %}
 				{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base_id': route.rOrbitalBase,
-					'base_name': route.baseName1,
-					'base_type': route.baseType1,
-					'player_id': route.playerId1,
-					'player_name': route.playerName1,
-					'population': route.population1,
+					'base': route.originBase,
 				}) %}
 				{% set destination_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base_id': route.rOrbitalBaseLinked,
-					'base_name': route.baseName2,
-					'base_type': route.baseType2,
-					'player_id': route.playerId2,
-					'player_name': route.playerName2,
-					'population': route.population2,
+					'base': route.destinationBase,
 				}) %}
 				<div class="component rc">
 					<div class="head skin-5">
@@ -280,8 +262,8 @@
 								</span>
 							</div>
 
-							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route.distance) }}px;">
-								{% if route.playerId1 == current_player.id %}
+							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route_distance) }}px;">
+								{% if route.originBase.player.id == current_player.id %}
 									{{ destination_base|raw }}
 								{% else %}
 									{{ origin_base|raw }}
@@ -290,7 +272,7 @@
 								<ul class="general">
 									<li>
 										Distance
-										<strong>{{ route.distance }} al.</strong>
+										<strong>{{ route_distance }} al.</strong>
 									</li>
 									<li>
 										Revenu par relève
@@ -300,22 +282,22 @@
 											{% if player_commercial_income_bonus > 0 %}
 											<span class="bonus">+ {{ (player_commercial_income_bonus * route.income / 100)|number }}</span>
 											{% endif %}
-											<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
+											<img src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" class="icon-color" />
 										</strong>
 									</li>
 									<li>
 										Population touchée
-										<strong>{{ (route.population1 + route.population2)|number }} millions</strong>
+										<strong>{{ (route.originBase.place.population + route.destinationBase.place.population)|number }} millions</strong>
 									</li>
 
 									{% if not route.isProposed %}
 										<li>
 											En service depuis <br />
-											{{ route.dCreation|date|raw }}
+											{{ route.acceptedAt|date|raw }}
 										</li>
 									{% endif %}
 								</ul>
-								{% if route.playerId1 == current_player.id %}
+								{% if route.originBase.player.id == current_player.id %}
 									{{ origin_base|raw }}
 								{% else %}
 									{{ destination_base|raw }}

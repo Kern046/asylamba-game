@@ -2,7 +2,6 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Ship;
 
-use App\Classes\Entity\EntityManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\ShipResource;
@@ -20,7 +19,6 @@ class Recycle extends AbstractController
 		Player $currentPlayer,
 		OrbitalBase $currentBase,
 		OrbitalBaseManager $orbitalBaseManager,
-		EntityManager $entityManager,
 	): Response {
 		$typeOfShip = $request->query->get('ship_identifier');
 		$quantity = $request->request->get('quantity');
@@ -30,7 +28,6 @@ class Recycle extends AbstractController
 				$resources = ($quantity * ShipResource::getInfo($typeOfShip, 'resourcePrice')) / 2;
 				$currentBase->shipStorage[$typeOfShip] -= $quantity;
 				$orbitalBaseManager->increaseResources($currentBase, $resources);
-				$entityManager->flush($currentBase);
 
 				return $this->redirect($request->headers->get('referer'));
 			} else {

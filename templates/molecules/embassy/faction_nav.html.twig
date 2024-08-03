@@ -5,10 +5,10 @@
 	<div class="fix-body">
 		<div class="body">
 			{% for f in factions %}
-				<a href="{{ path('embassy', {'faction': f.id}) }}" class="nav-element {% if faction.id == f.id %}active{% endif %}">
-					<img src="{{ asset('build/media/avatar/small/color-' ~ f.id ~ '.png') }}" alt="" />
-					<strong>{{ get_faction_info(f.id, 'officialName') }}</strong>
-					<em>Ambassade des {{ get_faction_info(f.id, 'demonym')|capitalize }}</em>
+				<a href="{{ path('embassy', {'faction': f.identifier}) }}" class="nav-element {% if faction.id == f.id %}active{% endif %}">
+					<img src="{{ asset('build/media/avatar/small/color-' ~ f.identifier ~ '.png') }}" alt="" />
+					<strong>{{ get_faction_info(f.identifier, 'officialName') }}</strong>
+					<em>Ambassade des {{ get_faction_info(f.identifier, 'demonym')|capitalize }}</em>
 				</a>
 			{% endfor %}
 		</div>

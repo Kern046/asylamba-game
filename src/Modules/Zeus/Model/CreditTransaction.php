@@ -1,83 +1,130 @@
 <?php
 
-/**
- * CreditTransaction.
- *
- * @author Jacky Casas
- * @copyright Asylamba
- *
- * @update 09.02.15
- */
+declare(strict_types=1);
 
 namespace App\Modules\Zeus\Model;
 
+use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\ColorResource;
+use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\Uid\Uuid;
 
 class CreditTransaction
 {
-	public const TYP_PLAYER = 0;
-	public const TYP_FACTION = 1;
-	public const TYP_F_TO_P = 2; // faction to player
+	public function __construct(
+		public Uuid $id,
+		public Player|null $playerSender,
+		public Player|null $playerReceiver,
+		public Color|null $factionSender,
+		public Color|null $factionReceiver,
+		public int $amount,
+		public \DateTimeImmutable $createdAt,
+		public string|null $comment,
+	) {
 
-	public $id = 0;
-	public $rSender = 0;
-	public $type = 0; // 0 = player, 1 = faction
-	public $rReceiver = 0;
-	public $amount = 0;
-	public $dTransaction = 0;
-	public $comment = '';
-
-	public $senderName = '';
-	public $senderAvatar = '';
-	public $senderStatus = '';
-	public $senderColor = '';
-
-	public $receiverName = '';
-	public $receiverAvatar = '';
-	public $receiverStatus = '';
-	public $receiverColor = '';
-
-	public function getFormatedReceiverLink()
-	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? '/embassy/player-'.$this->rReceiver
-			: '/embassy/faction-'.$this->rReceiver;
 	}
 
-	public function getFormatedReceiverName()
+	public function getReceiver(): CreditHolderInterface
 	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? $this->receiverName
-			: ColorResource::getInfo($this->rReceiver, 'popularName');
+		return $this->playerReceiver ?? $this->factionReceiver;
 	}
 
-	public function getFormatedReceiverAvatar()
+	public function getSender(): CreditHolderInterface
 	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? $this->receiverAvatar
-			: 'color-'.$this->rReceiver;
+		return $this->playerSender ?? $this->factionSender;
 	}
 
-	public function getFormatedReceiverStatus()
+	public function getReceiverLink(): string
 	{
-		if (CreditTransaction::TYP_PLAYER == $this->type) {
-			$status = ColorResource::getInfo($this->receiverColor, 'status');
-
-			return $status[$this->receiverStatus - 1];
-		} else {
-			return ColorResource::getInfo($this->rReceiver, 'government');
-		}
+		return $this->getLink($this->getReceiver());
 	}
 
-	public function getFormatedReceiverColor()
+	public function getSenderLink(): string
 	{
-		return CreditTransaction::TYP_PLAYER == $this->type
-			? $this->receiverColor
-			: $this->rReceiver;
+		return $this->getLink($this->getSender());
 	}
 
-	public function getId()
+	/**
+	 * @return string
+	 */
+	private function getLink(CreditHolderInterface $part): string
 	{
-		return $this->id;
+		return match (ClassUtils::getClass($part)) {
+			Color::class => '/embassy/faction-' . $part->id,
+			Player::class => '/embassy/player-' . $part->id,
+		};
+	}
+
+	public function getReceiverName(): string
+	{
+		return $this->getName($this->getReceiver());
+	}
+
+	public function getSenderName(): string
+	{
+		return $this->getName($this->getSender());
+	}
+
+	private function getName(CreditHolderInterface $part): string
+	{
+		return match (ClassUtils::getClass($part)) {
+			Color::class => ColorResource::getInfo($part->identifier, 'popularName'),
+			Player::class => $part->name,
+		};
+	}
+
+	public function getReceiverAvatar(): string
+	{
+		return $this->getAvatar($this->getReceiver());
+	}
+
+	public function getSenderAvatar(): string
+	{
+		return $this->getAvatar($this->getSender());
+	}
+
+	private function getAvatar(CreditHolderInterface $part): string
+	{
+		return match (ClassUtils::getClass($part)) {
+			Color::class => 'color-' . $part->identifier,
+			Player::class => $part->avatar,
+		};
+	}
+
+	public function getReceiverStatus(): string
+	{
+		return $this->getStatus($this->getReceiver());
+	}
+
+	public function getSenderStatus(): string
+	{
+		return $this->getStatus($this->getSender());
+	}
+
+	private function getStatus(CreditHolderInterface $part): string
+	{
+		return match (ClassUtils::getClass($part)) {
+			Color::class => ColorResource::getInfo($part->identifier, 'government'),
+			// TODO make a method to get a player status
+			Player::class => ColorResource::getInfo($part->faction->identifier, 'status')[$part->status - 1],
+		};
+	}
+
+	public function getReceiverColor(): int
+	{
+		return $this->getFaction($this->getReceiver());
+	}
+
+	public function getSenderColor(): int
+	{
+		return $this->getFaction($this->getSender());
+	}
+
+	private function getFaction(CreditHolderInterface $part): int
+	{
+		return match (ClassUtils::getClass($part)) {
+			Color::class => $part->identifier,
+			Player::class => $part->faction->identifier,
+		};
 	}
 }

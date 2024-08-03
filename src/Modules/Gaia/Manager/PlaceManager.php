@@ -1,487 +1,711 @@
 <?php
 
-/**
- * Place Manager.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @update 20.05.13
- */
-
 namespace App\Modules\Gaia\Manager;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
 use App\Modules\Ares\Model\Commander;
-use App\Modules\Gaia\Event\PlaceOwnerChangeEvent;
+use App\Modules\Ares\Model\Report;
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Gaia\Model\Place;
-use App\Modules\Gaia\Model\System;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
 use App\Modules\Hermes\Model\Notification;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Uid\Uuid;
 
-class PlaceManager
+readonly class PlaceManager
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected NotificationManager $notificationManager,
-		protected EventDispatcherInterface $eventDispatcher,
-		protected string $mediaPath,
+		private NotificationRepositoryInterface $notificationRepository,
+		private PlaceRepositoryInterface        $placeRepository,
+		private UrlGeneratorInterface           $urlGenerator,
 	) {
 	}
 
-	public function get(int $id): ?Place
+	public function turnAsEmptyPlace(Place $place): void
 	{
-		if (($place = $this->entityManager->getRepository(Place::class)->get($id)) !== null) {
-			return $place;
+		$place->typeOfPlace = Place::EMPTYZONE;
+
+		$this->placeRepository->save($place);
+	}
+
+	public function turnAsSpawnPlace(Place $place, Player $player): void
+	{
+		$place->player = $player;
+		$place->coefResources = 60;
+		$place->coefHistory = 20;
+		$place->population = 50;
+
+		$this->placeRepository->save($place);
+	}
+
+	public function sendNotif(Place $place, int $case, Commander $commander, Report|null $report = null): void
+	{
+		$notifications = match ($case) {
+			Place::CHANGESUCCESS => [
+				NotificationBuilder::new()
+					->setTitle('Déplacement réussi')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' est arrivé sur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'.',
+					))
+					->for($commander->player),
+			],
+			Place::CHANGEFAIL => [
+				NotificationBuilder::new()
+					->setTitle('Déplacement réussi')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' s\'est posé sur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'. Il est en garnison car il n\'y avait pas assez de place en orbite.',
+					))
+					->for($commander->player),
+			],
+			Place::CHANGELOST => [
+				NotificationBuilder::new()
+					->setTitle('Déplacement raté')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' n\'est pas arrivé sur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'. Cette base ne vous appartient pas. Elle a pu être conquise entre temps.',
+					))
+					->for($commander->player),
+			],
+			Place::LOOTEMPTYSSUCCESS => [
+				NotificationBuilder::new()
+					->setTitle('Pillage réussi')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' a pillé la planète rebelle située aux coordonnées ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							Game::formatCoord(
+								$place->system->xPosition,
+								$place->system->xPosition,
+								$place->position,
+								$place->system->sector->identifier
+							),
+						),
+						'.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_RESOURCE,
+							Format::number($commander->resources),
+							'ressources pillées',
+						),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_XP,
+							'+ ' . Format::number($commander->earnedExperience),
+							'expérience de l\'officier',
+						),
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($commander->player),
+			],
+			Place::LOOTEMPTYFAIL => [
+				NotificationBuilder::new()
+					->setTitle('Pillage raté')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('memorial', ['id' => $commander->id]),
+							$commander->name,
+						),
+						' est tombé lors de l\'attaque de la planète rebelle située aux coordonnées ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							Game::formatCoord(
+								$place->system->xPosition,
+								$place->system->xPosition,
+								$place->position,
+								$place->system->sector->identifier
+							),
+						),
+						'.',
+						NotificationBuilder::divider(),
+						'Il a désormais rejoint le Mémorial. Que son âme traverse l\'Univers dans la paix.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($commander->player)
+			],
+			Place::LOOTPLAYERWHITBATTLESUCCESS => [
+				NotificationBuilder::new()
+					->setTitle('Pillage réussi')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' a pillé la planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $place->player]),
+							$place->player->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_RESOURCE,
+							Format::number($commander->resources),
+							'ressources pillées',
+						),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_XP,
+							'+ ' . Format::number($commander->earnedExperience),
+							'expérience de l\'officier',
+						),
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($commander->player),
+				NotificationBuilder::new()
+					->setTitle('Rapport de pillage')
+					->setContent(NotificationBuilder::paragraph(
+						'L\'officier ',
+						NotificationBuilder::bold($commander->name),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $commander->player]),
+							$commander->player->name,
+						),
+						' a pillé votre planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_RESOURCE,
+							Format::number($commander->resources),
+							'ressources pillées',
+						),
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($place->player)
+			],
+			Place::LOOTPLAYERWHITBATTLEFAIL => [
+				NotificationBuilder::new()
+					->setTitle('Pillage raté')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('memorial', ['id' => $commander->id]),
+							$commander->name,
+						),
+						' est tombé lors du pillage de la planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $place->player]),
+							$place->player->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						'Il a désormais rejoint le Mémorial. Que son âme traverse l\'Univers dans la paix.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($commander->player),
+				NotificationBuilder::new()
+					->setTitle('Rapport de combat')
+					->setContent(NotificationBuilder::paragraph(
+						'L\'officier ',
+						NotificationBuilder::bold($commander->name),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $place->player]),
+							$place->player->name,
+						),
+						' a attaqué votre planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						'Vous avez repoussé l\'ennemi avec succès.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($place->player),
+			],
+			Place::LOOTPLAYERWHITOUTBATTLESUCCESS => [
+				NotificationBuilder::new()
+					->setTitle('Pillage réussi')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' a pillé la planète non défendue ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $place->player]),
+							$place->player->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_RESOURCE,
+							Format::number($commander->resources),
+							'ressources pillées',
+						),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_XP,
+							'+ ' . Format::number($commander->earnedExperience),
+							'expérience de l\'officier',
+						),
+					))
+					->for($commander->player),
+				NotificationBuilder::new()
+					->setTitle('Rapport de pillage')
+					->setContent(
+						'L\'officier ',
+						NotificationBuilder::bold($commander->name),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $commander->player]),
+							$commander->player->name,
+						),
+						' a pillé votre planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'. Aucune flotte n\'était en position pour la défendre. ',
+						NotificationBuilder::divider(),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_RESOURCE,
+							Format::number($commander->resources),
+							'ressources pillées',
+						),
+					)
+					->for($place->player)
+			],
+			Place::LOOTLOST => [
+				NotificationBuilder::new()
+					->setTitle('Erreur de coordonnées')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' n\'a pas attaqué la planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' car son joueur est de votre faction, sous la protection débutant ou un allié.',
+					))
+					->for($commander->player)
+			],
+			Place::CONQUEREMPTYSSUCCESS => [
+				NotificationBuilder::new()
+					->setTitle('Colonisation réussie')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' a colonisé la planète rebelle située aux coordonnées ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							Game::formatCoord(
+								$place->system->xPosition,
+								$place->system->xPosition,
+								$place->position,
+								$place->system->sector->identifier
+							),
+						),
+						NotificationBuilder::resourceBox(
+							'xp',
+							'+ ' . Format::number($commander->earnedExperience),
+							'expérience de l\'officier',
+						),
+						'Votre empire s\'étend, administrez votre ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('switchbase', ['baseId' => $place->base->id]),
+							'nouvelle planète',
+						),
+						'.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($commander->player)
+			],
+			Place::CONQUEREMPTYFAIL => [
+				NotificationBuilder::new()
+					->setTitle('Colonisation ratée')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('memorial', ['id' => $commander->id]),
+							$commander->name,
+						),
+						' est tombé lors de l\'attaque de la planète rebelle située aux coordonnées ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							Game::formatCoord(
+								$place->system->xPosition,
+								$place->system->xPosition,
+								$place->position,
+								$place->system->sector->identifier
+							),
+						),
+						'.',
+						NotificationBuilder::divider(),
+						'Il a désormais rejoint le Mémorial. Que son âme traverse l\'Univers dans la paix.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_archives', ['id' => $report->id]),
+							'voir le rapport',
+						),
+					))
+					->for($commander->player),
+			],
+			Place::CONQUERPLAYERWHITOUTBATTLESUCCESS => [
+				NotificationBuilder::new()
+					->setTitle('Conquête réussie')
+					->setContent(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' a conquis la planète non défendue ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $place->player]),
+							$place->player->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_XP,
+							'+ ' . Format::number($commander->earnedExperience),
+							'expérience de l\'officier',
+						),
+						'Elle est désormais votre, vous pouvez l\'administrer ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('switchbase', ['baseId' => $place->base->id]),
+							'ici',
+						),
+						'.',
+					)
+					->for($commander->player),
+				NotificationBuilder::new()
+					->setTitle('Planète conquise')
+					->setContent(NotificationBuilder::paragraph(
+						'L\'officier ',
+						NotificationBuilder::bold($commander->name),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $commander->player]),
+							$commander->player->name,
+						),
+						' a conquis votre planète non défendue ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						'Impliquez votre faction dans une action punitive envers votre assaillant.',
+					))
+					->for($place->player),
+			],
+			Place::CONQUERLOST => [
+				NotificationBuilder::new()
+					->setTitle('Erreur de coordonnées')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' n\'a pas attaqué la planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' car le joueur est dans votre faction, sous la protection débutant ou votre allié.',
+					))
+					->for($commander->player)
+			],
+			Place::COMEBACK => [
+				NotificationBuilder::new()
+					->setTitle('Rapport de retour')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' est de retour sur votre base ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' et rapporte ',
+						NotificationBuilder::bold(Format::number($commander->resources)),
+						' ressources à vos entrepôts.'
+					))
+					->for($commander->player)
+			],
+			default => throw new \RuntimeException(sprintf('Unknown notification type %s', $case)),
+		};
+
+		foreach ($notifications as $notification) {
+			$this->notificationRepository->save($notification);
 		}
-
-		return null;
 	}
 
-	public function getByIds(array $ids = []): array
-	{
-		return $this->entityManager->getRepository(Place::class)->getByIds($ids);
-	}
-
-	public function getSystemPlaces(System $system): array
-	{
-		return $this->entityManager->getRepository(Place::class)->getSystemPlaces($system->getId());
-	}
-
-	public function search(string $search): array
-	{
-		return $this->entityManager->getRepository(Place::class)->search($search);
-	}
-
-	public function getPlayerPlaces(): array
-	{
-		return $this->entityManager->getRepository(Place::class)->getPlayerPlaces();
-	}
-
-	public function getNpcPlaces(): array
-	{
-		return $this->entityManager->getRepository(Place::class)->getNpcPlaces();
-	}
-
-	public function turnAsEmptyPlace(Place $place): bool
-	{
-		return $this->entityManager->getRepository(Place::class)->turnAsEmptyPlace($place->getId());
-	}
-
-	public function turnAsSpawnPlace(int $placeId, int $playerId): bool
-	{
-		$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($this->get($placeId)), PlaceOwnerChangeEvent::NAME);
-
-		return $this->entityManager->getRepository(Place::class)->turnAsSpawnPlace($placeId, $playerId);
-	}
-
-	public function sendNotif(Place $place, string $case, Commander $commander, int $report = null): void
-	{
-		switch ($case) {
-			case Place::CHANGESUCCESS:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Déplacement réussi');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId(), $commander->getName())
-					->addTxt(' est arrivé sur ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-
-			case Place::CHANGEFAIL:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Déplacement réussi');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId(), $commander->getName())
-					->addTxt(' s\'est posé sur ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('. Il est en garnison car il n\'y avait pas assez de place en orbite.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::CHANGELOST:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Déplacement raté');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId(), $commander->getName())
-					->addTxt(' n\'est pas arrivé sur ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('. Cette base ne vous appartient pas. Elle a pu être conquise entre temps.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::LOOTEMPTYSSUCCESS:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Pillage réussi');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' a pillé la planète rebelle située aux coordonnées ')
-					->addLnk('map/place-'.$place->id, Game::formatCoord($place->xSystem, $place->ySystem, $place->position, $place->rSector))
-					->addTxt('.')
-					->addSep()
-					->addBoxResource('resource', Format::number($commander->getResources()), 'ressources pillées', $this->mediaPath)
-					->addBoxResource('xp', '+ '.Format::number($commander->earnedExperience), 'expérience de l\'officier', $this->mediaPath)
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::LOOTEMPTYFAIL:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Pillage raté');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/view-memorial', $commander->getName())
-					->addTxt(' est tombé lors de l\'attaque de la planète rebelle située aux coordonnées ')
-					->addLnk('map/place-'.$place->id, Game::formatCoord($place->xSystem, $place->ySystem, $place->position, $place->rSector))
-					->addTxt('.')
-					->addSep()
-					->addTxt('Il a désormais rejoint le Mémorial. Que son âme traverse l\'Univers dans la paix.')
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::LOOTPLAYERWHITBATTLESUCCESS:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Pillage réussi');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' a pillé la planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$place->rPlayer, $place->playerName)
-					->addTxt('.')
-					->addSep()
-					->addBoxResource('resource', Format::number($commander->getResources()), 'ressources pillées', $this->mediaPath)
-					->addBoxResource('xp', '+ '.Format::number($commander->earnedExperience), 'expérience de l\'officier', $this->mediaPath)
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-
-				$notif = new Notification();
-				$notif->setRPlayer($place->rPlayer);
-				$notif->setTitle('Rapport de pillage');
-				$notif->addBeg()
-					->addTxt('L\'officier ')
-					->addStg($commander->getName())
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$commander->getRPlayer(), $commander->getPlayerName())
-					->addTxt(' a pillé votre planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('.')
-					->addSep()
-					->addBoxResource('resource', Format::number($commander->getResources()), 'ressources pillées', $this->mediaPath)
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::LOOTPLAYERWHITBATTLEFAIL:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Pillage raté');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/view-memorial', $commander->getName())
-					->addTxt(' est tombé lors du pillage de la planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$place->rPlayer, $place->playerName)
-					->addTxt('.')
-					->addSep()
-					->addTxt('Il a désormais rejoint le Mémorial. Que son âme traverse l\'Univers dans la paix.')
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-
-				$notif = new Notification();
-				$notif->setRPlayer($place->rPlayer);
-				$notif->setTitle('Rapport de combat');
-				$notif->addBeg()
-					->addTxt('L\'officier ')
-					->addStg($commander->getName())
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$commander->getRPlayer(), $commander->getPlayerName())
-					->addTxt(' a attaqué votre planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('.')
-					->addSep()
-					->addTxt('Vous avez repoussé l\'ennemi avec succès.')
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::LOOTPLAYERWHITOUTBATTLESUCCESS:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Pillage réussi');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' a pillé la planète non défendue ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$place->rPlayer, $place->playerName)
-					->addTxt('.')
-					->addSep()
-					->addBoxResource('resource', Format::number($commander->getResources()), 'ressources pillées', $this->mediaPath)
-					->addBoxResource('xp', '+ '.Format::number($commander->earnedExperience), 'expérience de l\'officier', $this->mediaPath)
-					->addEnd();
-				$this->notificationManager->add($notif);
-
-				$notif = new Notification();
-				$notif->setRPlayer($place->rPlayer);
-				$notif->setTitle('Rapport de pillage');
-				$notif->addBeg()
-					->addTxt('L\'officier ')
-					->addStg($commander->getName())
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$commander->getRPlayer(), $commander->getPlayerName())
-					->addTxt(' a pillé votre planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('. Aucune flotte n\'était en position pour la défendre. ')
-					->addSep()
-					->addBoxResource('resource', Format::number($commander->getResources()), 'ressources pillées', $this->mediaPath)
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::LOOTLOST:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Erreur de coordonnées');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' n\'a pas attaqué la planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' car son joueur est de votre faction, sous la protection débutant ou un allié.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::CONQUEREMPTYSSUCCESS:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Colonisation réussie');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' a colonisé la planète rebelle située aux coordonnées ')
-					->addLnk('map/place-'.$place->id, Game::formatCoord($place->xSystem, $place->ySystem, $place->position, $place->rSector).'.')
-					->addBoxResource('xp', '+ '.Format::number($commander->earnedExperience), 'expérience de l\'officier', $this->mediaPath)
-					->addTxt('Votre empire s\'étend, administrez votre ')
-					->addLnk('bases/base-'.$place->id, 'nouvelle planète')
-					->addTxt('.')
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::CONQUEREMPTYFAIL:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Colonisation ratée');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/view-memorial', $commander->getName())
-					->addTxt(' est tombé lors de l\'attaque de la planète rebelle située aux coordonnées ')
-					->addLnk('map/place-'.$place->id, Game::formatCoord($place->xSystem, $place->ySystem, $place->position, $place->rSector))
-					->addTxt('.')
-					->addSep()
-					->addTxt('Il a désormais rejoint le Mémorial. Que son âme traverse l\'Univers dans la paix.')
-					->addSep()
-					->addLnk('fleet/view-archive/report-'.$report, 'voir le rapport')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::CONQUERPLAYERWHITOUTBATTLESUCCESS:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Conquête réussie');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' a conquis la planète non défendue ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$place->rPlayer, $place->playerName)
-					->addTxt('.')
-					->addSep()
-					->addBoxResource('xp', '+ '.Format::number($commander->earnedExperience), 'expérience de l\'officier', $this->mediaPath)
-					->addTxt('Elle est désormais votre, vous pouvez l\'administrer ')
-					->addLnk('bases/base-'.$place->id, 'ici')
-					->addTxt('.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-
-				$notif = new Notification();
-				$notif->setRPlayer($place->rPlayer);
-				$notif->setTitle('Planète conquise');
-				$notif->addBeg()
-					->addTxt('L\'officier ')
-					->addStg($commander->getName())
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$commander->getRPlayer(), $commander->getPlayerName())
-					->addTxt(' a conquis votre planète non défendue ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('.')
-					->addSep()
-					->addTxt('Impliquez votre faction dans une action punitive envers votre assaillant.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::CONQUERLOST:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Erreur de coordonnées');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' n\'a pas attaqué la planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' car le joueur est dans votre faction, sous la protection débutant ou votre allié.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::COMEBACK:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Rapport de retour');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' est de retour sur votre base ')
-					->addLnk('map/place-'.$commander->getRBase(), $commander->getBaseName())
-					->addTxt(' et rapporte ')
-					->addStg(Format::number($commander->getResources()))
-					->addTxt(' ressources à vos entrepôts.')
-					->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-
-			default: break;
-		}
-	}
-
-	public function sendNotifForConquest(Place $place, string $case, Commander $commander, array $reports = []): void
+	/**
+	 * @param list<Uuid> $reports
+	 */
+	public function sendNotifForConquest(Place $place, int $case, Commander $commander, array $reports = []): void
 	{
 		$nbrBattle = count($reports);
-		switch ($case) {
-			case Place::CONQUERPLAYERWHITBATTLESUCCESS:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Conquête réussie');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/commander-'.$commander->getId().'/sftr-3', $commander->getName())
-					->addTxt(' a conquis la planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$place->rPlayer, $place->playerName)
-					->addTxt('.')
-					->addSep()
-					->addTxt($nbrBattle.Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'))
-					->addSep()
-					->addBoxResource('xp', '+ '.Format::number($commander->earnedExperience), 'expérience de l\'officier', $this->mediaPath)
-					->addSep()
-					->addTxt('Elle est désormais vôtre, vous pouvez l\'administrer ')
-					->addLnk('bases/base-'.$place->id, 'ici')
-					->addTxt('.');
-				for ($i = 0; $i < $nbrBattle; ++$i) {
-					$notif->addSep();
-					$notif->addLnk('fleet/view-archive/report-'.$reports[$i], 'voir le '.Format::ordinalNumber($i + 1).' rapport');
-				}
-				$notif->addEnd();
-				$this->notificationManager->add($notif);
 
-				$notif = new Notification();
-				$notif->setRPlayer($place->rPlayer);
-				$notif->setTitle('Planète conquise');
-				$notif->addBeg()
-					->addTxt('L\'officier ')
-					->addStg($commander->getName())
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$commander->getRPlayer(), $commander->getPlayerName())
-					->addTxt(' a conquis votre planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('.')
-					->addSep()
-					->addTxt($nbrBattle.Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'))
-					->addSep()
-					->addTxt('Impliquez votre faction dans une action punitive envers votre assaillant.');
-				for ($i = 0; $i < $nbrBattle; ++$i) {
-					$notif->addSep();
-					$notif->addLnk('fleet/view-archive/report-'.$reports[$i], 'voir le '.Format::ordinalNumber($i + 1).' rapport');
-				}
-				$notif->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-			case Place::CONQUERPLAYERWHITBATTLEFAIL:
-				$notif = new Notification();
-				$notif->setRPlayer($commander->getRPlayer());
-				$notif->setTitle('Conquête ratée');
-				$notif->addBeg()
-					->addTxt('Votre officier ')
-					->addLnk('fleet/view-memorial/', $commander->getName())
-					->addTxt(' est tombé lors de la tentive de conquête de la planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$place->rPlayer, $place->playerName)
-					->addTxt('.')
-					->addSep()
-					->addTxt($nbrBattle.Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'))
-					->addSep()
-					->addTxt('Il a désormais rejoint de Mémorial. Que son âme traverse l\'Univers dans la paix.');
-				for ($i = 0; $i < $nbrBattle; ++$i) {
-					$notif->addSep();
-					$notif->addLnk('fleet/view-archive/report-'.$reports[$i], 'voir le '.Format::ordinalNumber($i + 1).' rapport');
-				}
-				$notif->addEnd();
-				$this->notificationManager->add($notif);
+		$notifications = match ($case) {
+			Place::CONQUERPLAYERWHITBATTLESUCCESS => [
+				NotificationBuilder::new()
+					->setTitle('Conquête réussie')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('fleet_headquarters', ['commander' => $commander->id]),
+							$commander->name,
+						),
+						' a conquis la planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $place->player]),
+							$place->player->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						$nbrBattle . Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'),
+						NotificationBuilder::divider(),
+						NotificationBuilder::resourceBox(
+							NotificationBuilder::RESOURCE_TYPE_XP,
+							'+ ' . Format::number($commander->earnedExperience),
+							'expérience de l\'officier',
+						),
+						NotificationBuilder::divider(),
+						'Elle est désormais vôtre, vous pouvez l\'administrer ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('switchbase', ['baseId' => $place->base->id]),
+							'ici',
+						),
+						'.',
+						NotificationBuilder::divider(),
+						...array_map(
+							fn (int $i): string => sprintf(
+								'%s%s',
+								NotificationBuilder::divider(),
+								NotificationBuilder::link(
+									$this->urlGenerator->generate('fleet_archives', ['id' => $reports[$i]]),
+									'voir le ' . Format::ordinalNumber($i + 1) . ' rapport',
+								),
+							),
+							array_keys($reports),
+						),
+					))
+					->for($commander->player),
+				NotificationBuilder::new()
+					->setTitle('Planète conquise')
+					->setContent(NotificationBuilder::paragraph(
+						'L\'officier ',
+						NotificationBuilder::bold($commander->name),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $commander->player]),
+							$commander->player->name,
+						),
+						' a conquis votre planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						$nbrBattle . Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'),
+						NotificationBuilder::divider(),
+						'Impliquez votre faction dans une action punitive envers votre assaillant.',
+						NotificationBuilder::divider(),
+						...array_map(
+							fn (int $i): string => sprintf(
+								'%s%s',
+								NotificationBuilder::divider(),
+								NotificationBuilder::link(
+									$this->urlGenerator->generate('fleet_archives', ['id' => $reports[$i]]),
+									'voir le ' . Format::ordinalNumber($i + 1) . ' rapport',
+								),
+							),
+							array_keys($reports),
+						),
+					))
+					->for($place->player)
+			],
+			Place::CONQUERPLAYERWHITBATTLEFAIL => [
+				NotificationBuilder::new()
+					->setTitle('Conquête ratée')
+					->setContent(NotificationBuilder::paragraph(
+						'Votre officier ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('memorial', ['id' => $commander->id]),
+							$commander->name,
+						),
+						' est tombé lors de la tentive de conquête de la planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $place->player]),
+							$place->player->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						$nbrBattle . Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'),
+						NotificationBuilder::divider(),
+						'Il a désormais rejoint de Mémorial. Que son âme traverse l\'Univers dans la paix.',
+						NotificationBuilder::divider(),
+						...array_map(
+							fn (int $i): string => sprintf(
+								'%s%s',
+								NotificationBuilder::divider(),
+								NotificationBuilder::link(
+									$this->urlGenerator->generate('fleet_archives', ['id' => $reports[$i]]),
+									'voir le ' . Format::ordinalNumber($i + 1) . ' rapport',
+								),
+							),
+							array_keys($reports),
+						),
+					))
+					->for($commander->player),
+				NotificationBuilder::new()
+					->setTitle('Rapport de combat')
+					->setContent(NotificationBuilder::paragraph(
+						'L\'officier ',
+						NotificationBuilder::bold($commander->name),
+						' appartenant au joueur ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('embassy', ['player' => $commander->player]),
+							$commander->player->name,
+						),
+						' a tenté de conquérir votre planète ',
+						NotificationBuilder::link(
+							$this->urlGenerator->generate('map', ['place' => $place->id]),
+							$place->base->name,
+						),
+						'.',
+						NotificationBuilder::divider(),
+						$nbrBattle . Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'),
+						NotificationBuilder::divider(),
+						'Vous avez repoussé l\'ennemi avec succès. Bravo !',
+						NotificationBuilder::divider(),
+						...array_map(
+							fn (int $i): string => sprintf(
+								'%s%s',
+								NotificationBuilder::divider(),
+								NotificationBuilder::link(
+									$this->urlGenerator->generate('fleet_archives', ['id' => $reports[$i]]),
+									'voir le ' . Format::ordinalNumber($i + 1) . ' rapport',
+								),
+							),
+							array_keys($reports),
+						),
+					))
+					->for($place->player)
+			],
+			default => throw new \RuntimeException(sprintf('Unknown notification type %s', $case)),
+		};
 
-				$notif = new Notification();
-				$notif->setRPlayer($place->rPlayer);
-				$notif->setTitle('Rapport de combat');
-				$notif->addBeg()
-					->addTxt('L\'officier ')
-					->addStg($commander->getName())
-					->addTxt(' appartenant au joueur ')
-					->addLnk('embassy/player-'.$commander->getRPlayer(), $commander->getPlayerName())
-					->addTxt(' a tenté de conquérir votre planète ')
-					->addLnk('map/place-'.$place->id, $place->baseName)
-					->addTxt('.')
-					->addSep()
-					->addTxt($nbrBattle.Format::addPlural($nbrBattle, ' combats ont eu lieu.', ' seul combat a eu lieu'))
-					->addSep()
-					->addTxt('Vous avez repoussé l\'ennemi avec succès. Bravo !');
-				for ($i = 0; $i < $nbrBattle; ++$i) {
-					$notif->addSep();
-					$notif->addLnk('fleet/view-archive/report-'.$reports[$i], 'voir le '.Format::ordinalNumber($i + 1).' rapport');
-				}
-				$notif->addEnd();
-				$this->notificationManager->add($notif);
-				break;
-
-			default: break;
+		foreach ($notifications as $notification) {
+			$this->notificationRepository->save($notification);
 		}
 	}
 }

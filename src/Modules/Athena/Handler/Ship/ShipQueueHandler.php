@@ -2,39 +2,30 @@
 
 namespace App\Modules\Athena\Handler\Ship;
 
-use App\Classes\Daemon\ClientManager;
-use App\Classes\Entity\EntityManager;
-use App\Classes\Library\Flashbag;
-use App\Classes\Library\Format;
-use App\Classes\Library\Session\SessionWrapper;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Manager\ShipQueueManager;
+use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Message\Ship\ShipQueueMessage;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Zeus\Manager\PlayerManager;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class ShipQueueHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class ShipQueueHandler
 {
 	public function __construct(
-		protected ShipQueueManager $shipQueueManager,
-		protected PlayerManager $playerManager,
-		protected ClientManager $clientManager,
-		protected SessionWrapper $sessionWrapper,
-		protected EntityManager $entityManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
+		private PlayerManager                $playerManager,
+		private ShipQueueRepositoryInterface $shipQueueRepository,
 	) {
 	}
 
 	public function __invoke(ShipQueueMessage $message): void
 	{
-		if (null === ($queue = $this->shipQueueManager->get($message->getShipQueueId()))) {
+		if (null === ($queue = $this->shipQueueRepository->get($message->getShipQueueId()))) {
 			return;
 		}
-		$orbitalBase = $this->orbitalBaseManager->get($queue->rOrbitalBase);
-		$player = $this->playerManager->get($orbitalBase->rPlayer);
+		$orbitalBase = $queue->base;
+		$player = $orbitalBase->player;
 		// vaisseau construit
-		$orbitalBase->setShipStorage($queue->shipNumber, $orbitalBase->getShipStorage($queue->shipNumber) + $queue->quantity);
+		$orbitalBase->addShips($queue->shipNumber, $queue->quantity);
 		// increase player experience
 		$experience = $queue->quantity * ShipResource::getInfo($queue->shipNumber, 'points');
 		$this->playerManager->increaseExperience($player, $experience);
@@ -53,7 +44,6 @@ class ShipQueueHandler implements MessageHandlerInterface
 		//			), 1 === $queue->dockType ? Flashbag::TYPE_DOCK1_SUCCESS : Flashbag::TYPE_DOCK2_SUCCESS);
 		//			$this->sessionWrapper->save($session);
 		//		}
-		$this->entityManager->remove($queue);
-		$this->entityManager->flush();
+		$this->shipQueueRepository->remove($queue);
 	}
 }

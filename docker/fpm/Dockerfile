@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine
+FROM php:8.2-fpm-alpine
 
 # Install SUPERVISOR and dependencies
 RUN apk add --update rabbitmq-c-dev icu-dev nodejs npm
@@ -12,16 +12,6 @@ RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
     && apk del pcre-dev ${PHPIZE_DEPS}
 
 RUN curl -s https://getcomposer.org/installer | php
-RUN alias composer="php composer.phar"
-
-COPY cron/ /etc/periodic/
-
-RUN chmod -R a+x /etc/periodic/
-
-COPY docker-entrypoint.sh /entrypoint.sh
-
-RUN chmod a+x /entrypoint.sh
+RUN mv /var/www/html/composer.phar /usr/bin/composer
 
 WORKDIR /srv/app
-
-ENTRYPOINT ["/entrypoint.sh"]

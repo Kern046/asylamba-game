@@ -2,81 +2,71 @@
 
 namespace App\Modules\Demeter\Infrastructure\Controller\Government;
 
-use App\Classes\Exception\ErrorException;
-use App\Classes\Exception\FormException;
 use App\Classes\Library\Parser;
-use App\Classes\Library\Utils;
-use App\Modules\Hermes\Manager\ConversationManager;
-use App\Modules\Hermes\Manager\ConversationMessageManager;
+use App\Modules\Hermes\Domain\Repository\ConversationMessageRepositoryInterface;
+use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
 use App\Modules\Hermes\Model\ConversationMessage;
 use App\Modules\Hermes\Model\ConversationUser;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class WriteToFaction extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		PlayerManager $playerManager,
+		PlayerRepositoryInterface $playerRepository,
+		ConversationRepositoryInterface $conversationRepository,
+		ConversationMessageRepositoryInterface $conversationMessageRepository,
+		EntityManagerInterface $entityManager,
 		Parser $parser,
-		ConversationManager $conversationManager,
-		ConversationMessageManager $conversationMessageManager,
 	): Response {
+		$message = $request->request->get('message') ?? throw new BadRequestHttpException('Missing message body');
 		// @TODO fix empty check
-		$content = $parser->parse($request->request->get('message'));
+		$content = $parser->parse($message);
 
-		if (null !== $content) {
-			if ($currentPlayer->isGovernmentMember()) {
-				if ('' !== $content && strlen($content) < 25000) {
-					if (($factionAccount = $playerManager->getFactionAccount($currentPlayer->rColor)) !== null) {
-						$S_CVM = $conversationManager->getCurrentSession();
-						$conversationManager->newSession();
-						$conversationManager->load(
-							['cu.rPlayer' => $factionAccount->id]
-						);
-
-						if (1 == $conversationManager->size()) {
-							$conv = $conversationManager->get();
-
-							++$conv->messages;
-							$conv->dLastMessage = Utils::now();
-
-							// désarchiver tout les users
-							$users = $conv->players;
-							foreach ($users as $user) {
-								$user->convStatement = ConversationUser::CS_DISPLAY;
-							}
-
-							// création du message
-							$message = new ConversationMessage();
-
-							$message->rConversation = $conv->id;
-							$message->rPlayer = $currentPlayer->id;
-							$message->type = ConversationMessage::TY_STD;
-							$message->content = $content;
-							$message->dCreation = Utils::now();
-							$message->dLastModification = null;
-
-							$conversationMessageManager->add($message);
-						} else {
-							throw new ErrorException('La conversation n\'existe pas ou ne vous appartient pas.');
-						}
-
-						$conversationManager->changeSession($S_CVM);
-					}
-				} else {
-					throw new FormException('Le message est vide ou trop long');
-				}
-			} else {
-				throw new FormException('Vizs n\'avez pas les droits pour poster un message officiel');
-			}
-		} else {
-			throw new FormException('Pas assez d\'informations pour écrire un message officiel');
+		// @TODO replace with voter
+		if (!$currentPlayer->isGovernmentMember()) {
+			throw $this->createAccessDeniedException('Vous n\'avez pas les droits pour poster un message officiel');
 		}
+
+		// TODO Replace with validator component
+		if ('' === $content || strlen($content) > 25000) {
+			throw new BadRequestHttpException('Le message est vide ou trop long');
+		}
+
+		$factionAccount = $playerRepository->getFactionAccount($currentPlayer->faction)
+			?? throw $this->createNotFoundException('Faction account not found');
+
+		$conversation = $conversationRepository->getOneByPlayer($factionAccount)
+			?? throw $this->createNotFoundException('Faction conversation not found');
+
+		$conversation->messagesCount++;
+		$conversation->lastMessageAt = new \DateTimeImmutable();
+
+		// désarchiver tout les users
+		foreach ($conversation->players as $user) {
+			$user->conversationStatus = ConversationUser::CS_DISPLAY;
+		}
+
+		// création du message
+		$message = new ConversationMessage(
+			id: Uuid::v4(),
+			conversation: $conversation,
+			player: $currentPlayer,
+			content: $content,
+			createdAt: new \DateTimeImmutable(),
+			type: ConversationMessage::TY_STD,
+		);
+
+		$conversationMessageRepository->save($message);
+		$entityManager->flush();
 
 		return $this->redirect($request->headers->get('referer'));
 	}

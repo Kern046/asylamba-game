@@ -1,15 +1,11 @@
 <?php
 
-/**
- * SpyReport.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @update 26.03.14
- */
-
 namespace App\Modules\Artemis\Model;
+
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Gaia\Model\Place;
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
 
 class SpyReport
 {
@@ -29,49 +25,28 @@ class SpyReport
 	public const STEP_ARMY = 95;
 	public const STEP_DOCK = 99;
 
-	// attributes
-	public $id = 0;
-	public $rPlayer = null;
-	public $price;
-	public $rPlace;
-	public $placeColor = null;
+	public function __construct(
+		public Uuid $id,
+		public Player $player,
+		public Place $place,
+		public int $price,
+		public Color|null $placeFaction,
+		public int $placeType,
+		public int|null $baseType,
+		public string|null $placeName,
+		public int $points,
+		public Player|null $targetPlayer,
+		public int|null $targetPlayerLevel,
+		public int $resources,
+		public array $shipStorage,
+		public int|null $antiSpyInvest,
+		public int|null $commercialRouteIncome,
+		public int $successRate,
+		public int $type,
+		public \DateTimeImmutable $createdAt,
+		public array $commanders = [],
+	) {
 
-	public $typeOfBase; // 0=empty, 1=ms1, 2=ms2, 3=ms3, 4=ob
-	public $typeOfOrbitalBase; // 0=neutral, 1=commercial, 2=military, 3=capital
-	public $placeName;
-	public $points;
-
-	public $rEnemy;
-	public $enemyName;
-	public $enemyAvatar;
-	public $enemyLevel;
-
-	public $resources; // from place OR base
-	public $shipsInStorage;
-	public $antiSpyInvest;
-	public $commercialRouteIncome;
-	public $commanders;
-
-	public $success; // from 0 to 100
-	public $type; // see constants
-	public $dSpying;
-
-	// additional attributes
-	// from place
-	public $typeOfPlace;
-	public $position;
-	public $population;
-	public $coefResources;
-	public $coefHistory;
-	// from system
-	public $rSector;
-	public $xPosition;
-	public $yPosition;
-	public $typeOfSystem;
-
-	public function getId()
-	{
-		return $this->id;
 	}
 
 	public function isNotCaught(): bool
@@ -91,56 +66,56 @@ class SpyReport
 
 	public function hasSpottedFleets(): bool
 	{
-		return self::STEP_FLEET < $this->success;
+		return self::STEP_FLEET < $this->successRate;
 	}
 
 	public function hasSpottedArmies(): bool
 	{
-		return self::STEP_ARMY < $this->success;
+		return self::STEP_ARMY < $this->successRate;
 	}
 
 	public function hasSpottedMovements(): bool
 	{
-		return self::STEP_MOVEMENT < $this->success;
+		return self::STEP_MOVEMENT < $this->successRate;
 	}
 
 	public function hasSpottedCommanders(): bool
 	{
-		return self::STEP_COMMANDER < $this->success;
+		return self::STEP_COMMANDER < $this->successRate;
 	}
 
 	public function hasSpottedPevs(): bool
 	{
-		return self::STEP_PEV < $this->success;
+		return self::STEP_PEV < $this->successRate;
 	}
 
 	public function hasSpottedDocks(): bool
 	{
-		return self::STEP_DOCK < $this->success;
+		return self::STEP_DOCK < $this->successRate;
 	}
 
 	public function hasSpottedResourcesStorage(): bool
 	{
-		return self::STEP_RESOURCES < $this->success;
+		return self::STEP_RESOURCES < $this->successRate;
 	}
 
 	public function hasSpottedPoints(): bool
 	{
-		return self::STEP_POINT < $this->success;
+		return self::STEP_POINT < $this->successRate;
 	}
 
 	public function hasSpottedAntiSpy(): bool
 	{
-		return self::STEP_ANITSPY < $this->success;
+		return self::STEP_ANITSPY < $this->successRate;
 	}
 
 	public function hasSpottedCommercialRoutesIncome(): bool
 	{
-		return self::STEP_RC < $this->success;
+		return self::STEP_RC < $this->successRate;
 	}
 
 	public function hasShipsInStorage(): bool
 	{
-		return \array_sum(\unserialize($this->shipsInStorage)) > 0;
+		return \array_sum($this->shipStorage) > 0;
 	}
 }

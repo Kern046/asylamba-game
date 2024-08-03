@@ -1,0 +1,88 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        profiling_collect_backtrace: true
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '13'
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        validate_xml_mapping: false # Will have to be true for Doctrine 4.0 but actually bugged
+        mappings:
+            Ares:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/ares'
+                prefix: 'App\Modules\Ares\Model'
+            Artemis:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/artemis'
+                prefix: 'App\Modules\Artemis\Model'
+            Athena:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/athena'
+                prefix: 'App\Modules\Athena\Model'
+            Atlas:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/atlas'
+                prefix: 'App\Modules\Atlas\Model'
+            Demeter:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/demeter'
+                prefix: 'App\Modules\Demeter\Model'
+            Gaia:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/gaia'
+                prefix: 'App\Modules\Gaia\Model'
+            Hephaistos:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/hephaistos'
+                prefix: 'App\Modules\Hephaistos\Model'
+            Hermes:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/hermes'
+                prefix: 'App\Modules\Hermes\Model'
+            Promethee:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/promethee'
+                prefix: 'App\Modules\Promethee\Model'
+            Zeus:
+                is_bundle: false
+                type: 'xml'
+                dir: '%kernel.project_dir%/config/doctrine/zeus'
+                prefix: 'App\Modules\Zeus\Model'
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

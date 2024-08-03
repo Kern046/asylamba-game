@@ -10,13 +10,12 @@ class NewBuildingQueueEvent implements TrackingEvent
 {
 	public function __construct(
 		public readonly BuildingQueue $buildingQueue,
-		public readonly Player $player,
 	) {
 	}
 
 	public function getTrackingPeopleId(): int
 	{
-		return $this->player->id;
+		return $this->buildingQueue->base->player->id;
 	}
 
 	public function getTrackingEventName(): string
@@ -29,7 +28,7 @@ class NewBuildingQueueEvent implements TrackingEvent
 		return [
 			'building_id' => $this->buildingQueue->buildingNumber,
 			'target_level' => $this->buildingQueue->targetLevel,
-			'place_id' => $this->buildingQueue->rOrbitalBase,
+			'base_id' => $this->buildingQueue->base->id,
 		];
 	}
 }

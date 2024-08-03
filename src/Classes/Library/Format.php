@@ -12,7 +12,7 @@ class Format
 	 *     : str => retourne la chaine (ou s si non spécifié) si number est supérieur à 1
 	 * arg :
 	 */
-	public static function addPlural($number, $return = '', $expression = '')
+	public static function addPlural(int $number, string $return = '', string $expression = ''): string
 	{
 		if ($number > 1) {
 			return ('' == $expression and '' == $return)
@@ -20,12 +20,12 @@ class Format
 				: $return;
 		} else {
 			return ('' == $expression)
-				? null
+				? ''
 				: $expression;
 		}
 	}
 
-	public static function ordinalNumber($nbr)
+	public static function ordinalNumber(int $nbr): string
 	{
 		switch ($nbr) {
 			case 1:
@@ -47,7 +47,7 @@ class Format
 		}
 	}
 
-	public static function plural($number, $return = '', $expression = '')
+	public static function plural(int $number, string $return = '', string $expression = ''): string
 	{
 		return self::addPlural($number, $return, $expression);
 	}
@@ -61,12 +61,12 @@ class Format
 	 * arg : $decimal *
 	 *     : int => nombre de chiffre après la virgule
 	 */
-	public static function numberFormat($number, $decimals = 0)
+	public static function numberFormat(int|float $number, int $decimals = 0): string
 	{
 		return self::number($number, $decimals);
 	}
 
-	public static function number($number, $decimals = 0)
+	public static function number(int|float $number, int $decimals = 0): string
 	{
 		if (-2 == $decimals and $number > 999999) {
 			return number_format(ceil($number / 1000000), $decimals, ',', ' ').' Mio';
@@ -79,7 +79,7 @@ class Format
 
 	public static function percent(int|float $number, int|float $base, bool $ceil = true): float
 	{
-		return min(100, (0 == $base)
+		return min(100, (0 === intval(round($base)))
 			? 0
 			: (
 				$ceil

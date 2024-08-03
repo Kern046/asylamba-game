@@ -2,8 +2,11 @@
 
 namespace App\Classes\Library;
 
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Zeus\Manager\PlayerManager;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class Parser
@@ -19,18 +22,13 @@ class Parser
 	public bool $parseBigTag = false;
 
 	protected PlaceManager $placeManager;
-	protected PlayerManager $playerManager;
 
 	public function __construct(
-		protected string $appRoot,
-		protected string $mediaPath,
+		private readonly PlayerRepositoryInterface $playerRepository,
+		private readonly PlaceRepositoryInterface $placeRepository,
+		private readonly UrlGeneratorInterface $urlGenerator,
+		private readonly string $mediaPath,
 	) {
-	}
-
-	#[Required]
-	public function setPlayerManager(PlayerManager $playerManager): void
-	{
-		$this->playerManager = $playerManager;
 	}
 
 	#[Required]
@@ -141,8 +139,8 @@ class Parser
 			'#\[\@(.+)\]#isU',
 			function ($m) {
 				return
-					(($player = $this->playerManager->getByName($m[1])) !== null)
-					? '<a href="'.$this->appRoot.'embassy/player-'.$player->getId().'" class="color'.$player->getRColor().' hb lt" title="voir le profil">'.$player->getName().'</a>'
+					(($player = $this->playerRepository->getByName($m[1])) !== null)
+					? '<a href="' . $this->urlGenerator->generate('embassy', ['player' => $player->id]) . '" class="color' . $player->faction->identifier . ' hb lt" title="voir le profil">' . $player->name . '</a>'
 					: $m[0]
 				;
 			},
@@ -155,11 +153,11 @@ class Parser
 		return \preg_replace_callback(
 			'#\[\#(.+)\]#isU',
 			function ($m) {
-				if (($place = $this->placeManager->get($m[1]))) {
+				if (($place = $this->placeRepository->get($m[1]))) {
 					if ($place->getTypeOfBase() > 0) {
-						return '<a href="'.$this->appRoot.'map/place-'.$place->getId().'" class="color'.$place->getPlayerColor().' hb lt" title="voir la planète">'.$place->getBaseName().'</a>';
+						return '<a href="'.$this->urlGenerator->generate('map', ['place' => $place->id]).'" class="color'.$place->player->faction->identifier.' hb lt" title="voir la planète">'.$place->base->name.'</a>';
 					} else {
-						return '<a href="'.$this->appRoot.'map/place-'.$place->getId().'" class="hb lt" title="voir la planète">planète rebelle</a>';
+						return '<a href="'.$this->urlGenerator->generate('map', ['place' => $place->id]).'" class="hb lt" title="voir la planète">planète rebelle</a>';
 					}
 				}
 

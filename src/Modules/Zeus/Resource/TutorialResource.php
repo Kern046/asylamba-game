@@ -45,22 +45,14 @@ class TutorialResource
 
 	public const SPONSORSHIP = 29;
 
-	public static function stepExists($step)
+	public static function stepExists(int $step): bool
 	{
-		if ($step > 0 and $step <= count(self::$steps)) {
-			return true;
-		} else {
-			return false;
-		}
+		return $step > 0 && $step <= count(self::$steps);
 	}
 
-	public static function isLastStep($step)
+	public static function isLastStep(int $step): bool
 	{
-		if ($step == count(self::$steps)) {
-			return true;
-		} else {
-			return false;
-		}
+		return $step === count(self::$steps);
 	}
 
 	public static function getInfo($id, $info)
@@ -76,7 +68,7 @@ class TutorialResource
 		}
 	}
 
-	private static $steps = [
+	private static array $steps = [
 		[
 			'id' => 1,
 			'title' => 'Bienvenue',

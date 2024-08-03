@@ -1,69 +1,32 @@
 <?php
 
-/**
- * Notification Manager.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @update 20.05.13
- */
-
 namespace App\Modules\Hermes\Manager;
 
-use App\Classes\Entity\EntityManager;
-use App\Modules\Hermes\Model\Notification;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
+use App\Modules\Zeus\Model\Player;
 
-class NotificationManager
+readonly class NotificationManager
 {
-	public function __construct(protected EntityManager $entityManager)
+	public function __construct(private NotificationRepositoryInterface $notificationRepository)
 	{
+
 	}
 
-	public function get($id): Notification|null
-	{
-		return $this->entityManager->getRepository(Notification::class)->get($id);
-	}
-
-	public function getUnreadNotifications($playerId)
-	{
-		return $this->entityManager->getRepository(Notification::class)->getUnreadNotifications($playerId);
-	}
-
-	public function getPlayerNotificationsByArchive($playerId, $isArchived)
-	{
-		return $this->entityManager->getRepository(Notification::class)->getPlayerNotificationsByArchive($playerId, $isArchived);
-	}
-
-	public function getAllByReadState($isReaded)
-	{
-		return $this->entityManager->getRepository(Notification::class)->getAllByReadState($isReaded);
-	}
-
-	public function patchForMultiCombats($commanderPlayerId, $placePlayerId, $arrivedAt)
-	{
-		$notifications = $this
-			->entityManager
-			->getRepository(Notification::class)
-			->getMultiCombatNotifications($commanderPlayerId, $placePlayerId, $arrivedAt)
-		;
+	public function patchForMultiCombats(
+		Player $commanderPlayer,
+		Player $placePlayer,
+		\DateTimeImmutable $arrivedAt,
+	): void {
+		$notifications = $this->notificationRepository->getMultiCombatNotifications(
+			$commanderPlayer,
+			$placePlayer,
+			$arrivedAt,
+		);
 		$nbNotifications = count($notifications);
 		if ($nbNotifications > 2) {
 			for ($i = 0; $i < $nbNotifications - 2; ++$i) {
-				$this->entityManager->remove($notifications[$i]);
+				$this->notificationRepository->remove($notifications[$i]);
 			}
 		}
-		$this->entityManager->flush(Notification::class);
-	}
-
-	public function add(Notification $notification)
-	{
-		$this->entityManager->persist($notification);
-		$this->entityManager->flush($notification);
-	}
-
-	public function deleteByRPlayer($rPlayer)
-	{
-		return $this->entityManager->getRepository(Notification::class)->removePlayerNotifications($rPlayer);
 	}
 }

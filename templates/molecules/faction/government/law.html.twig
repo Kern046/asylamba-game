@@ -39,16 +39,16 @@
 							<select name="rsector">
 								<option value="-1">Choisissez un secteur</option>
 								{% for sector in faction_sectors %}
-									<option value="{{ sector.id }}">{{ sector.name }} (#{{ sector.id }})</option>
+									<option value="{{ sector.id }}">{{ sector.name }} (#{{ sector.identifier }})</option>
 								{% endfor %}
 							</select>
 
 						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::NEUTRALPACT') %}
 							<select name="rcolor">
 								<option value="-1">Choisissez une faction</option>
-								{% for faction_id in faction.colorLink|keys %}
+								{% for faction_id in faction.relations|keys %}
 									{% if faction_id != 0 %}
-										{% set other_faction = faction.colorLink[faction_id] %}
+										{% set other_faction = faction.relations[faction_id] %}
 
 										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
 									{% endif %}
@@ -57,9 +57,9 @@
 						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::PEACEPACT') %}
 							<select name="rcolor">
 								<option value="-1">Choisissez une faction</option>
-								{% for faction_id in faction.colorLink|keys %}
+								{% for faction_id in faction.relations|keys %}
 									{% if faction_id != 0 %}
-										{% set other_faction = faction.colorLink[faction_id] %}
+										{% set other_faction = faction.relations[faction_id] %}
 
 										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
 									{% endif %}
@@ -68,9 +68,9 @@
 						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::WARDECLARATION') %}
 							<select name="rcolor">
 								<option value="-1">Choisissez une faction</option>
-								{% for faction_id in faction.colorLink|keys %}
+								{% for faction_id in faction.relations|keys %}
 									{% if faction_id != 0 %}
-										{% set other_faction = faction.colorLink[faction_id] %}
+										{% set other_faction = faction.relations[faction_id] %}
 
 										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
 									{% endif %}
@@ -79,9 +79,9 @@
 						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::TOTALALLIANCE') %}
 							<select name="rcolor">
 								<option value="-1">Choisissez une faction</option>
-								{% for faction_id in faction.colorLink|keys %}
+								{% for faction_id in faction.relations|keys %}
 									{% if faction_id != 0 %}
-										{% set other_faction = faction.colorLink[faction_id] %}
+										{% set other_faction = faction.relations[faction_id] %}
 
 										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
 									{% endif %}
@@ -91,9 +91,9 @@
 							<input type="text" placeholder="Nouvelle taxe en pourcent" name="taxes" />
 							<select name="rcolor">
 								<option value="-1">Choisissez une faction</option>
-								{% for faction_id in faction.colorLink|keys %}
+								{% for faction_id in faction.relations|keys %}
 									{% if faction_id != 0 %}
-										{% set other_faction = faction.colorLink[faction_id] %}
+										{% set other_faction = faction.relations[faction_id] %}
 
 										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'popularName') }}</option>
 									{% endif %}

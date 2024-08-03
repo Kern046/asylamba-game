@@ -1,5 +1,3 @@
-version: '3'
-
 volumes:
     caddy_data:
     caddy_config:
@@ -9,6 +7,10 @@ services:
         container_name: kalaxia_app
         build: docker/fpm
         env_file: '.env.prod'
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
         volumes:
             - "./:/srv/app"
         networks:
@@ -34,6 +36,10 @@ services:
         container_name: kalaxia_worker
         build: docker/supervisord
         env_file: '.env.prod'
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
         volumes:
             - "./:/srv/app"
             - "./var/logs/supervisord/:/var/log/supervisord/"

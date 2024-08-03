@@ -2,6 +2,7 @@
 
 namespace App\Shared\Infrastructure\Log;
 
+use Monolog\LogRecord;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class DatadogLogProcessor
@@ -32,19 +33,19 @@ class DatadogLogProcessor
 		];
 	}
 
-	public function __invoke(array $record): array
+	public function __invoke(LogRecord $record): LogRecord
 	{
-		$record['http.request_id'] = $this->requestId;
-		$record['http.session_id'] = $this->requestStack->getMainRequest()?->hasPreviousSession()
+		$record->extra['http.request_id'] = $this->requestId;
+		$record->extra['http.session_id'] = $this->requestStack->getMainRequest()?->hasPreviousSession()
 			? $this->requestStack->getMainRequest()->getSession()->getId()
 			: 'Unknown';
-		$record['http.url'] = $this->serverData['http.url'];
-		$record['http.method'] = $this->serverData['http.method'];
-		$record['http.useragent'] = $this->serverData['http.useragent'];
-		$record['http.referer'] = $this->serverData['http.referer'];
-		$record['http.x_forwarded_for'] = $this->serverData['http.x_forwarded_for'];
-		$record['http.query_params'] = $this->queryParams;
-		$record['http.request_params'] = $this->requestParams;
+		$record->extra['http.url'] = $this->serverData['http.url'];
+		$record->extra['http.method'] = $this->serverData['http.method'];
+		$record->extra['http.useragent'] = $this->serverData['http.useragent'];
+		$record->extra['http.referer'] = $this->serverData['http.referer'];
+		$record->extra['http.x_forwarded_for'] = $this->serverData['http.x_forwarded_for'];
+		$record->extra['http.query_params'] = $this->queryParams;
+		$record->extra['http.request_params'] = $this->requestParams;
 
 		return $record;
 	}

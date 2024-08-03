@@ -2,6 +2,7 @@
 
 namespace App\Modules\Zeus\Application\Registry;
 
+use App\Modules\Zeus\Domain\Exception\NoCurrentPlayerSetException;
 use App\Modules\Zeus\Model\Player;
 
 class CurrentPlayerRegistry
@@ -20,6 +21,6 @@ class CurrentPlayerRegistry
 
 	public function get(): Player
 	{
-		return $this->currentPlayer ?? throw new \LogicException('Current Player has not been set');
+		return $this->currentPlayer ?? throw new NoCurrentPlayerSetException();
 	}
 }

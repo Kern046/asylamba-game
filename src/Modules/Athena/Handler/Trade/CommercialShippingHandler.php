@@ -2,43 +2,41 @@
 
 namespace App\Modules\Athena\Handler\Trade;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
-use App\Classes\Library\Utils;
-use App\Modules\Ares\Manager\CommanderManager;
+use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Manager\CommercialShippingManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Manager\TransactionManager;
 use App\Modules\Athena\Message\Trade\CommercialShippingMessage;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\Transaction;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
+use App\Shared\Application\Handler\DurationHandler;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class CommercialShippingHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class CommercialShippingHandler
 {
 	public function __construct(
-		protected CommercialShippingManager $commercialShippingManager,
-		protected TransactionManager $transactionManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected CommanderManager $commanderManager,
-		protected MessageBusInterface $messageBus,
-		protected EntityManager $entityManager,
-		protected NotificationManager $notificationManager,
+		private DurationHandler $durationHandler,
+		private CommercialShippingManager $commercialShippingManager,
+		private CommercialShippingRepositoryInterface $commercialShippingRepository,
+		private MessageBusInterface $messageBus,
+		private NotificationRepositoryInterface $notificationRepository,
+		private UrlGeneratorInterface $urlGenerator,
 	) {
 	}
 
 	public function __invoke(CommercialShippingMessage $message): void
 	{
-		$cs = $this->commercialShippingManager->get($message->getCommercialShippingId());
-		$transaction = $this->transactionManager->get($cs->getTransactionId());
-		$orbitalBase = $this->orbitalBaseManager->get($cs->getBaseId());
-		$destOB = $this->orbitalBaseManager->get($cs->getDestinationBaseId());
-		$commander =
-			(null !== $transaction && Transaction::TYP_COMMANDER === $transaction->type)
-				? $this->commanderManager->get($transaction->identifier)
+		$cs = $this->commercialShippingRepository->get($message->getCommercialShippingId())
+			?? throw new \RuntimeException(sprintf('Commercial shipping %s not found', $message->getCommercialShippingId()));
+		$transaction = $cs->transaction;
+		$orbitalBase = $cs->originBase;
+		$destOB = $cs->destinationBase;
+		$commander = (null !== $transaction && Transaction::TYP_COMMANDER === $transaction->type)
+				? $transaction->commander
 				: null
 		;
 
@@ -48,37 +46,42 @@ class CommercialShippingHandler implements MessageHandlerInterface
 				$this->commercialShippingManager->deliver($cs, $transaction, $destOB, $commander);
 				// prepare commercialShipping for moving back
 				$cs->statement = CommercialShipping::ST_MOVING_BACK;
-				$timeToTravel = strtotime($cs->dArrival) - strtotime($cs->dDeparture);
-				$cs->dDeparture = $cs->dArrival;
-				$cs->dArrival = Utils::addSecondsToDate($cs->dArrival, $timeToTravel);
+				$timeToTravel = $this->durationHandler->getDiff($cs->getDepartureDate(), $cs->getArrivalDate());
+				$cs->departureDate = $cs->getArrivalDate();
+				$cs->arrivalDate = $this->durationHandler->getDurationEnd($cs->getArrivalDate(), $timeToTravel);
 
-				$this->messageBus->dispatch(new CommercialShippingMessage($cs->getId()), [DateTimeConverter::to_delay_stamp($cs->getArrivedAt())]);
+				$this->commercialShippingRepository->save($cs);
+
+				$this->messageBus->dispatch(
+					new CommercialShippingMessage($cs->id),
+					[DateTimeConverter::to_delay_stamp($cs->getArrivalDate())],
+				);
 				break;
 			case CommercialShipping::ST_MOVING_BACK:
 				// shipping arrived, release of the commercial ships
 				// send notification
-				$n = new Notification();
-				$n->setRPlayer($cs->rPlayer);
-				$n->setTitle('Retour de livraison');
-				if (1 == $cs->shipQuantity) {
-					$n->addBeg()->addTxt('Votre vaisseau commercial est de retour sur votre ');
-				} else {
-					$n->addBeg()->addTxt('Vos vaisseaux commerciaux sont de retour sur votre ');
-				}
-				$n->addLnk('map/place-'.$cs->rBase, 'base orbitale')->addTxt(' après avoir livré du matériel sur une autre ');
-				$n->addLnk('map/place-'.$cs->rBaseDestination, 'base')->addTxt(' . ');
-				if (1 == $cs->shipQuantity) {
-					$n->addSep()->addTxt('Votre vaisseau de commerce est à nouveau disponible pour faire d\'autres transactions ou routes commerciales.');
-				} else {
-					$n->addSep()->addTxt('Vos '.$cs->shipQuantity.' vaisseaux de commerce sont à nouveau disponibles pour faire d\'autres transactions ou routes commerciales.');
-				}
-				$n->addEnd();
-				$this->notificationManager->add($n);
+				$notification = NotificationBuilder::new()
+					->setTitle('Retour de livraison')
+					->setContent(NotificationBuilder::paragraph(
+						(1 === $cs->shipQuantity)
+							? 'Votre vaisseau commercial est de retour sur votre '
+							: 'Vos vaisseaux commerciaux sont de retour sur votre ',
+						NotificationBuilder::link($this->urlGenerator->generate('map', ['place' => $orbitalBase->place->id]), 'base orbitale'),
+						' après avoir livré du matériel sur une autre ',
+						NotificationBuilder::link($this->urlGenerator->generate('map', ['place' => $destOB->place->id]), 'base'),
+						NotificationBuilder::divider(),
+						(1 === $cs->shipQuantity)
+							? 'Votre vaisseau de commerce est à nouveau disponible pour faire d\'autres transactions ou routes commerciales.'
+							: 'Vos '.$cs->shipQuantity.' vaisseaux de commerce sont à nouveau disponibles pour faire d\'autres transactions ou routes commerciales.',
+					))
+					->for($cs->player);
+
+				$this->notificationRepository->save($notification);
 				// delete commercialShipping
-				$this->entityManager->remove($cs);
+				$this->commercialShippingRepository->remove($cs);
 				break;
-			default:break;
+			default:
+				break;
 		}
-		$this->entityManager->flush();
 	}
 }

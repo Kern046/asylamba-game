@@ -15,10 +15,10 @@
 	<div class="fix-body">
 		<div class="body">
 			{# pending commercial routes display #}
-			{% if orbital_base.levelSpatioport > 0 and orbital_base.commercialRoutesData.waiting_for_me is defined and orbital_base.commercialRoutesData.waiting_for_me != 0 %}
+			{% if orbital_base.levelSpatioport > 0 and commercial_routes_data.waiting_for_me is defined and commercial_routes_data.waiting_for_me != 0 %}
 				<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'spatioport'}) }}" class="alert">
-					{% set plural = orbital_base.commercialRoutesData.waiting_for_me|plural %}
-					Vous avez {{ orbital_base.commercialRoutesData.waiting_for_me }} proposition{{ plural }} commerciale{{ plural }}
+					{% set plural = commercial_routes_data.waiting_for_me|plural %}
+					Vous avez {{ commercial_routes_data.waiting_for_me }} proposition{{ plural }} commerciale{{ plural }}
 				</a>
 			{% endif %}
 
@@ -45,7 +45,7 @@
 			{% set realSizeQueue = 0 %}
 
 			<div class="queue">
-				{% for building_queue in orbital_base.buildingQueues %}
+				{% for building_queue in building_queues %}
 					{% set realSizeQueue = realSizeQueue + 1 %}
 					{% set nextTime = building_queue|queue_duration  %}
 					{% set nextTotalTime = nextTotalTime + building_queue|building_queue_time %}
@@ -69,7 +69,7 @@
 						{% endif %}
 					</div>
 				{% endfor %}
-				{% if orbital_base|base_max_building_queues > orbital_base.buildingQueues|length %}
+				{% if orbital_base|base_max_building_queues > building_queues|length %}
 					<a href="{{ path('switchbase', { 'baseId': orbital_base.id, 'page': 'generator'}) }}" class="item link">
 						Construire un bâtiment
 					</a>
@@ -82,7 +82,7 @@
 				{% set realSizeQueue = 0 %}
 
 				<div class="queue">
-					{% for ship_queue in orbital_base.dock1ShipQueues %}
+					{% for ship_queue in dock1_ship_queues %}
 						{% set realSizeQueue = realSizeQueue + 1 %}
 						{% set totalTimeShips = ship_queue|ship_queue_time %}
 						{% set remainingTime = ship_queue|queue_duration %}
@@ -111,7 +111,7 @@
 						{% endif %}
 						</div>
 					{% endfor %}
-					{% if orbital_base|base_max_dock1_ship_queues > orbital_base.dock1ShipQueues|length %}
+					{% if orbital_base|base_max_dock1_ship_queues > dock1_ship_queues|length %}
 						<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'docks', 'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="item link">
 							Lancer la production
 						</a>
@@ -125,7 +125,7 @@
 				{% set realSizeQueue = 0 %}
 
 				<div class="queue">
-					{% for ship_queue in orbital_base.dock2ShipQueues %}
+					{% for ship_queue in dock2_ship_queues %}
 						{% set realSizeQueue = realSizeQueue + 1 %}
 						{% set totalTimeShips = ship_queue|ship_queue_time %}
 						{% set remainingTime = ship_queue|queue_duration %}
@@ -154,7 +154,7 @@
 						{% endif %}
 						</div>
 					{% endfor %}
-					{% if orbital_base|base_max_dock2_ship_queues > orbital_base.dock2ShipQueues|length %}
+					{% if orbital_base|base_max_dock2_ship_queues > dock2_ship_queues|length %}
 						<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'docks', 'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="item link">
 							Lancer la production
 						</a>
@@ -170,7 +170,7 @@
 				{% set totalTimeTechno = 0 %}
 
 				<div class="queue">
-					{% for technology_queue in orbital_base.technoQueues %}
+					{% for technology_queue in technology_queues %}
 						{% set realSizeQueue = realSizeQueue + 1 %}
 						{% set totalTimeTechno = totalTimeTechno + technology_queue|technology_queue_time %}
 						{% set remainingTotalTime = technology_queue|queue_duration %}
@@ -199,7 +199,7 @@
 							{% endif %}
 						</div>
 					{% endfor %}
-					{% if orbital_base|base_max_technology_queues > orbital_base.technoQueues|length %}
+					{% if orbital_base|base_max_technology_queues > technology_queues|length %}
 						<a href="{{ path('switchbase', {'baseId': orbital_base.id, 'page': 'technosphere'}) }}" class="item link">
 							Développer une technologie
 						</a>
@@ -213,10 +213,10 @@
 				<div class="number-box">
 					<span class="label">Routes commerciales</span>
 					<span class="value">
-						{{ orbital_base.commercialRoutesData.total }} / {{ orbital_base.commercialRoutesData.max }}
+						{{ commercial_routes_data.total }} / {{ commercial_routes_data.max }}
 					</span>
 
-					{% set percent = ((orbital_base.commercialRoutesData.total / orbital_base.commercialRoutesData.max) * 100)|number %}
+					{% set percent = commercial_routes_data.total|percent(commercial_routes_data.max) %}
 					<span class="progress-bar hb bl" title="remplissage : {{ percent }}%">
 						<span style="width:{{ percent }}%;" class="content"></span>
 					</span>

@@ -72,6 +72,7 @@
 		</div>
 	</div>
 
+	{# @TODO Fix Dock type length in heavy shipyard #}
 	<div class="component dock{{ dock_type }}">
 		<div class="head skin-5">
 			<h2>{{ dock_type == 1 ? 'Corvettes' : 'Destroyers / Croiseurs' }}</h2>
@@ -107,21 +108,22 @@
 
 					<div class="component market-sell">
 						{% for i in ships_range %}
+							{% set ships_count = storage[i] ?? 0 %}
 							<div class="queue sh" data-target="sell-ships-{{ i }}">
 								<div class="item">
 									<img class="picto" src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
 									<strong>
-										<span class="big">{{ storage[i] }}</span>
-										{{ get_ship_info(i, 'codeName') ~ storage[i]|plural }}
+										<span class="big">{{ ships_count }}</span>
+										{{ get_ship_info(i, 'codeName') ~ ships_count|plural }}
 									</strong>
-									<em>{{ storage[i] * get_ship_info(i, 'pev') }} PEV</em>
+									<em>{{ ships_count * get_ship_info(i, 'pev') }} PEV</em>
 								</div>
 							</div>
 
-							{% if storage[i] != 0 %}
+							{% if ships_count != 0 %}
 								<form id="sell-ships-{{ i }}"
 									  class="sell-form"
-									  data-max-quantity="{{ storage[i] }}"
+									  data-max-quantity="{{ ships_count }}"
 									  data-min-price="{{ get_ship_info(i, 'resourcePrice') / 2 }}"
 									  action="{{ path('recycle_ships', {'ship_identifier': i}) }}"
 									  method="post"

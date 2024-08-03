@@ -16,12 +16,12 @@ class UpdateUniversityInvestments extends AbstractController
 		Player $currentPlayer,
 		PlayerManager $playerManager,
 	): Response {
-		if (0 === ($investment = $request->request->getInt('credit'))) {
-			throw new BadRequestHttpException('Montant invalide');
-		}
+		$investment = abs($request->request->getInt('credit'));
 
 		if (500000 < $investment) {
-			throw new BadRequestHttpException('La limite maximale d\'investissement dans l\'Université est de 500\'000 crédits.');
+			throw new BadRequestHttpException(
+				'La limite maximale d\'investissement dans l\'Université est de 500\'000 crédits.',
+			);
 		}
 
 		$playerManager->updateUniversityInvestment($currentPlayer, $investment);

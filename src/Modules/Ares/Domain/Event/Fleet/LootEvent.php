@@ -16,7 +16,7 @@ class LootEvent implements TrackingEvent
 
 	public function getTrackingPeopleId(): int
 	{
-		return $this->commander->rPlayer;
+		return $this->commander->player->id;
 	}
 
 	public function getTrackingEventName(): string
@@ -28,8 +28,8 @@ class LootEvent implements TrackingEvent
 	{
 		return [
 			'commander_id' => $this->commander->id,
-			'origin_place_id' => $this->commander->rStartPlace,
-			'target_place_id' => $this->commander->rDestinationPlace,
+			'origin_place_id' => $this->commander->startPlace,
+			'target_place_id' => $this->commander->destinationPlace,
 			'is_victorious' => $this->commander->isVictorious(),
 			'resources' => $this->commander->resources,
 			'defender_id' => $this->defender?->id,

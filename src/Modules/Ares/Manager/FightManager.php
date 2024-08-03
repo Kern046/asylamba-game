@@ -1,236 +1,42 @@
 <?php
 
-/**
- * Fight Controller.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 14.02.14
- */
-
 namespace App\Modules\Ares\Manager;
 
-use App\Classes\Library\DataAnalysis;
-use App\Classes\Library\Utils;
+use App\Modules\Ares\Application\Handler\Battle\SquadronFightHandler;
+use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
+use App\Modules\Ares\Application\Handler\CommanderExperienceHandler;
+use App\Modules\Ares\Application\Handler\FightImportanceHandler;
+use App\Modules\Ares\Domain\Repository\SquadronRepositoryInterface;
+use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Model\LiveReport;
-use App\Modules\Athena\Resource\ShipResource;
+use App\Modules\Zeus\Manager\PlayerBonusManager;
+use App\Modules\Zeus\Model\PlayerBonus;
+use Psr\Log\LoggerInterface;
 
+// TODO Transform static properties into constants to set the class as readonly
 class FightManager
 {
 	public function __construct(
-		protected CommanderManager $commanderManager,
-		protected int $gaiaId,
+		private readonly FightImportanceHandler $fightImportanceHandler,
+		private readonly CommanderArmyHandler $commanderArmyHandler,
+		private readonly CommanderExperienceHandler $commanderExperienceHandler,
+		private readonly SquadronFightHandler $squadronFightHandler,
+		private readonly SquadronRepositoryInterface $squadronRepository,
+		private readonly PlayerBonusManager $playerBonusManager,
+		private readonly LoggerInterface $logger,
 	) {
 		self::$currentLine = 3;
 	}
-
-	private $isAFight = false;
 
 	// ATTRIBUT STATIC DE LIGNE COURANTE
 
 	private static $currentLine = 0;
 
-	private static $AFighterBonus = [1, 1, 1, 1];
-	private static $ACorvetteBonus = [1, 1, 1, 1];
-	private static $AFrigateBonus = [1, 1, 1, 1];
-	private static $ADestroyerBonus = [1, 1, 1, 1];
-
-	private static $DFighterBonus = [1, 1, 1, 1];
-	private static $DCorvetteBonus = [1, 1, 1, 1];
-	private static $DFrigateBonus = [1, 1, 1, 1];
-	private static $DDestroyerBonus = [1, 1, 1, 1];
-
-	public function setFightControl($isAFight = false)
-	{
-		$this->isAFight = $isAFight;
-	}
-
 	// GETTER
 
-	public static function getCurrentLine()
+	public static function getCurrentLine(): int
 	{
 		return self::$currentLine;
-	}
-
-	public static function getAFighterBonus($i)
-	{
-		return self::$AFighterBonus[$i];
-	}
-
-	public static function getACorvetteBonus($i)
-	{
-		return self::$ACorvetteBonus[$i];
-	}
-
-	public static function getAFrigateBonus($i)
-	{
-		return self::$AFrigateBonus[$i];
-	}
-
-	public static function getADestroyerBonus($i)
-	{
-		return self::$ADestroyerBonus[$i];
-	}
-
-	public static function getDFighterBonus($i)
-	{
-		return self::$DFighterBonus[$i];
-	}
-
-	public static function getDCorvetteBonus($i)
-	{
-		return self::$DCorvetteBonus[$i];
-	}
-
-	public static function getDFrigateBonus($i)
-	{
-		return self::$DFrigateBonus[$i];
-	}
-
-	public static function getDDestroyerBonus($i)
-	{
-		return self::$DDestroyerBonus[$i];
-	}
-
-	// SETTER
-
-	public function setPlayerBonus($ABonus, $DBonus)
-	{
-		if (isset($ABonus['global'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$AFighterBonus[$i] += $ABonus['global'][$i];
-				self::$ACorvetteBonus[$i] += $ABonus['global'][$i];
-				self::$AFrigateBonus[$i] += $ABonus['global'][$i];
-				self::$ADestroyerBonus[$i] += $ABonus['global'][$i];
-			}
-		}
-
-		if (isset($ABonus['fighter'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$AFighterBonus[$i] += $ABonus['fighter'][$i];
-			}
-		}
-
-		if (isset($ABonus['corvette'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$ACorvetteBonus[$i] += $ABonus['corvette'][$i];
-			}
-		}
-
-		if (isset($ABonus['frigate'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$AFrigateBonus[$i] += $ABonus['frigate'][$i];
-			}
-		}
-
-		if (isset($ABonus['destroyer'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$ADestroyerBonus[$i] += $ABonus['destroyer'][$i];
-			}
-		}
-
-		if (isset($DBonus['global'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DFighterBonus[$i] += $DBonus['global'][$i];
-				self::$DCorvetteBonus[$i] += $DBonus['global'][$i];
-				self::$DFrigateBonus[$i] += $DBonus['global'][$i];
-				self::$DDestroyerBonus[$i] += $DBonus['global'][$i];
-			}
-		}
-
-		if (isset($DBonus['fighter'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DFighterBonus[$i] += $DBonus['fighter'][$i];
-			}
-		}
-
-		if (isset($DBonus['corvette'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DCorvetteBonus[$i] += $DBonus['corvette'][$i];
-			}
-		}
-
-		if (isset($DBonus['frigate'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DFrigateBonus[$i] += $DBonus['frigate'][$i];
-			}
-		}
-
-		if (isset($DBonus['destroyer'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DDestroyerBonus[$i] += $DBonus['destroyer'][$i];
-			}
-		}
-	}
-
-	public function setEnvironmentBonus($ABonus, $DBonus)
-	{
-		if (isset($ABonus['global'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$AFighterBonus[$i] += $ABonus['global'][$i];
-				self::$ACorvetteBonus[$i] += $ABonus['global'][$i];
-				self::$AFrigateBonus[$i] += $ABonus['global'][$i];
-				self::$ADestroyerBonus[$i] += $ABonus['global'][$i];
-			}
-		}
-
-		if (isset($ABonus['fighter'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$AFighterBonus[$i] += $ABonus['fighter'][$i];
-			}
-		}
-
-		if (isset($ABonus['corvette'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$ACorvetteBonus[$i] += $ABonus['corvette'][$i];
-			}
-		}
-
-		if (isset($ABonus['frigate'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$AFrigateBonus[$i] += $ABonus['frigate'][$i];
-			}
-		}
-
-		if (isset($ABonus['destroyer'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$ADestroyerBonus[$i] += $ABonus['destroyer'][$i];
-			}
-		}
-
-		if (isset($DBonus['global'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DFighterBonus[$i] += $DBonus['global'][$i];
-				self::$DCorvetteBonus[$i] += $DBonus['global'][$i];
-				self::$DFrigateBonus[$i] += $DBonus['global'][$i];
-				self::$DDestroyerBonus[$i] += $DBonus['global'][$i];
-			}
-		}
-
-		if (isset($DBonus['fighter'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DFighterBonus[$i] += $DBonus['fighter'][$i];
-			}
-		}
-
-		if (isset($DBonus['corvette'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DCorvetteBonus[$i] += $DBonus['corvette'][$i];
-			}
-		}
-
-		if (isset($DBonus['frigate'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DFrigateBonus[$i] += $DBonus['frigate'][$i];
-			}
-		}
-
-		if (isset($DBonus['destroyer'])) {
-			for ($i = 0; $i < 4; ++$i) {
-				self::$DDestroyerBonus[$i] += $DBonus['destroyer'][$i];
-			}
-		}
 	}
 
 	/**
@@ -244,118 +50,233 @@ class FightManager
 	 *			D gagne
 	 *		SINON COMBAT.
 	 */
-	public function startFight($commanderA, $playerA, $commanderD, $playerD = null)
+	public function startFight(Commander $attacker, Commander $defender): void
 	{
-		$commanderA->setIsAttacker(true);
-		$commanderD->setIsAttacker(false);
+		$this->commanderArmyHandler->setArmy($attacker);
+		$attacker->isAttacker = true;
+		$this->commanderArmyHandler->setArmy($defender);
+		$defender->isAttacker = false;
 
-		$commanderA->setPevInBegin();
-		$commanderD->setPevInBegin();
+		LiveReport::$rPlayerAttacker = $attacker->player;
+		LiveReport::$rPlayerDefender = $defender->player;
 
-		LiveReport::$rPlayerAttacker = $commanderA->rPlayer;
-		LiveReport::$rPlayerDefender = $commanderD->rPlayer;
+		LiveReport::$attackerCommander = $attacker;
+		LiveReport::$defenderCommander = $defender;
+		LiveReport::$levelA = $attacker->level;
+		LiveReport::$levelD = $defender->level;
+		LiveReport::$experienceA = $attacker->experience;
+		LiveReport::$experienceD = $defender->experience;
+		LiveReport::$palmaresA = $attacker->palmares;
+		LiveReport::$palmaresD = $defender->palmares;
+		LiveReport::$attackerImportance = $this->fightImportanceHandler->calculateImportance($attacker, $defender);
+		LiveReport::$defenderImportance = $this->fightImportanceHandler->calculateImportance($defender, $attacker);
 
-		LiveReport::$avatarA = $commanderA->avatar;
-		LiveReport::$avatarD = $commanderD->avatar;
-		LiveReport::$nameA = $commanderA->name;
-		LiveReport::$nameD = $commanderD->name;
-		LiveReport::$levelA = $commanderA->level;
-		LiveReport::$levelD = $commanderD->level;
-		LiveReport::$experienceA = $commanderA->experience;
-		LiveReport::$experienceD = $commanderD->experience;
-		LiveReport::$palmaresA = $commanderA->palmares;
-		LiveReport::$palmaresD = $commanderD->palmares;
+		$this->logger->debug('Battle importance is {attacker_importance} for commander {attacker_name}, {defender_importance} for commander {defender_name}', [
+			'attacker_importance' => LiveReport::$attackerImportance,
+			'attacker_name' => $attacker->name,
+			'defender_importance' => LiveReport::$defenderImportance,
+			'defender_name' => $defender->name,
+		]);
 
-		$shipsA = $commanderA->getNbrShipByType();
-		$shipsD = $commanderD->getNbrShipByType();
-		$weight = 0;
+		$this->storeSquadronsInBegin($attacker);
+		$this->storeSquadronsInBegin($defender);
 
-		for ($i = 0; $i < count($shipsA); ++$i) {
-			$weight += DataAnalysis::resourceToStdUnit(ShipResource::getInfo($i, 'resourcePrice') * $shipsA[$i]);
-			$weight += DataAnalysis::resourceToStdUnit(ShipResource::getInfo($i, 'resourcePrice') * $shipsD[$i]);
-		}
+		$this->processRounds($attacker, $defender);
 
-		LiveReport::$importance = $weight;
+		$this->logger->debug('Attacker has {attackerShipsCount} remaining ships, defender has {defenderShipsCount}', [
+			'attackerShipsCount' => array_sum($attacker->getNbrShipByType()),
+			'defenderShipsCount' => array_sum($defender->getNbrShipByType()),
+		]);
 
-		$i = 0;
-		foreach ($commanderA->armyInBegin as $s) {
-			LiveReport::$squadrons[] = [0, $i, 0, 0, $commanderA->id, $s[0], $s[1], $s[2], $s[3], $s[4], $s[5], $s[6], $s[7], $s[8], $s[9], $s[10], $s[11]];
-			++$i;
-		}
-		$i = 0;
-		foreach ($commanderD->armyInBegin as $s) {
-			LiveReport::$squadrons[] = [0, $i, 0, 0, $commanderD->id, $s[0], $s[1], $s[2], $s[3], $s[4], $s[5], $s[6], $s[7], $s[8], $s[9], $s[10], $s[11]];
-			++$i;
-		}
+		$this->updateCommander($attacker);
+		$this->updateCommander($defender);
+	}
 
-		while (1) {
-			if (1000 == LiveReport::$round) {
+	private function processRounds(Commander $attacker, Commander $defender): void
+	{
+		$attackerBonus = null !== $attacker->player ? $this->playerBonusManager->getBonusByPlayer($attacker->player) : null;
+		$defenderBonus = null !== $defender->player ? $this->playerBonusManager->getBonusByPlayer($defender->player) : null;
+
+		while (1000 > LiveReport::$round) {
+			$this->logger->debug('Beginning round {roundNumber}', [
+				'roundNumber' => LiveReport::$round,
+			]);
+
+			if (true === $this->processPartyRound($defender, $attacker, $defenderBonus, $attackerBonus)) {
 				break;
 			}
-			$nbrShipsD = 0;
-			$nbrShipsA = 0;
 
-			foreach ($commanderA->getArmy() as $squadronA) {
-				$nbrShipsA += $squadronA->getNbrShips();
-			}
-			if (0 == $nbrShipsA) {
-				$this->commanderManager->resultOfFight($commanderD, true, $commanderA);
-				$this->commanderManager->resultOfFight($commanderA, false, $commanderD);
-				$commanderA->setStatement(3);
-				$commanderD->setDDeath(Utils::now());
-				LiveReport::$rPlayerWinner = $commanderD->rPlayer;
-
-				if ($commanderD->rPlayer != $this->gaiaId) {
-					$playerD->increaseVictory(1);
-					$playerA->increaseDefeat(1);
-				} else {
-					$playerA->increaseDefeat(1);
-				}
-
+			if (true === $this->processPartyRound($attacker, $defender, $attackerBonus, $defenderBonus)) {
 				break;
-			} else {
-				$commanderA = $this->commanderManager->engage($commanderD, $commanderA);
-				++LiveReport::$halfround;
-			}
-
-			foreach ($commanderD->getArmy() as $squadronD) {
-				$nbrShipsD += $squadronD->getNbrShips();
-			}
-			if (0 == $nbrShipsD) {
-				$this->commanderManager->resultOfFight($commanderA, true, $commanderD);
-				$this->commanderManager->resultOfFight($commanderD, false, $commanderA);
-				$commanderD->setStatement(3);
-				$commanderD->setDDeath(Utils::now());
-				LiveReport::$rPlayerWinner = $commanderA->rPlayer;
-
-				if ($commanderD->rPlayer != $this->gaiaId) {
-					$playerA->increaseVictory(1);
-					$playerD->increaseDefeat(1);
-				} else {
-					$playerA->increaseVictory(1);
-				}
-
-				break;
-			} else {
-				$commanderD = $this->commanderManager->engage($commanderA, $commanderD);
-				++LiveReport::$halfround;
 			}
 
 			++LiveReport::$round;
 			++self::$currentLine;
 		}
 
-		$i = 0;
-		foreach ($commanderA->armyAtEnd as $s) {
-			LiveReport::$squadrons[] = [0, $i, 0, -1, $commanderA->id, $s[0], $s[1], $s[2], $s[3], $s[4], $s[5], $s[6], $s[7], $s[8], $s[9], $s[10], $s[11]];
-			++$i;
+		$this->storeRemainingSquadronsAtEnd($attacker);
+		$this->storeRemainingSquadronsAtEnd($defender);
+	}
+
+	private function processPartyRound(
+		Commander $commander,
+		Commander $opponent,
+		PlayerBonus|null $playerBonus = null,
+		PlayerBonus|null $opponentBonus = null,
+	): bool {
+		$this->engage($commander, $opponent, $playerBonus, $opponentBonus);
+		++LiveReport::$halfRound;
+
+		$commanderShipsCount = 0;
+
+		foreach ($commander->army as $squadron) {
+			$commanderShipsCount += array_sum($squadron->getShips());
 		}
-		$i = 0;
-		foreach ($commanderD->armyAtEnd as $s) {
-			LiveReport::$squadrons[] = [0, $i, 0, -1, $commanderD->id, $s[0], $s[1], $s[2], $s[3], $s[4], $s[5], $s[6], $s[7], $s[8], $s[9], $s[10], $s[11]];
-			++$i;
+		if (0 == $commanderShipsCount) {
+			$this->processDeath($commander, $opponent);
+
+			return true;
 		}
 
-		return [$commanderA, $commanderD];
+		return false;
+	}
+
+	private function processDeath(Commander $commander, Commander $opponent): void
+	{
+		$this->logger->debug('Commander {name} died', [
+			'name' => $commander->name,
+		]);
+
+		$this->resultOfFight($opponent, true, $commander);
+		$this->resultOfFight($commander, false, $opponent);
+		$commander->statement = Commander::DEAD;
+		$commander->diedAt = new \DateTimeImmutable();
+		LiveReport::$rPlayerWinner = $opponent->player;
+
+		if (null !== $commander->player) {
+			++$commander->player->defeat;
+		}
+
+		if (null !== $opponent->player) {
+			++$opponent->player->victory;
+		}
+	}
+
+	private function storeSquadronsInBegin(Commander $commander): void
+	{
+		foreach ($commander->army as $key => $squadron) {
+			LiveReport::$squadrons[] = [
+				0,
+				$key,
+				0,
+				0,
+				$commander,
+				$squadron->getShipQuantity(0),
+				$squadron->getShipQuantity(1),
+				$squadron->getShipQuantity(2),
+				$squadron->getShipQuantity(3),
+				$squadron->getShipQuantity(4),
+				$squadron->getShipQuantity(5),
+				$squadron->getShipQuantity(6),
+				$squadron->getShipQuantity(7),
+				$squadron->getShipQuantity(8),
+				$squadron->getShipQuantity(9),
+				$squadron->getShipQuantity(10),
+				$squadron->getShipQuantity(11),
+			];
+		}
+	}
+
+	private function storeRemainingSquadronsAtEnd(Commander $commander): void
+	{
+		foreach ($commander->army as $key => $squadron) {
+			LiveReport::$squadrons[] = [
+				0,
+				$key,
+				0,
+				-1,
+				$commander,
+				$squadron->getShipQuantity(0),
+				$squadron->getShipQuantity(1),
+				$squadron->getShipQuantity(2),
+				$squadron->getShipQuantity(3),
+				$squadron->getShipQuantity(4),
+				$squadron->getShipQuantity(5),
+				$squadron->getShipQuantity(6),
+				$squadron->getShipQuantity(7),
+				$squadron->getShipQuantity(8),
+				$squadron->getShipQuantity(9),
+				$squadron->getShipQuantity(10),
+				$squadron->getShipQuantity(11),
+			];
+		}
+	}
+
+	private function resultOfFight(Commander $commander, bool $isWinner, Commander $enemyCommander): void
+	{
+		if ($commander->isVirtual) {
+			return;
+		}
+
+		/* TODO VERIFY * */
+		$this->commanderExperienceHandler->setEarnedExperience($commander, $enemyCommander);
+		$commander->earnedExperience = round($commander->earnedExperience);
+		$commander->winner = $isWinner;
+		$this->commanderArmyHandler->setArmyAtEnd($commander);
+
+		$this->commanderExperienceHandler->upExperience($commander, $commander->earnedExperience);
+
+		if ($isWinner) {
+			LiveReport::$expCom = $commander->earnedExperience;
+
+			++$commander->palmares;
+		}
+	}
+
+	// ENGAGE UN COMBAT ENTRE CHAQUE SQUADRON CONTRE UN COMMANDANT
+	private function engage(
+		Commander $commander,
+		Commander $enemyCommander,
+		PlayerBonus|null $playerBonus = null,
+		PlayerBonus|null $enemyBonus = null,
+	): void {
+		foreach ($commander->army as $squadron) {
+			$squadron->targetId = null;
+		}
+		foreach ($commander->army as $squadron) {
+			// TODO move to spec (same as SquadronManager::chooseEnemy)
+			// The current line is just the rule to ensure that all the lines don't fire at the starting round
+			if (0 < $squadron->getPev() && $squadron->lineCoord * 3 <= FightManager::getCurrentLine()) {
+				$this->squadronFightHandler->engage($squadron, $enemyCommander, $playerBonus, $enemyBonus);
+			} elseif (0 === $squadron->getPev()) {
+				$this->logger->debug('Squadron {squadronPosition} of commander {commanderName} has no more ships to fight', [
+					'squadronPosition' => $squadron->position,
+					'commanderName' => $squadron->commander->name,
+				]);
+			} else {
+				$this->logger->debug('Squadron {squadronPosition} from {squadronLine} line of commander {commanderName} does not fight in this round. Current line is {currentLine}', [
+					'squadronPosition' => $squadron->position,
+					'squadronLine' => $squadron->lineCoord,
+					'commanderName' => $squadron->commander->name,
+					'currentLine' => FightManager::getCurrentLine(),
+				]);
+			}
+		}
+	}
+
+	private function updateCommander(Commander $commander): void
+	{
+		if ($commander->isVirtual) {
+			return;
+		}
+
+		foreach ($commander->squadrons as $squadron) {
+			if (0 === $squadron->getShipsCount()) {
+				$this->squadronRepository->remove($squadron);
+
+				continue;
+			}
+			$this->squadronRepository->save($squadron);
+		}
 	}
 }

@@ -3,123 +3,49 @@
 namespace App\Modules\Gaia\Repository;
 
 use App\Classes\Entity\AbstractRepository;
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Gaia\Model\Sector;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
-class SectorRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<Sector>
+ */
+class SectorRepository extends DoctrineRepository implements SectorRepositoryInterface
 {
-	/**
-	 * @param int $id
-	 *
-	 * @return Sector
-	 */
-	public function get($id)
+	public function __construct(ManagerRegistry $registry)
 	{
-		if (($s = $this->unitOfWork->getObject(Sector::class, $id)) !== null) {
-			return $s;
-		}
-
-		$statement = $this->connection->prepare('SELECT * FROM sector WHERE id = :id');
-		$statement->execute(['id' => $id]);
-
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		$sector = $this->format($row);
-		$this->unitOfWork->addObject($sector);
-
-		return $sector;
+		parent::__construct($registry, Sector::class);
 	}
 
-	public function getFactionSectors($factionId)
+	public function get(Uuid $id): Sector|null
 	{
-		$statement = $this->connection->prepare('SELECT * FROM sector WHERE rColor = :faction_id');
-		$statement->execute(['faction_id' => $factionId]);
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($s = $this->unitOfWork->getObject(Sector::class, $row['id'])) !== null) {
-				$data[] = $s;
-				continue;
-			}
-			$sector = $this->format($row);
-			$this->unitOfWork->addObject($sector);
-			$data[] = $sector;
-		}
-
-		return $data;
+		return $this->find($id);
 	}
 
-	public function getAll()
+	public function getOneByIdentifier(int $identifier): Sector|null
 	{
-		$statement = $this->connection->query('SELECT * FROM sector');
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($s = $this->unitOfWork->getObject(Sector::class, $row['id'])) !== null) {
-				$data[] = $s;
-				continue;
-			}
-			$sector = $this->format($row);
-			$this->unitOfWork->addObject($sector);
-			$data[] = $sector;
-		}
-
-		return $data;
+		return $this->findOneBy(['identifier' => $identifier]);
 	}
 
-	public function insert($sector)
+	public function getFactionSectors(Color $faction): array
 	{
-	}
-
-	public function update($sector)
-	{
-		$statement = $this->connection->prepare(
-			'UPDATE sector SET
-				rSurrender = :surrender_id,
-				tax = :tax,
-				name = :name
-			WHERE id = :id'
-		);
-		$statement->execute([
-			'surrender_id' => $sector->rSurrender,
-			'tax' => $sector->tax,
-			'name' => $sector->name,
-			'id' => $sector->id,
+		return $this->findBy([
+			'faction' => $faction,
 		]);
 	}
 
-	public function changeOwnership(Sector $sector)
+	public function countFactionSectors(Color $faction): int
 	{
-		$statement = $this->connection->prepare(
-			'UPDATE sector SET rColor = :faction_id WHERE id = :id'
-		);
-		$statement->execute([
-			'id' => $sector->getId(),
-			'faction_id' => $sector->getRColor(),
+		return $this->count([
+			'faction' => $faction,
 		]);
 	}
 
-	public function remove($sector)
+	public function getAll(): array
 	{
-	}
-
-	public function format($data)
-	{
-		$sector = new Sector();
-		$sector->setId($data['id']);
-		$sector->setRColor($data['rColor']);
-		$sector->rSurrender = $data['rSurrender'];
-		$sector->setXPosition($data['xPosition']);
-		$sector->setYPosition($data['yPosition']);
-		$sector->setXBarycentric($data['xBarycentric']);
-		$sector->setYBarycentric($data['yBarycentric']);
-		$sector->setTax($data['tax']);
-		$sector->setName($data['name']);
-		$sector->setPoints($data['points']);
-		$sector->setPopulation($data['population']);
-		$sector->setLifePlanet($data['lifePlanet']);
-		$sector->setPrime((bool) $data['prime']);
-
-		return $sector;
+		return $this->findAll();
 	}
 }

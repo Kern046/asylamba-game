@@ -2,130 +2,162 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Offer;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
+use App\Classes\Library\DateTimeConverter;
 use App\Classes\Library\Format;
 use App\Classes\Library\Game;
-use App\Classes\Library\Utils;
+use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
 use App\Modules\Athena\Manager\CommercialShippingManager;
-use App\Modules\Athena\Manager\CommercialTaxManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Manager\TransactionManager;
+use App\Modules\Athena\Message\Trade\CommercialShippingMessage;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Gaia\Manager\PlaceManager;
-use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
+use App\Modules\Travel\Domain\Model\TravelType;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Uid\Uuid;
 
 class Accept extends AbstractController
 {
 	public function __invoke(
-		Request $request,
-		OrbitalBase $currentBase,
-		Player $currentPlayer,
-		ColorManager $colorManager,
-		TransactionManager $transactionManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		CommercialShippingManager $commercialShippingManager,
-		CommercialTaxManager $commercialTaxManager,
-		NotificationManager $notificationManager,
-		PlaceManager $placeManager,
-		PlayerManager $playerManager,
-		EntityManager $entityManager,
-		int $id,
+		Request                               $request,
+		OrbitalBase                           $currentBase,
+		Player                                $currentPlayer,
+		ColorManager                          $colorManager,
+		ColorRepositoryInterface              $colorRepository,
+		GetTravelDuration                     $getTravelDuration,
+		TransactionManager                    $transactionManager,
+		OrbitalBaseManager                    $orbitalBaseManager,
+		CommercialShippingManager             $commercialShippingManager,
+		CommercialShippingRepositoryInterface $commercialShippingRepository,
+		MessageBusInterface                   $messageBus,
+		NotificationRepositoryInterface       $notificationRepository,
+		PlaceManager                          $placeManager,
+		PlayerRepositoryInterface             $playerRepository,
+		PlayerManager                         $playerManager,
+		TransactionRepositoryInterface        $transactionRepository,
+		EntityManagerInterface $entityManager,
+		Uuid $id,
 	): Response {
-		$transaction = $transactionManager->get($id);
-
-		$commercialShipping = $commercialShippingManager->getByTransactionId($id);
-
-		if (null !== $transaction and null !== $commercialShipping and Transaction::ST_PROPOSED == $transaction->statement) {
-			$transactionData = $transactionManager->getTransactionData($transaction, $currentBase);
-
-			if ($currentPlayer->getCredit() >= $transactionData['total_price']) {
-				// chargement des joueurs
-				$buyer = $currentPlayer;
-				$seller = $playerManager->get($transaction->rPlayer);
-
-				if (null !== $seller) {
-					// The buyer pays the transaction price + the taxes
-					$playerManager->decreaseCredit($buyer, $transactionData['total_price']);
-					$playerManager->increaseCredit($seller, $transaction->price);
-
-					// transfert des crédits aux alliances
-					if (0 != $transaction->sectorColor) {
-						$exportFaction = $colorManager->get($transaction->sectorColor);
-						$exportFaction->increaseCredit($transactionData['export_tax']);
-					}
-
-					if (0 != $currentBase->sectorColor) {
-						$importFaction = $colorManager->get($currentBase->sectorColor);
-						$importFaction->increaseCredit($transactionData['import_tax']);
-					}
-
-					// gain d'expérience
-					$experience = $transaction->getExperienceEarned();
-					$playerManager->increaseExperience($seller, $experience);
-
-					// load places to compute travel time
-					$startPlace = $placeManager->get($commercialShipping->rBase);
-					$destinationPlace = $placeManager->get($currentBase->getRPlace());
-					$timeToTravel = Game::getTimeToTravelCommercial($startPlace, $destinationPlace);
-					$departure = Utils::now();
-					$arrival = Utils::addSecondsToDate($departure, $timeToTravel);
-
-					// update commercialShipping
-					$commercialShipping->rBaseDestination = $currentBase->getId();
-					$commercialShipping->dDeparture = $departure;
-					$commercialShipping->dArrival = $arrival;
-					$commercialShipping->statement = CommercialShipping::ST_GOING;
-
-					// update transaction statement
-					$transaction->statement = Transaction::ST_COMPLETED;
-					$transaction->dValidation = Utils::now();
-
-					// update exchange rate
-					$transaction->currentRate = Game::calculateCurrentRate($transactionManager->getExchangeRate($transaction->type), $transaction->type, $transaction->quantity, $transaction->identifier, $transaction->price);
-
-					// notif pour le proposeur
-					$n = new Notification();
-					$n->setRPlayer($transaction->rPlayer);
-					$n->setTitle('Transaction validée');
-					$n->addBeg()->addLnk('embassy/player-'.$currentPlayer->getId(), $currentPlayer->getName());
-					$n->addTxt(' a accepté une de vos propositions dans le marché. Des vaisseaux commerciaux viennent de partir de votre ');
-					$n->addLnk('map/place-'.$commercialShipping->rBase, 'base')->addTxt(' et se dirigent vers ');
-					$n->addLnk('map/place-'.$currentBase->getRPlace(), $currentBase->getName())->addTxt(' pour acheminer la marchandise. ');
-					$n->addSep()->addTxt('Vous gagnez '.Format::numberFormat($transaction->price).' crédits et '.Format::numberFormat($experience).' points d\'expérience.');
-					$n->addSep()->addLnk('action/a-switchbase/base-'.$commercialShipping->rBase.'/page-sell', 'En savoir plus ?');
-					$n->addEnd();
-					$notificationManager->add($n);
-
-					//						if (true === $this->getContainer()->getParameter('data_analysis')) {
-					//							$qr = $database->prepare('INSERT INTO
-					//						DA_CommercialRelation(`from`, `to`, type, weight, dAction)
-					//						VALUES(?, ?, ?, ?, ?)'
-					//							);
-					//							$qr->execute([$transaction->rPlayer, $session->get('playerId'), $transaction->type, DataAnalysis::creditToStdUnit($transaction->price), Utils::now()]);
-					//						}
-					$entityManager->flush();
-
-					$this->addFlash('market_success', 'Proposition acceptée. Les vaisseaux commerciaux sont en route vers votre base orbitale.');
-
-					return $this->redirect($request->headers->get('referer'));
-				} else {
-					throw new ErrorException('erreur dans les propositions sur le marché, joueur inexistant');
-				}
-			} else {
-				throw new ErrorException('vous n\'avez pas assez de crédits pour accepter cette proposition');
-			}
-		} else {
-			throw new ErrorException('erreur dans les propositions sur le marché');
+		if (0 === $currentBase->levelCommercialPlateforme) {
+			throw $this->createAccessDeniedException('YOu cannot accept offers without a trading platform');
 		}
+
+		$transaction = $transactionRepository->get($id)
+			?? throw $this->createNotFoundException('Transaction not found');
+		$commercialShipping = $commercialShippingRepository->getByTransaction($transaction)
+			?? throw $this->createNotFoundException('Commercial shipping not found');
+
+		if (!$transaction->isProposed()) {
+			throw new ConflictHttpException('Transaction is not proposed');
+		}
+		$transactionData = $transactionManager->getTransactionData($transaction, $currentBase);
+
+		if (!$currentPlayer->canAfford($transactionData['total_price'])) {
+			throw new ConflictHttpException('vous n\'avez pas assez de crédits pour accepter cette proposition');
+		}
+		// chargement des joueurs
+		$buyer = $currentPlayer;
+		$seller = $transaction->player;
+
+		// The buyer pays the transaction price + the taxes
+		$playerManager->decreaseCredit($buyer, $transactionData['total_price']);
+		$playerManager->increaseCredit($seller, $transaction->price);
+
+		// transfert des crédits aux alliances
+		if (null !== ($exportFaction = $transaction->base->place->system->sector->faction)) {
+			$exportFaction->increaseCredit($transactionData['export_tax']);
+		}
+
+		if (null !== ($importFaction = $currentBase->place->system->sector->faction)) {
+			$importFaction->increaseCredit($transactionData['import_tax']);
+		}
+
+		// gain d'expérience
+		$experience = $transaction->getExperienceEarned();
+		$playerManager->increaseExperience($seller, $experience);
+
+		// update commercialShipping
+		$commercialShipping->destinationBase = $currentBase;
+		$commercialShipping->departureDate = new \DateTimeImmutable();
+		$commercialShipping->arrivalDate = $getTravelDuration(
+			$commercialShipping->originBase->place,
+			$currentBase->place,
+			$commercialShipping->departureDate,
+			TravelType::CommercialShipping,
+			$commercialShipping->player,
+		);
+		$commercialShipping->statement = CommercialShipping::ST_GOING;
+
+		// update transaction statement
+		$transaction->statement = Transaction::ST_COMPLETED;
+		$transaction->validatedAt = new \DateTimeImmutable();
+
+		// update exchange rate
+		$transaction->currentRate = Game::calculateCurrentRate(
+			$transactionRepository->getExchangeRate($transaction->type),
+			$transaction->type,
+			$transaction->quantity,
+			$transaction->identifier,
+			$transaction->price,
+		);
+
+		// notif pour le proposeur
+		$n = NotificationBuilder::new()
+			->setTitle('Transaction validée')
+			->setContent(NotificationBuilder::paragraph(
+				NotificationBuilder::link($this->generateUrl('embassy', ['player' => $currentPlayer->id]), $currentPlayer->name),
+				' a accepté une de vos propositions dans le marché. Des vaisseaux commerciaux viennent de partir de votre ',
+				NotificationBuilder::link($this->generateUrl('map', ['place' => $commercialShipping->originBase->place->id]), 'base'),
+				' et se dirigent vers ',
+				NotificationBuilder::link($this->generateUrl('map', ['place' => $currentBase->place->id]), $currentBase->name),
+				' pour acheminer la marchandise. ',
+				NotificationBuilder::divider(),
+				sprintf(
+					'Vous gagnez %s crédits et %s points d\'expérience.',
+					Format::numberFormat($transaction->price),
+					Format::numberFormat($experience),
+				),
+				NotificationBuilder::divider(),
+				NotificationBuilder::link(
+					$this->generateUrl('switchbase', ['baseId' => $commercialShipping->originBase->id, 'page' => 'sell']),
+					'En savoir plus ?',
+				),
+			))
+			->for($transaction->player);
+		$notificationRepository->save($n);
+
+		//						if (true === $this->getContainer()->getParameter('data_analysis')) {
+		//							$qr = $database->prepare('INSERT INTO
+		//						DA_CommercialRelation(`from`, `to`, type, weight, dAction)
+		//						VALUES(?, ?, ?, ?, ?)'
+		//							);
+		//							$qr->execute([$transaction->rPlayer, $session->get('playerId'), $transaction->type, DataAnalysis::creditToStdUnit($transaction->price), Utils::now()]);
+		//						}
+		$entityManager->flush();
+
+		$messageBus->dispatch(
+			new CommercialShippingMessage($commercialShipping->id),
+			[DateTimeConverter::to_delay_stamp($commercialShipping->getArrivalDate())],
+		);
+
+		$this->addFlash('market_success', 'Proposition acceptée. Les vaisseaux commerciaux sont en route vers votre base orbitale.');
+
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

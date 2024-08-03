@@ -1,62 +1,53 @@
 <?php
 
-/**
- * Live Report.
- *
- * @author Noé Zufferey
- * @copyright Asylamba - le jeu
- *
- * @update 01.06.14
- */
-
 namespace App\Modules\Ares\Model;
+
+use App\Modules\Gaia\Model\Place;
+use App\Modules\Zeus\Model\Player;
 
 class LiveReport
 {
-	public static $squadrons = [];
-	public static $halfround = 0;
-	public static $littleRound = 0;
+	public static array $squadrons = [];
+	public static int $halfRound = 0;
+	public static int $littleRound = 0;
 
-	public static $rPlayerAttacker = 0;
-	public static $rPlayerDefender = 0;
-	public static $rPlayerWinner = 0;
-	public static $avatarA = '';
-	public static $avatarD = '';
-	public static $nameA = '';
-	public static $nameD = '';
-	public static $levelA = 0;
-	public static $levelD = 0;
-	public static $experienceA = 0;
-	public static $experienceD = 0;
-	public static $palmaresA = 0;
-	public static $palmaresD = 0;
-	public static $resources = 0;
-	public static $expCom = 0;
-	public static $expPlayerA = 0;
-	public static $expPlayerD = 0;
-	public static $rPlace = 0;
-	public static $type = 0;
-	public static $isLegal = 0;
-	public static $round = 0;
-	public static $importance = 0;
-	public static $statementAttacker = 0;
-	public static $statementDefender = 0;
-	public static $dFight = '';
-	public static $placeName = '';
+	public static Player|null $rPlayerAttacker;
+	public static Player|null $rPlayerDefender = null;
+	public static Player|null $rPlayerWinner = null;
+	public static Commander|null $attackerCommander;
+	public static Commander|null $defenderCommander = null;
+	public static Place|null $rPlace;
+	public static int $levelA = 0;
+	public static int $levelD = 0;
+	public static int $experienceA = 0;
+	public static int $experienceD = 0;
+	public static int $palmaresA = 0;
+	public static int $palmaresD = 0;
+	public static int $resources = 0;
+	public static int $expCom = 0;
+	public static int $expPlayerA = 0;
+	public static int $expPlayerD = 0;
+	public static int $type = 0;
+	public static bool $isLegal;
+	public static int $round = 0;
+	public static int $attackerImportance = 0;
+	public static int $defenderImportance = 0;
+	public static int $statementAttacker = 0;
+	public static int $statementDefender = 0;
+	public static \DateTimeImmutable|null $dFight = null;
 
-	public static function clear()
+	public static function clear(): void
 	{
 		self::$squadrons = [];
-		self::$halfround = 0;
+		self::$halfRound = 0;
 		self::$littleRound = 0;
 
-		self::$rPlayerAttacker = 0;
-		self::$rPlayerDefender = 0;
-		self::$rPlayerWinner = 0;
-		self::$avatarA = '';
-		self::$avatarD = '';
-		self::$nameA = '';
-		self::$nameD = '';
+		self::$rPlayerAttacker = null;
+		self::$rPlayerDefender = null;
+		self::$rPlayerWinner = null;
+		self::$attackerCommander = null;
+		self::$defenderCommander = null;
+		self::$rPlace = null;
 		self::$levelA = 0;
 		self::$levelD = 0;
 		self::$experienceA = 0;
@@ -67,14 +58,13 @@ class LiveReport
 		self::$expCom = 0;
 		self::$expPlayerA = 0;
 		self::$expPlayerD = 0;
-		self::$rPlace = 0;
 		self::$type = 0;
 		self::$isLegal = 0;
 		self::$round = 0;
-		self::$importance = 0;
+		self::$attackerImportance = 0;
+		self::$defenderImportance = 0;
 		self::$statementAttacker = 0;
 		self::$statementDefender = 0;
-		self::$dFight = '';
-		self::$placeName = '';
+		self::$dFight = null;
 	}
 }

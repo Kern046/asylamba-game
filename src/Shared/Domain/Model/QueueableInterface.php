@@ -2,9 +2,11 @@
 
 namespace App\Shared\Domain\Model;
 
-interface QueueableInterface
+interface QueueableInterface extends DurationInterface
 {
-	public function getEndDate(): string;
+	public function getStartDate(): \DateTimeImmutable;
+
+	public function getEndDate(): \DateTimeImmutable;
 
 	public function getResourceIdentifier(): int;
 }

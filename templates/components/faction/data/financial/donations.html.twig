@@ -5,14 +5,14 @@
 	<div class="fix-body">
 		<div class="body">
 			{% for transaction in members_donations %}
-				<div class="player color{{ transaction.senderColor }}">
-					<a href="{{ path('embassy', {'player': transaction.rSender}) }}">
-						<img src="{{ asset('build/media/avatar/small/' ~ transaction.senderAvatar ~ '.png') }}" class="picto" alt="{{ transaction.senderName }}">
+				<div class="player color{{ transaction.sender.faction.identifier }}">
+					<a href="{{ path('embassy', {'player': transaction.sender.id}) }}">
+						<img src="{{ asset('build/media/avatar/small/' ~ transaction.sender.avatar ~ '.png') }}" class="picto" alt="{{ transaction.sender.name }}">
 					</a>
 
-					{% set statuses = get_faction_info(transaction.senderColor, 'status') %}
-					<span class="title">{{ statuses[transaction.senderStatus - 1] }}</span>
-					<strong class="name">{{ transaction.senderName }}</strong>
+					{% set statuses = get_faction_info(transaction.sender.faction.identifier, 'status') %}
+					<span class="title">{{ statuses[transaction.sender.status - 1] }}</span>
+					<strong class="name">{{ transaction.sender.name }}</strong>
 					<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
 				</div>
 			{% endfor %}

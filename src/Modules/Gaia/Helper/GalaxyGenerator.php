@@ -2,143 +2,56 @@
 
 namespace App\Modules\Gaia\Helper;
 
-use App\Classes\Database\DatabaseAdmin;
-use App\Classes\Library\Format;
 use App\Classes\Library\Utils;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Galaxy\GalaxyConfiguration;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\PointLocation;
+use App\Modules\Gaia\Model\Sector;
+use App\Modules\Gaia\Model\System;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Uid\Uuid;
 
 class GalaxyGenerator
 {
 	public const MAX_QUERY = 5000;
 
 	// stats
-	public $nbSystem = 0;
-	public $listSystem = [];
+	public int $nbSystem = 0;
+	/** @var list<System> */
+	public array $listSystem = [];
 
-	public $nbPlace = 0;
-	public $popTotal = 0;
-	public $listPlace = [];
+	public int $nbPlace = 0;
+	public int $popTotal = 0;
+	public array $listPlace = [];
 
-	public $nbSector = 0;
-	public $systemDeleted = 0;
-	public $listSector = [];
-
-	protected string $output = '';
+	public int $nbSector = 0;
+	public int $systemDeleted = 0;
 
 	public function __construct(
-		protected DatabaseAdmin $databaseAdmin,
-		protected GalaxyConfiguration $galaxyConfiguration,
+		private readonly GalaxyConfiguration $galaxyConfiguration,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly SectorRepositoryInterface $sectorRepository,
+		private readonly SystemRepositoryInterface $systemRepository,
+		private readonly PlaceRepositoryInterface $placeRepository,
+		private readonly ColorRepositoryInterface $colorRepository,
 	) {
 	}
 
-	public function generate()
+	public function generate(): void
 	{
-		$this->clear();
-
 		// generation
-		$this->generateSector();
-		$this->generateSystem();
+		$this->generateSectors();
+		$this->generateSystems();
 		$this->associateSystemToSector();
-		$this->generatePlace();
-
-		$this->save();
-
-		$this->getStatisticsSector();
+		$this->generatePlaces();
 	}
 
-	public function clear()
+	private function generateSystems(): void
 	{
-		$this->databaseAdmin->query('SET FOREIGN_KEY_CHECKS = 0;');
-
-		$this->databaseAdmin->query('TRUNCATE place');
-		$this->log('table `place` vidées');
-
-		$this->databaseAdmin->query('TRUNCATE system');
-		$this->log('table `system` vidées');
-
-		$this->databaseAdmin->query('TRUNCATE sector');
-		$this->log('table `sector` vidées');
-
-		$this->databaseAdmin->query('SET FOREIGN_KEY_CHECKS = 1;');
-		$this->log('_ _ _ _');
-	}
-
-	public function save()
-	{
-		// clean up database
-		$this->clear();
-
-		$this->log('sauvegarde des secteurs');
-		for ($i = 0; $i < ceil(count($this->listSector) / self::MAX_QUERY); ++$i) {
-			$qr = 'INSERT INTO sector(id, rColor, xPosition, yPosition, xBarycentric, yBarycentric, tax, population, lifePlanet, name, prime, points) VALUES ';
-
-			for ($j = $i * self::MAX_QUERY; $j < (($i + 1) * self::MAX_QUERY) - 1; ++$j) {
-				if (isset($this->listSector[$j])) {
-					$qr .= '(\''.implode('\', \'', $this->listSector[$j]).'\'), ';
-				}
-			}
-
-			$qr = substr($qr, 0, -2);
-			$this->databaseAdmin->query($qr);
-		}
-		$this->log(ceil(count($this->listSector) / self::MAX_QUERY).' requêtes `INSERT`');
-
-		$this->log('sauvegarde des systèmes');
-		for ($i = 0; $i < ceil(count($this->listSystem) / self::MAX_QUERY); ++$i) {
-			$qr = 'INSERT INTO system(id, rSector, rColor, xPosition, yPosition, typeOfSystem) VALUES ';
-
-			for ($j = $i * self::MAX_QUERY; $j < (($i + 1) * self::MAX_QUERY) - 1; ++$j) {
-				if (isset($this->listSystem[$j])) {
-					$qr .= '('.implode(', ', $this->listSystem[$j]).'), ';
-				}
-			}
-
-			$qr = substr($qr, 0, -2);
-			$this->databaseAdmin->query($qr);
-		}
-		$this->log(ceil(count($this->listSystem) / self::MAX_QUERY).' requêtes `INSERT`');
-
-		$this->log('sauvegarde des places');
-		for ($i = 0; $i < ceil(count($this->listPlace) / self::MAX_QUERY); ++$i) {
-			$qr = 'INSERT INTO place(id, rSystem, typeOfPlace, position, population, coefResources, coefHistory, resources, danger, maxDanger, uPlace) VALUES ';
-
-			for ($j = $i * self::MAX_QUERY; $j < (($i + 1) * self::MAX_QUERY) - 1; ++$j) {
-				if (isset($this->listPlace[$j])) {
-					$qr .= '('.implode(', ', $this->listPlace[$j]).', "'.Utils::addSecondsToDate(Utils::now(), -259200).'"), ';
-				}
-			}
-
-			$qr = substr($qr, 0, -2);
-			$this->databaseAdmin->query($qr);
-		}
-		$this->log(ceil(count($this->listPlace) / self::MAX_QUERY).' requêtes `INSERT`');
-
-		$this->log('_ _ _ _');
-	}
-
-	public function getLog()
-	{
-		$rt = '<pre style="font-family: consolas;">';
-		$rt .= $this->output;
-		$rt .= '</pre>';
-
-		return $rt;
-	}
-
-	private function log($text)
-	{
-		$this->output .= ">_ $text <br />";
-	}
-
-	private function generateSystem()
-	{
-		$this->log('génération des systèmes');
-
-		// id
-		$k = 1;
-
 		// GENERATION DES LINES
 		for ($w = 0; $w < count($this->galaxyConfiguration->galaxy['lineSystemPosition']); ++$w) {
 			// line point
@@ -170,9 +83,19 @@ class GalaxyGenerator
 							$type = $this->getSystem();
 
 							++$this->nbSystem;
-							$this->listSystem[] = [$k, 0, 0, $xC, $yC, $type];
 
-							++$k;
+							$system = new System(
+								id: Uuid::v4(),
+								sector: null,
+								faction: null,
+								xPosition: $xC,
+								yPosition: $yC,
+								typeOfSystem: $type,
+							);
+
+							$this->systemRepository->save($system);
+
+							$this->listSystem[] = $system;
 						}
 					}
 				}
@@ -209,9 +132,18 @@ class GalaxyGenerator
 							$type = $this->getSystem();
 
 							++$this->nbSystem;
-							$this->listSystem[] = [$k, 0, 0, $xPosition, $yPosition, $type];
+							$system = new System(
+								id: Uuid::v4(),
+								sector: null,
+								faction: null,
+								xPosition: $xPosition,
+								yPosition: $yPosition,
+								typeOfSystem: $type,
+							);
 
-							++$k;
+							$this->systemRepository->save($system);
+
+							$this->listSystem[] = $system;
 						}
 					}
 				}
@@ -236,36 +168,40 @@ class GalaxyGenerator
 						$type = $this->getSystem();
 
 						++$this->nbSystem;
-						$this->listSystem[] = [$k, 0, 0, $xPosition, $yPosition, $type];
 
-						++$k;
+						$system = new System(
+							id: Uuid::v4(),
+							sector: null,
+							faction: null,
+							xPosition: $xPosition,
+							yPosition: $yPosition,
+							typeOfSystem: $type,
+						);
+
+						$this->systemRepository->save($system);
+
+						$this->listSystem[] = $system;
 					}
 				}
 			}
 		}
-
-		$this->log($this->nbSystem.' systèmes générés');
-		$this->log('_ _ _ _');
 	}
 
-	public function generatePlace()
+	public function generatePlaces(): void
 	{
-		$this->log('génération des places');
-		$k = 1;
-
 		foreach ($this->listSystem as $system) {
 			$sectorDanger = 0;
 			foreach ($this->galaxyConfiguration->sectors as $sector) {
-				if ($system[1] == $sector['id']) {
+				if ($system->sector->identifier == $sector['id']) {
 					$sectorDanger = $sector['danger'];
 					break;
 				}
 			}
 
-			$place = $this->getNbOfPlace($system[5]);
+			$placesCount = $this->getNbOfPlace($system->typeOfSystem);
 
-			for ($i = 0; $i < $place; ++$i) {
-				$type = $this->getTypeOfPlace($system[5]);
+			for ($i = 0; $i < $placesCount; ++$i) {
+				$type = $this->getTypeOfPlace($system->typeOfSystem);
 
 				if (1 == $type) {
 					$pointsRep = rand(1, 10);
@@ -321,157 +257,136 @@ class GalaxyGenerator
 				}
 
 				// TODO DANGER
-				switch ($sectorDanger) {
-					case GalaxyConfiguration::DNG_CASUAL:
-						$danger = rand(0, Place::DNG_CASUAL);
-					break;
-					case GalaxyConfiguration::DNG_EASY:
-						$danger = rand(3, Place::DNG_EASY);
-					break;
-					case GalaxyConfiguration::DNG_MEDIUM:
-						$danger = rand(6, Place::DNG_MEDIUM);
-					break;
-					case GalaxyConfiguration::DNG_HARD:
-						$danger = rand(9, Place::DNG_HARD);
-					break;
-					case GalaxyConfiguration::DNG_VERY_HARD:
-						$danger = rand(12, Place::DNG_VERY_HARD);
-					break;
-					default: $danger = 0; break;
-				}
+				$danger = match ($sectorDanger) {
+					GalaxyConfiguration::DNG_CASUAL => rand(0, Place::DNG_CASUAL),
+					GalaxyConfiguration::DNG_EASY => rand(3, Place::DNG_EASY),
+					GalaxyConfiguration::DNG_MEDIUM => rand(6, Place::DNG_MEDIUM),
+					GalaxyConfiguration::DNG_HARD => rand(9, Place::DNG_HARD),
+					GalaxyConfiguration::DNG_VERY_HARD => rand(12, Place::DNG_VERY_HARD),
+					default => 0,
+				};
 
 				++$this->nbPlace;
-				$this->popTotal += $population;
-				$this->listPlace[] = [$k, $system[0], $type, ($i + 1), $population, $resources, $history, $stRES, $danger, $danger];
-				++$k;
+				$this->popTotal += intval(round($population));
+				$place = new Place(
+					id: Uuid::v4(),
+					player: null,
+					base: null,
+					system: $system,
+					typeOfPlace: $type,
+					position: $i + 1,
+					population: $population,
+					coefResources: $resources,
+					coefHistory: $history,
+					resources: $stRES,
+					danger: $danger,
+					maxDanger: $danger,
+					updatedAt: new \DateTimeImmutable('-259200 seconds'),
+				);
+
+				$this->placeRepository->save($place);
+
+				if (0 === $this->nbPlace % 20) {
+					$this->entityManager->clear();
+				}
 			}
 		}
-
-		$this->log($this->nbPlace.' places générées');
-		$this->log(Format::numberFormat($this->popTotal * 1000000).' de population');
-		$this->log('_ _ _ _');
 	}
 
-	public function generateSector()
+	public function generateSectors(): void
 	{
-		$this->log('génération des secteurs');
-		$k = 1;
-
 		foreach ($this->galaxyConfiguration->sectors as $sector) {
 			++$this->nbSector;
 
-			$prime = (0 != $sector['beginColor'])
+			$prime = (null !== $sector['beginColor'])
 				? 1
 				: 0;
 
-			$this->listSector[] = [
-				$k,
-				$sector['beginColor'],
-				$sector['display'][0],
-				$sector['display'][1],
-				$sector['barycentre'][0],
-				$sector['barycentre'][1],
-				5,
-				0,
-				0,
-				$sector['name'],
-				$prime,
-				$sector['points'],
-			];
+			$faction = (null !== $sector['beginColor'])
+				? $this->colorRepository->getOneByIdentifier($sector['beginColor'])
+					?? throw new \LogicException('Faction not found') : null;
 
-			++$k;
+			$sector = new Sector(
+				id: Uuid::v4(),
+				identifier: $sector['id'],
+				faction: $faction,
+				xPosition: $sector['display'][0],
+				yPosition: $sector['display'][1],
+				xBarycentric: $sector['barycentre'][0],
+				yBarycentric: $sector['barycentre'][1],
+				tax: 5,
+				name: $sector['name'],
+				points: $sector['points'],
+				population: 0,
+				lifePlanet: 0,
+				prime: $prime,
+			);
+
+			$this->sectorRepository->save($sector);
 		}
-
-		$this->log($this->nbSector.' secteurs générés');
-		$this->log('_ _ _ _');
 	}
 
-	public function associateSystemToSector()
+	public function associateSystemToSector(): void
 	{
 		$pl = new PointLocation();
 		$systemToDelete = [];
 		$k = 0;
 
-		foreach ($this->listSystem as $v) {
-			foreach ($this->galaxyConfiguration->sectors as $w) {
-				$place = $pl->pointInPolygon($v[3].', '.$v[4], $w['vertices']);
+		foreach ($this->listSystem as $system) {
+			foreach ($this->galaxyConfiguration->sectors as $sector) {
+				$place = $pl->pointInPolygon(
+					sprintf('%d, %d', $system->xPosition, $system->yPosition),
+					$sector['vertices'],
+				);
 
-				if (1 == $place or 2 == $place) {
-					$systemToDelete[] = $v[0];
+				if (1 === $place or 2 === $place) {
+					$systemToDelete[] = $system;
 					break;
-				} elseif (3 == $place) {
-					$this->listSystem[$k][1] = $w['id'];
+				} elseif (3 === $place) {
+					$system->sector = $this->sectorRepository->getOneByIdentifier($sector['id']);
+
 					break;
 				}
 			}
 			++$k;
 		}
+		// Updates the systems sectors
+		$this->entityManager->flush();
 
-		foreach ($this->listSystem as $v) {
-			if (0 == $v[1]) {
-				$systemToDelete[] = $v[0];
+		foreach ($this->listSystem as $system) {
+			if (null === $system->sector) {
+				$systemToDelete[] = $system->id;
 			}
 		}
 
 		// suppression des systemes sur des lignes ou des angles
 		for ($i = count($this->listSystem) - 1; $i >= 0; --$i) {
-			if (in_array($this->listSystem[$i][0], $systemToDelete)) {
+			if (in_array($this->listSystem[$i]->id, $systemToDelete)) {
+				$this->sectorRepository->remove($this->listSystem[$i]);
+
 				unset($this->listSystem[$i]);
 			}
 		}
+		// Remove the systems without sector
+		$this->entityManager->flush();
 
 		$this->systemDeleted = count($systemToDelete);
 	}
 
-	protected function getStatisticsSector()
-	{
-		foreach ($this->listSector as $sector) {
-			$id = $sector[0];
-
-			$qr = $this->databaseAdmin->prepare('SELECT
-					COUNT(pl.id) AS planet,
-					SUM(pl.population) AS population
-				FROM sector AS se
-				LEFT JOIN system AS sy
-					ON se.id = sy.rSector
-				LEFT JOIN place AS pl
-					ON sy.id = pl.rSystem
-				WHERE pl.typeOfPlace = 1
-				AND se.id = ?');
-			$qr->execute([$id]);
-			$aw = $qr->fetch();
-
-			$nbrPlanet = $aw['planet'];
-			$population = ceil($aw['population']);
-
-			$qr->closeCursor();
-
-			$qr = $this->databaseAdmin->prepare('UPDATE sector SET lifePlanet = ?, population = ? WHERE id = ?');
-			$qr->execute([$nbrPlanet, $population, $id]);
-
-			$qr->closeCursor();
-		}
-	}
-
-	protected function isPointInMap($d2o)
+	protected function isPointInMap($d2o): bool
 	{
 		$mask = rand(1, $this->galaxyConfiguration->galaxy['mask']);
 
-		if ($mask < 3) {
-			$realPosition = $this->galaxyConfiguration->galaxy['diag'] - $d2o;
-			$step = $this->galaxyConfiguration->galaxy['diag'] / count($this->galaxyConfiguration->galaxy['systemPosition']);
-			$currentStep = floor($realPosition / $step);
-
-			$random = rand(0, 100);
-
-			if ($this->galaxyConfiguration->galaxy['systemPosition'][$currentStep] > $random) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
+		if ($mask >= 3) {
 			return false;
 		}
+		$realPosition = $this->galaxyConfiguration->galaxy['diag'] - $d2o;
+		$step = $this->galaxyConfiguration->galaxy['diag'] / count($this->galaxyConfiguration->galaxy['systemPosition']);
+		$currentStep = floor($realPosition / $step);
+
+		$random = rand(0, 100);
+
+		return $this->galaxyConfiguration->galaxy['systemPosition'][$currentStep] > $random;
 	}
 
 	protected function l2p($x1, $x2, $y1, $y2)
@@ -503,7 +418,7 @@ class GalaxyGenerator
 		return sqrt($this->l2p($p1, $p2, $tx, $ty));
 	}
 
-	protected function getProportion($params, $value)
+	protected function getProportion(array $params, int $value): int
 	{
 		$cursor = 0;
 		$type = 0;
@@ -528,23 +443,26 @@ class GalaxyGenerator
 				return $type;
 			}
 		}
+		throw new \LogicException('Must return a value');
 	}
 
-	protected function getSystem()
+	protected function getSystem(): int
 	{
 		return $this->getProportion($this->galaxyConfiguration->galaxy['systemProportion'], rand(1, 100));
 	}
 
-	protected function getNbOfPlace($systemType)
+	protected function getNbOfPlace(int $systemType): int
 	{
-		return rand(
-			$this->galaxyConfiguration->systems[$systemType - 1]['nbrPlaces'][0],
-			$this->galaxyConfiguration->systems[$systemType - 1]['nbrPlaces'][1]
-		);
+		$nbrPlaces = $this->galaxyConfiguration->systems[$systemType - 1]['nbrPlaces'];
+
+		return rand($nbrPlaces[0], $nbrPlaces[1]);
 	}
 
-	protected function getTypeOfPlace($systemType)
+	protected function getTypeOfPlace(int $systemType): int
 	{
-		return $this->getProportion($this->galaxyConfiguration->systems[$systemType - 1]['placesPropotion'], rand(1, 100));
+		return $this->getProportion(
+			$this->galaxyConfiguration->systems[$systemType - 1]['placesPropotion'],
+			rand(1, 100),
+		);
 	}
 }

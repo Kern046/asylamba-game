@@ -2,20 +2,26 @@
 
 namespace App\Modules\Hermes\Infrastructure\Controller\Notification;
 
-use App\Modules\Hermes\Manager\NotificationManager;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class DeleteAll extends AbstractController
 {
+	#[Route(
+		path: '/notifications/delete-all',
+		name: 'delete_all_notifications',
+		methods: Request::METHOD_GET,
+	)]
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		NotificationManager $notificationManager,
+		NotificationRepositoryInterface $notificationRepository,
 	): Response {
-		$nbr = $notificationManager->deleteByRPlayer($currentPlayer);
+		$nbr = $notificationRepository->removePlayerNotifications($currentPlayer);
 
 		if ($nbr > 1) {
 			$this->addFlash('success', $nbr.' notifications ont été supprimées.');

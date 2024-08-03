@@ -2,38 +2,71 @@
 
 namespace App\Modules\Hermes\Infrastructure\Repository;
 
-use App\Classes\Entity\AbstractRepository;
 use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
+use App\Modules\Hermes\Model\Conversation;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
-class ConversationRepository extends AbstractRepository implements ConversationRepositoryInterface
+/**
+ * @extends DoctrineRepository<Conversation>
+ */
+class ConversationRepository extends DoctrineRepository implements ConversationRepositoryInterface
 {
-	public function countPlayerConversations(int $playerId): int
+	public function __construct(ManagerRegistry $registry)
 	{
-		$qr = $this->connection->prepare(
-			'SELECT COUNT(c.id) AS count
-			FROM `conversation` AS c
-			LEFT JOIN `conversationUser` AS u
-			ON u.rConversation = c.id
-			WHERE u.rPlayer = :player_id
-			AND u.dLastView < c.dLastMessage'
-		);
-		$qr->execute(['player_id' => $playerId]);
-
-		return $qr->fetch()['count'];
+		parent::__construct($registry, Conversation::class);
 	}
 
-	public function insert($entity)
+	public function getOneByPlayer(Player $player): Conversation
 	{
-		// TODO: Implement insert() method.
+		$qb = $this->createQueryBuilder('c');
+
+		$qb
+			->leftJoin('c.players', 'cu')
+			->where('cu.player = :player')
+			->setParameter('player', $player);
+
+		return $qb->getQuery()->getSingleResult();
 	}
 
-	public function update($entity)
+	public function getOne(Uuid $id): Conversation|null
 	{
-		// TODO: Implement update() method.
+		return $this->find($id);
 	}
 
-	public function remove($entity)
+	public function countPlayerUnreadConversations(Player $player): int
 	{
-		// TODO: Implement remove() method.
+		$qb = $this->createQueryBuilder('c');
+
+		$qb
+			->select('COUNT(c.id)')
+			->leftJoin('c.players', 'cu')
+			->where('cu.player = :player')
+			->andWhere($qb->expr()->orX(
+				$qb->expr()->isNull('cu.lastViewedAt'),
+				$qb->expr()->lt('cu.lastViewedAt', 'c.lastMessageAt'),
+			))
+			->setParameter('player', $player);
+
+		return $qb->getQuery()->getSingleScalarResult();
+	}
+
+	public function getPlayerConversations(Player $player, int $mode, int $page = 1): array
+	{
+		$qb = $this->createQueryBuilder('c');
+
+		$qb
+			->leftJoin('c.players', 'cu')
+			->where('cu.player = :player')
+			->andWhere('cu.conversationStatus = :mode')
+			->orderBy('c.lastMessageAt', 'DESC')
+			->setFirstResult(($page - 1) * Conversation::CONVERSATION_BY_PAGE)
+			->setMaxResults(Conversation::CONVERSATION_BY_PAGE)
+			->setParameter('player', $player)
+			->setParameter('mode', $mode);
+
+		return $qb->getQuery()->getResult();
 	}
 }

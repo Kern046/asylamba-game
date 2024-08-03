@@ -76,13 +76,15 @@ class Chronos
 	 * arg : $date
 	 *     : str => date au format sql (2012-08-01 18:30:00)
 	 */
-	public static function transform(string $sourceDate)
+	public static function transform(string|\DateTimeImmutable $sourceDate)
 	{
 		if (\is_numeric($sourceDate)) {
-			$date = new \DateTime();
+			$date = new \DateTimeImmutable();
 			$date->setTimestamp(intval($sourceDate));
+		} elseif ($sourceDate instanceof \DateTimeImmutable) {
+			$date = $sourceDate;
 		} else {
-			$date = new \DateTime($sourceDate);
+			$date = new \DateTimeImmutable($sourceDate);
 		}
 
 		$releve = self::getRel($date->format('Y-m-d H:i:s'));

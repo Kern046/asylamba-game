@@ -1,29 +1,24 @@
 <?php
 
-/**
- * Player.
- *
- * @author Gil Clavien
- * @copyright Expansion - le jeu
- *
- * @update 20.05.13
- */
-
 namespace App\Modules\Zeus\Model;
 
-class Player
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Shared\Domain\Model\SystemUpdatable;
+use App\Modules\Zeus\Resource\TutorialResource;
+
+class Player implements CreditHolderInterface, SystemUpdatable
 {
 	public int|null $id = 0;
 	public string|null $bind = null;
-	public int $rColor = 0;
-	public int|null $rGodfather = null;
-	public $name = '';
+	public Color|null $faction = null;
+	public Player|null $godFather = null;
+	public string $name = '';
 	public int $sex = 0;
-	public $description = '';
-	public $avatar = '';
+	public string $description = '';
+	public string $avatar = '';
 	public int $status = 1;
+	// @TODO rename to credits
 	public int $credit = 0;
-	public $uPlayer = '';
 	public int $experience = 0;
 	public int $factionPoint = 0;
 	public int $level = 0;
@@ -36,11 +31,12 @@ class Player
 	public int $partLifeSciences = 25;
 	public int $partSocialPoliticalSciences = 25;
 	public int $partInformaticEngineering = 25;
-	public $dInscription = '';
-	public $dLastConnection = '';
-	public $dLastActivity = '';
-	public $premium = 0; 	// 0 = publicité, 1 = pas de publicité
-	public $statement = 0;
+	public \DateTimeImmutable|null $uPlayer;
+	public \DateTimeImmutable|null $dInscription;
+	public \DateTimeImmutable|null $dLastConnection;
+	public \DateTimeImmutable|null $dLastActivity;
+	public bool $premium = false;
+	public int $statement = 0;
 
 	public bool $synchronized = false;
 
@@ -58,89 +54,20 @@ class Player
 	public const MINISTER = 5;
 	public const CHIEF = 6;
 
-	public function getId()
+	public function isInGame(): bool
 	{
-		return $this->id;
+		return in_array($this->statement, [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY, Player::BANNED]);
 	}
 
-	public function getBind()
+	public function isAlive(): bool
 	{
-		return $this->bind;
+		return static::DEAD !== $this->statement;
 	}
 
-	public function getRColor()
+	// @TODO transform into Voter
+	public function canAccess(): bool
 	{
-		return $this->rColor;
-	}
-
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	public function getAvatar()
-	{
-		return $this->avatar;
-	}
-
-	public function getStatus()
-	{
-		return $this->status;
-	}
-
-	public function getCredit()
-	{
-		return $this->credit;
-	}
-
-	public function getExperience()
-	{
-		return $this->experience;
-	}
-
-	public function getLevel()
-	{
-		return $this->level;
-	}
-
-	public function getVictory()
-	{
-		return $this->victory;
-	}
-
-	public function getDefeat()
-	{
-		return $this->defeat;
-	}
-
-	public function getStepTutorial()
-	{
-		return $this->stepTutorial;
-	}
-
-	public function getDInscription()
-	{
-		return $this->dInscription;
-	}
-
-	public function getDLastConnection()
-	{
-		return $this->dLastConnection;
-	}
-
-	public function getDLastActivity()
-	{
-		return $this->dLastActivity;
-	}
-
-	public function getPremium()
-	{
-		return $this->premium;
-	}
-
-	public function getStatement()
-	{
-		return $this->statement;
+		return in_array($this->statement, [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY]);
 	}
 
 	public function isSynchronized(): bool
@@ -150,22 +77,22 @@ class Player
 
 	public function isRuler(): bool
 	{
-		return self::CHIEF === $this->getStatus();
+		return self::CHIEF === $this->status;
 	}
 
 	public function isSenator(): bool
 	{
-		return self::PARLIAMENT === $this->getStatus();
+		return self::PARLIAMENT === $this->status;
 	}
 
 	public function isGovernmentMember(): bool
 	{
-		return in_array($this->getStatus(), [self::CHIEF, self::WARLORD, self::TREASURER, self::MINISTER]);
+		return in_array($this->status, [self::CHIEF, self::WARLORD, self::TREASURER, self::MINISTER]);
 	}
 
 	public function isTreasurer(): bool
 	{
-		return self::TREASURER === $this->getStatus();
+		return self::TREASURER === $this->status;
 	}
 
 	public function isParliamentMember(): bool
@@ -175,146 +102,32 @@ class Player
 
 	public function isPeopleMember(): bool
 	{
-		return self::STANDARD === $this->getStatus();
+		return self::STANDARD === $this->status;
 	}
 
-	public function setId($v)
+	public function setCredits(int $credit): static
 	{
-		$this->id = $v;
+		$this->credit = $credit;
 
 		return $this;
 	}
 
-	public function setBind($v)
+	public function getCredits(): int
 	{
-		$this->bind = $v;
-
-		return $this;
+		return $this->credit;
 	}
 
-	public function setRColor($v)
+	public function canAfford(int $amount): bool
 	{
-		$this->rColor = $v;
-
-		return $this;
+		return $this->credit >= $amount;
+	}
+	public function lastUpdatedBySystemAt(): \DateTimeImmutable
+	{
+		return $this->uPlayer;
 	}
 
-	public function setName($v)
+	public function hasCompletedTutorial(): bool
 	{
-		$this->name = $v;
-
-		return $this;
-	}
-
-	public function setAvatar($v)
-	{
-		$this->avatar = $v;
-
-		return $this;
-	}
-
-	public function setStatus($v)
-	{
-		$this->status = $v;
-
-		return $this;
-	}
-
-	public function setCredit($v)
-	{
-		$this->credit = $v;
-
-		return $this;
-	}
-
-	public function setExperience($v)
-	{
-		$this->experience = $v;
-
-		return $this;
-	}
-
-	public function setLevel($v)
-	{
-		$this->level = $v;
-
-		return $this;
-	}
-
-	public function setVictory($v)
-	{
-		$this->victory = $v;
-
-		return $this;
-	}
-
-	public function setDefeat($v)
-	{
-		$this->defeat = $v;
-
-		return $this;
-	}
-
-	public function setStepTutorial($v)
-	{
-		$this->stepTutorial = $v;
-
-		return $this;
-	}
-
-	public function setDInscription($v)
-	{
-		$this->dInscription = $v;
-
-		return $this;
-	}
-
-	public function setDLastConnection($v)
-	{
-		$this->dLastConnection = $v;
-
-		return $this;
-	}
-
-	public function setDLastActivity($v)
-	{
-		$this->dLastActivity = $v;
-
-		return $this;
-	}
-
-	public function setPremium($v)
-	{
-		$this->premium = $v;
-
-		return $this;
-	}
-
-	public function setStatement($v)
-	{
-		$this->statement = $v;
-
-		return $this;
-	}
-
-	public function setFactionPoints($factionPoints)
-	{
-		$this->factionPoints = $factionPoints;
-
-		return $this;
-	}
-
-	public function increaseVictory($i)
-	{
-		$this->victory += $i;
-
-		return $this;
-	}
-
-	public function increaseDefeat($i)
-	{
-		$this->defeat += $i;
-
-		return $this;
+		return !TutorialResource::stepExists($this->stepTutorial);
 	}
 }

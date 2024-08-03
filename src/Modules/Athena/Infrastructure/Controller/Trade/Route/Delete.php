@@ -2,11 +2,13 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Hermes\Application\Builder\NotificationBuilder;
+use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Manager\NotificationManager;
-use App\Modules\Hermes\Model\Notification;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,36 +22,39 @@ class Delete extends AbstractController
 		Player $currentPlayer,
 		OrbitalBase $currentBase,
 		CommercialRouteManager $commercialRouteManager,
+		CommercialRouteRepositoryInterface $commercialRouteRepository,
 		OrbitalBaseManager $orbitalBaseManager,
 		NotificationManager $notificationManager,
+		NotificationRepositoryInterface $notificationRepository,
 		int $id,
 	): Response {
-		if (null === ($cr = $commercialRouteManager->get($id))) {
-			throw $this->createNotFoundException('Commercial route not found');
-		}
+		$cr = $commercialRouteRepository->get($id)
+			?? throw $this->createNotFoundException('Commercial route not found');
+
 		if ($cr->isProposed()) {
 			throw new ConflictHttpException('Commercial route has not been established yet');
 		}
-		if ($cr->playerId1 !== $currentPlayer->getid() && $cr->playerId2 === $currentPlayer->getId()) {
+
+		if ($cr->originBase->player->id !== $currentPlayer->id && $cr->destinationBase->player->id === $currentPlayer->id) {
 			throw $this->createAccessDeniedException('This Commercial route does not belong to you');
 		}
-		if ($cr->getROrbitalBase() !== $currentBase->getId() && $cr->getROrbitalBaseLinked() !== $currentBase->getId()) {
+		$proposerBase = $cr->originBase;
+		$linkedBase = $cr->destinationBase;
+
+		if ($cr->originBase->id->equals($currentBase->id)) {
+			$notifReceiver = $linkedBase->player;
+			$myBaseName = $proposerBase->name;
+			$otherBaseName = $linkedBase->name;
+			$myBaseId = $proposerBase->place->id;
+			$otherBaseId = $linkedBase->place->id;
+		} elseif ($cr->destinationBase->id->equals($currentBase->id)) {
+			$notifReceiver = $proposerBase->player;
+			$myBaseName = $linkedBase->name;
+			$otherBaseName = $proposerBase->name;
+			$myBaseId = $linkedBase->place->id;
+			$otherBaseId = $proposerBase->place->id;
+		} else {
 			throw new ConflictHttpException('Commercial route does not belong to the current base');
-		}
-		$proposerBase = $orbitalBaseManager->get($cr->getROrbitalBase());
-		$linkedBase = $orbitalBaseManager->get($cr->getROrbitalBaseLinked());
-		if ($cr->getROrbitalBase() == $currentBase->getId()) {
-			$notifReceiver = $linkedBase->getRPlayer();
-			$myBaseName = $proposerBase->getName();
-			$otherBaseName = $linkedBase->getName();
-			$myBaseId = $proposerBase->getRPlace();
-			$otherBaseId = $linkedBase->getRPlace();
-		} else { // if ($cr->getROrbitalBaseLinked == $base) {
-			$notifReceiver = $proposerBase->getRPlayer();
-			$myBaseName = $linkedBase->getName();
-			$otherBaseName = $proposerBase->getName();
-			$myBaseId = $linkedBase->getRPlace();
-			$otherBaseId = $proposerBase->getRPlace();
 		}
 
 		// perte du prestige pour les joueurs Négoriens
@@ -60,19 +65,27 @@ class Delete extends AbstractController
 		//				$exp = round($cr->getIncome() * $routeExperienceCoeff);
 //
 		//				$playerManager->changeSession($S_PAM1);
-		// notification
-		$n = new Notification();
-		$n->setRPlayer($notifReceiver);
-		$n->setTitle('Route commerciale détruite');
-		$n->addBeg()->addLnk('embassy/player-'.$currentPlayer->getId(), $currentPlayer->getName())->addTxt(' annule les accords commerciaux entre ');
-		$n->addLnk('map/place-'.$myBaseId, $myBaseName)->addTxt(' et ');
-		$n->addLnk('map/place-'.$otherBaseId, $otherBaseName)->addTxt('.');
-		$n->addSep()->addTxt('La route commerciale qui liait les deux bases orbitales est détruite, elle ne vous rapporte donc plus rien !');
-		$n->addEnd();
-		$notificationManager->add($n);
+
+		$n = NotificationBuilder::new()
+			->setTitle('Route commerciale détruite')
+			->setContent(
+				NotificationBuilder::paragraph(
+					NotificationBuilder::link($this->generateUrl('embassy', ['player' => $currentPlayer->id]), $currentPlayer->name),
+					' annule les accords commerciaux entre ',
+					NotificationBuilder::link($this->generateUrl('map', ['place' => $myBaseId]), $myBaseName),
+					' et ',
+					NotificationBuilder::link($this->generateUrl('map', ['place' => $otherBaseId]), $otherBaseName),
+					'.',
+					NotificationBuilder::divider(),
+					'La route commerciale qui liait les deux bases orbitales est détruite, elle ne vous rapporte donc plus rien !',
+				)
+			)
+			->for($notifReceiver);
+
+		$notificationRepository->save($n);
 
 		// destruction de la route
-		$commercialRouteManager->remove($cr);
+		$commercialRouteRepository->remove($cr);
 
 		$this->addFlash('success', 'Route commerciale détruite');
 

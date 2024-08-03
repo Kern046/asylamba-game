@@ -2,38 +2,38 @@
 
 namespace App\Modules\Demeter\Handler;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Message\SenateUpdateMessage;
 use App\Modules\Demeter\Model\Color;
-use App\Modules\Zeus\Manager\PlayerManager;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class SenateUpdateHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+class SenateUpdateHandler
 {
 	public function __construct(
-		protected ColorManager $colorManager,
-		protected PlayerManager $playerManager,
-		protected MessageBusInterface $messageBus,
-		protected EntityManager $entityManager,
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly ColorManager $colorManager,
+		private readonly MessageBusInterface $messageBus,
 	) {
 	}
 
 	public function __invoke(SenateUpdateMessage $message): void
 	{
-		$faction = $this->colorManager->get($message->getFactionId());
-		$this->colorManager->updateStatus($faction, $this->playerManager->getFactionPlayersByRanking($faction->getId()));
+		$faction = $this->colorRepository->get($message->getFactionId());
+		$this->colorManager->updateStatus($faction);
 
-		if (Color::ROYALISTIC === $faction->regime && Color::MANDATE === $faction->electionStatement) {
-			$date = date('Y-m-d H:i:s', time() + $faction->mandateDuration);
-			$faction->dLastElection = $date;
+		if ($faction->isRoyalistic() && Color::MANDATE === $faction->isInMandate()) {
+			$date = new \DateTimeImmutable(sprintf('+%d seconds', $faction->mandateDuration));
+			$faction->lastElectionHeldAt = $date;
+
 			$this->messageBus->dispatch(
-				new SenateUpdateMessage($faction->getId()),
+				new SenateUpdateMessage($faction->id),
 				[DateTimeConverter::to_delay_stamp($date)],
 			);
-			$this->entityManager->flush($faction);
+			$this->colorRepository->save($faction);
 		}
 	}
 }

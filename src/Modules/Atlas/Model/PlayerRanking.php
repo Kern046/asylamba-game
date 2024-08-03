@@ -12,6 +12,7 @@
 namespace App\Modules\Atlas\Model;
 
 use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
 
 class PlayerRanking
 {
@@ -24,104 +25,37 @@ class PlayerRanking
 	// set number of player on ajax load page
 	public const PAGE = 10;
 
-	// attributes
-	public $id;
-	public $rRanking;
-	public $rPlayer;
+	public function __construct(
+		public Uuid $id,
+		public Ranking $ranking,
+		public Player $player,
+		public int $general,			// pts des bases + flottes + commandants
+		public int $generalPosition,
+		public int $generalVariation,
+		public int $experience, 		// experience
+		public int $experiencePosition,
+		public int $experienceVariation,
+		public int $butcher,			// destroyedPEV - lostPEV
+		public int $butcherDestroyedPEV,
+		public int $butcherLostPEV,
+		public int $butcherPosition,
+		public int $butcherVariation,
+		public int $trader,				// revenu total des routes
+		public int $traderPosition,
+		public int $traderVariation,
+		public int $fight, 				// victoires - défaites
+		public int $victories,
+		public int $defeat,
+		public int $fightPosition,
+		public int $fightVariation,
+		public int $armies,				// nb de pev total flotte + hangar
+		public int $armiesPosition,
+		public int $armiesVariation,
+		public int $resources, 			// production de ressources par relève (on peut ajouter les recyclages p-e)
+		public int $resourcesPosition,
+		public int $resourcesVariation,
+		public \DateTimeImmutable $createdAt,
+	) {
 
-	/** @var Player * */
-	protected $player;
-
-	public $general;			// pts des bases + flottes + commandants
-	public $generalPosition;
-	public $generalVariation;
-
-	public $experience; 		// experience
-	public $experiencePosition;
-	public $experienceVariation;
-
-	public $butcher;			// destroyedPEV - lostPEV
-	public $butcherDestroyedPEV;
-	public $butcherLostPEV;
-	public $butcherPosition;
-	public $butcherVariation;
-
-	public $trader;				// revenu total des routes
-	public $traderPosition;
-	public $traderVariation;
-
-	public $fight; 				// victoires - défaites
-	public $victories;
-	public $defeat;
-	public $fightPosition;
-	public $fightVariation;
-
-	public $armies;				// nb de pev total flotte + hangar
-	public $armiesPosition;
-	public $armiesVariation;
-
-	public $resources; 			// production de ressources par relève (on peut ajouter les recyclages p-e)
-	public $resourcesPosition;
-	public $resourcesVariation;
-
-	// additional attributes
-	public $color;
-	public $name;
-	public $avatar;
-	public $status;
-
-	/**
-	 * @param int $id
-	 *
-	 * @return PlayerRanking
-	 */
-	public function setId($id)
-	{
-		$this->id = $id;
-
-		return $this;
-	}
-
-	public function getId()
-	{
-		return $this->id;
-	}
-
-	/**
-	 * @return PlayerRanking
-	 */
-	public function setPlayer(Player $player)
-	{
-		$this->player = $player;
-
-		return $this;
-	}
-
-	/**
-	 * @return Player
-	 */
-	public function getPlayer()
-	{
-		return $this->player;
-	}
-
-	/**
-	 * @param int $general
-	 *
-	 * @return PlayerRanking
-	 */
-	public function setGeneral($general)
-	{
-		$this->general = $general;
-
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getGeneral()
-	{
-		return $this->general;
 	}
 }

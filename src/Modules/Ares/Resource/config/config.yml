@@ -27,19 +27,9 @@ services:
         exclude:
             - '../../Message'
             - '../../Model'
-            - '../../Repository'
             - '../../Resource'
-
-    App\Modules\Ares\Manager\CommanderManager:
-        arguments:
-            $commanderBaseLevel: "%ares.commander.base_level%"
-            $gaiaId: '%id_gaia%'
 
     App\Modules\Ares\Manager\ConquestManager:
         arguments:
             $colonizationCost: '%ares.coeff.colonization_cost%'
             $conquestCost: '%ares.coeff.conquest_cost%'
-
-    App\Modules\Ares\Manager\FightManager:
-        arguments:
-            $gaiaId: '%id_gaia%'

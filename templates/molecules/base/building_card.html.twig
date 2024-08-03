@@ -1,7 +1,7 @@
 <div class="build-item {% if not building_data.real_level %}disable{% endif %}">
 	<div class="name">
 		<img src="{{ asset('build/media/orbitalbase/' ~ get_building_info(building_number, 'imageLink') ~ '.png') }}" alt="" />
-		<strong>{{ get_building_info(building_number, 'frenchName') }}</strong>
+		<strong class="leading-none">{{ get_building_info(building_number, 'frenchName') }}</strong>
 		{% if building_data.level > 0 %}
 			<span class="level hb lt" title="niveau actuel">{{ building_data.level }}</span>
 		{% endif %}
@@ -12,50 +12,22 @@
 		   data-building-current-level="{{ building_data.level }}">+</a>
 	</div>
 	{% set price %}
-		{{ get_building_info(building_number, 'level', (building_data.next_level), 'resourcePrice')|number(-1) }}
+		{{ get_building_resource_cost(building_number, building_data.next_level)|number(-1) }}
 		<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressources" class="icon-color" />
 	{% endset %}
 	{% set time %}
-		{{ get_building_info(building_number, 'level', (building_data.next_level), 'time')|lite_seconds }}
+		{{ get_building_time_cost(building_number, building_data.next_level)|lite_seconds }}
 		<img src="{{ asset('build/media/resources/time.png') }}" alt="relèves" class="icon-color" />
 	{% endset %}
 
-	{% if building_data.building_requirements is not same as(true) %}
-		{% if 'niveau maximum atteint' == building_data.building_requirements %}
-			<span class="button disable">
-				<span class="text">
-					construction impossible<br/>
-					niveau maximum atteint
-				</span>
-			</span>
-		{% else %}
-			<span class="button disable hb lt" title="{{ building_data.building_requirements }}">
-				<span class="text">
-					construction impossible<br/>
+	{% if 0 < building_data.building_requirements|length %}
+		<span class="button disable hb lt" title="{{ building_data.building_requirements|map(v => v.message)|join(', ') }}">
+			<span class="text">
+				construction impossible<br/>
+
+				{% if building_data.next_level <= get_building_info(building_number, 'maxLevel', current_base.typeOfBase) %}
 					{{ price }} | {{ time }}
-				</span>
-			</span>
-		{% endif %}
-	{% elseif building_data.technology_requirements is not same as(true) %}
-		<span class="button disable hb lt" title="{{ building_data.technology_requirements }}">
-			<span class="text">
-				construction impossible<br/>
-				{{ price }} | {{ time }}
-			</span>
-		</span>
-	{% elseif true != building_data.queue_requirements %}
-		<span class="button disable hb lt" title="file de construction pleine, revenez dans un moment">
-			<span class="text">
-				construction impossible<br/>
-				{{ price }} | {{ time }}
-			</span>
-		</span>
-	{% elseif true != building_data.resources_requirements %}
-		{% set missing_resources = get_building_info(building_number, 'level', (building_data.next_level), 'resourcePrice') - current_base.resourcesStorage %}
-		<span class="button disable hb lt" title="pas assez de ressources, il manque {{ missing_resources|number }} ressource{{ missing_resources|plural }}">
-			<span class="text">
-				construction impossible<br/>
-				{{ price }} | {{ time }}
+				{% endif %}
 			</span>
 		</span>
 	{% else %}

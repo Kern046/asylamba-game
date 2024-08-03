@@ -1,52 +1,51 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
+use App\Modules\Demeter\Domain\Repository\Forum\FactionNewsRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Forum\FactionNewsManager;
 use App\Modules\Demeter\Resource\LawResources;
-use App\Modules\Gaia\Manager\SectorManager;
-use App\Modules\Zeus\Manager\CreditTransactionManager;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Zeus\Domain\Repository\CreditTransactionRepositoryInterface;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Infrastructure\Validator\IsGovernmentMember;
+use App\Modules\Zeus\Infrastructure\Validator\IsParliamentMember;
 use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 
 class ViewGovernment extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		FactionNewsManager $factionNewsManager,
-		CreditTransactionManager $creditTransactionManager,
+		CreditTransactionRepositoryInterface $creditTransactionRepository,
 		ColorManager $colorManager,
-		PlayerManager $playerManager,
-		SectorManager $sectorManager,
+		PlayerRepositoryInterface $playerRepository,
+		SectorRepositoryInterface $sectorRepository,
+		FactionNewsRepositoryInterface $factionNewsRepository,
 	): Response {
 		if (!$currentPlayer->isGovernmentMember()) {
 			throw $this->createAccessDeniedException();
 		}
-		$faction = $colorManager->get($currentPlayer->getRColor());
-
-		$creditTransactionManager->load(
-			['rSender' => $faction->id, 'type' => CreditTransaction::TYP_F_TO_P],
-			['dTransaction', 'DESC'],
-			[0, 20]
-		);
+		$faction = $currentPlayer->faction;
 
 		return $this->render('pages/demeter/faction/government.html.twig', [
 			'faction' => $faction,
 			'parsed_description' => $colorManager->getParsedDescription($faction),
-			'credit_transactions' => $creditTransactionManager->getAll(),
-			'senators' => $playerManager->getParliamentMembers($faction->id),
-			'faction_sectors' => $sectorManager->getFactionSectors($faction->id),
-			'faction_news' => $factionNewsManager->getFactionNews($faction->id),
-			'faction_news_to_edit' => $request->query->has('news') ? $factionNewsManager->get($request->query->get('news')) : null,
-			'faction_members' => $playerManager->getFactionPlayersByName($faction->id),
-			'members_count' => $playerManager->countByFactionAndStatements($faction->id, [Player::ACTIVE]),
-			'government_members' => $playerManager->getGovernmentMembers($faction->id),
+			'credit_transactions' => $creditTransactionRepository->getAllBySender($faction),
+			'senators' => $playerRepository->getBySpecification(new IsParliamentMember($faction)),
+			'faction_sectors' => $sectorRepository->getFactionSectors($faction),
+			'faction_news' => $factionNewsRepository->getFactionNews($faction),
+			'faction_news_to_edit' => $request->query->has('news') ? $factionNewsRepository->get(Uuid::fromString($request->query->get('news'))) : null,
+			'faction_members' => $playerRepository->getFactionPlayersByName($faction),
+			'members_count' => $playerRepository->countByFactionAndStatements($faction, [Player::ACTIVE]),
+			'government_members' => $playerRepository->getBySpecification(new IsGovernmentMember($faction)),
 			'total_laws_count' => LawResources::size(),
 		]);
 	}

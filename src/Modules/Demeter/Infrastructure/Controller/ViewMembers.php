@@ -3,9 +3,9 @@
 namespace App\Modules\Demeter\Infrastructure\Controller;
 
 use App\Classes\Library\Utils;
-use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,10 +15,10 @@ class ViewMembers extends AbstractController
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		ColorManager $colorManager,
-		PlayerManager $playerManager,
+		DurationHandler $durationHandler,
+		PlayerRepositoryInterface $playerRepository,
 	): Response {
-		$faction = $colorManager->get($currentPlayer->getRColor());
+		$faction = $currentPlayer->faction;
 
 		$onlinePlayersCount = 0;
 		$offlinePlayersCount = 0;
@@ -33,21 +33,21 @@ class ViewMembers extends AbstractController
 			'Sénat' => [],
 			'Peuple' => [],
 		];
-		$factionPlayers = $playerManager->getFactionPlayersByRanking($faction->getId());
+		$factionPlayers = $playerRepository->getFactionPlayersByRanking($faction);
 
 		foreach ($factionPlayers as $factionPlayer) {
-			if (Utils::interval(Utils::now(), $factionPlayer->getDLastActivity(), 's') < 600) {
+			if ($durationHandler->getDiff(new \DateTimeImmutable(), $factionPlayer->dLastActivity) < 600) {
 				++$onlinePlayersCount;
 			} else {
 				++$offlinePlayersCount;
 			}
 
 			++$playersCount;
-			$victoriesCount += $factionPlayer->getVictory();
-			$defeatsCount += $factionPlayer->getDefeat();
-			$pointsCount += $factionPlayer->getExperience();
+			$victoriesCount += $factionPlayer->victory;
+			$defeatsCount += $factionPlayer->defeat;
+			$pointsCount += $factionPlayer->experience;
 
-			$type = match ($factionPlayer->getStatus()) {
+			$type = match ($factionPlayer->status) {
 				Player::STANDARD => 'Peuple',
 				Player::PARLIAMENT => 'Sénat',
 				default => 'Gouvernement',
@@ -59,7 +59,7 @@ class ViewMembers extends AbstractController
 			'faction' => $faction,
 			'players_by_type' => $playersByType,
 			'players_count' => $playersCount,
-			'last_faction_players' => $playerManager->getLastFactionPlayers($faction->id),
+			'last_faction_players' => $playerRepository->getLastFactionPlayers($faction),
 			'online_players_count' => $onlinePlayersCount,
 			'offline_players_count' => $offlinePlayersCount,
 			'victories_average' => $victoriesCount,

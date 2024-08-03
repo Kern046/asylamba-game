@@ -1,18 +1,10 @@
 <?php
-/**
- * Technology Queue Manager.
- *
- * @author Jacky Casas
- * @copyright Expansion - le jeu
- *
- * @update 10.02.14
-*/
 
 namespace App\Modules\Promethee\Manager;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\DateTimeConverter;
 use App\Modules\Promethee\Domain\Event\NewTechnologyQueueEvent;
+use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Message\TechnologyQueueMessage;
 use App\Modules\Promethee\Model\TechnologyQueue;
 use App\Modules\Zeus\Model\Player;
@@ -20,78 +12,23 @@ use App\Shared\Application\SchedulerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class TechnologyQueueManager implements SchedulerInterface
+readonly class TechnologyQueueManager implements SchedulerInterface
 {
 	public function __construct(
-		protected EventDispatcherInterface $eventDispatcher,
-		protected EntityManager $entityManager,
-		protected MessageBusInterface $messageBus
+		private TechnologyQueueRepositoryInterface $technologyQueueRepository,
+		private MessageBusInterface $messageBus
 	) {
 	}
 
 	public function schedule(): void
 	{
-		$queues = $this->entityManager->getRepository(TechnologyQueue::class)->getAll();
+		$queues = $this->technologyQueueRepository->getAll();
 
-		/** @var TechnologyQueue $queue */
 		foreach ($queues as $queue) {
 			$this->messageBus->dispatch(
-				new TechnologyQueueMessage($queue->getId()),
-				[DateTimeConverter::to_delay_stamp($queue->getEndedAt())],
+				new TechnologyQueueMessage($queue->id),
+				[DateTimeConverter::to_delay_stamp($queue->getEndDate())],
 			);
 		}
-	}
-
-	/**
-	 * @param int $id
-	 *
-	 * @return TechnologyQueue
-	 */
-	public function get($id)
-	{
-		return $this->entityManager->getRepository(TechnologyQueue::class)->get($id);
-	}
-
-	/**
-	 * @param int $playerId
-	 * @param int $technology
-	 *
-	 * @return TechnologyQueue
-	 */
-	public function getPlayerTechnologyQueue($playerId, $technology)
-	{
-		return $this->entityManager->getRepository(TechnologyQueue::class)->getPlayerTechnologyQueue($playerId, $technology);
-	}
-
-	public function getPlaceQueues(int $placeId)
-	{
-		return $this->entityManager->getRepository(TechnologyQueue::class)->getPlaceQueues($placeId);
-	}
-
-	public function getPlayerQueues(int $playerId): array
-	{
-		return $this->entityManager->getRepository(TechnologyQueue::class)->getPlayerQueues($playerId);
-	}
-
-	public function add(TechnologyQueue $technologyQueue, Player $player): void
-	{
-		$this->entityManager->persist($technologyQueue);
-		$this->entityManager->flush($technologyQueue);
-
-		$this->messageBus->dispatch(
-			new TechnologyQueueMessage($technologyQueue->getId()),
-			[DateTimeConverter::to_delay_stamp($technologyQueue->getEndedAt())]
-		);
-
-		$this->eventDispatcher->dispatch(new NewTechnologyQueueEvent($technologyQueue, $player));
-	}
-
-	public function remove(TechnologyQueue $queue): void
-	{
-		// @TODO handle cancellations
-		// $this->realtimeActionScheduler->cancel($queue, $queue->getEndedAt());
-
-		$this->entityManager->remove($queue);
-		$this->entityManager->flush($queue);
 	}
 }

@@ -9,7 +9,7 @@
 			<ul class="list-type-1">
 				{% for sector in faction_sectors %}
 					<li>
-						<a href="#" class="picto color{{ sector.rColor }}">{{ sector.id }}</a>
+						<a href="#" class="picto color{{ sector.faction.identifier ?? 0 }}">{{ sector.identifier }}</a>
 						<span class="label">{{ sector.name }}</span>
 						<span class="value">{{ sector.tax }} %</span>
 					</li>

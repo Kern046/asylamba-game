@@ -2,24 +2,23 @@
 
 namespace App\Modules\Demeter\Handler\Law;
 
-use App\Classes\Entity\EntityManager;
-use App\Modules\Demeter\Manager\Law\LawManager;
+use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
 use App\Modules\Demeter\Message\Law\BonusEndMessage;
 use App\Modules\Demeter\Model\Law\Law;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class BonusEndHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+readonly class BonusEndHandler
 {
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected LawManager $lawManager,
+		private LawRepositoryInterface $lawRepository,
 	) {
 	}
 
 	public function __invoke(BonusEndMessage $message): void
 	{
-		$law = $this->lawManager->get($message->getLawId());
+		$law = $this->lawRepository->get($message->getLawId());
 		$law->statement = Law::OBSOLETE;
-		$this->entityManager->flush($law);
+		$this->lawRepository->save($law);
 	}
 }

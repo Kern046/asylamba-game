@@ -2,6 +2,7 @@
 
 namespace App\Modules\Promethee\Infrastructure\Controller;
 
+use App\Modules\Promethee\Domain\Repository\ResearchRepositoryInterface;
 use App\Modules\Promethee\Manager\ResearchManager;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
@@ -15,13 +16,12 @@ class ViewUniversity extends AbstractController
 		Player $currentPlayer,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		ResearchManager $researchManager,
+		ResearchRepositoryInterface $researchRepository,
 	): Response {
-		$researchManager->load(['rPlayer' => $currentPlayer->getId()]);
-
 		return $this->render('pages/promethee/university.html.twig', [
 			'university_investment_bonus' => $currentPlayerBonusRegistry
 				->getPlayerBonus()->bonuses->get(PlayerBonusId::UNI_INVEST),
-			'research' => $researchManager->get(0),
+			'research' => $researchRepository->getPlayerResearch($currentPlayer),
 		]);
 	}
 }

@@ -2,23 +2,45 @@
 
 namespace App\Modules\Zeus\Infrastructure\Controller;
 
-use App\Classes\Exception\ErrorException;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
+use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class SearchPlayer extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		PlayerManager $playerManager,
-	): Response {
-		$id = $request->request->getInt('playerid');
-		if (($player = $playerManager->get($id)) !== null) {
-			return $this->redirectToRoute('embassy', ['player' => $player->getId()]);
-		} else {
-			throw new ErrorException('Aucun joueur ne correspond à votre recherche.');
+	public function __construct(
+		private readonly PlayerRepositoryInterface $playerRepository,
+	) {
+	}
+
+	public function __invoke(Request $request): Response
+	{
+		$player = null;
+
+		if (null !== ($id = $request->request->getInt('playerid'))) {
+			$player = $this->searchById($id);
 		}
+
+		if (null !== ($name = $request->request->get('name'))) {
+			$player = $this->searchByName($name);
+		}
+
+		if (null === $player) {
+			throw $this->createNotFoundException('Aucun joueur ne correspond à votre recherche.');
+		}
+
+		return $this->redirectToRoute('embassy', ['player' => $player->id]);
+	}
+
+	private function searchById(int $id): Player|null
+	{
+		return $this->playerRepository->get($id);
+	}
+
+	private function searchByName(string $name): Player|null
+	{
+		return $this->playerRepository->getByName($name);
 	}
 }

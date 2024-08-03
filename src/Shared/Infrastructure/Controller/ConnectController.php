@@ -4,15 +4,13 @@ namespace App\Shared\Infrastructure\Controller;
 
 use App\Classes\Container\ArrayList;
 use App\Classes\Container\EventList;
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Security;
 use App\Classes\Library\Utils;
-use App\Classes\Worker\API;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Zeus\Domain\Event\PlayerConnectionEvent;
-use App\Modules\Zeus\Manager\PlayerBonusManager;
-use App\Modules\Zeus\Manager\PlayerManager;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,14 +19,15 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class ConnectController extends AbstractController
 {
+	public function __construct(private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository)
+	{
+	}
+
 	public function __invoke(
 		Request $request,
 		Security $security,
-		PlayerManager $playerManager,
-		PlayerBonusManager $playerBonusManager,
-		API $api,
-		OrbitalBaseManager $orbitalBaseManager,
-		EntityManager $entityManager,
+		PlayerRepositoryInterface $playerRepository,
+		EntityManagerInterface $entityManager,
 		EventDispatcherInterface $eventDispatcher,
 		string $bindKey
 	): Response {
@@ -44,24 +43,24 @@ class ConnectController extends AbstractController
 			return $this->redirectToRoute('homepage');
 		}
 
-		if (null === ($player = $playerManager->getByBindKey($bindKey))
-			|| !\in_array($player->getStatement(), [Player::ACTIVE, Player::INACTIVE, Player::HOLIDAY])) {
+		if (null === ($player = $playerRepository->getByBindKey($bindKey)) || !$player->canAccess()) {
 			return $this->redirectToRoute('homepage');
 		}
-		$player->setStatement(Player::ACTIVE);
+		$player->statement = Player::ACTIVE;
 
 		$session->set('token', Utils::generateString(5));
 
-		$this->createSession($session, $playerBonusManager, $orbitalBaseManager, $player);
+		$this->createSession($session, $player);
 
 		// mise de dLastConnection + dLastActivity
-		$player->setDLastConnection(Utils::now());
-		$player->setDLastActivity(Utils::now());
+		$player->dLastConnection = new \DateTimeImmutable();
+		$player->dLastActivity = new \DateTimeImmutable();
 
 		// confirmation au portail
-		if ('enabled' === $this->getParameter('apimode')) {
+		// TODO Replace when portal is implemented
+		/*if ('enabled' === $this->getParameter('apimode')) {
 			$api->confirmConnection($bindKey);
-		}
+		}*/
 		$entityManager->flush($player);
 
 		$eventDispatcher->dispatch(new PlayerConnectionEvent($player));
@@ -73,23 +72,21 @@ class ConnectController extends AbstractController
 		]);
 	}
 
-	private function createSession(
-		Session $session,
-		PlayerBonusManager $playerBonusManager,
-		OrbitalBaseManager $orbitalBaseManager,
-		Player $player,
-	): void {
+	private function createSession(Session $session, Player $player): void
+	{
 		// remplissage des données du joueur
-		$session->set('playerId', $player->getId());
+		$session->set('playerId', $player->id);
 
-		$playerBases = $orbitalBaseManager->getPlayerBases($player->getId());
+		$playerBases = $this->orbitalBaseRepository->getPlayerBases($player);
 		// remplissage des bonus
 
 		// création des paramètres utilisateur
 		$session->set('playerParams', new ArrayList());
 
+		$session->set('playerInfo', new ArrayList());
+
 		// remplissage des paramètres utilisateur
-		$session->get('playerParams')->add('base', $playerBases[0]->getId());
+		$session->get('playerParams')->add('base', $playerBases[0]->id);
 
 		// création des tableaux de données dans le contrôleur
 

@@ -21,7 +21,7 @@ class CommercialShippingExtension extends AbstractExtension
 	public function getFilters(): array
 	{
 		return [
-			new TwigFilter('commercial_shipping_picto', fn (CommercialShipping $commercialShipping) => Transaction::getResourcesIcon($commercialShipping->quantity)),
+			new TwigFilter('commercial_shipping_picto', fn (CommercialShipping $commercialShipping) => Transaction::getResourcesIcon($commercialShipping->transaction?->quantity ?? $commercialShipping->resourceTransported)),
 			new TwigFilter('transaction_picto', fn (Transaction $transaction) => Transaction::getResourcesIcon($transaction->quantity)),
 		];
 	}
@@ -30,7 +30,7 @@ class CommercialShippingExtension extends AbstractExtension
 	{
 		return [
 			new TwigFunction('get_min_price', fn (string $transactionType, int $quantity, int $identifier = null) => Game::getMinPriceRelativeToRate($transactionType, 1, $identifier)),
-			new TwigFunction('get_transaction_class', fn (CommercialShipping $commercialShipping) => match ($commercialShipping->typeOfTransaction) {
+			new TwigFunction('get_transaction_class', fn (CommercialShipping $commercialShipping) => match ($commercialShipping->transaction?->type) {
 				Transaction::TYP_RESOURCE => 'resources',
 				Transaction::TYP_COMMANDER => 'commander',
 				Transaction::TYP_SHIP => 'ship',
@@ -42,7 +42,7 @@ class CommercialShippingExtension extends AbstractExtension
 				Transaction::TYP_SHIP => 'ship',
 				default => null,
 			}),
-			new TwigFunction('get_cancellation_price', fn (CommercialShipping $commercialShipping) => Format::number(floor($commercialShipping->price * Transaction::PERCENTAGE_TO_CANCEL / 100))),
+			new TwigFunction('get_cancellation_price', fn (CommercialShipping $commercialShipping) => Format::number(floor($commercialShipping->transaction->price * Transaction::PERCENTAGE_TO_CANCEL / 100))),
 			new TwigFunction('get_transaction_data', fn (Transaction $transaction, OrbitalBase $orbitalBase, float $currentRate) => $this->transactionManager->getTransactionData($transaction, $orbitalBase, $currentRate)),
 		];
 	}

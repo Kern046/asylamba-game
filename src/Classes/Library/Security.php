@@ -2,14 +2,11 @@
 
 namespace App\Classes\Library;
 
-use App\Classes\Library\Session\SessionWrapper;
-
 class Security
 {
 	public const CYPHER_ALGO = 'AES-128-CBC';
 
 	public function __construct(
-		protected SessionWrapper $sessionWrapper,
 		protected string $serverKey,
 		protected string $iv,
 	) {

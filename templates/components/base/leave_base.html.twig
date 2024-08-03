@@ -1,5 +1,5 @@
 {% set are_commanders_in_mission = commanders|reduce((carry, c) => carry or c.isMoving, false) %}
-{% set cooldown = constant('App\\Modules\\Athena\\Model\\OrbitalBase::COOL_DOWN') %}
+{% set cooldown = get_cooldown_before_leaving_base() %}
 
 <div class="component generator">
 	<div class="head"></div>

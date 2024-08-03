@@ -2,183 +2,53 @@
 
 namespace App\Modules\Promethee\Repository;
 
-use App\Classes\Entity\AbstractRepository;
+use App\Modules\Gaia\Model\Place;
+use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Model\TechnologyQueue;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
-class TechnologyQueueRepository extends AbstractRepository
+/**
+ * @extends DoctrineRepository<TechnologyQueue>
+ */
+class TechnologyQueueRepository extends DoctrineRepository implements TechnologyQueueRepositoryInterface
 {
-	/**
-	 * @param int $id
-	 *
-	 * @return TechnologyQueue $technologyQueue
-	 */
-	public function get($id)
+	public function __construct(ManagerRegistry $registry)
 	{
-		if (($tq = $this->unitOfWork->getObject(TechnologyQueue::class, $id)) !== null) {
-			return $tq;
-		}
-		$statement = $this->connection->prepare('SELECT * FROM technologyQueue WHERE id = :id');
-		$statement->execute(['id' => $id]);
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		$technologyQueue = $this->format($row);
-		$this->unitOfWork->addObject($technologyQueue);
-
-		return $technologyQueue;
+		parent::__construct($registry, TechnologyQueue::class);
 	}
 
-	/**
-	 * @param int $playerId
-	 * @param int $technology
-	 *
-	 * @return TechnologyQueue $technologyQueue
-	 */
-	public function getPlayerTechnologyQueue($playerId, $technology)
+	public function get(Uuid $id): TechnologyQueue|null
 	{
-		$statement = $this->connection->prepare('SELECT * FROM technologyQueue WHERE rPlayer = :player_id AND technology = :technology');
-		$statement->execute(['player_id' => $playerId, 'technology' => $technology]);
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		if (($tq = $this->unitOfWork->getObject(TechnologyQueue::class, (int) $row['id'])) !== null) {
-			return $tq;
-		}
-		$technologyQueue = $this->format($row);
-		$this->unitOfWork->addObject($technologyQueue);
-
-		return $technologyQueue;
+		return $this->find($id);
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getAll()
+	public function getPlayerTechnologyQueue(Player $player, int $technology): TechnologyQueue|null
 	{
-		$statement = $this->connection->query('SELECT * FROM technologyQueue');
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($tq = $this->unitOfWork->getObject(TechnologyQueue::class, (int) $row['id'])) !== null) {
-				$data[] = $tq;
-				continue;
-			}
-			$technologyQueue = $this->format($row);
-			$this->unitOfWork->addObject($technologyQueue);
-			$data[] = $technologyQueue;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @param int $placeId
-	 *
-	 * @return array
-	 */
-	public function getPlaceQueues($placeId)
-	{
-		$statement = $this->connection->prepare('SELECT * FROM technologyQueue WHERE rPlace = :place_id ORDER BY dEnd');
-		$statement->execute(['place_id' => $placeId]);
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($tq = $this->unitOfWork->getObject(TechnologyQueue::class, (int) $row['id'])) !== null) {
-				$data[] = $tq;
-				continue;
-			}
-			$technologyQueue = $this->format($row);
-			$this->unitOfWork->addObject($technologyQueue);
-			$data[] = $technologyQueue;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @param int $playerId
-	 *
-	 * @return array
-	 */
-	public function getPlayerQueues($playerId)
-	{
-		$statement = $this->connection->prepare('SELECT * FROM technologyQueue WHERE rPlayer = :player_id');
-		$statement->execute(['player_id' => $playerId]);
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($tq = $this->unitOfWork->getObject(TechnologyQueue::class, (int) $row['id'])) !== null) {
-				$data[] = $tq;
-				continue;
-			}
-			$technologyQueue = $this->format($row);
-			$this->unitOfWork->addObject($technologyQueue);
-			$data[] = $technologyQueue;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @param TechnologyQueue $technologyQueue
-	 */
-	public function insert($technologyQueue)
-	{
-		$qr = $this->connection->prepare('INSERT INTO
-			technologyQueue(rPlayer, rPlace, technology, targetLevel, dStart, dEnd)
-			VALUES(?, ?, ?, ?, ?, ?)');
-		$qr->execute([
-			$technologyQueue->getPlayerId(),
-			$technologyQueue->getPlaceId(),
-			$technologyQueue->getTechnology(),
-			$technologyQueue->getTargetLevel(),
-			$technologyQueue->getCreatedAt(),
-			$technologyQueue->getEndedAt(),
-		]);
-		$technologyQueue->setId($this->connection->lastInsertId());
-	}
-
-	public function update($technologyQueue)
-	{
-		$statement = $this->connection->prepare(
-			'UPDATE technologyQueue SET
-				targetlevel = ?,
-				dStart = ?,
-				dEnd = ?
-			WHERE id = ?'
-		);
-		$statement->execute([
-			$technologyQueue->getTargetLevel(),
-			$technologyQueue->getCreatedAt(),
-			$technologyQueue->getEndedAt(),
-			$technologyQueue->getId(),
+		return $this->findOneBy([
+			'player' => $player,
+			'technology' => $technology,
 		]);
 	}
 
-	/**
-	 * @param TechnologyQueue $technologyQueue
-	 */
-	public function remove($technologyQueue)
+	public function getAll(): array
 	{
-		$statement = $this->connection->prepare('DELETE FROM technologyQueue WHERE id = :id');
-		$statement->execute(['id' => $technologyQueue->getId()]);
+		return $this->findAll();
 	}
 
-	/**
-	 * @param array $data
-	 *
-	 * @return TechnologyQueue
-	 */
-	public function format($data)
+	public function getPlaceQueues(Place $place): array
 	{
-		return
-			(new TechnologyQueue())
-			->setId((int) $data['id'])
-			->setPlayerId((int) $data['rPlayer'])
-			->setTechnology((int) $data['technology'])
-			->setTargetLevel((int) $data['targetLevel'])
-			->setCreatedAt($data['dStart'])
-			->setEndedAt($data['dEnd'])
-		;
+		return $this->findBy([
+			'place' => $place,
+		]);
+	}
+
+	public function getPlayerQueues(Player $player): array
+	{
+		return $this->findBy([
+			'player' => $player,
+		]);
 	}
 }

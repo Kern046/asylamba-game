@@ -2,13 +2,11 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Library\Format;
-use App\Classes\Library\Utils;
+use App\Modules\Ares\Application\Handler\CommanderExperienceHandler;
 use App\Modules\Ares\Domain\Event\Commander\NewCommanderEvent;
-use App\Modules\Ares\Manager\CommanderManager;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\SchoolClassResource;
 use App\Modules\Gaia\Resource\PlaceResource;
@@ -22,75 +20,77 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class CreateCommander extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		OrbitalBase $orbitalBase,
-		OrbitalBaseManager $orbitalBaseManager,
-		CommanderManager $commanderManager,
+		OrbitalBase $currentBase,
+		CommanderExperienceHandler $commanderExperienceHandler,
+		CommanderRepositoryInterface $commanderRepository,
 		PlayerManager $playerManager,
-		EntityManager $entityManager,
 		EventDispatcherInterface $eventDispatcher,
 	): Response {
 		$school = 0;
-		$name = $request->request->get('name');
+		$name = $request->request->get('name') ?? throw new BadRequestHttpException('Missing name');
 
 		$cn = new CheckName();
 		$cn->maxLength = 20;
 
-		if (false !== $name) {
-			if (($orbitalBase = $orbitalBaseManager->getPlayerBase($orbitalBase->getId(), $currentPlayer->getId())) !== null) {
-				$schoolCommanders = $commanderManager->getBaseCommanders($orbitalBase->getId(), [Commander::INSCHOOL]);
+		$schoolCommanders = $commanderRepository->getBaseCommanders($currentBase, [Commander::INSCHOOL]);
 
-				if (count($schoolCommanders) < PlaceResource::get($orbitalBase->typeOfBase, 'school-size')) {
-					$reserveCommanders = $commanderManager->getBaseCommanders($orbitalBase->getId(), [Commander::RESERVE]);
-
-					if (count($reserveCommanders) < OrbitalBase::MAXCOMMANDERINMESS) {
-						$nbrCommandersToCreate = rand(SchoolClassResource::getInfo($school, 'minSize'), SchoolClassResource::getInfo($school, 'maxSize'));
-
-						if ($cn->checkLength($name) && $cn->checkChar($name)) {
-							if (SchoolClassResource::getInfo($school, 'credit') <= $currentPlayer->getCredit()) {
-								// débit des crédits au joueur
-								$playerManager->decreaseCredit($currentPlayer, SchoolClassResource::getInfo($school, 'credit'));
-
-								for ($i = 0; $i < $nbrCommandersToCreate; ++$i) {
-									$newCommander = new Commander();
-									$commanderManager->upExperience($newCommander, rand(SchoolClassResource::getInfo($school, 'minExp'), SchoolClassResource::getInfo($school, 'maxExp')));
-									$newCommander->rPlayer = $currentPlayer->getId();
-									$newCommander->rBase = $orbitalBase->getId();
-									$newCommander->palmares = 0;
-									$newCommander->statement = 0;
-									$newCommander->name = $name;
-									$newCommander->avatar = 't'.rand(1, 21).'-c'.$currentPlayer->getRColor();
-									$newCommander->dCreation = Utils::now();
-									$newCommander->uCommander = Utils::now();
-									$newCommander->setSexe(1);
-									$newCommander->setAge(rand(40, 70));
-									$entityManager->persist($newCommander);
-									$entityManager->flush($newCommander);
-
-									$eventDispatcher->dispatch(new NewCommanderEvent($newCommander, $currentPlayer));
-								}
-								$this->addFlash('success', $nbrCommandersToCreate.' commandant'.Format::addPlural($nbrCommandersToCreate).' inscrit'.Format::addPlural($nbrCommandersToCreate).' au programme d\'entraînement.');
-							} else {
-								throw new AccessDeniedHttpException('vous n\'avez pas assez de crédit.');
-							}
-						} else {
-							throw new BadRequestHttpException('le nom contient des caractères non autorisé ou trop de caractères.');
-						}
-					} else {
-						throw new ConflictHttpException('Vous ne pouvez pas créer de nouveaux officiers si vous en avez déjà '.Orbitalbase::MAXCOMMANDERINMESS.' ou plus.');
-					}
-				} else {
-					throw new ConflictHttpException('Trop d\'officiers en formation. Déplacez des officiers dans le mess pour libérer de la place.');
-				}
-			} else {
-				throw new AccessDeniedHttpException('cette base ne vous appartient pas');
-			}
+		if (count($schoolCommanders) >= PlaceResource::get($currentBase->typeOfBase, 'school-size')) {
+			throw new ConflictHttpException('Trop d\'officiers en formation. Déplacez des officiers dans le mess pour libérer de la place.');
 		}
+		$reserveCommanders = $commanderRepository->getBaseCommanders($currentBase, [Commander::RESERVE]);
+
+		if (count($reserveCommanders) >= OrbitalBase::MAXCOMMANDERINMESS) {
+			throw new ConflictHttpException('Vous ne pouvez pas créer de nouveaux officiers si vous en avez déjà '.Orbitalbase::MAXCOMMANDERINMESS.' ou plus.');
+		}
+		$nbrCommandersToCreate = rand(SchoolClassResource::getInfo($school, 'minSize'), SchoolClassResource::getInfo($school, 'maxSize'));
+
+		// TODO Replace with validator component
+		if (!$cn->checkLength($name) || !$cn->checkChar($name)) {
+			throw new BadRequestHttpException('le nom contient des caractères non autorisé ou trop de caractères.');
+		}
+		// TODO Replace with specification
+		if (SchoolClassResource::getInfo($school, 'credit') > $currentPlayer->getCredits()) {
+			throw new AccessDeniedHttpException('vous n\'avez pas assez de crédit.');
+		}
+		// débit des crédits au joueur
+		$playerManager->decreaseCredit($currentPlayer, SchoolClassResource::getInfo($school, 'credit'));
+
+		for ($i = 0; $i < $nbrCommandersToCreate; ++$i) {
+			$newCommander = new Commander(
+				id: Uuid::v4(),
+				name: $name,
+				avatar: 't'.rand(1, 21).'-c'.$currentPlayer->faction->identifier,
+				player: $currentPlayer,
+				base: $currentBase,
+				enlistedAt: new \DateTimeImmutable(),
+				sexe: 1,
+				age: rand(40, 70),
+				updatedAt: new \DateTimeImmutable(),
+			);
+			$commanderExperienceHandler->upExperience(
+				$newCommander,
+				rand(
+					SchoolClassResource::getInfo($school, 'minExp'),
+					SchoolClassResource::getInfo($school, 'maxExp'),
+				),
+			);
+			$commanderRepository->save($newCommander);
+
+			$eventDispatcher->dispatch(new NewCommanderEvent($newCommander, $currentPlayer));
+		}
+		$this->addFlash('success', sprintf(
+			'%s commandant%s inscrit%s au programme d\'entraînement.',
+			$nbrCommandersToCreate,
+			Format::addPlural($nbrCommandersToCreate),
+			Format::addPlural($nbrCommandersToCreate),
+		));
 
 		return $this->redirectToRoute('school');
 	}

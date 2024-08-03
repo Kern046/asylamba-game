@@ -6,15 +6,15 @@
 		<div class="body">
 			<div class="center-box">
 				<span class="value">Meilleure faction</span>
-				<span class="label">{{ get_faction_info(best_faction.rFaction, 'popularName') }}</span>
+				<span class="label">{{ get_faction_info(best_faction.faction.identifier, 'popularName') }}</span>
 			</div>
 
-			<div class="profil-flag color-{{ best_faction.rFaction }}">
-				<img src="{{ asset('build/media/ally/big/color' ~ best_faction.rFaction ~ '.png') }}" alt="" />
+			<div class="profil-flag color-{{ best_faction.faction.identifier }}">
+				<img src="{{ asset('build/media/ally/big/color' ~ best_faction.faction.identifier ~ '.png') }}" alt="" />
 			</div>
 
 			<div class="center-box">
-				<span class="label">{{ get_faction_info(best_faction.rFaction, 'devise') }}</span>
+				<span class="label">{{ get_faction_info(best_faction.faction.identifier, 'devise') }}</span>
 			</div>
 		</div>
 	</div>

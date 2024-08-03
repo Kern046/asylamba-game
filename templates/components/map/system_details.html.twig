@@ -1,201 +1,203 @@
 {% apply spaceless %}
-<div class="header"
-	 data-sector-color="{{ places[0].sectorColor }}"
-	 data-distance="{{ get_place_distance(current_base, places[0])|number }}">
-	<ul>
-		<li>Système #{{ system.id }}</li>
-		<li>Cordonnées {{ system|coords }}</li>
-		<li>
-			{% if system.rColor == 0 %}
-				<span>Non revendiqué</span>
-			{% else %}
-				<img src="{{ asset('build/media/ally/big/color' ~ system.rColor ~ '.png') }}" alt="" />
-				<span>Revendiqué par {{ get_faction_info(system.rColor, 'popularName') }}</span>
-			{% endif %}
-		</li>
-		<li>
-			<img src="{{ asset('build/media/map/systems/t' ~ system.typeOfSystem ~ 'c0.png') }}" alt="" />
-			<span>{{ get_system_info(system.typeOfSystem, 'frenchName') }}</span>
-		</li>
-	</ul>
-	<a href="#" class="button closeactionbox">×</a>
-</div>
-
-<div class="body">
-	<a class="actbox-movers" id="actboxToLeft" href="#"></a>
-	<a class="actbox-movers" id="actboxToRight" href="#"></a>
-	<div class="system">
+	{% set systemFactionIdentifier = system.faction.identifier ?? 0 %}
+	<div class="header"
+		 data-sector-color="{{ places[0].system.sector.faction.identifier ?? 0 }}"
+		 data-distance="{{ get_place_distance(current_base, places[0])|number }}">
 		<ul>
-			<li class="star"></li>
+			<li>Système #{{ system.id }}</li>
+			<li>Cordonnées {{ system|coords }}</li>
+			<li>
+				{% if systemFactionIdentifier == 0 %}
+					<span>Non revendiqué</span>
+				{% else %}
+					<img src="{{ asset('build/media/ally/big/color' ~ systemFactionIdentifier ~ '.png') }}" alt="" />
+					<span>Revendiqué par {{ get_faction_info(systemFactionIdentifier, 'popularName') }}</span>
+				{% endif %}
+			</li>
+			<li>
+				<img src="{{ asset('build/media/map/systems/t' ~ system.typeOfSystem ~ 'c0.png') }}" alt="" />
+				<span>{{ get_system_info(system.typeOfSystem, 'frenchName') }}</span>
+			</li>
+		</ul>
+		<a href="#" class="button closeactionbox">×</a>
+	</div>
 
-			{% for place in places %}
-				{% set position = place.position - 1 %}
-				<li class="place color{{ place.playerColor }}">
-					<a href="#" class="openplace" data-target="{{ position }}">
-						<strong>{{ position }}</strong>
-						{% if place.typeOfPlace == 1 %}
-							<img class="land" src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" />
-						{% else %}
-							{% if place.resources > 10000000 %}
-								{% set size = 3 %}
-							{% elseif place.resources > 5000000 %}
-								{% set size = 2 %}
+	<div class="body">
+		<a class="actbox-movers" id="actboxToLeft" href="#"></a>
+		<a class="actbox-movers" id="actboxToRight" href="#"></a>
+		<div class="system">
+			<ul>
+				<li class="star"></li>
+
+				{% for place in places %}
+					{% set playerFactionIdentifier = place.player.faction.identifier ?? 0 %}
+					{% set position = place.position - 1 %}
+					<li class="place color{{ playerFactionIdentifier }}">
+						<a href="#" class="openplace" data-target="{{ position }}">
+							<strong>{{ position }}</strong>
+							{% if place.typeOfPlace == 1 %}
+								<img class="land" src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" />
 							{% else %}
-								{% set size = 1 %}
+								{% if place.resources > 10000000 %}
+									{% set size = 3 %}
+								{% elseif place.resources > 5000000 %}
+									{% set size = 2 %}
+								{% else %}
+									{% set size = 1 %}
+								{% endif %}
+
+								<img class="land" src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ size ~ '.png') }}" />
 							{% endif %}
-
-							<img class="land" src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ size ~ '.png') }}" />
-						{% endif %}
-						{% if place.rPlayer != 0 %}
-							<img class="avatar" src="{{ asset('build/media/avatar/small/' ~ place.playerAvatar ~ '.png') }}" />
-						{% endif %}
-					</a>
-				</li>
-
-				{# noAjax #}
-				<li class="action color{{ place.playerColor }}"
-					id="place-{{ position }}"
-					{% if no_ajax is defined and no_ajax == true and app.request.query.get('place') == place.id %}style="width: 565px;"{% endif %}
-				>
-				<div class="content flex">
-					<div class="column info divide-y divide-stone-600">
-						{% set reports = spy_reports|filter(r => r.rPlace == place.id) %}
-						{% if reports|length > 0 %}
-							{% set report = reports|first %}
-							<a href="{{ path('spy_reports', {'report': report.id}) }}"
-							   class="last-spy-link hb"
-							   title="voir le rapport d'espionnage le plus récent"
-							>
-								<img src="{{ asset('build/media/map/spy/last-spy.png') }}" alt="" />
-							</a>
-						{% endif %}
-
-						{% if place.typeOfPlace == 1 %}
-							{% if place.typeOfBase != 0 %}
-								<div class="px-1">
-									<h5 class="text-lg">{{ place.baseName }}</h5>
-								</div>
-
-								<div class="flex items-center px-1">
-									<span class="w-20">propriété du</span>
-									<span>
-										{% if place.playerColor != 0 %}
-											{% set player_status = get_faction_info(place.playerColor, 'status')[place.playerStatus - 1] %}
-											{{ player_status }}
-											<span class="player-name">
-												<a href="{{ path('embassy', {'playerId': place.rPlayer}) }}" class="color{{ place.playerColor }}">
-													{{ place.playerName }}
-												</a>
-											</span>
-										{% else %}
-											rebelle <span class="player-name">{{ place.playerName }}</span>
-										{% endif %}
-									</span>
-								</div>
-							{% else %}
-								<div class="px-1">
-									<h5 class="text-lg">Planète rebelle</h5>
-								</div>
-
-								<div class="px-1">
-									{{ include('molecules/common/coeff_indicator.html.twig', {
-										'label': 'Défense',
-										'values': [
-											0,
-											constant('App\\Modules\\Gaia\\Model\\Place::DNG_CASUAL'),
-											constant('App\\Modules\\Gaia\\Model\\Place::DNG_EASY'),
-											constant('App\\Modules\\Gaia\\Model\\Place::DNG_MEDIUM'),
-											constant('App\\Modules\\Gaia\\Model\\Place::DNG_HARD'),
-										],
-										'coeff': place.maxDanger,
-										'media_path': asset('build/media/resources/defense.png'),
-									}) }}
-								</div>
+							{% if place.player is not null %}
+								<img class="avatar" src="{{ asset('build/media/avatar/small/' ~ place.player.avatar ~ '.png') }}" />
 							{% endif %}
+						</a>
+					</li>
 
-							{% set coeffs_data = [
-								{
-									'label': 'Population',
-									'coeff': place.population,
-									'values': [0, 50, 100, 150, 200],
-									'media_path': asset('build/media/resources/population.png'),
-								},
-								{
-									'label': 'Ressource',
-									'coeff': place.coefResources,
-									'values': [0, 20, 40, 60, 80],
-									'media_path': asset('build/media/resources/resource.png'),
-								},
-								{
-									'label': 'Science',
-									'coeff': get_place_technosphere_improvement_coeff(place),
-									'values': [0, 8, 16, 24, 32],
-									'media_path': asset('build/media/resources/science.png'),
-								}
-							] %}
-							<div class="px-1">
-								{% for coeff_data in coeffs_data %}
-									{{ include('molecules/common/coeff_indicator.html.twig', coeff_data) }}
-								{% endfor %}
-							</div>
-						{% else %}
-							<div class="px-1">
-								<strong>{{ get_place_type(place.typeOfPlace)|capitalize }}</strong>
-							</div>
-
-							<div class="px-1">
-								<p>
-									<span class="label">Ressources</span>
-									<span class="value">
-									{{ ((place.resources * place.coefResources)/100)|number }}
-								</span>
-								</p>
-								<p>
-									<span class="label">Débris</span>
-									<span class="value">
-									{{ ((place.resources * place.coefHistory)/100)|number }}
-								</span>
-								</p>
-								<p>
-									<span class="label">Gaz noble</span>
-									<span class="value">
-									{{ ((place.resources * place.population)/100)|number }}
-								</span>
-								</p>
-							</div>
-						{% endif %}
-
-						<div class="flex items-center px-1">
-							<span class="label">Distance</span>
-							<span class="value">
-								{{ get_place_distance(current_base, place)|number }} Al.
-							</span>
-						</div>
-
-						{% if place.typeOfPlace == 1 %}
-							{% set reports = combat_reports|filter(r => r.rPlace == place.id) %}
+					{# noAjax #}
+					<li class="action color{{ playerFactionIdentifier }}"
+						id="place-{{ position }}"
+						{% if no_ajax is defined and no_ajax == true and app.request.query.get('place') == place.id %}style="width: 565px;"{% endif %}
+					>
+					<div class="content flex">
+						<div class="column info divide-y divide-stone-600">
+							{% set reports = spy_reports|filter(r => r.rPlace == place.id) %}
 							{% if reports|length > 0 %}
 								{% set report = reports|first %}
-								<div>
-									<em>
-										Dernier pillage {{ report.dFight|date|raw }}.
-									</em>
+								<a href="{{ path('spy_reports', {'report': report.id}) }}"
+								   class="last-spy-link hb"
+								   title="voir le rapport d'espionnage le plus récent"
+								>
+									<img src="{{ asset('build/media/map/spy/last-spy.png') }}" alt="" />
+								</a>
+							{% endif %}
+
+							{% if place.typeOfPlace == 1 %}
+								{% if place.base is not null %}
+									<div class="px-1">
+										<h5 class="text-lg">{{ place.base.name }}</h5>
+									</div>
+
+									<div class="flex items-center px-1">
+										<span class="w-20">propriété du</span>
+										<span>
+											{% if playerFactionIdentifier != 0 %}
+												{% set player_status = get_faction_info(playerFactionIdentifier, 'status')[place.player.status - 1] %}
+												{{ player_status }}
+												<span class="player-name">
+													<a href="{{ path('embassy', {'player': place.player.id }) }}" class="color{{ playerFactionIdentifier }}">
+														{{ place.player.name }}
+													</a>
+												</span>
+											{% else %}
+												rebelle <span class="player-name">{{ place.player.name }}</span>
+											{% endif %}
+										</span>
+									</div>
+								{% else %}
+									<div class="px-1">
+										<h5 class="text-lg">Planète rebelle</h5>
+									</div>
+
+									<div class="px-1">
+										{{ include('molecules/common/coeff_indicator.html.twig', {
+											'label': 'Défense',
+											'values': [
+												0,
+												constant('App\\Modules\\Gaia\\Model\\Place::DNG_CASUAL'),
+												constant('App\\Modules\\Gaia\\Model\\Place::DNG_EASY'),
+												constant('App\\Modules\\Gaia\\Model\\Place::DNG_MEDIUM'),
+												constant('App\\Modules\\Gaia\\Model\\Place::DNG_HARD'),
+											],
+											'coeff': place.maxDanger,
+											'media_path': asset('build/media/resources/defense.png'),
+										}) }}
+									</div>
+								{% endif %}
+
+								{% set coeffs_data = [
+									{
+										'label': 'Population',
+										'coeff': place.population,
+										'values': [0, 50, 100, 150, 200],
+										'media_path': asset('build/media/resources/population.png'),
+									},
+									{
+										'label': 'Ressource',
+										'coeff': place.coefResources,
+										'values': [0, 20, 40, 60, 80],
+										'media_path': asset('build/media/resources/resource.png'),
+									},
+									{
+										'label': 'Science',
+										'coeff': get_place_technosphere_improvement_coeff(place),
+										'values': [0, 8, 16, 24, 32],
+										'media_path': asset('build/media/resources/science.png'),
+									}
+								] %}
+								<div class="px-1">
+									{% for coeff_data in coeffs_data %}
+										{{ include('molecules/common/coeff_indicator.html.twig', coeff_data) }}
+									{% endfor %}
+								</div>
+							{% else %}
+								<div class="px-1">
+									<strong>{{ get_place_type(place.typeOfPlace)|capitalize }}</strong>
+								</div>
+
+								<div class="px-1">
+									<p>
+										<span class="label">Ressources</span>
+										<span class="value">
+										{{ ((place.resources * place.coefResources)/100)|number }}
+									</span>
+									</p>
+									<p>
+										<span class="label">Débris</span>
+										<span class="value">
+										{{ ((place.resources * place.coefHistory)/100)|number }}
+									</span>
+									</p>
+									<p>
+										<span class="label">Gaz noble</span>
+										<span class="value">
+										{{ ((place.resources * place.population)/100)|number }}
+									</span>
+									</p>
 								</div>
 							{% endif %}
-						{% endif %}
-					</div>
 
-					{{ include('molecules/map/place_actions.html.twig', {
-						technologies,
-						moving_commanders,
-						colonization_cost,
-						conquest_cost,
-						recycling_missions,
-					}) }}
-				</div>
-			</li>
-			{% endfor %}
-		</ul>
+							<div class="flex items-center px-1">
+								<span class="label">Distance</span>
+								<span class="value">
+									{{ get_place_distance(current_base, place)|number }} Al.
+								</span>
+							</div>
+
+							{% if place.typeOfPlace == 1 %}
+								{% set reports = combat_reports|filter(r => r.rPlace == place.id) %}
+								{% if reports|length > 0 %}
+									{% set report = reports|first %}
+									<div>
+										<em>
+											Dernier pillage {{ report.dFight|date|raw }}.
+										</em>
+									</div>
+								{% endif %}
+							{% endif %}
+						</div>
+
+						{{ include('molecules/map/place_actions.html.twig', {
+							technologies,
+							moving_commanders,
+							colonization_cost,
+							conquest_cost,
+							recycling_missions,
+						}) }}
+					</div>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
 	</div>
-</div>
 {% endapply %}

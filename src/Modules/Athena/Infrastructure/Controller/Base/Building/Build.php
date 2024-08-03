@@ -2,86 +2,93 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
-use App\Classes\Library\Utils;
+use App\Modules\Athena\Application\Factory\BuildingQueueFactory;
+use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
+use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Base\Building\BuildingDataHandler;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\BuildingQueueManager;
+use App\Modules\Athena\Infrastructure\Validator\CanMakeBuilding;
+use App\Modules\Athena\Infrastructure\Validator\DTO\BuildingConstructionOrder;
+use App\Modules\Athena\Infrastructure\Validator\IsValidBuilding;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
-use App\Modules\Athena\Model\BuildingQueue;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Athena\Resource\OrbitalBaseResource;
-use App\Modules\Promethee\Manager\TechnologyManager;
-use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
+use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
-use App\Modules\Zeus\Model\PlayerBonusId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Validator\Constraints\Sequentially;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class Build extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
-		BonusApplierInterface $bonusApplier,
 		OrbitalBase $currentBase,
 		OrbitalBaseHelper $orbitalBaseHelper,
 		OrbitalBaseManager $orbitalBaseManager,
-		TechnologyManager $technologyManager,
-		BuildingQueueManager $buildingQueueManager,
+		TechnologyRepositoryInterface $technologyRepository,
+		BuildingDataHandler $buildingDataHandler,
+		BuildingQueueRepositoryInterface $buildingQueueRepository,
+		BuildingLevelHandler $buildingLevelHandler,
+		BuildingQueueFactory $buildingQueueFactory,
+		ValidatorInterface $validator,
 		int $identifier,
 	): Response {
-		if ($orbitalBaseHelper->isABuilding($identifier)) {
-			$buildingQueues = $buildingQueueManager->getBaseQueues($currentBase->getId());
-
-			$currentLevel = call_user_func([$currentBase, 'getReal'.ucfirst($orbitalBaseHelper->getBuildingInfo($identifier, 'name')).'Level']);
-			$technos = $technologyManager->getPlayerTechnology($currentPlayer->getId());
-
-			if ($orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'resource', $currentBase->getResourcesStorage())
-				and $orbitalBaseHelper->haveRights(OrbitalBaseResource::GENERATOR, $currentBase->getLevelGenerator(), 'queue', count($buildingQueues))
-				and (true === $orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'buildingTree', $currentBase))
-				and $orbitalBaseHelper->haveRights($identifier, $currentLevel + 1, 'techno', $technos)) {
-				$session = $request->getSession();
-
-				// build the new building
-				$bq = new BuildingQueue();
-				$bq->rOrbitalBase = $currentBase->getId();
-				$bq->buildingNumber = $identifier;
-				$bq->targetLevel = $currentLevel + 1;
-				$time = $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $currentLevel + 1, 'time');
-				$bonus = $bonusApplier->apply($time, PlayerBonusId::GENERATOR_SPEED);
-				$nbBuildingQueues = count($buildingQueues);
-				if (0 === $nbBuildingQueues) {
-					$bq->dStart = Utils::now();
-				} else {
-					$bq->dStart = $buildingQueues[$nbBuildingQueues - 1]->dEnd;
-				}
-				$bq->dEnd = Utils::addSecondsToDate($bq->dStart, round($time - $bonus));
-				$buildingQueueManager->add($bq, $currentPlayer);
-
-				// debit resources
-				$orbitalBaseManager->decreaseResources($currentBase, $orbitalBaseHelper->getBuildingInfo($identifier, 'level', $currentLevel + 1, 'resourcePrice'));
-
-				//						if ($container->getParameter('data_analysis')) {
-				//							$qr = $database->prepare('INSERT INTO
-				//						DA_BaseAction(`from`, type, opt1, opt2, weight, dAction)
-				//						VALUES(?, ?, ?, ?, ?, ?)'
-				//							);
-				//							$qr->execute([$session->get('playerId'), 1, $building, $currentLevel + 1, DataAnalysis::resourceToStdUnit($orbitalBaseHelper->getBuildingInfo($building, 'level', $currentLevel + 1, 'resourcePrice')), Utils::now()]);
-				//						}
-
-				// add the event in controller
-				$session->get('playerEvent')->add($bq->dEnd, $this->getParameter('event_base'), $currentBase->getId());
-
-				$this->addFlash('success', 'Construction programmée');
-
-				return $this->redirect($request->headers->get('referer'));
-			} else {
-				throw new ConflictHttpException('les conditions ne sont pas remplies pour construire ce bâtiment');
-			}
-		} else {
+		if (!$orbitalBaseHelper->isABuilding($identifier)) {
 			throw new BadRequestHttpException('le bâtiment indiqué n\'est pas valide');
 		}
+		$buildingQueues = $buildingQueueRepository->getBaseQueues($currentBase);
+		$buildingQueuesCount = count($buildingQueues);
+
+		$currentLevel = $buildingLevelHandler->getBuildingRealLevel($currentBase, $identifier, $buildingQueues);
+		$targetLevel = $currentLevel + 1;
+		$technos = $technologyRepository->getPlayerTechnology($currentPlayer);
+
+		$buildingConstructionOrder = new BuildingConstructionOrder(
+			orbitalBase: $currentBase,
+			technology: $technos,
+			buildingIdentifier: $identifier,
+			targetLevel: $targetLevel,
+		);
+
+		$violations = $validator->validate($buildingConstructionOrder, new Sequentially([
+			new IsValidBuilding(),
+			new CanMakeBuilding($buildingQueuesCount),
+		]));
+
+		if (0 < $violations->count()) {
+			throw new ValidationFailedException($buildingConstructionOrder, $violations);
+		}
+
+		if (0 === $buildingQueuesCount) {
+			$startedAt = new \DateTimeImmutable();
+		} else {
+			$startedAt = $buildingQueues[$buildingQueuesCount - 1]->endedAt;
+		}
+
+		// debit resources
+		$orbitalBaseManager->decreaseResources(
+			$currentBase,
+			$buildingDataHandler->getBuildingResourceCost($identifier, $targetLevel),
+		);
+
+		$buildingQueue = $buildingQueueFactory->create(
+			orbitalBase: $currentBase,
+			identifier: $identifier,
+			targetLevel: $targetLevel,
+			startedAt: $startedAt,
+		);
+
+		// TODO remove this
+		// add the event in controller
+		$request->getSession()->get('playerEvent')->add($buildingQueue->getEndDate(), $this->getParameter('event_base'), $currentBase->id);
+
+		$this->addFlash('success', 'Construction programmée');
+
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

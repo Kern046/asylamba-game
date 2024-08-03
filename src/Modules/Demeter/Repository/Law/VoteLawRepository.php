@@ -2,90 +2,32 @@
 
 namespace App\Modules\Demeter\Repository\Law;
 
-use App\Classes\Entity\AbstractRepository;
+use App\Modules\Demeter\Domain\Repository\Law\VoteLawRepositoryInterface;
+use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Demeter\Model\Law\VoteLaw;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use App\Modules\Zeus\Model\Player;
+use Doctrine\Persistence\ManagerRegistry;
 
-class VoteLawRepository extends AbstractRepository
+class VoteLawRepository extends DoctrineRepository implements VoteLawRepositoryInterface
 {
-	public function getLawVotes($lawId)
+	public function __construct(ManagerRegistry $registry)
 	{
-		$statement = $this->connection->prepare('SELECT * FROM voteLaw WHERE rLaw = :law_id');
-		$statement->execute(['law_id' => $lawId]);
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($lv = $this->unitOfWork->getObject(LawVote::class, $row['id']))) {
-				$data[] = $lv;
-				continue;
-			}
-			$lawVote = $this->format($row);
-			$this->unitOfWork->addObject($lawVote);
-			$data[] = $lawVote;
-		}
-
-		return $data;
+		parent::__construct($registry, VoteLaw::class);
 	}
 
-	public function hasVoted($playerId, $lawId)
+	public function getLawVotes(Law $law): array
 	{
-		$statement = $this->connection->prepare('SELECT COUNT(*) AS nb_votes FROM voteLaw WHERE rPlayer = :player_id AND rLaw = :law_id');
-		$statement->execute(['player_id' => $playerId, 'law_id' => $lawId]);
-
-		return (int) $statement->fetch()['nb_votes'] > 0;
-	}
-
-	public function insert($voteLaw)
-	{
-		$statement = $this->connection->prepare(
-			'INSERT INTO voteLaw SET
-			rLaw = :law_id,
-			rPlayer = :player_id,
-			vote = :vote,
-			dVotation = :voted_at'
-		);
-		$statement->execute([
-			'law_id' => $voteLaw->rLaw,
-			'player_id' => $voteLaw->rPlayer,
-			'vote' => $voteLaw->vote,
-			'voted_at' => $voteLaw->dVotation,
-		]);
-		$voteLaw->id = $this->connection->lastInsertId();
-	}
-
-	public function update($voteLaw)
-	{
-		$statement = $this->connection->prepare(
-			'UPDATE voteLaw SET
-				rLaw = :law_id,
-				rPlayer = :player_id,
-				vote = :vote,
-				dVotation = :voted_at
-			WHERE id = :id'
-		);
-		$statement->execute([
-			'law_id' => $voteLaw->rLaw,
-			'player_id' => $voteLaw->rPlayer,
-			'vote' => $voteLaw->vote,
-			'voted_at' => $voteLaw->dVotation,
-			'id' => $voteLaw->id,
+		return $this->findBy([
+			'law' => $law,
 		]);
 	}
 
-	public function remove($voteLaw)
+	public function hasVoted(Player $player, Law $law): bool
 	{
-		$qr = $this->connection->prepare('DELETE FROM voteLaw WHERE id = :id');
-		$qr->execute(['id' => $voteLaw->id]);
-	}
-
-	public function format($data)
-	{
-		$voteLaw = new VoteLaw();
-		$voteLaw->id = (int) $data['id'];
-		$voteLaw->rLaw = (int) $data['rLaw'];
-		$voteLaw->rPlayer = (int) $data['rPlayer'];
-		$voteLaw->vote = $data['vote'];
-		$voteLaw->dVotation = $data['dVotation'];
-
-		return $voteLaw;
+		return $this->count([
+			'law' => $law,
+			'player' => $player,
+		]) > 0;
 	}
 }

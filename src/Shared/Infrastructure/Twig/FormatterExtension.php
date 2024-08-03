@@ -19,7 +19,7 @@ class FormatterExtension extends AbstractExtension
 	{
 		return [
 			new TwigFilter('parse', fn (string $content) => $this->parser->parse($content)),
-			new TwigFilter('number', fn (int|float $number, int $decimals = 0) => Format::numberFormat($number, $decimals)),
+			new TwigFilter('number', fn (int|float|null $number, int $decimals = 0) => Format::numberFormat($number ?? 0, $decimals)),
 			new TwigFilter('ranking', fn (int|float $number) => Format::rankingFormat($number)),
 			new TwigFilter('ordinal_number', fn (int|float $number) => Format::ordinalNumber($number)),
 			new TwigFilter('plural', fn (int|float $number) => Format::plural($number)),
@@ -27,7 +27,7 @@ class FormatterExtension extends AbstractExtension
 			new TwigFilter('lite_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'lite')),
 			new TwigFilter('large_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'large')),
 			new TwigFilter('short_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'short')),
-			new TwigFilter('date', fn (string $date) => Chronos::transform($date)),
+			new TwigFilter('date', fn (string|\DateTimeImmutable $date) => Chronos::transform($date)),
 			new TwigFilter('unserialize', fn (string $data) => \unserialize($data)),
 		];
 	}

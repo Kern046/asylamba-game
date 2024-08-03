@@ -11,15 +11,15 @@
 
 			<div class="number-box">
 				<span class="label">taux de participation</span>
-				<span class="value">{{ votes|length|percent(faction_members|length) }} %</span>
+				<span class="value">{{ votes|length|percent(faction_members_count) }} %</span>
 				<span class="progress-bar">
-					<span style="width:{{ votes|length|percent(faction_members|length) }}%;" class="content"></span>
+					<span style="width:{{ votes|length|percent(faction_members_count) }}%;" class="content"></span>
 				</span>
 			</div>
 
 			<hr style="margin-top: 25px;" />
 
-			<p class="info">{{ get_faction_info(current_player.rColor, 'campaignDesc') }}</p>
+			<p class="info">{{ get_faction_info(current_player.faction.identifier, 'campaignDesc') }}</p>
 		</div>
 	</div>
 </div>

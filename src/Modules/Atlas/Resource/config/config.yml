@@ -9,21 +9,7 @@ services:
         exclude:
             - '../../Message'
             - '../../Model'
-            - '../../Repository'
             - '../../Resource'
-
-    App\Modules\Atlas\Handler\PlayerRankingHandler:
-        arguments:
-            $dataAnalysis: '%data_analysis%'
-
-    App\Modules\Atlas\Handler\FactionRankingHandler:
-        arguments:
-            $serverStartTime: '%server_start_time%'
-            $hoursBeforeStartOfRanking: '%hours_before_start_of_ranking%'
-            $pointsToWin: '%points_to_win%'
-
-    App\Modules\Atlas\Manager\:
-        resource: '%kernel.project_dir%/src/Modules/Atlas/Manager/*'
 
     App\Modules\Atlas\Manager\RankingManager:
         arguments:

@@ -13,13 +13,12 @@ class NewShipQueueEvent implements TutorialEvent, TrackingEvent
 {
 	public function __construct(
 		public readonly ShipQueue $shipQueue,
-		public readonly Player $player,
 	) {
 	}
 
 	public function getTutorialPlayer(): Player
 	{
-		return $this->player;
+		return $this->shipQueue->base->player;
 	}
 
 	public function getTutorialStep(): int|null
@@ -33,7 +32,7 @@ class NewShipQueueEvent implements TutorialEvent, TrackingEvent
 
 	public function getTrackingPeopleId(): int
 	{
-		return $this->player->id;
+		return $this->shipQueue->base->player->id;
 	}
 
 	public function getTrackingEventName(): string
@@ -46,7 +45,7 @@ class NewShipQueueEvent implements TutorialEvent, TrackingEvent
 		return [
 			'ship_id' => $this->shipQueue->shipNumber,
 			'quantity' => $this->shipQueue->quantity,
-			'place_id' => $this->shipQueue->rOrbitalBase,
+			'place_id' => $this->shipQueue->base->id,
 		];
 	}
 }

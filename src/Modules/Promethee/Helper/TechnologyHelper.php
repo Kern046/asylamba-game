@@ -4,7 +4,6 @@ namespace App\Modules\Promethee\Helper;
 
 use App\Classes\Container\ArrayList;
 use App\Classes\Container\StackList;
-use App\Classes\Exception\ErrorException;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
@@ -45,54 +44,48 @@ class TechnologyHelper
 
 	public function getInfo($techno, $info, $level = 0)
 	{
-		if ($this->isATechnology($techno)) {
-			if ($this->isAnUnblockingTechnology($techno)) {
-				if (\in_array($info, ['name', 'progName', 'imageLink', 'requiredTechnosphere', 'requiredResearch', 'time', 'resource', 'credit', 'points', 'column', 'shortDescription', 'description'])) {
-					return TechnologyResource::$technology[$techno][$info];
-				} else {
-					throw new ErrorException('2e argument faux pour getInfo() de TechnologyResource (techno '.$techno.', '.$info.')');
-				}
-			} else {
-				if (in_array($info, ['name', 'progName', 'imageLink', 'requiredTechnosphere', 'requiredResearch', 'maxLevel', 'category', 'column', 'shortDescription', 'description', 'bonus'])) {
-					return TechnologyResource::$technology[$techno][$info];
-				} elseif (in_array($info, ['time', 'resource', 'credit', 'points'])) {
-					if ($level <= 0) {
-						return false;
-					}
-					if ('points' == $info) {
-						return round(TechnologyResource::$technology[$techno][$info] * $level * Technology::COEF_POINTS);
-					} elseif ('time' == $info) {
-						return round(TechnologyResource::$technology[$techno][$info] * $level * Technology::COEF_TIME);
-					} else {
-						switch (TechnologyResource::$technology[$techno]['category']) {
-							case 1:
-								$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.5, $level - 1));
-								break;
-							case 2:
-								$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.3, $level - 1));
-								break;
-							case 3:
-								$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.2, $level - 1));
-								break;
-							default:
-								return false;
-						}
-
-						//	$value = round($this->technology[$techno][$info] * pow(1.75, $level-1));
-						//	$value = round($this->technology[$techno][$info] * pow(1.5, $level-1));
-						//	$value = round($this->technology[$techno][$info] * pow(1.3, $level-1));
-
-						return $value;
-					}
-				} else {
-					throw new ErrorException('2e argument faux pour getInof() de TechnologyResource');
-				}
-			}
-		} else {
-			throw new ErrorException('Technologie inexistante dans getInfo() de TechnologyResource '.$techno);
+		if (!$this->isATechnology($techno)) {
+			throw new \InvalidArgumentException('Technologie inexistante dans getInfo() de TechnologyResource '.$techno);
 		}
+		if ($this->isAnUnblockingTechnology($techno)) {
+			if (\in_array($info, ['name', 'progName', 'imageLink', 'requiredTechnosphere', 'requiredResearch', 'time', 'resource', 'credit', 'points', 'column', 'shortDescription', 'description'])) {
+				return TechnologyResource::$technology[$techno][$info];
+			}
+			throw new \InvalidArgumentException('2e argument faux pour getInfo() de TechnologyResource (techno '.$techno.', '.$info.')');
+		}
+		if (in_array($info, ['name', 'progName', 'imageLink', 'requiredTechnosphere', 'requiredResearch', 'maxLevel', 'category', 'column', 'shortDescription', 'description', 'bonus'])) {
+			return TechnologyResource::$technology[$techno][$info];
+		} elseif (in_array($info, ['time', 'resource', 'credit', 'points'])) {
+			if ($level <= 0) {
+				return false;
+			}
+			if ('points' == $info) {
+				return round(TechnologyResource::$technology[$techno][$info] * $level * Technology::COEF_POINTS);
+			} elseif ('time' == $info) {
+				return round(TechnologyResource::$technology[$techno][$info] * $level * Technology::COEF_TIME);
+			} else {
+				switch (TechnologyResource::$technology[$techno]['category']) {
+					case 1:
+						$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.5, $level - 1));
+						break;
+					case 2:
+						$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.3, $level - 1));
+						break;
+					case 3:
+						$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.2, $level - 1));
+						break;
+					default:
+						return false;
+				}
 
-		return false;
+				//	$value = round($this->technology[$techno][$info] * pow(1.75, $level-1));
+				//	$value = round($this->technology[$techno][$info] * pow(1.5, $level-1));
+				//	$value = round($this->technology[$techno][$info] * pow(1.3, $level-1));
+
+				return $value;
+			}
+		}
+		throw new \InvalidArgumentException('2e argument faux pour getInof() de TechnologyResource');
 	}
 
 	public function haveRights($techno, $type, $arg1 = 0, $arg2 = 'default')
@@ -102,10 +95,10 @@ class TechnologyHelper
 				// assez de ressources pour contruire ?
 				// $arg1 est le niveau
 				// $arg2 est ce que le joueur possède (ressource ou crédit)
-				case 'resource': return ($arg2 >= $this->getInfo($techno, 'resource', $arg1)) ? true : false;
+				case 'resource': return $arg2 >= $this->getInfo($techno, 'resource', $arg1);
 					break;
 				// assez de crédits pour construire ?
-				case 'credit': return ($arg2 >= $this->getInfo($techno, 'credit', $arg1)) ? true : false;
+				case 'credit': return $arg2 >= $this->getInfo($techno, 'credit', $arg1);
 					break;
 				// encore de la place dans la queue ?
 				// $arg1 est un objet de type OrbitalBase
@@ -113,26 +106,19 @@ class TechnologyHelper
 				case 'queue':
 					$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::TECHNOSPHERE, 'level', $arg1->levelTechnosphere, 'nbQueues');
 
-					return ($arg2 < $maxQueue) ? true : false;
+					return $arg2 < $maxQueue;
 					break;
 				// a-t-on le droit de construire ce niveau ?
 				// $arg1 est le niveau cible
 				case 'levelPermit':
-					if ($this->isAnUnblockingTechnology($techno)) {
-						return (1 == $arg1) ? true : false;
-					} else {
-						// limitation de niveau ?
-						if ($arg1 > 0) {
-							return true;
-						} else {
-							return false;
-						}
-					}
+					return $this->isAnUnblockingTechnology($techno)
+						? 1 == $arg1
+						: $arg1 > 0;
 				// est-ce que le niveau de la technosphère est assez élevé ?
 				// arg1 est le niveau de la technosphere
 				// no break
 				case 'technosphereLevel':
-					return ($this->getInfo($techno, 'requiredTechnosphere') <= $arg1) ? true : false;
+					return $this->getInfo($techno, 'requiredTechnosphere') <= $arg1;
 					break;
 				// est-ce que les recherches de l'université sont acquises ?
 				// arg1 est le niveau de la technologie
@@ -152,61 +138,45 @@ class TechnologyHelper
 					}
 					if ($researchList->size() > 0) {
 						return $researchList;
-					} else {
-						return true;
 					}
-					break;
-				// est-ce qu'on peut construire la techno ? Pas dépassé le niveau max
-				// arg1 est le niveau de la technologie voulue
+					return true;
+					// est-ce qu'on peut construire la techno ? Pas dépassé le niveau max
+					// arg1 est le niveau de la technologie voulue
 				case 'maxLevel':
 					if ($this->isAnUnblockingTechnology($techno)) {
 						return true;
-					} else {
-						return $arg1 <= $this->getInfo($techno, 'maxLevel');
 					}
-					break;
-				// est-ce qu'on peut construire la techno en fonction du type de la base ?
-				// arg1 est le type de la base
+					return $arg1 <= $this->getInfo($techno, 'maxLevel');
+					// est-ce qu'on peut construire la techno en fonction du type de la base ?
+					// arg1 est le type de la base
 				case 'baseType':
-					switch ($arg1) {
-						case OrbitalBase::TYP_NEUTRAL:
-							return in_array($this->getInfo($techno, 'column'), [1, 2, 3]);
-							break;
-						case OrbitalBase::TYP_COMMERCIAL:
-							return in_array($this->getInfo($techno, 'column'), [1, 2, 3, 4, 5]);
-							break;
-						case OrbitalBase::TYP_MILITARY:
-							return in_array($this->getInfo($techno, 'column'), [1, 2, 3, 6, 7]);
-							break;
-						case OrbitalBase::TYP_CAPITAL:
-							return in_array($this->getInfo($techno, 'column'), [1, 2, 3, 4, 5, 6, 7]);
-							break;
-						default:
-							return false;
-							break;
-					}
+					return match ($arg1) {
+						OrbitalBase::TYP_NEUTRAL => in_array($this->getInfo($techno, 'column'), [1, 2, 3]),
+						OrbitalBase::TYP_COMMERCIAL => in_array($this->getInfo($techno, 'column'), [1, 2, 3, 4, 5]),
+						OrbitalBase::TYP_MILITARY => in_array($this->getInfo($techno, 'column'), [1, 2, 3, 6, 7]),
+						OrbitalBase::TYP_CAPITAL => in_array($this->getInfo($techno, 'column'), [1, 2, 3, 4, 5, 6, 7]),
+						default => false,
+					};
 					break;
 				default:
-					throw new ErrorException('Erreur dans haveRights() de TechnologyResource');
+					throw new \RuntimeException('Erreur dans haveRights() de TechnologyResource');
 			}
 		} else {
-			throw new ErrorException('Technologie inexistante dans haveRights() de TechnologyResource');
+			throw new \RuntimeException('Technologie inexistante dans haveRights() de TechnologyResource');
 		}
 	}
 
-	public function getImprovementPercentage($techno, $level = -1)
+	public function getImprovementPercentage(int $techno, int $level = -1): int
 	{
-		if (!$this->isAnUnblockingTechnology($techno)) {
-			$baseBonus = $this->getInfo($techno, 'bonus');
-			if (0 == $level) {
-				return 0;
-			} elseif (-1 == $level) {
-				return $baseBonus;
-			} else {
-				return $baseBonus + floor(($level - 1) / 5);
-			}
+		if ($this->isAnUnblockingTechnology($techno)) {
+			return 0;
 		}
-
-		return 0;
+		$baseBonus = $this->getInfo($techno, 'bonus');
+		// TODO explain this calculation and its result
+		return match ($level) {
+			0 => 0,
+			-1 => $baseBonus,
+			default => $baseBonus + intval(floor(($level - 1) / 5)),
+		};
 	}
 }

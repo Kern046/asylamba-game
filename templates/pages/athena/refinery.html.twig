@@ -7,7 +7,7 @@
 			<h2>
 				{{ get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::REFINERY'), 'frenchName') }}
 			</h2>
-			<em>Niveau {{ current_base.getLevelRefinery() }}</em>
+			<em>Niveau {{ current_base.levelRefinery }}</em>
 		</div>
 		<div class="fix-body">
 			<div class="body">
@@ -30,7 +30,7 @@
 
 				<div class="number-box grey">
 					<span class="label">coefficient ressource de la planète</span>
-					<span class="value">{{ current_base.planetResources }} %</span>
+					<span class="value">{{ current_base.place.coefResources }} %</span>
 					</div>
 
 				<div class="number-box {% if refining_bonus == 0 %}grey{% endif %}">

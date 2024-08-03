@@ -18,7 +18,8 @@ class CanPlayerMoveToPlace extends PlayerSpecification
 	 */
 	public function isSatisfiedBy($candidate): bool
 	{
-		return ($candidate->rPlayer === $this->player->getId() && $candidate->getId() !== $this->orbitalBase->getId())
-			|| $candidate->playerColor === $this->player->rColor;
+		return null !== $candidate->player
+			&& (($candidate->player->id === $this->player->id && !$candidate->id->equals($this->orbitalBase->place->id))
+			|| $candidate->player->faction->id->equals($this->player->faction->id));
 	}
 }

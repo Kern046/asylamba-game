@@ -2,13 +2,16 @@
 
 namespace App\Modules\Athena\Message;
 
-class RecyclingMissionMessage
+use App\Shared\Domain\Message\AsyncMessage;
+use Symfony\Component\Uid\Uuid;
+
+class RecyclingMissionMessage implements AsyncMessage
 {
-	public function __construct(protected int $recyclingMissionId)
+	public function __construct(private readonly Uuid $recyclingMissionId)
 	{
 	}
 
-	public function getRecyclingMissionId(): int
+	public function getRecyclingMissionId(): Uuid
 	{
 		return $this->recyclingMissionId;
 	}

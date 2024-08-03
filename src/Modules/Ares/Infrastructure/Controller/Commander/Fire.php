@@ -2,13 +2,14 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Commander;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
+use App\Modules\Ares\Model\Commander;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 
 class Fire extends AbstractController
 {
@@ -16,24 +17,27 @@ class Fire extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		CommanderManager $commanderManager,
-		EntityManager $entityManager,
-		int $id,
+		CommanderRepositoryInterface $commanderRepository,
+		Uuid $id,
 	): Response {
-		if (($commander = $commanderManager->get($id)) === null || $commander->rPlayer !== $currentPlayer->getId()) {
-			throw new ErrorException('Ce commandant n\'existe pas ou ne vous appartient pas.');
+		$commander = $commanderRepository->get($id)
+			?? throw $this->createNotFoundException('Ce commandant n\'existe pas.');
+		// TODO Voter
+		if ($commander->player->id !== $currentPlayer->id) {
+			throw $this->createAccessDeniedException('Ce commandant ne vous appartient pas');
 		}
 
-		if (1 == $commander->statement) {
+		if ($commander->isAffected() || $commander->isInSchool() || $commander->isInReserve()) {
 			// vider le commandant
 			$commanderManager->emptySquadrons($commander);
-			$commander->setStatement(4);
+			$commander->statement = Commander::DESERT;
 
-			$this->addFlash('success', 'Vous avez renvoyé votre commandant '.$commander->getName().'.');
+			$commanderRepository->save($commander);
+
+			$this->addFlash('success', 'Vous avez renvoyé votre commandant '.$commander->name.'.');
 		} else {
 			$this->addFlash('error', 'Vous ne pouvez pas renvoyer un officier en déplacement.');
 		}
-
-		$entityManager->flush();
 
 		return $this->redirectToRoute('fleet_headquarters');
 	}

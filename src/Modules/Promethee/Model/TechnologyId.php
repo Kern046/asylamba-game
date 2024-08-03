@@ -106,6 +106,9 @@ class TechnologyId
 		self::DESTROYER_DEFENSE,
 	];
 
+	/**
+	 * @return list<int>
+	 */
 	public static function getAll(): array
 	{
 		return [

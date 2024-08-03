@@ -2,29 +2,23 @@
 
 namespace App\Modules\Athena\Helper;
 
+use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
-use Symfony\Contracts\Service\Attribute\Required;
 
-class ShipHelper
+readonly class ShipHelper
 {
-	protected OrbitalBaseHelper $orbitalBaseHelper;
-
 	public function __construct(
 		private CurrentPlayerRegistry $currentPlayerRegistry,
-		protected TechnologyHelper $technologyHelper,
-		protected ShipQueueManager $shipQueueManager
+		private TechnologyHelper $technologyHelper,
+		private ShipQueueManager $shipQueueManager,
+		private OrbitalBaseHelper $orbitalBaseHelper,
+		private ShipQueueRepositoryInterface $shipQueueRepository,
 	) {
-	}
-
-	#[Required]
-	public function setOrbitalBaseHelper(OrbitalBaseHelper $orbitalBaseHelper): void
-	{
-		$this->orbitalBaseHelper = $orbitalBaseHelper;
 	}
 
 	public function haveRights($shipId, $type, $sup, $quantity = 1): bool|string
@@ -35,19 +29,19 @@ class ShipHelper
 				case 'resource':
 					$price = ShipResource::getInfo($shipId, 'resourcePrice') * $quantity;
 					if (ShipResource::CERBERE == $shipId || ShipResource::PHENIX == $shipId) {
-						if (ColorResource::EMPIRE == $this->currentPlayerRegistry->get()->rColor) {
+						if (ColorResource::EMPIRE == $this->currentPlayerRegistry->get()->faction->identifier) {
 							// bonus if the player is from the Empire
 							$price -= round($price * ColorResource::BONUS_EMPIRE_CRUISER / 100);
 						}
 					}
 
 					return !($sup < $price);
-				// assez de points d'action pour construire ?
+					// assez de points d'action pour construire ?
 				case 'pa':
 					return !($sup < self::getInfo($shipId, 'pa'));
-				// encore de la place dans la queue ?
-				// $sup est un objet de type OrbitalBase
-				// $quantity est le nombre de batiments dans la queue
+					// encore de la place dans la queue ?
+					// $sup est un objet de type OrbitalBase
+					// $quantity est le nombre de batiments dans la queue
 				case 'queue':
 					if ($this->orbitalBaseHelper->isAShipFromDock1($shipId)) {
 						$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK1, 'level', $sup->levelDock1, 'nbQueues');
@@ -58,38 +52,38 @@ class ShipHelper
 					}
 
 					return $quantity < $maxQueue;
-				// droit de construire le vaisseau ?
-				// $sup est un objet de type OrbitalBase
+					// droit de construire le vaisseau ?
+					// $sup est un objet de type OrbitalBase
 				case 'shipTree':
 					if (ShipResource::isAShipFromDock1($shipId)) {
-						$level = $sup->getLevelDock1();
+						$level = $sup->levelDock1;
 
 						return $shipId < $this->orbitalBaseHelper->getBuildingInfo(2, 'level', $level, 'releasedShip');
 					} elseif (ShipResource::isAShipFromDock2($shipId)) {
-						$level = $sup->getLevelDock2();
+						$level = $sup->levelDock2;
 
 						return ($shipId - 6) < $this->orbitalBaseHelper->getBuildingInfo(3, 'level', $level, 'releasedShip');
 					} else {
-						$level = $sup->getLevelDock3();
+						$level = $sup->levelDock3;
 
 						return ($shipId - 12) < $this->orbitalBaseHelper->getBuildingInfo(4, 'level', $level, 'releasedShip');
 					}
 					break;
-				// assez de pev dans le storage et dans la queue ?
-				// $sup est un objet de type OrbitalBase
+					// assez de pev dans le storage et dans la queue ?
+					// $sup est un objet de type OrbitalBase
 				case 'pev':
 					if (ShipResource::isAShipFromDock1($shipId)) {
 						// place dans le hangar
-						$totalSpace = $this->orbitalBaseHelper->getBuildingInfo(2, 'level', $sup->getLevelDock1(), 'storageSpace');
+						$totalSpace = $this->orbitalBaseHelper->getBuildingInfo(2, 'level', $sup->levelDock1, 'storageSpace');
 						// ce qu'il y a dans le hangar
-						$storage = $sup->getShipStorage();
+						$storage = $sup->shipStorage;
 						$inStorage = 0;
 						for ($i = 0; $i < 6; ++$i) {
-							$inStorage += ShipResource::getInfo($i, 'pev') * $storage[$i];
+							$inStorage += ShipResource::getInfo($i, 'pev') * ($storage[$i] ?? 0);
 						}
 						// ce qu'il y a dans la queue
 						$inQueue = 0;
-						$shipQueues = $this->shipQueueManager->getByBaseAndDockType($sup->rPlace, 1);
+						$shipQueues = $this->shipQueueRepository->getByBaseAndDockType($sup, 1);
 						foreach ($shipQueues as $shipQueue) {
 							$inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * $shipQueue->quantity;
 						}
@@ -99,16 +93,16 @@ class ShipHelper
 						return $wanted + $inQueue + $inStorage <= $totalSpace;
 					} elseif (ShipResource::isAShipFromDock2($shipId)) {
 						// place dans le hangar
-						$totalSpace = $this->orbitalBaseHelper->getBuildingInfo(3, 'level', $sup->getLevelDock2(), 'storageSpace');
+						$totalSpace = $this->orbitalBaseHelper->getBuildingInfo(3, 'level', $sup->levelDock2, 'storageSpace');
 						// ce qu'il y a dans le hangar
-						$storage = $sup->getShipStorage();
+						$storage = $sup->shipStorage;
 						$inStorage = 0;
 						for ($i = 6; $i < 12; ++$i) {
-							$inStorage += ShipResource::getInfo($i, 'pev') * $storage[$i];
+							$inStorage += ShipResource::getInfo($i, 'pev') * ($storage[$i] ?? 0);
 						}
 						// ce qu'il y a dans la queue
 						$inQueue = 0;
-						$shipQueues = $this->shipQueueManager->getByBaseAndDockType($sup->rPlace, 2);
+						$shipQueues = $this->shipQueueRepository->getByBaseAndDockType($sup, 2);
 						foreach ($shipQueues as $shipQueue) {
 							$inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * 1;
 						}
@@ -120,8 +114,8 @@ class ShipHelper
 						return true;
 					}
 					break;
-				// a la technologie nécessaire pour constuire ce vaisseau ?
-				// $sup est un objet de type Technology
+					// a la technologie nécessaire pour constuire ce vaisseau ?
+					// $sup est un objet de type Technology
 				case 'techno':
 					if (1 == $sup->getTechnology(ShipResource::getInfo($shipId, 'techno'))) {
 						return true;

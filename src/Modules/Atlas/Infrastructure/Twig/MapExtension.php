@@ -7,16 +7,21 @@ use App\Modules\Ares\Domain\Specification\Player\CanPlayerAttackPlace;
 use App\Modules\Ares\Domain\Specification\Player\CanPlayerMoveToPlace;
 use App\Modules\Ares\Domain\Specification\Player\CanRecycle;
 use App\Modules\Ares\Domain\Specification\Player\CanSpyPlace;
+use App\Modules\Artemis\Application\Handler\AntiSpyHandler;
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Recycling\GetMissionTime;
 use App\Modules\Athena\Domain\Specification\CanOrbitalBaseTradeWithPlace;
-use App\Modules\Athena\Manager\CommercialRouteManager;
 use App\Modules\Athena\Model\CommercialRoute;
 use App\Modules\Athena\Model\OrbitalBase;
-use App\Modules\Gaia\Manager\PlaceManager;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Gaia\Model\System;
 use App\Modules\Gaia\Resource\SystemResource;
+use App\Modules\Travel\Domain\Service\GetTravelDuration;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 use App\Modules\Zeus\Model\Player;
+use App\Shared\Application\Handler\DurationHandler;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -24,9 +29,14 @@ use Twig\TwigFunction;
 class MapExtension extends AbstractExtension
 {
 	public function __construct(
-		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
-		protected CommercialRouteManager $commercialRouteManager,
-		protected PlaceManager $placeManager,
+		private readonly DurationHandler $durationHandler,
+		private readonly GetTravelDuration $getTravelDuration,
+		private readonly AntiSpyHandler $antiSpyHandler,
+		private readonly GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		private readonly GetMissionTime $getMissionTime,
+		private readonly CurrentPlayerRegistry $currentPlayerRegistry,
+		private readonly CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
 	) {
 	}
 
@@ -40,22 +50,24 @@ class MapExtension extends AbstractExtension
 	public function getFunctions(): array
 	{
 		return [
-			new TwigFunction('get_place', fn (int $placeId) => $this->placeManager->get($placeId)),
-			new TwigFunction('get_base_antispy_radius', fn (OrbitalBase $base) => Game::getAntiSpyRadius($base->getAntiSpyAverage())),
-			new TwigFunction('get_travel_time', fn (OrbitalBase $defaultBase, Place $place) => Game::getTimeTravel(
-				$defaultBase->system,
-				$defaultBase->position,
-				$defaultBase->xSystem,
-				$defaultBase->ySystem,
-				$place->rSystem,
-				$place->position,
-				$place->xSystem,
-				$place->ySystem,
-				$this->currentPlayerBonusRegistry->getPlayerBonus(),
-			)),
+			new TwigFunction('get_base_antispy_radius', fn (OrbitalBase $base) => $this->antiSpyHandler->getAntiSpyRadius($base->antiSpyAverage)),
+			new TwigFunction('get_travel_time', function (OrbitalBase $defaultBase, Place $place) {
+				$departureDate = new \DateTimeImmutable();
+				$arrivalDate = ($this->getTravelDuration)(
+					origin: $defaultBase->place,
+					destination: $place,
+					departureDate: $departureDate,
+					player: $this->currentPlayerRegistry->get(),
+				);
+
+				return $this->durationHandler->getDiff($departureDate, $arrivalDate);
+			}),
 			new TwigFunction('get_place_type', fn (string $type) => Game::convertPlaceType($type)),
 			new TwigFunction('get_system_info', fn (int $systemType, string $info) => SystemResource::getInfo($systemType, $info)),
-			new TwigFunction('get_place_distance', fn (OrbitalBase $defaultBase, Place $place) => Game::getDistance($defaultBase->xSystem, $place->xSystem, $defaultBase->ySystem, $place->ySystem)),
+			new TwigFunction('get_place_distance', fn (OrbitalBase $defaultBase, Place $place) => ($this->getDistanceBetweenPlaces)(
+				$defaultBase->place,
+				$place,
+			)),
 			new TwigFunction('get_max_travel_distance', fn () => Game::getMaxTravelDistance($this->currentPlayerBonusRegistry->getPlayerBonus())),
 			new TwigFunction('get_place_demography', fn (Place $place) => Game::getSizeOfPlanet($place->population)),
 			new TwigFunction('get_place_technosphere_improvement_coeff', fn (Place $place) => Game::getImprovementFromScientificCoef($place->coefHistory)),
@@ -86,15 +98,13 @@ class MapExtension extends AbstractExtension
 
 				return $specification->isSatisfiedBy($place);
 			}),
+			new TwigFunction('get_recycling_mission_time', fn (OrbitalBase $orbitalBase, Place $place) => ($this->getMissionTime)($orbitalBase->place, $place, $this->currentPlayerRegistry->get())),
 		];
 	}
 
 	private function getCommercialRouteData(OrbitalBase $defaultBase, Place $place): array
 	{
-		$routes = array_merge(
-			$this->commercialRouteManager->getByBase($defaultBase->getId()),
-			$this->commercialRouteManager->getByDistantBase($defaultBase->getId())
-		);
+		$routes = $this->commercialRouteRepository->getBaseRoutes($defaultBase);
 
 		$data = [
 			'proposed' => false,
@@ -105,14 +115,14 @@ class MapExtension extends AbstractExtension
 		];
 
 		foreach ($routes as $route) {
-			if ($route->getROrbitalBaseLinked() == $defaultBase->rPlace && CommercialRoute::PROPOSED == $route->statement) {
+			if ($route->destinationBase->id->equals($defaultBase->id) && CommercialRoute::PROPOSED == $route->statement) {
 				--$data['slots'];
 			}
-			if ($place->getId() !== $route->getROrbitalBase() && $place->getId() !== $route->getROrbitalBaseLinked()) {
+			if (!$place->id->equals($route->originBase->place->id) && !$place->id->equals($route->destinationBase->place->id)) {
 				continue;
 			}
-			$data = array_merge($data, match ($route->getStatement()) {
-				CommercialRoute::PROPOSED => ($defaultBase->getId() === $route->getROrbitalBase())
+			$data = array_merge($data, match ($route->statement) {
+				CommercialRoute::PROPOSED => ($defaultBase->id->equals($route->originBase->id))
 						? ['proposed' => true]
 						: ['not_accepted' => true],
 				CommercialRoute::ACTIVE => ['send_resources' => true],

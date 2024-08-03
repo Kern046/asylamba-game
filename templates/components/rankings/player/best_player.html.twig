@@ -10,12 +10,12 @@
 
 			<div class="center-box">
 				<span class="label">
-					{{ get_faction_info(best_player.color, 'status')[best_player.status - 1] }} de {{ get_faction_info(best_player.color, 'popularName') }}
+					{{ get_faction_info(best_player.faction.identifier, 'status')[best_player.status - 1] }} de {{ get_faction_info(best_player.faction.identifier, 'popularName') }}
 				</span>
 				<span class="value">{{ best_player.name }}</span>
 			</div>
 
-			<div class="profil-flag color-{{ best_player.color }}">
+			<div class="profil-flag color-{{ best_player.faction.identifier }}">
 				<img
 					src="{{ asset('build/media//avatar/big/' ~ best_player.avatar ~ '.png') }}"
 					alt="avatar de {{ best_player.name }}"

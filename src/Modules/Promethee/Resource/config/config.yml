@@ -21,7 +21,6 @@ services:
         exclude:
             - '../../Message'
             - '../../Model'
-            - '../../Repository'
             - '../../Resource'
 
     App\Modules\Promethee\Helper\ResearchHelper:

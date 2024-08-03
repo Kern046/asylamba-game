@@ -4,20 +4,27 @@ namespace App\Modules\Demeter\Infrastructure\Controller;
 
 use App\Classes\Library\Format;
 use App\Classes\Redis\RedisManager;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
+use App\Modules\Ares\Domain\Repository\LiveReportRepositoryInterface;
+use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
+use App\Modules\Ares\Domain\Repository\SquadronRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
-use App\Modules\Ares\Manager\LiveReportManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Ares\Resource\CommanderResources;
+use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\CommercialTaxRepositoryInterface;
 use App\Modules\Athena\Manager\CommercialRouteManager;
-use App\Modules\Athena\Manager\CommercialTaxManager;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Atlas\Manager\FactionRankingManager;
+use App\Modules\Atlas\Domain\Repository\FactionRankingRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Demeter\Manager\ColorManager;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Demeter\Resource\LawResources;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
 use App\Modules\Gaia\Galaxy\GalaxyConfiguration;
 use App\Modules\Gaia\Manager\SectorManager;
-use App\Modules\Zeus\Manager\CreditTransactionManager;
+use App\Modules\Gaia\Model\Sector;
+use App\Modules\Zeus\Domain\Repository\CreditTransactionRepositoryInterface;
 use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,82 +34,71 @@ use Symfony\Component\HttpFoundation\Response;
 // @TODO split this controller into multiple ones
 class ViewData extends AbstractController
 {
-	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		ColorManager $colorManager,
-		CommanderManager $commanderManager,
-		CommercialRouteManager $commercialRouteManager,
-		CommercialTaxManager $commercialTaxManager,
-		CreditTransactionManager $creditTransactionManager,
-		LiveReportManager $liveReportManager,
-		FactionRankingManager $factionRankingManager,
-		GalaxyConfiguration $galaxyConfiguration,
-		SectorManager $sectorManager,
-		RedisManager $redisManager,
-	): Response {
-		$faction = $colorManager->get($currentPlayer->getRColor());
+	public function __construct(
+		private readonly CommercialRouteRepositoryInterface $commercialRouteRepository,
+		private readonly ColorRepositoryInterface $colorRepository,
+		private readonly RedisManager $redisManager,
+	) {
 
-		$factionRankingManager->loadByRequest(
-			'WHERE rFaction = ? ORDER BY rRanking DESC LIMIT 0, 20',
-			[$faction->id]
-		);
+	}
+
+	public function __invoke(
+		Request                              $request,
+		Player                               $currentPlayer,
+		CommanderRepositoryInterface         $commanderRepository,
+		CommercialTaxRepositoryInterface     $commercialTaxRepository,
+		CreditTransactionRepositoryInterface $creditTransactionRepository,
+		LiveReportRepositoryInterface        $reportRepository,
+		FactionRankingRepositoryInterface    $factionRankingRepository,
+		GalaxyConfiguration                  $galaxyConfiguration,
+		SectorRepositoryInterface            $sectorRepository,
+		SquadronRepositoryInterface $squadronRepository,
+	): Response {
+		$faction = $currentPlayer->faction;
+
+		$rankings = $factionRankingRepository->getFactionRankings($faction);
 
 		$creditBase = 0;
-		for ($i = 0; $i < $factionRankingManager->size(); ++$i) {
-			if ($creditBase < $factionRankingManager->get($i)->wealth) {
-				$creditBase = $factionRankingManager->get($i)->wealth;
+		
+		foreach ($rankings as $ranking) {
+			if ($creditBase < $ranking->wealth) {
+				$creditBase = $ranking->wealth;
 			}
 		}
 		// @TODO factoriser cette formule
 		$creditBase += $creditBase * 12 / 100;
 
-		// load
-		$creditTransactionManager->newSession();
-		$creditTransactionManager->load(
-			['rReceiver' => $faction->id, 'type' => CreditTransaction::TYP_FACTION],
-			['dTransaction', 'DESC'],
-			[0, 20],
-		);
-		$membersDonations = $creditTransactionManager->getAll();
+		$membersDonations = $creditTransactionRepository->getAllByFactionReceiverFromMembers($faction);
 
-		$creditTransactionManager->newSession();
-		$creditTransactionManager->load(
-			['rSender' => $faction->id, 'type' => CreditTransaction::TYP_F_TO_P],
-			['dTransaction', 'DESC'],
-			[0, 20],
-		);
-		$factionDonations = $creditTransactionManager->getAll();
+		$factionDonations = $creditTransactionRepository->getAllByFactionReceiverFromFactions($faction);
 
-		$commercialTaxManager->newSession();
-		$commercialTaxManager->load(['faction' => $faction->id], ['importTax', 'ASC']);
-		$importaxes = $commercialTaxManager->getAll();
+		$importaxes = $commercialTaxRepository->getFactionTaxesByImport($faction);
 
-		$commercialTaxManager->newSession();
-		$commercialTaxManager->load(['faction' => $faction->id], ['exportTax', 'ASC']);
-		$exportTaxes = $commercialTaxManager->getAll();
+		$exportTaxes = $commercialTaxRepository->getFactionTaxesByExport($faction);
 
-		$commanderStats = $commanderManager->getFactionCommanderStats($faction->getId());
-		$fleetStats = $commanderManager->getFactionFleetStats($faction->getId());
+		$commanderStats = $commanderRepository->getFactionCommanderStats($faction);
+
+		$fleetStats = $squadronRepository->getFactionFleetStats($faction);
 
 		$totalPEV = 0;
 		for ($i = 0; $i < 12; ++$i) {
-			$totalPEV += $fleetStats['nbs'.$i] * ShipResource::getInfo($i, 'pev');
+			$totalPEV += ($fleetStats['nbs'.$i] ?? 0) * ShipResource::getInfo($i, 'pev');
 		}
 
-		$factions = $colorManager->getAll();
-		$sectors = $sectorManager->getAll();
-		$mapData = $this->getTacticalMapData($faction->getId(), $factions, $sectors, $redisManager);
+		$factions = $this->colorRepository->findAll();
+		$sectors = $sectorRepository->getAll();
+		$mapData = $this->getTacticalMapData($faction, $factions, $sectors);
 
 		return $this->render('pages/demeter/faction/data.html.twig', [
 			'faction' => $faction,
 			'credit_base' => $creditBase,
-			'faction_rankings' => $factionRankingManager->getAll(),
+			'faction_rankings' => $rankings,
 			'members_donations' => $membersDonations,
 			'faction_donations' => $factionDonations,
-			'faction_sectors' => $sectorManager->getFactionSectors($faction->id),
-			'rc_data' => $commercialRouteManager->getCommercialRouteFactionData($faction->id),
-			'rc_diplomatic_data' => $this->getCommercialRoutesDiplomaticData($faction, $commercialRouteManager),
+			'faction_sectors' => $sectorRepository->getFactionSectors($faction),
+			'rc_data' => $this->commercialRouteRepository->getCommercialRouteFactionData($faction),
+			'faction_internal_commercial_routes_data' => $this->commercialRouteRepository->getInternalCommercialRouteFactionData($faction),
+			'rc_diplomatic_data' => $this->getCommercialRoutesDiplomaticData($faction),
 			'import_taxes' => $importaxes,
 			'export_taxes' => $exportTaxes,
 			'commanders_ranks_count' => CommanderResources::size(),
@@ -110,8 +106,8 @@ class ViewData extends AbstractController
 			'commander_stats' => $commanderStats,
 			'fleet_stats' => $fleetStats,
 			'total_pev' => $totalPEV,
-			'attack_reports' => $liveReportManager->getFactionAttackReports($faction->getId()),
-			'defense_reports' => $liveReportManager->getFactionDefenseReports($faction->getId()),
+			'attack_reports' => $reportRepository->getFactionAttackReports($faction),
+			'defense_reports' => $reportRepository->getFactionDefenseReports($faction),
 			'sectors' => $sectors,
 			'map_scale' => 750 / $galaxyConfiguration->galaxy['size'],
 			'map_data_types' => $mapData['types'],
@@ -130,7 +126,13 @@ class ViewData extends AbstractController
 		]);
 	}
 
-	private function getTacticalMapData(int $factionId, array $factions, array $sectors, RedisManager $redisManager): array
+	/**
+	 * @param list<Color> $factions
+	 * @param list<Sector> $sectors
+	 * @return array<string, array>
+	 * @throws \RedisException
+	 */
+	private function getTacticalMapData(Color $faction, array $factions, array $sectors): array
 	{
 		$scores = $percents = [];
 
@@ -141,27 +143,27 @@ class ViewData extends AbstractController
 
 		foreach (array_keys($types) as $type) {
 			foreach ($sectors as $key => $sector) {
-				$percents = ['color'.$factionId => 0];
-				$scores = unserialize($redisManager->getConnection()->get('sector:'.$sector->getId()));
+				$percents = ['color'.$faction->identifier => 0];
+				$scores = unserialize($this->redisManager->getConnection()->get('sector:'.$sector->identifier));
 
-				if (!isset($scores[$factionId]) && $sector->getRColor() !== $factionId) {
+				if (!isset($scores[$faction->identifier]) && !$sector->faction?->id->equals($faction->id)) {
 					unset($sectors[$key]);
 					continue;
 				}
-				if ('Secteurs conquis' === $type && $sector->getRColor() !== $factionId) {
+				if ('Secteurs conquis' === $type && !$sector->faction?->id->equals($faction->id)) {
 					continue;
 				}
 
 				foreach ($factions as $f) {
-					if (0 === $f->id || !isset($scores[$f->id])) {
+					if (0 === $f->id || !isset($scores[$f->identifier])) {
 						continue;
 					}
-					$percents['color'.$f->id] = round(Format::percent($scores[$f->id], array_sum($scores), false));
+					$percents['color'.$f->id] = round(Format::percent($scores[$f->identifier], array_sum($scores), false));
 				}
 
 				arsort($percents);
 
-				if ($sector->getRColor() == $factionId || ($scores[$factionId] > 0)) {
+				if ($sector?->faction->id->equals($faction->id) || ($scores[$faction->identifier] > 0)) {
 					$types[$type] = $sector;
 				}
 			}
@@ -177,12 +179,15 @@ class ViewData extends AbstractController
 	/**
 	 * @return array<int, int>
 	 */
-	private function getCommercialRoutesDiplomaticData(Color $faction, CommercialRouteManager $commercialRouteManager): array
+	private function getCommercialRoutesDiplomaticData(Color $faction): array
 	{
 		return array_reduce(
-			array_filter(array_keys($faction->getColorLink()), fn ($factionId) => !in_array($factionId, [0, $faction->getId()])),
-			function ($acc, $factionId) use ($faction, $commercialRouteManager) {
-				$acc[$factionId] = $commercialRouteManager->countCommercialRoutesBetweenFactions($faction->getId(), $factionId);
+			array_filter(array_keys($faction->relations), fn (int $factionId) => !in_array($factionId, [0, $faction->identifier])),
+			function ($acc, $factionId) use ($faction) {
+				$acc[$factionId] = $this->commercialRouteRepository->countCommercialRoutesBetweenFactions(
+					$faction,
+					$this->colorRepository->getOneByIdentifier($factionId),
+				);
 
 				return $acc;
 			},

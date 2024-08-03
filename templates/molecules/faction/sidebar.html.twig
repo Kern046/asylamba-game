@@ -10,7 +10,7 @@
 			</span>
 		</a>
 
-		{% if faction.hasOngoingElectionCampagin %}
+		{% if faction.hasOngoingElectionCampaign %}
 			<a href="{{ path('view_faction_election') }}" class="item {% if app.request.get('_route') == 'faction_election' %}active{% endif %}">
 				<span class="picto">
 					<img src="{{ asset('build/media/faction/nav/election.png') }}" alt="" />
@@ -21,7 +21,6 @@
 			</a>
 		{% endif %}
 
-		{#
 		<a href="{{ path('faction_forum') }}" class="item {% if app.request.get('_route') == 'faction_forum' %}active{% endif %}">
 			<span class="picto">
 				<img src="{{ asset('build/media/faction/nav/forum.png') }}" alt="" />
@@ -30,7 +29,6 @@
 				<span>Forum</span>
 			</span>
 		</a>
-		#}
 
 		{% if current_player.isGovernmentMember %}
 			<a href="{{ path('faction_government') }}" class="item {% if app.request.get('_route') == 'faction_government' %}active{% endif %}">

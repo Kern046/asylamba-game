@@ -1,0 +1,64 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Promethee\Model\Technology" table="technology">
+		<id name="id" type="uuid" />
+		
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player">
+			<join-column nullable="false" />
+		</many-to-one>
+
+		<field name="comPlatUnblock" type="smallint" />
+		<field name="dock2Unblock" type="smallint" />
+		<field name="dock3Unblock" type="smallint" />
+		<field name="recyclingUnblock" type="smallint" />
+		<field name="spatioportUnblock" type="smallint" />
+
+		<field name="ship0Unblock" type="smallint" />
+		<field name="ship1Unblock" type="smallint" />
+		<field name="ship2Unblock" type="smallint" />
+		<field name="ship3Unblock" type="smallint" />
+		<field name="ship4Unblock" type="smallint" />
+		<field name="ship5Unblock" type="smallint" />
+		<field name="ship6Unblock" type="smallint" />
+		<field name="ship7Unblock" type="smallint" />
+		<field name="ship8Unblock" type="smallint" />
+		<field name="ship9Unblock" type="smallint" />
+		<field name="ship10Unblock" type="smallint" />
+		<field name="ship11Unblock" type="smallint" />
+
+		<field name="colonization" type="smallint" />
+		<field name="conquest" type="smallint" />
+
+		<field name="generatorSpeed" type="smallint" />
+		<field name="refineryRefining" type="smallint" />
+		<field name="refineryStorage" type="smallint" />
+		<field name="dock1Speed" type="smallint" />
+		<field name="dock2Speed" type="smallint" />
+		<field name="technosphereSpeed" type="smallint" />
+		<field name="commercialIncomeUp" type="smallint" />
+		<field name="gravitModuleUp" type="smallint" />
+		<field name="dock3Speed" type="smallint" />
+
+		<field name="populationTaxUp" type="smallint" />
+		<field name="commanderInvestUp" type="smallint" />
+		<field name="uniInvestUp" type="smallint" />
+		<field name="antiSpyInvestUp" type="smallint" />
+
+		<field name="spaceShipsSpeed" type="smallint" />
+		<field name="spaceShipsContainer" type="smallint" />
+
+		<field name="baseQuantity" type="smallint" />
+
+		<field name="fighterSpeed" type="smallint" />
+		<field name="fighterAttack" type="smallint" />
+		<field name="fighterDefense" type="smallint" />
+		<field name="corvetteSpeed" type="smallint" />
+		<field name="corvetteAttack" type="smallint" />
+		<field name="corvetteDefense" type="smallint" />
+		<field name="frigateSpeed" type="smallint" />
+		<field name="frigateAttack" type="smallint" />
+		<field name="frigateDefense" type="smallint" />
+		<field name="destroyerSpeed" type="smallint" />
+		<field name="destroyerAttack" type="smallint" />
+		<field name="destroyerDefense" type="smallint" />
+	</entity>
+</doctrine-mapping>

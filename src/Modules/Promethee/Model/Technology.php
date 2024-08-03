@@ -11,67 +11,74 @@
 
 namespace App\Modules\Promethee\Model;
 
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
+
 class Technology
 {
-	public int $rPlayer;
+	public function __construct(
+		public Uuid $id,
+		public Player $player,
+		// @TODO convert to boolean (but beware the technologies with level which must remain integers)
+		// technologies de débloquage (0 = bloqué, 1 = débloqué)
+		public int $comPlatUnblock = 0,
+		public int $dock2Unblock = 0,
+		public int $dock3Unblock = 0,
+		public int $recyclingUnblock = 0,
+		public int $spatioportUnblock = 0,
 
-	// @TODO Convert to boolean
-	// technologies de débloquage (0 = bloqué, 1 = débloqué)
-	public int $comPlatUnblock = 0;
-	public int $dock2Unblock = 0;
-	public int $dock3Unblock = 0;
-	public int $recyclingUnblock = 0;
-	public int $spatioportUnblock = 0;
+		public int $ship0Unblock = 0,
+		public int $ship1Unblock = 0,
+		public int $ship2Unblock = 0,
+		public int $ship3Unblock = 0,
+		public int $ship4Unblock = 0,
+		public int $ship5Unblock = 0,
+		public int $ship6Unblock = 0,
+		public int $ship7Unblock = 0,
+		public int $ship8Unblock = 0,
+		public int $ship9Unblock = 0,
+		public int $ship10Unblock = 0,
+		public int $ship11Unblock = 0,
 
-	public int $ship0Unblock = 0;
-	public int $ship1Unblock = 0;
-	public int $ship2Unblock = 0;
-	public int $ship3Unblock = 0;
-	public int $ship4Unblock = 0;
-	public int $ship5Unblock = 0;
-	public int $ship6Unblock = 0;
-	public int $ship7Unblock = 0;
-	public int $ship8Unblock = 0;
-	public int $ship9Unblock = 0;
-	public int $ship10Unblock = 0;
-	public int $ship11Unblock = 0;
+		public int $colonization = 0,
+		public int $conquest = 0,
 
-	public int $colonization = 0;
-	public int $conquest = 0;
+		// technologies à niveau
+		public int $generatorSpeed = 0,
+		public int $refineryRefining = 0,
+		public int $refineryStorage = 0,
+		public int $dock1Speed = 0,
+		public int $dock2Speed = 0,
+		public int $technosphereSpeed = 0,
+		public int $commercialIncomeUp = 0,
+		public int $gravitModuleUp = 0,
+		public int $dock3Speed = 0,
 
-	// technologies à niveau
-	public int $generatorSpeed = 0;
-	public int $refineryRefining = 0;
-	public int $refineryStorage = 0;
-	public int $dock1Speed = 0;
-	public int $dock2Speed = 0;
-	public int $technosphereSpeed = 0;
-	public int $commercialIncomeUp = 0;
-	public int $gravitModuleUp = 0;
-	public int $dock3Speed = 0;
+		public int $populationTaxUp = 0,
+		public int $commanderInvestUp = 0,
+		public int $uniInvestUp = 0,
+		public int $antiSpyInvestUp = 0,
 
-	public int $populationTaxUp = 0;
-	public int $commanderInvestUp = 0;
-	public int $uniInvestUp = 0;
-	public int $antiSpyInvestUp = 0;
+		public int $spaceShipsSpeed = 0,
+		public int $spaceShipsContainer = 0, // soute
 
-	public int $spaceShipsSpeed = 0;
-	public int $spaceShipsContainer = 0; // soute
+		public int $baseQuantity = 0,
 
-	public int $baseQuantity = 0;
-
-	public int $fighterSpeed = 0;
-	public int $fighterAttack = 0;
-	public int $fighterDefense = 0;
-	public int $corvetteSpeed = 0;
-	public int $corvetteAttack = 0;
-	public int $corvetteDefense = 0;
-	public int $frigateSpeed = 0;
-	public int $frigateAttack = 0;
-	public int $frigateDefense = 0;
-	public int $destroyerSpeed = 0;
-	public int $destroyerAttack = 0;
-	public int $destroyerDefense = 0;
+		public int $fighterSpeed = 0,
+		public int $fighterAttack = 0,
+		public int $fighterDefense = 0,
+		public int $corvetteSpeed = 0,
+		public int $corvetteAttack = 0,
+		public int $corvetteDefense = 0,
+		public int $frigateSpeed = 0,
+		public int $frigateAttack = 0,
+		public int $frigateDefense = 0,
+		public int $destroyerSpeed = 0,
+		public int $destroyerAttack = 0,
+		public int $destroyerDefense = 0,
+	) {
+		
+	}
 
 	public const COEF_POINTS = 1;
 	public const COEF_TIME = 1;

@@ -1,111 +1,86 @@
 <?php
 
-/**
- * Sector Manager.
- *
- * @author Expansion
- * @copyright Expansion - le jeu
- *
- * @update 20.05.13
- */
+declare(strict_types=1);
 
 namespace App\Modules\Gaia\Manager;
 
-use App\Classes\Entity\EntityManager;
 use App\Classes\Redis\RedisManager;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Gaia\Domain\Repository\SystemRepositoryInterface;
 use App\Modules\Gaia\Model\Sector;
-use App\Modules\Zeus\Manager\PlayerManager;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class SectorManager
+readonly class SectorManager
 {
+	private const CONTROLLED_SYSTEM_POINTS = 2;
+
 	public function __construct(
-		protected EntityManager $entityManager,
-		protected RedisManager $redisManager,
-		protected OrbitalBaseManager $orbitalBaseManager,
-		protected PlayerManager $playerManager,
-		protected SystemManager $systemManager,
-		protected array $scores = [],
+		private ColorRepositoryInterface $colorRepository,
+		private RedisManager                   $redisManager,
+		private SystemRepositoryInterface      $systemRepository,
+		private SectorRepositoryInterface $sectorRepository,
+		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		#[Autowire('%gaia.sector_minimal_score%')]
+		private int $sectorMinimalScore,
+		#[Autowire('%gaia.scores%')]
+		private array $scores = [],
 	) {
 	}
 
-	public function initOwnershipData()
-	{
-		// $this->loadBalancer->affectTask(
-		//    $this->taskManager->createTechnicalTask('gaia.sector_manager', 'calculateAllOwnerships')
-		// );
-	}
-
 	/**
-	 * @param int $id
+	 * Returns a sorted array with faction identifiers as keys and their ownership score as values
+	 * The highest score is first
 	 *
-	 * @return Sector
+	 * @return array<int, int>
 	 */
-	public function get($id)
+	public function calculateOwnership(Sector $sector): array
 	{
-		return $this->entityManager->getRepository(Sector::class)->get($id);
-	}
-
-	/**
-	 * @param int $factionId
-	 *
-	 * @return array
-	 */
-	public function getFactionSectors($factionId)
-	{
-		return $this->entityManager->getRepository(Sector::class)->getFactionSectors($factionId);
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAll()
-	{
-		return $this->entityManager->getRepository(Sector::class)->getAll();
-	}
-
-	public function changeOwnership(Sector $sector)
-	{
-		$this->entityManager->getRepository(Sector::class)->changeOwnership($sector);
-	}
-
-	public function calculateAllOwnerships()
-	{
-		foreach ($this->getAll() as $sector) {
-			$this->calculateOwnership($sector);
-		}
-	}
-
-	/**
-	 * @return array
-	 */
-	public function calculateOwnership(Sector $sector)
-	{
-		$systems = $this->systemManager->getSectorSystems($sector->getId());
-		$bases = $this->orbitalBaseManager->getSectorBases($sector->getId());
+		$systems = $this->systemRepository->getSectorSystems($sector);
+		$bases = $this->orbitalBaseRepository->getSectorBases($sector);
 		$scores = [];
 
 		foreach ($bases as $base) {
-			$player = $this->playerManager->get($base->rPlayer);
+			$player = $base->player;
 
-			$scores[$player->rColor] =
-				(!empty($scores[$player->rColor]))
-				? $scores[$player->rColor] + $this->scores[$base->typeOfBase]
+			$scores[$player->faction->identifier] =
+				(!empty($scores[$player->faction->identifier]))
+				? $scores[$player->faction->identifier] + $this->scores[$base->typeOfBase]
 				: $this->scores[$base->typeOfBase]
 			;
 		}
 		// For each system, the owning faction gains two points
 		foreach ($systems as $system) {
-			if (0 === $system->rColor) {
+			if (null === $system->faction) {
 				continue;
 			}
-			$scores[$system->rColor] = (!empty($scores[$system->rColor])) ? $scores[$system->rColor] + 2 : 2;
+			$scores[$system->faction->identifier] = (!empty($scores[$system->faction->identifier]))
+				? $scores[$system->faction->identifier] + self::CONTROLLED_SYSTEM_POINTS
+				: self::CONTROLLED_SYSTEM_POINTS;
 		}
 		$scores[0] = 0;
 		arsort($scores);
-		reset($scores);
 
-		$this->redisManager->getConnection()->set('sector:'.$sector->getId(), serialize($scores));
+		$newColor = key($scores);
+		$score = $scores[$newColor];
+		$hasEnoughPoints = $score >= $this->sectorMinimalScore;
+
+		$currentFactionIdentifier = $sector->faction?->identifier ?? 0;
+
+		if (!$hasEnoughPoints) {
+			// If this is a prime sector, we do not pull back the color from the sector
+			// TODO check behavior if another faction has taken the prime sector before
+			if (!$sector->prime) {
+				$sector->faction = null;
+			}
+		} elseif ($currentFactionIdentifier !== $newColor && $score > $scores[$currentFactionIdentifier]) {
+			$sector->faction = $this->colorRepository->getOneByIdentifier($newColor);
+		}
+
+		$this->sectorRepository->save($sector);
+
+		$this->redisManager->getConnection()->set('sector:' . $sector->id, serialize($scores));
 
 		return $scores;
 	}

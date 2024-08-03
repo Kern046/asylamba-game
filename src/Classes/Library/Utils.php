@@ -2,6 +2,8 @@
 
 namespace App\Classes\Library;
 
+use App\Shared\Application\Handler\DurationHandler;
+
 class Utils
 {
 	private static $autorizedChar = [
@@ -25,11 +27,17 @@ class Utils
 		]);
 	}
 
-	public static function now()
+	/**
+	 * @deprecated use {@see \DateTimeImmutable} instead
+	 */
+	public static function now(): string
 	{
 		return date('Y-m-d H:i:s');
 	}
 
+	/**
+	 * @deprecated Use {@see DurationHandler::getHoursDiff()} instead
+	 */
 	public static function interval($date1, $date2, $precision = 'h')
 	{
 		if ('h' == $precision) {
@@ -55,6 +63,9 @@ class Utils
 		}
 	}
 
+	/**
+	 * @deprecated Use {@see DurationHandler::getHoursDiff()} instead
+	 */
 	public static function intervalDates($date1, $date2, $precision = 'h')
 	{
 		// give each full hours between two dates
@@ -106,35 +117,13 @@ class Utils
 		return $dates;
 	}
 
-	public static function hasAlreadyHappened($date, $now = false)
-	{
-		if (false === $now) {
-			$now = self::now();
-		}
-
-		if (strtotime($date) <= strtotime($now)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
+	/**
+	 * @see DurationHandler::getDurationEnd()
+	 * @deprecated Use \DateTimeImmutable instead
+	 */
 	public static function addSecondsToDate($date, $seconds)
 	{
 		return date('Y-m-d H:i:s', strtotime($date) + $seconds);
-	}
-
-	public static function nextOClock($date, $i = 1)
-	{
-		list($left, $right) = explode(' ', $date);
-		list($h, $m, $s) = explode(':', $right);
-
-		return $left.' '.($h + $i).':00:00';
-	}
-
-	public static function getDateFromTimestamp($timestamp)
-	{
-		return date('Y-m-d H:i:s', $timestamp);
 	}
 
 	public static function generateString($nbr)
@@ -158,69 +147,6 @@ class Utils
 		}
 
 		return $string;
-	}
-
-	public static function arrayToWhere($array, $prefix = '')
-	{
-		if (!empty($array)) {
-			$i = 0;
-			$return = '';
-
-			foreach ($array as $k => $v) {
-				if (0 == $i) {
-					$return .= 'WHERE ';
-				} else {
-					$return .= ' AND ';
-				}
-				if (is_array($v)) {
-					$return .= ' (';
-					for ($j = 0; $j < count($v); ++$j) {
-						if (0 == $j) {
-							$return .= $prefix.$k.' = ?';
-						} else {
-							$return .= ' OR '.$prefix.$k.' = ?';
-						}
-					}
-					$return .= ') ';
-				} else {
-					$return .= $prefix.$k.' = ? ';
-				}
-				++$i;
-			}
-
-			return $return;
-		}
-	}
-
-	public static function arrayToOrder($array, $prefix = '')
-	{
-		if (!empty($array)) {
-			$return = 'ORDER BY';
-			$i = 0;
-			foreach ($array as $k) {
-				if (1 != $i % 2 and 0 != $i) {
-					$return .= ',';
-				}
-				$return .= ' '.$prefix.$k;
-				++$i;
-			}
-
-			return $return;
-		}
-	}
-
-	public static function arrayToLimit($array)
-	{
-		if (empty($array)) {
-			return '';
-		} else {
-			return 'LIMIT '.$array[0].', '.$array[1];
-		}
-	}
-
-	public static function hashAndSalt($string)
-	{
-		return sha1($string.'abdelazer');
 	}
 
 	public static function shuffle(&$array)

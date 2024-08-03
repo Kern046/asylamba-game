@@ -2,54 +2,43 @@
 
 namespace App\Modules\Zeus\Manager;
 
-use App\Classes\Exception\ErrorException;
-use App\Modules\Demeter\Manager\ColorManager;
-use App\Modules\Demeter\Manager\Law\LawManager;
+use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
 use App\Modules\Demeter\Model\Law\Law;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Demeter\Resource\LawResources;
+use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Helper\TechnologyHelper;
-use App\Modules\Promethee\Manager\TechnologyManager;
 use App\Modules\Promethee\Model\TechnologyId;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
+use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
+use App\Modules\Zeus\Domain\Exception\NoCurrentPlayerSetException;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerBonus;
 use App\Modules\Zeus\Model\PlayerBonusId;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\Service\Attribute\Required;
 
-class PlayerBonusManager
+readonly class PlayerBonusManager
 {
-	protected ColorManager $colorManager;
-	protected TechnologyHelper $technologyHelper;
-	protected TechnologyManager $technologyManager;
-
 	public function __construct(
-		protected LawManager $lawManager,
-		protected RequestStack $requestStack,
+		private CurrentPlayerRegistry $currentPlayerRegistry,
+		private CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
+		private TechnologyRepositoryInterface $technologyRepository,
+		private TechnologyHelper              $technologyHelper,
+		private LawRepositoryInterface        $lawRepository,
 	) {
-	}
-
-	#[Required]
-	public function setColorManager(ColorManager $colorManager): void
-	{
-		$this->colorManager = $colorManager;
-	}
-
-	#[Required]
-	public function setTechnologyHelper(TechnologyHelper $technologyHelper): void
-	{
-		$this->technologyHelper = $technologyHelper;
-	}
-
-	#[Required]
-	public function setTechnologyManager(TechnologyManager $technologyManager): void
-	{
-		$this->technologyManager = $technologyManager;
 	}
 
 	public function getBonusByPlayer(Player $player): PlayerBonus
 	{
-		$technology = $this->technologyManager->getPlayerTechnology($player->id);
+		// Failsafe to avoid reloading the current player bonus
+		try {
+			if ($this->currentPlayerRegistry->get()->id === $player->id && $this->currentPlayerBonusRegistry->isInitialized()) {
+				return $this->currentPlayerBonusRegistry->getPlayerBonus();
+			}
+		} catch (NoCurrentPlayerSetException $exception) {
+		}
+
+
+		$technology = $this->technologyRepository->getPlayerTechnology($player);
 		$playerBonus = new PlayerBonus($player, $technology);
 
 		// remplissage de l'objet normalement
@@ -82,7 +71,7 @@ class PlayerBonusManager
 
 	private function addLawBonus(PlayerBonus $playerBonus): void
 	{
-		$laws = $this->lawManager->getByFactionAndStatements($playerBonus->playerColor, [Law::EFFECTIVE]);
+		$laws = $this->lawRepository->getByFactionAndStatements($playerBonus->playerColor, [Law::EFFECTIVE]);
 		foreach ($laws as $law) {
 			switch ($law->type) {
 				case Law::MILITARYSUBVENTION:
@@ -102,62 +91,64 @@ class PlayerBonusManager
 
 	private function addFactionBonus(PlayerBonus $playerBonus): void
 	{
-		$color = $this->colorManager->get($playerBonus->playerColor);
+		$color = $playerBonus->playerColor ?? throw new \LogicException('Bonus must have a faction');
 
-		if (in_array(ColorResource::DEFENSELITTLESHIPBONUS, $color->bonus)) {
+		$bonus = ColorResource::getInfo($color->identifier, 'bonus');
+
+		if (in_array(ColorResource::DEFENSELITTLESHIPBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::FIGHTER_DEFENSE, 5);
 			$playerBonus->bonuses->increase(PlayerBonusId::CORVETTE_DEFENSE, 5);
 			$playerBonus->bonuses->increase(PlayerBonusId::FRIGATE_DEFENSE, 5);
 			$playerBonus->bonuses->increase(PlayerBonusId::DESTROYER_DEFENSE, 5);
 		}
 
-		if (in_array(ColorResource::SPEEDLITTLESHIPBONUS, $color->bonus)) {
+		if (in_array(ColorResource::SPEEDLITTLESHIPBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::FIGHTER_SPEED, 10);
 			$playerBonus->bonuses->increase(PlayerBonusId::CORVETTE_SPEED, 10);
 		}
 
-		if (in_array(ColorResource::DEFENSELITTLESHIPMALUS, $color->bonus)) {
+		if (in_array(ColorResource::DEFENSELITTLESHIPMALUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::FRIGATE_DEFENSE, -5);
 			$playerBonus->bonuses->increase(PlayerBonusId::DESTROYER_DEFENSE, -5);
 		}
 
-		if (in_array(ColorResource::COMMERCIALROUTEBONUS, $color->bonus)) {
+		if (in_array(ColorResource::COMMERCIALROUTEINCOMEBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::COMMERCIAL_INCOME, 5);
 		}
 
-		if (in_array(ColorResource::TAXBONUS, $color->bonus)) {
+		if (in_array(ColorResource::TAXBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::POPULATION_TAX, 3);
 		}
 
-		if (in_array(ColorResource::LOOTRESOURCESMALUS, $color->bonus)) {
+		if (in_array(ColorResource::LOOTRESOURCESMALUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::SHIP_CONTAINER, -5);
 		}
 
-		if (in_array(ColorResource::RAFINERYBONUS, $color->bonus)) {
+		if (in_array(ColorResource::RAFINERYBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::REFINERY_REFINING, 4);
 		}
 
-		if (in_array(ColorResource::STORAGEBONUS, $color->bonus)) {
+		if (in_array(ColorResource::STORAGEBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::REFINERY_STORAGE, 4);
 		}
 
-		if (in_array(ColorResource::BIGACADEMICBONUS, $color->bonus)) {
+		if (in_array(ColorResource::BIGACADEMICBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::UNI_INVEST, 4);
 		}
 
-		if (in_array(ColorResource::COMMANDERSCHOOLBONUS, $color->bonus)) {
+		if (in_array(ColorResource::COMMANDERSCHOOLBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::COMMANDER_INVEST, 6);
 		}
 
-		if (in_array(ColorResource::LITTLEACADEMICBONUS, $color->bonus)) {
+		if (in_array(ColorResource::LITTLEACADEMICBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::UNI_INVEST, 2);
 		}
 
-		if (in_array(ColorResource::TECHNOLOGYBONUS, $color->bonus)) {
+		if (in_array(ColorResource::TECHNOLOGYBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::TECHNOSPHERE_SPEED, 2);
 		}
 
-		if (in_array(ColorResource::DEFENSELITTLESHIPBONUS, $color->bonus)) {
+		if (in_array(ColorResource::DEFENSELITTLESHIPBONUS, $bonus)) {
 			$playerBonus->bonuses->increase(PlayerBonusId::FIGHTER_DEFENSE, 5);
 			$playerBonus->bonuses->increase(PlayerBonusId::CORVETTE_DEFENSE, 5);
 			$playerBonus->bonuses->increase(PlayerBonusId::FRIGATE_DEFENSE, 5);
@@ -171,10 +162,10 @@ class PlayerBonusManager
 			if ($increment > 0) {
 				$playerBonus->bonuses->add($bonusId, $playerBonus->bonuses->get($bonusId) + $increment);
 			} else {
-				throw new ErrorException('incrémentation de bonus impossible - l\'incrément doit être positif');
+				throw new \LogicException('incrémentation de bonus impossible - l\'incrément doit être positif');
 			}
 		} else {
-			throw new ErrorException('incrémentation de bonus impossible - bonus invalide');
+			throw new \LogicException('incrémentation de bonus impossible - bonus invalide');
 		}
 	}
 
@@ -185,13 +176,13 @@ class PlayerBonusManager
 				if ($decrement <= $playerBonus->bonuses->get($bonusId)) {
 					$playerBonus->bonuses->add($bonusId, $playerBonus->bonuses->get($bonusId) - $decrement);
 				} else {
-					throw new ErrorException('décrémentation de bonus impossible - le décrément est plus grand que le bonus');
+					throw new \LogicException('décrémentation de bonus impossible - le décrément est plus grand que le bonus');
 				}
 			} else {
-				throw new ErrorException('décrémentation de bonus impossible - le décrément doit être positif');
+				throw new \LogicException('décrémentation de bonus impossible - le décrément doit être positif');
 			}
 		} else {
-			throw new ErrorException('décrémentation de bonus impossible - bonus invalide');
+			throw new \LogicException('décrémentation de bonus impossible - bonus invalide');
 		}
 	}
 

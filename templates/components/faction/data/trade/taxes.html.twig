@@ -4,7 +4,7 @@
 		<div class="body">
 			<h4>{{ label }}</h4>
 			{% for tax in taxes %}
-				{% set faction_id = tax.relatedFaction %}
+				{% set faction_id = tax.relatedFaction.identifier %}
 				<div class="player faction color{{ faction_id }}">
 					<a href="{{ path('embassy', {'faction': faction_id}) }}">
 						<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_id ~ '.png') }}" alt="" class="picto">

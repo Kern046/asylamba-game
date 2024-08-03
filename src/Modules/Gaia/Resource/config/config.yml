@@ -14,15 +14,7 @@ services:
         exclude:
             - '../../Message'
             - '../../Model'
-            - '../../Repository'
             - '../../Resource'
-
-    App\Modules\Gaia\Helper\ActionHelper:
-        arguments:
-            $rootPath: '%kernel.project_dir%'
-            $mediaPath: '%media%'
-            $routeSectorBonus: "%athena.trade.route.sector_bonus%"
-            $routeColorBonus: "%athena.trade.route.color_bonus%"
 
     App\Modules\Gaia\Helper\GalaxyGenerator: ~
             
@@ -30,26 +22,11 @@ services:
         arguments:
             $availableFactions: "%game.available_factions%"
             $limitConquestSector: "%gaia.limit_conquest_sector%"
-
-    App\Modules\Gaia\Manager\PlaceManager:
-        arguments:
-            $mediaPath: "%media%"
-
-    App\Modules\Gaia\Manager\SectorManager:
-        arguments:
-            $scores: "%gaia.scores%"
             
     App\Modules\Gaia\Galaxy\GalaxyConfiguration:
         public: true
         class: "%gaia.galaxy_configuration.class%"
-        
-    App\Modules\Gaia\EventListener\SectorListener:
-        arguments:
-            $scores: "%gaia.scores%"
-            $sectorMinimalScore: "%gaia.sector_minimal_score%"
-        tags:
-            - {name: "kernel.event_listener", event: "gaia.place_owner_change", method: "onPlaceOwnerChange", priority: 1}
-            
+
     App\Modules\Gaia\EventListener\SystemListener:
         arguments:
             $scores: "%gaia.scores%"

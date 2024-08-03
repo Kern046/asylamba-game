@@ -1,4 +1,4 @@
-{% set statuses = get_faction_info(current_player.rColor, 'status') %}
+{% set statuses = get_faction_info(current_player.faction.identifier, 'status') %}
 
 <div class="component player profil size1">
 	<div class="head"></div>
@@ -8,7 +8,7 @@
 				{% if faction.isDemocratic %}
 					<div class="build-item">
 						{% if player_vote is not null %}
-							{% if player_vote.rCandidate == candidate.rPlayer %}
+							{% if player_vote.candidate.player.id == candidate.player.id %}
 								<span class="button disable" style="text-align: center;">
 									<span class="text" style="line-height: 35px;">Vous avez voté pour lui</span>
 								</span>
@@ -18,7 +18,7 @@
 								</span>
 							{% endif %}
 						{% else %}
-							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.rPlayer }) }}" style="text-align: center;">
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id }) }}" style="text-align: center;">
 								<span class="text" style="line-height: 35px;">Voter</span>
 							</a>
 						{% endif %}
@@ -26,7 +26,7 @@
 				{% else %}
 					<div class="build-item">
 						{% if player_vote is not null %}
-							{% if player_vote.candidate == candidate.rPlayer %}
+							{% if player_vote.hasApproved %}
 								<span class="button disable" style="text-align: center;">
 									<span class="text" style="line-height: 35px;">Vous avez soutenu le coup d'état</span>
 								</span>
@@ -36,10 +36,10 @@
 								</span>
 							{% endif %}
 						{% else %}
-							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id}) }}" style="text-align: center;">
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id, 'hasApproved': true}) }}" style="text-align: center;">
 								<span class="text" style="line-height: 35px;">Soutenir le coup d'état</span>
 							</a>
-							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': 0}) }}" style="text-align: center;">
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id, 'hasApproved': false}) }}" style="text-align: center;">
 								<span class="text" style="line-height: 35px;">Rejeter le coup d'état</span>
 							</a>
 						{% endif %}
@@ -49,13 +49,13 @@
 
 			<div class="center-box">
 				<span class="label">
-					{{ statuses[candidate.status - 1] }}
+					{{ statuses[candidate.player.status - 1] }}
 				</span>
-				<span class="value">{{ candidate.name }}</span>
+				<span class="value">{{ candidate.player.name }}</span>
 			</div>
 
 			<div class="profil-flag">
-				<img src="{{ asset('build/media/avatar/big/' ~ candidate.avatar ~ '.png') }}" alt="{{ candidate.name }}">
+				<img src="{{ asset('build/media/avatar/big/' ~ candidate.player.avatar ~ '.png') }}" alt="{{ candidate.player.name }}">
 			</div>
 		</div>
 	</div>

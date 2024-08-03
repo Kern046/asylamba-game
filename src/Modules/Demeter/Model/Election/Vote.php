@@ -1,26 +1,18 @@
 <?php
 
-/**
- * Vote Forum.
- *
- * @author Noé Zufferey
- * @copyright Expansion - le jeu
- *
- * @update 06.10.13
- */
-
 namespace App\Modules\Demeter\Model\Election;
+
+use App\Modules\Zeus\Model\Player;
+use Symfony\Component\Uid\Uuid;
 
 class Vote
 {
-	public $id = 0;
-	public $rCandidate = 0;
-	public $rPlayer = 0;
-	public $rElection = 0;
-	public $dVotation = '';
-
-	public function getId()
-	{
-		return $this->id;
+	public function __construct(
+		public Uuid $id,
+		public Candidate $candidate,
+		public Player $player,
+		public bool $hasApproved,
+		public \DateTimeImmutable $votedAt,
+	) {
 	}
 }

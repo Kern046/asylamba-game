@@ -2,79 +2,75 @@
 
 namespace App\Modules\Ares\Infrastructure\Controller\Fleet;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\ErrorException;
-use App\Classes\Library\Game;
+use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
+use App\Modules\Ares\Domain\Model\CommanderMission;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
-use App\Modules\Gaia\Manager\PlaceManager;
-use App\Modules\Gaia\Manager\SectorManager;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
+use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerBonusRegistry;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class Move extends AbstractController
 {
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,
+		MoveFleet $moveFleet,
+		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		CommanderManager $commanderManager,
-		PlaceManager $placeManager,
-		SectorManager $sectorManager,
-		EntityManager $entityManager,
-		int $id,
+		CommanderRepositoryInterface $commanderRepository,
+		PlaceRepositoryInterface $placeRepository,
+		Uuid $id,
 	): Response {
-		if (($commander = $commanderManager->get($id)) !== null && $commander->rPlayer === $currentPlayer->getId()) {
-			if (($place = $placeManager->get($request->query->getInt('placeId'))) !== null) {
-				if ($commander->playerColor == $place->playerColor) {
-					$home = $placeManager->get($commander->getRBase());
+		$commander = $commanderRepository->get($id) ?? throw $this->createNotFoundException('Commander not found');
 
-					$length = Game::getDistance($home->getXSystem(), $place->getXSystem(), $home->getYSystem(), $place->getYSystem());
-					$duration = Game::getTimeToTravel($home, $place, $currentPlayerBonusRegistry->getPlayerBonus());
-
-					if (Commander::AFFECTED === $commander->statement) {
-						$sector = $sectorManager->get($place->rSector);
-						$isFactionSector = ($sector->rColor == $commander->playerColor) ? true : false;
-
-						$commander->destinationPlaceName = $place->baseName;
-
-						if ($length <= Commander::DISTANCEMAX || $isFactionSector) {
-							$commanderManager->move($commander, $place->getId(), $commander->rBase, Commander::MOVE, $length, $duration);
-
-							//								if (true === $container->getParameter('data_analysis')) {
-							//									$qr = $database->prepare('INSERT INTO
-							//								DA_CommercialRelation(`from`, `to`, type, weight, dAction)
-							//								VALUES(?, ?, ?, ?, ?)'
-							//									);
-							//									$ships = $commander->getNbrShipByType();
-							//									$price = 0;
-//
-							//									for ($i = 0; $i < count($ships); $i++) {
-							//										$price += DataAnalysis::resourceToStdUnit(ShipResource::getInfo($i, 'resourcePrice') * $ships[$i]);
-							//									}
-//
-							//									$qr->execute([$commander->rPlayer, $place->rPlayer, 7, $price, Utils::now()]);
-							//								}
-							$entityManager->flush();
-
-							return $this->redirect($request->headers->get('referer'));
-						} else {
-							throw new ErrorException('Cet emplacement est trop éloigné.');
-						}
-					} else {
-						throw new ErrorException('Cet officier est déjà en déplacement.');
-					}
-				} else {
-					throw new ErrorException('Vous ne pouvez pas envoyer une flotte sur une planète qui ne vous appartient pas.');
-				}
-			} else {
-				throw new ErrorException('Ce lieu n\'existe pas.');
-			}
-		} else {
-			throw new ErrorException('Ce commandant ne vous appartient pas ou n\'existe pas.');
+		// TODO Voter
+		if ($commander->player->id !== $currentPlayer->id) {
+			throw $this->createAccessDeniedException('This commander does not belong to you');
 		}
+
+		$placeId = $request->query->get('placeId') ?? throw new BadRequestHttpException('Missing place ID');
+
+		if (!Uuid::isValid($placeId)) {
+			throw new BadRequestHttpException('Invalid place ID');
+		}
+		$place = $placeRepository->get(Uuid::fromString($placeId)) ?? throw $this->createNotFoundException('Place not found');
+
+		if (!$commander->player->faction->id->equals($place?->player?->faction->id)) {
+			throw new ConflictHttpException('Vous ne pouvez pas envoyer une flotte sur une planète qui ne vous appartient pas.');
+		}
+		$home = $commander->base;
+
+		$length = $getDistanceBetweenPlaces($home->place, $place);
+
+		if (!$commander->isAffected()) {
+			throw new ConflictHttpException('Cet officier est déjà en déplacement.');
+		}
+		$sector = $place->system->sector;
+		// TODO add an interface for faction assets entities to create a shortcut method to check the owning faction
+		$isFactionSector = $sector->faction?->id->equals($commander->player->faction->id);
+
+		if ($length > Commander::DISTANCEMAX && !$isFactionSector) {
+			throw new ConflictHttpException('Cet emplacement est trop éloigné.');
+		}
+		$moveFleet(
+			commander: $commander,
+			origin: $home->place,
+			destination: $place,
+			mission: CommanderMission::Move,
+		);
+
+		$commanderRepository->save($commander);
+
+		return $this->redirect($request->headers->get('referer'));
 	}
 }

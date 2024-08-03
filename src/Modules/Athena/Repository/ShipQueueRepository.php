@@ -2,175 +2,44 @@
 
 namespace App\Modules\Athena\Repository;
 
-use App\Classes\Entity\AbstractRepository;
+use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
+use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\ShipQueue;
+use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
-class ShipQueueRepository extends AbstractRepository
+class ShipQueueRepository extends DoctrineRepository implements ShipQueueRepositoryInterface
 {
-	/**
-	 * @param int $id
-	 *
-	 * @return ShipQueue
-	 */
-	public function get($id)
+	public function __construct(ManagerRegistry $registry)
 	{
-		if (($sq = $this->unitOfWork->getObject(ShipQueue::class, $id)) !== null) {
-			return $sq;
-		}
-		$statement = $this->connection->prepare('SELECT * FROM orbitalBaseShipQueue WHERE id = :id');
-		$statement->execute(['id' => $id]);
-
-		if (($row = $statement->fetch()) === false) {
-			return null;
-		}
-		$shipQueue = $this->format($row);
-		$this->unitOfWork->addObject($shipQueue);
-
-		return $shipQueue;
+		parent::__construct($registry, ShipQueue::class);
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getAll()
+	public function get(Uuid $id): ShipQueue|null
 	{
-		$statement = $this->connection->query('SELECT * FROM orbitalBaseShipQueue');
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($sq = $this->unitOfWork->getObject(ShipQueue::class, $row['id'])) !== null) {
-				$data[] = $sq;
-				continue;
-			}
-			$shipQueue = $this->format($row);
-			$this->unitOfWork->addObject($shipQueue);
-			$data[] = $shipQueue;
-		}
-
-		return $data;
+		return $this->find($id);
 	}
 
-	/**
-	 * @param int $baseId
-	 *
-	 * @return array
-	 */
-	public function getBaseQueues($baseId)
+	public function getAll(): array
 	{
-		$statement = $this->connection->prepare('SELECT * FROM orbitalBaseShipQueue WHERE rOrbitalBase = :base_id');
-		$statement->execute(['base_id' => $baseId]);
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($sq = $this->unitOfWork->getObject(ShipQueue::class, $row['id'])) !== null) {
-				$data[] = $sq;
-				continue;
-			}
-			$shipQueue = $this->format($row);
-			$this->unitOfWork->addObject($shipQueue);
-			$data[] = $shipQueue;
-		}
-
-		return $data;
+		return $this->findAll();
 	}
 
-	/**
-	 * @param int $baseId
-	 * @param int $dockType
-	 *
-	 * @return array
-	 */
-	public function getByBaseAndDockType($baseId, $dockType)
+	public function getBaseQueues(OrbitalBase $base): array
 	{
-		$statement = $this->connection->prepare('SELECT * FROM orbitalBaseShipQueue WHERE rOrbitalBase = :base_id AND dockType = :dock_type ORDER BY dEnd');
-		$statement->execute(['base_id' => $baseId, 'dock_type' => $dockType]);
-
-		$data = [];
-		while ($row = $statement->fetch()) {
-			if (($sq = $this->unitOfWork->getObject(ShipQueue::class, $row['id'])) !== null) {
-				$data[] = $sq;
-				continue;
-			}
-			$shipQueue = $this->format($row);
-			$this->unitOfWork->addObject($shipQueue);
-			$data[] = $shipQueue;
-		}
-
-		return $data;
-	}
-
-	/**
-	 * @param ShipQueue $shipQueue
-	 */
-	public function insert($shipQueue)
-	{
-		$statement = $this->connection->prepare('INSERT INTO
-			orbitalBaseShipQueue(rOrbitalBase, dockType, shipNumber, quantity, dStart, dEnd)
-			VALUES(?, ?, ?, ?, ?, ?)');
-		$statement->execute([
-			$shipQueue->rOrbitalBase,
-			$shipQueue->dockType,
-			$shipQueue->shipNumber,
-			$shipQueue->quantity,
-			$shipQueue->dStart,
-			$shipQueue->dEnd,
-		]);
-
-		$shipQueue->id = $this->connection->lastInsertId();
-	}
-
-	/**
-	 * @param ShipQueue $shipQueue
-	 */
-	public function update($shipQueue)
-	{
-		$statement = $this->connection->prepare('UPDATE orbitalBaseShipQueue
-			SET	id = ?,
-				rOrbitalBase = ?,
-				dockType = ?,
-				shipNumber = ?,
-				quantity = ?,
-				dStart = ?,
-				dEnd = ?
-			WHERE id = ?');
-		$statement->execute([
-			$shipQueue->id,
-			$shipQueue->rOrbitalBase,
-			$shipQueue->dockType,
-			$shipQueue->shipNumber,
-			$shipQueue->quantity,
-			$shipQueue->dStart,
-			$shipQueue->dEnd,
-			$shipQueue->id,
+		return $this->findBy([
+			'base' => $base,
 		]);
 	}
 
-	/**
-	 * @param ShipQueue $shipQueue
-	 */
-	public function remove($shipQueue)
+	public function getByBaseAndDockType(OrbitalBase $base, int $dockType): array
 	{
-		$statement = $this->connection->prepare('DELETE FROM orbitalBaseShipQueue WHERE id = ?');
-		$statement->execute([$shipQueue->id]);
-	}
-
-	/**
-	 * @param array $data
-	 *
-	 * @return ShipQueue
-	 */
-	public function format($data)
-	{
-		$shipQueue = new ShipQueue();
-
-		$shipQueue->id = (int) $data['id'];
-		$shipQueue->rOrbitalBase = (int) $data['rOrbitalBase'];
-		$shipQueue->dockType = (int) $data['dockType'];
-		$shipQueue->shipNumber = (int) $data['shipNumber'];
-		$shipQueue->quantity = (int) $data['quantity'];
-		$shipQueue->dStart = $data['dStart'];
-		$shipQueue->dEnd = $data['dEnd'];
-
-		return $shipQueue;
+		return $this->findBy([
+			'base' => $base,
+			'dockType' => $dockType,
+		], [
+			'startedAt' => 'ASC',
+		]);
 	}
 }

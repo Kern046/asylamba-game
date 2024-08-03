@@ -2,15 +2,16 @@
 
 namespace App\Modules\Zeus\Infrastructure\Controller\Tutorial;
 
-use App\Classes\Entity\EntityManager;
-use App\Classes\Exception\FormException;
 use App\Classes\Library\Format;
+use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Promethee\Model\TechnologyId;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Helper\TutorialHelper;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -18,6 +19,7 @@ use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class ValidateStep extends AbstractController
 {
@@ -26,21 +28,22 @@ class ValidateStep extends AbstractController
 		Player $currentPlayer,
 		OrbitalBase $currentBase,
 		OrbitalBaseManager $orbitalBaseManager,
+		OrbitalBaseRepositoryInterface $orbitalBaseRepository,
 		PlayerManager $playerManager,
 		TutorialHelper $tutorialHelper,
 		ShipQueueManager $shipQueueManager,
-		EntityManager $entityManager,
+		ShipQueueRepositoryInterface $shipQueueRepository,
+		PlayerRepositoryInterface $playerRepository,
 	): Response {
-		$playerId = $currentPlayer->getId();
-		$stepTutorial = $currentPlayer->getStepTutorial();
+		$stepTutorial = $currentPlayer->stepTutorial;
 		$session = $request->getSession();
 
-		if (true == $currentPlayer->stepDone and TutorialResource::stepExists($stepTutorial)) {
+		if (true === $currentPlayer->stepDone and TutorialResource::stepExists($stepTutorial)) {
 			$experience = TutorialResource::getInfo($stepTutorial, 'experienceReward');
 			$credit = TutorialResource::getInfo($stepTutorial, 'creditReward');
 			$resource = TutorialResource::getInfo($stepTutorial, 'resourceReward');
 			$ship = TutorialResource::getInfo($stepTutorial, 'shipReward');
-			$playerBases = $orbitalBaseManager->getPlayerBases($currentPlayer->getId());
+			$playerBases = $orbitalBaseRepository->getPlayerBases($currentPlayer);
 			$alert = 'Etape validée. ';
 
 			$firstReward = true;
@@ -85,7 +88,7 @@ class ValidateStep extends AbstractController
 							++$qty;
 
 							// add ship to dock
-							$orbitalBaseManager->addShipToDock($ob, $key, $value);
+							$ob->addShips($key, $value);
 						}
 					}
 					if ($firstReward) {
@@ -116,12 +119,9 @@ class ValidateStep extends AbstractController
 			$alert .= 'La prochaine étape vous attend.';
 			$this->addFlash('success', $alert);
 
-			$nextStep = $stepTutorial;
+			$nextStep = $stepTutorial + 1;
 			if (TutorialResource::isLastStep($stepTutorial)) {
-				$nextStep = 0;
 				$this->addFlash('success', 'Bravo, vous avez terminé le tutoriel. Bonne continuation et bon amusement sur Asylamba, vous pouvez maintenant voler de vos propres ailes !');
-			} else {
-				++$nextStep;
 			}
 
 			// verify if the next step is already done
@@ -133,16 +133,16 @@ class ValidateStep extends AbstractController
 					$nextStepAlreadyDone = true;
 					break;
 				case TutorialResource::GENERATOR_LEVEL_2:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::GENERATOR, 2);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::GENERATOR, 2);
 					break;
 				case TutorialResource::REFINERY_LEVEL_3:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::REFINERY, 3);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::REFINERY, 3);
 					break;
 				case TutorialResource::STORAGE_LEVEL_3:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::STORAGE, 3);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::STORAGE, 3);
 					break;
 				case TutorialResource::TECHNOSPHERE_LEVEL_1:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::TECHNOSPHERE, 1);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::TECHNOSPHERE, 1);
 					break;
 				case TutorialResource::MODIFY_UNI_INVEST:
 					// asdf
@@ -151,16 +151,16 @@ class ValidateStep extends AbstractController
 					// asdf
 					break;
 				case TutorialResource::DOCK1_LEVEL_1:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::DOCK1, 1);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::DOCK1, 1);
 					break;
 				case TutorialResource::SHIP0_UNBLOCK:
-					$nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($playerId, TechnologyId::SHIP0_UNBLOCK);
+					$nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($currentPlayer, TechnologyId::SHIP0_UNBLOCK);
 					break;
 				case TutorialResource::BUILD_SHIP0:
 					// verify in the queue
 					// load the queues
 					foreach ($playerBases as $ob) {
-						$shipQueues = $shipQueueManager->getBaseQueues($ob->rPlace);
+						$shipQueues = $shipQueueRepository->getBaseQueues($ob);
 						foreach ($shipQueues as $shipQueue) {
 							if (ShipResource::PEGASE == $shipQueue->shipNumber) {
 								$nextStepAlreadyDone = true;
@@ -191,34 +191,34 @@ class ValidateStep extends AbstractController
 					$nextStepAlreadyDone = true;
 					break;
 				case TutorialResource::REFINERY_LEVEL_10:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::REFINERY, 10);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::REFINERY, 10);
 					break;
 				case TutorialResource::STORAGE_LEVEL_8:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::STORAGE, 8);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::STORAGE, 8);
 					break;
 				case TutorialResource::DOCK1_LEVEL_6:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::DOCK1, 6);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::DOCK1, 6);
 					break;
 				case TutorialResource::REFINERY_LEVEL_16:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::REFINERY, 16);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::REFINERY, 16);
 					break;
 				case TutorialResource::STORAGE_LEVEL_12:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::STORAGE, 12);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::STORAGE, 12);
 					break;
 				case TutorialResource::TECHNOSPHERE_LEVEL_6:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::TECHNOSPHERE, 6);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::TECHNOSPHERE, 6);
 					break;
 				case TutorialResource::SHIP1_UNBLOCK:
-					$nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($playerId, TechnologyId::SHIP1_UNBLOCK);
+					$nextStepAlreadyDone = $tutorialHelper->isNextTechnoStepAlreadyDone($currentPlayer, TechnologyId::SHIP1_UNBLOCK);
 					break;
 				case TutorialResource::DOCK1_LEVEL_15:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::DOCK1, 15);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::DOCK1, 15);
 					break;
 				case TutorialResource::BUILD_SHIP1:
 					// asdf
 					break;
 				case TutorialResource::REFINERY_LEVEL_20:
-					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($playerId, OrbitalBaseResource::REFINERY, 20);
+					$nextStepAlreadyDone = $tutorialHelper->isNextBuildingStepAlreadyDone($currentPlayer, OrbitalBaseResource::REFINERY, 20);
 					break;
 				case TutorialResource::SPONSORSHIP:
 					$nextStepAlreadyDone = true;
@@ -230,14 +230,14 @@ class ValidateStep extends AbstractController
 			}
 			$currentPlayer->stepTutorial = $nextStep;
 			$session->get('playerInfo')->add('stepTutorial', $nextStep);
-			$entityManager->flush($currentPlayer);
+			$playerRepository->save($currentPlayer);
 			if ($redirectWithoutJeanMi) {
 				return $this->redirectToRoute('profile');
 			}
 
 			return $this->redirect($request->headers->get('referer'));
 		} else {
-			throw new FormException('Impossible de valider l\'étape avant de l\'avoir effectuée.');
+			throw new BadRequestHttpException('Impossible de valider l\'étape avant de l\'avoir effectuée.');
 		}
 	}
 }

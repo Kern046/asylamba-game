@@ -35,22 +35,23 @@
 							<input type="hidden" id="input-sector-id" name="sector" />
 							<svg class="sectors" viewBox="0, 0, 750, 750" xmlns="http://www.w3.org/2000/svg" style="width: 580px; height: 580px;">
 								{% for sector in sectors %}
-								<polygon data-id="{{ sector.id }}"
-									class="ally{{ sector.rColor }} {{ sector.rColor == app.session.get('inscription').get('ally') ? 'enabled' : 'disabled' }}"
-									points="{{ galaxy_configuration.getSectorCoord(sector.id, rate, 0) }}"
-								/>
+									{% set faction_identifier = sector.faction|default({identifier: 0}).identifier %}
+									<polygon data-id="{{ sector.id }}"
+										class="ally{{ faction_identifier }} {{ faction_identifier == app.session.get('inscription').get('ally') ? 'enabled' : 'disabled' }}"
+										points="{{ galaxy_configuration.getSectorCoord(sector.identifier, rate, 0) }}"
+									/>
 								{% endfor %}
 
-								</svg>
+							</svg>
 							<div class="number">
 								{% for sector in sectors %}
 									{% set positionX = galaxy_configuration.sectors[loop.index - 1]['display'][0] * rate / 1.35 %}
 									{% set positionY = galaxy_configuration.sectors[loop.index - 1]['display'][1] * rate / 1.35 %}
 
-									<span id="sector{{ sector.id }}"
-										  class="ally{{ sector.rColor == app.session.get('inscription').get('ally') ? sector.rColor : 0 }}"
+									<span id="sector{{ sector.identifier }}"
+										  class="ally{{ sector.faction and sector.faction.identifier == app.session.get('inscription').get('ally') ? sector.faction.identifier : 0 }}"
 										  style="top: {{ positionY }}px; left: {{ positionX }}px;">
-										{{- sector.id -}}
+										{{- sector.identifier -}}
 									</span>
 								{% endfor %}
 								</div>
