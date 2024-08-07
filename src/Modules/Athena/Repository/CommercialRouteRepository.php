@@ -238,7 +238,7 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 	{
 		$qb = $this->createQueryBuilder('cr');
 
-		return $qb
+		$qb
 			->select('SUM(cr.income) AS total_income')
 			->where(
 				$qb->expr()->andX(
@@ -246,9 +246,9 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 					$qb->expr()->eq('cr.statement', CommercialRoute::ACTIVE),
 				),
 			)
-			->setParameter('base', $base->id, UuidType::NAME)
-			->getQuery()
-			->getSingleScalarResult() ?? 0;
+			->setParameter('base', $base->id, UuidType::NAME);
+
+		return intval($qb->getQuery()->getSingleScalarResult() ?? 0);
 	}
 
 	/**
@@ -259,7 +259,7 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 	{
 		$qb = $this->createQueryBuilder('cr');
 
-		return $qb
+		$qb
 			->select('COUNT(cr.id) AS nb_routes')
 			->where(
 				$qb->expr()->andX(
@@ -267,9 +267,9 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 					([] !== $statements) ? $qb->expr()->in('cr.statement', $statements) : null,
 				),
 			)
-			->setParameter('base', $base->id, UuidType::NAME)
-			->getQuery()
-			->getSingleScalarResult();
+			->setParameter('base', $base->id, UuidType::NAME);
+
+		return intval($qb->getQuery()->getSingleScalarResult() ?? 0);
 	}
 
 	public function freezeRoutes(Color $faction, Color $otherFaction, bool $freeze): void
