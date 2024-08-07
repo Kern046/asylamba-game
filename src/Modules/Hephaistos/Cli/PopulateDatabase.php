@@ -96,7 +96,7 @@ class PopulateDatabase extends Command
 		$p->victory = 0;
 		$p->defeat = 0;
 		$p->stepTutorial = 0;
-		$p->stepDone = 0;
+		$p->stepDone = false;
 		$p->iUniversity = 0;
 		$p->partNaturalSciences = 25;
 		$p->partLifeSciences = 25;

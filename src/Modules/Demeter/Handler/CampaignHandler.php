@@ -33,7 +33,7 @@ readonly class CampaignHandler
 		$faction = $this->colorRepository->get($message->getFactionId())
 			?? throw new \RuntimeException(sprintf('Faction %s not found', $message->getFactionId()));
 
-		$this->colorManager->updateStatus($faction);
+		$this->colorManager->updateSenate($faction);
 
 		$election = new Election(
 			id: Uuid::v4(),

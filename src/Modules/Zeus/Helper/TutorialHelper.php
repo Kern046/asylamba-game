@@ -7,13 +7,14 @@ use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
+use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
 
 readonly class TutorialHelper
 {
 	public function __construct(
-		private EntityManagerInterface             $entityManager,
+		private PlayerRepositoryInterface $playerRepository,
 		private OrbitalBaseRepositoryInterface     $orbitalBaseRepository,
 		private BuildingQueueRepositoryInterface   $buildingQueueRepository,
 		private TechnologyRepositoryInterface      $technologyRepository,
@@ -50,14 +51,14 @@ readonly class TutorialHelper
 	{
 		$player->stepDone = true;
 
-		$this->entityManager->flush($player);
+		$this->playerRepository->save($player);
 	}
 
 	public function clearStepDone(Player $player): void
 	{
 		$player->stepDone = true;
 
-		$this->entityManager->flush($player);
+		$this->playerRepository->save($player);
 	}
 
 	public function isNextBuildingStepAlreadyDone(Player $player, int $buildingId, int $level): bool

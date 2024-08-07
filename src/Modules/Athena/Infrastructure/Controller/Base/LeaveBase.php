@@ -85,7 +85,7 @@ class LeaveBase extends AbstractController
 		$place->player = null;
 		$entityManager->flush();
 
-		$eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place), PlaceOwnerChangeEvent::NAME);
+		$eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place));
 
 		$this->addFlash('success', 'Base abandonnée');
 

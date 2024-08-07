@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Zeus\Manager;
 
 use App\Modules\Athena\Application\Handler\OrbitalBasePointsHandler;
@@ -157,7 +159,7 @@ readonly class PlayerManager
 
 	public function increaseExperience(Player $player, $exp): void
 	{
-		$exp = round($exp);
+		$exp = intval(round($exp));
 		$player->experience += $exp;
 		$nextLevel = $this->playerBaseLevel * pow(2, $player->level - 1);
 		if ($player->experience < $nextLevel) {

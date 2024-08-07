@@ -7,6 +7,7 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\DBAL\Exception;
 use Symfony\Component\Uid\Uuid;
 
 interface CommercialRouteRepositoryInterface extends EntityRepositoryInterface
@@ -14,7 +15,10 @@ interface CommercialRouteRepositoryInterface extends EntityRepositoryInterface
 	public function get(int $id): CommercialRoute|null;
 
 	/**
-	 * @return list<CommercialRoute>
+	 * @param list<int> $factions
+	 * @return list<array<string, mixed>>
+	 *
+	 * @throws Exception
 	 */
 	public function searchCandidates(
 		Player $player,
@@ -61,7 +65,7 @@ interface CommercialRouteRepositoryInterface extends EntityRepositoryInterface
 	/**
 	 * @param list<int> $statements
 	 */
-	public function countBaseRoutes(OrbitalBase $base, array $statements): int;
+	public function countBaseRoutes(OrbitalBase $base, array $statements = []): int;
 
 	public function freezeRoutes(Color $faction, Color $otherFaction, bool $freeze): void;
 }

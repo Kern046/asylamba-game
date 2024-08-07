@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Application\Handler;
 
 use App\Modules\Athena\Application\Handler\Building\BuildingLevelHandler;
@@ -27,7 +29,7 @@ readonly class OrbitalBasePointsHandler
 			}
 		}
 
-		$points = round($points);
+		$points = intval(round($points));
 		$orbitalBase->points = $points;
 
 		return $points - $initialPoints;

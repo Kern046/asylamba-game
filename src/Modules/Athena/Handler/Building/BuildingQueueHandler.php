@@ -36,7 +36,7 @@ readonly class BuildingQueueHandler
 		}
 		$orbitalBase = $queue->base;
 		$player = $orbitalBase->player;
-		$this->buildingLevelHandler->increaseBuildingLevel($orbitalBase, $queue->buildingNumber, $queue->targetLevel);
+		$this->buildingLevelHandler->increaseBuildingLevel($orbitalBase, $queue->buildingNumber);
 		$this->orbitalBasePointsHandler->updatePoints($orbitalBase);
 		$this->orbitalBaseRepository->save($orbitalBase);
 		// increase player experience

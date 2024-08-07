@@ -64,12 +64,12 @@ class Transaction
 
 	public function getPriceToCancelOffer(): int
 	{
-		return floor($this->price * self::PERCENTAGE_TO_CANCEL / 100);
+		return intval(floor($this->price * self::PERCENTAGE_TO_CANCEL / 100));
 	}
 
 	public function getExperienceEarned(): int
 	{
-		return 1 + round($this->price / self::EXPERIENCE_DIVIDER);
+		return 1 + intval(round($this->price / self::EXPERIENCE_DIVIDER));
 	}
 
 	public static function getResourcesIcon(int $quantity): int

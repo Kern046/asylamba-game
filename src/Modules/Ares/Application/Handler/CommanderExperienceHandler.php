@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Application\Handler;
 
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
@@ -25,7 +27,7 @@ readonly class CommanderExperienceHandler
 		$commander->earnedExperience = $importance * Commander::COEFFEARNEDEXP;
 
 		if (null !== $commander->player) {
-			$exp = round($commander->earnedExperience / Commander::COEFFEXPPLAYER);
+			$exp = intval(round($commander->earnedExperience / Commander::COEFFEXPPLAYER));
 			$this->playerManager->increaseExperience($commander->player, $exp);
 
 			if ($enemyCommander->isAttacker) {

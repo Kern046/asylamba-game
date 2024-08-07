@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Repository;
 
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
@@ -10,9 +12,6 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Color>
- */
 class ColorRepository extends DoctrineRepository implements ColorRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

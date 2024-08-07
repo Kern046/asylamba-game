@@ -28,10 +28,10 @@ class CommanderExtension extends AbstractExtension
 	{
 		return [
 			new TwigFilter('mission_label', fn (Commander $commander) => match ($commander->travelType) {
-				CommanderMission::Move => 'déplacement vers ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
-				CommanderMission::Loot => 'pillage de ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
-				CommanderMission::Colo => 'colonisation de ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
-				CommanderMission::Back => 'retour vers ' . $commander->destinationPlace->base?->name ?? 'colonie rebelle',
+				CommanderMission::Move => 'déplacement vers ' . ($commander->destinationPlace->base?->name ?? 'colonie rebelle'),
+				CommanderMission::Loot => 'pillage de ' . ($commander->destinationPlace->base?->name ?? 'colonie rebelle'),
+				CommanderMission::Colo => 'colonisation de ' . ($commander->destinationPlace->base?->name ?? 'colonie rebelle'),
+				CommanderMission::Back => 'retour vers ' . ($commander->destinationPlace->base?->name ?? 'colonie rebelle'),
 				default => 'autre'
 			}),
 			new TwigFilter('commander_rank', fn (Commander $commander) => $this->getCommanderLevel($commander->level)),

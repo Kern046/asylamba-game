@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Infrastructure\Controller\Financial;
 
 use App\Classes\Library\Game;
@@ -77,6 +79,17 @@ class ViewInvestments extends AbstractController
 		]);
 	}
 
+	/**
+	 * @param list<OrbitalBase> $bases
+	 * @return array<string, array{
+	 *     tax_income: int,
+	 *     tax_income_bonus: int,
+	 *     routes: list<CommercialRoute>,
+	 *     routes_count: int,
+	 *     routes_income: int,
+	 *     routes_income_bonus: int,
+	 * }>
+	 */
 	private function getBasesData(array $bases, int $taxCoeff): array
 	{
 		return array_reduce($bases, function (array $carry, OrbitalBase $base) {
@@ -101,7 +114,14 @@ class ViewInvestments extends AbstractController
 	 * @param OrbitalBase[]      $playerBases
 	 * @param Commander[]        $commanders
 	 * @param Transaction[]      $transactions
-	 * @param array<string, int> $basesData
+	 * @param array<string, array{
+	 *      tax_income: int,
+	 *      tax_income_bonus: int,
+	 *      routes: list<CommercialRoute>,
+	 *      routes_count: int,
+	 *      routes_income: int,
+	 *      routes_income_bonus: int,
+	 *  }> $basesData
 	 *
 	 * @return array<string, int>
 	 */

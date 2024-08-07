@@ -24,4 +24,6 @@ interface SpyReportRepositoryInterface extends EntityRepositoryInterface
 	 * @return SpyReport[]
 	 */
 	public function getPlayerReports(Player $player): array;
+
+	public function deletePlayerReports(Player $player): int;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Promethee\Repository;
 
 use App\Modules\Gaia\Model\Place;
@@ -10,9 +12,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<TechnologyQueue>
- */
 class TechnologyQueueRepository extends DoctrineRepository implements TechnologyQueueRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

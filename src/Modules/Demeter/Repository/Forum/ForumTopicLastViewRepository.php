@@ -11,9 +11,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends DoctrineRepository<ForumTopicLastView>
- */
 class ForumTopicLastViewRepository extends DoctrineRepository implements ForumTopicLastViewRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

@@ -21,6 +21,7 @@ class ViewForum extends AbstractController
 
 		if (null === $forumId) {
 			$showHome = true;
+			$isStandard_topics = FALSE;
 			# page d'accueil des forums
 			# charge les x premiers sujets de chaque forum
 			for ($i = 1; $i <= ForumResources::size(); $i++) {
@@ -30,10 +31,6 @@ class ViewForum extends AbstractController
 					$topicsByForum[$forumId] = ($forumId < 20)
 						? $forumTopicRepository->getByForumAndFactionWithLastViews($forumId, $currentPlayer->faction, $currentPlayer)
 						: $forumTopicRepository->getByForumWithLastViews($forumId, $currentPlayer);
-
-					$isStandard_topics = FALSE;
-					$idColum_topics = $i;
-					$showTopics = true;
 				}
 			}
 		} else {

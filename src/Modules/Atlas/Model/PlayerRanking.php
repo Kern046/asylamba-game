@@ -1,13 +1,6 @@
 <?php
 
-/**
- * PlayerRanking.
- *
- * @author Jacky Casas
- * @copyright Asylamba
- *
- * @update 04.06.14
- */
+declare(strict_types=1);
 
 namespace App\Modules\Atlas\Model;
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Repository\Forum;
 
 use App\Classes\Library\Utils;

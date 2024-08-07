@@ -21,7 +21,7 @@ class ViewFactionRankings extends AbstractController
 	): Response {
 		// @TODO Replace this parameter by a dynamic field
 		$serverStartTime = new \DateTimeImmutable($this->getParameter('server_start_time'));
-		$hoursBeforeRankingStart = $this->getParameter('hours_before_start_of_ranking');
+		$hoursBeforeRankingStart = intval($this->getParameter('hours_before_start_of_ranking'));
 
 		$ranking = $rankingRepository->getLastRanking();
 

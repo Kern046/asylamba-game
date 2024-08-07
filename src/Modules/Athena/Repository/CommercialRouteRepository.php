@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
@@ -18,9 +20,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<CommercialRoute>
- */
 class CommercialRouteRepository extends DoctrineRepository implements CommercialRouteRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)
@@ -33,11 +32,6 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 		return $this->find($id);
 	}
 
-	/**
-	 * @param list<int> $factions
-	 *
-	 * @throws Exception
-	 */
 	public function searchCandidates(Player $player, OrbitalBase $orbitalBase, array $factions, int $minDistance, int $maxDistance): array
 	{
 		$factionIdentifiers = sprintf("(%s)", implode(',', $factions));

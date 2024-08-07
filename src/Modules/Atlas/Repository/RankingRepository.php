@@ -9,9 +9,6 @@ use App\Modules\Atlas\Model\Ranking;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends DoctrineRepository<Ranking>
- */
 class RankingRepository extends DoctrineRepository implements RankingRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

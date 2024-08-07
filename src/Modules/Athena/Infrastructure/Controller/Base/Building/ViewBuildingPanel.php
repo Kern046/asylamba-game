@@ -29,6 +29,7 @@ class ViewBuildingPanel extends AbstractController
 
 		$noteQuantity = 0;
 		$footnoteArray = [];
+		$data = [];
 		for ($i = 0; $i < $max; ++$i) {
 			$level = $i + 1;
 			// generate the exponents for the footnotes

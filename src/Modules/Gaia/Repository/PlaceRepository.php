@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Gaia\Repository;
 
 use App\Modules\Gaia\Domain\Repository\PlaceRepositoryInterface;
@@ -14,9 +16,6 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Place>
- */
 class PlaceRepository extends DoctrineRepository implements PlaceRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

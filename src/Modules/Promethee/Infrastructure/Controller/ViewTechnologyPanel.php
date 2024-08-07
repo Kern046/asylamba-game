@@ -44,7 +44,7 @@ class ViewTechnologyPanel extends AbstractController
 		$requiredResearch = $technologyHelper->getInfo($identifier, 'requiredResearch');
 
 		$researchList = [];
-		$researchQuantity = $this->getParameter('promethee.research.quantity');
+		$researchQuantity = intval($this->getParameter('promethee.research.quantity'));
 		for ($i = 0; $i < $researchQuantity; ++$i) {
 			if ($requiredResearch[$i] > 0) {
 				$check = true;

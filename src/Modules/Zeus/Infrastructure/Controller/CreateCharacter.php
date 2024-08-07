@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Zeus\Infrastructure\Controller;
 
 use App\Classes\Container\ArrayList;
@@ -212,14 +214,14 @@ class CreateCharacter extends AbstractController
 	{
 		$session = $request->getSession();
 		if ($session->has('inscription')) {
-			if (null === $this->playerRepository->findOneBy(['name' => $request->request->get('pseudo')])) {
+			if (null === $this->playerRepository->getByName($request->request->get('pseudo'))) {
 				$check = new CheckName();
 
 				if ($request->request->has('pseudo') && $check->checkLength($request->request->get('pseudo')) && $check->checkChar($request->request->get('pseudo'))) {
 					$session->get('inscription')->add('pseudo', $request->request->get('pseudo'));
 
 					// check avatar
-					if ((int) $request->request->get('avatar') > 0 && (int) $request->request->get('avatar') <= $this->getParameter('nb_avatar')) {
+					if ((int) $request->request->get('avatar') > 0 && (int) $request->request->get('avatar') <= intval($this->getParameter('nb_avatar'))) {
 						$session->get('inscription')->add('avatar', $request->request->get('avatar'));
 					} elseif (!$session->get('inscription')->exist('avatar')) {
 						throw new BadRequestHttpException('Cet avatar n\'existe pas ou est invalide');
@@ -335,7 +337,7 @@ class CreateCharacter extends AbstractController
 			$player->dLastConnection = new \DateTimeImmutable();
 			$player->dLastActivity = new \DateTimeImmutable();
 
-			$player->premium = 0;
+			$player->premium = false;
 			$player->statement = Player::ACTIVE;
 
 			// ajout des variables dépendantes
@@ -484,7 +486,7 @@ class CreateCharacter extends AbstractController
 
 			$this->entityManager->commit();
 
-			$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place), PlaceOwnerChangeEvent::NAME);
+			$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place));
 
 			// modification de la place
 

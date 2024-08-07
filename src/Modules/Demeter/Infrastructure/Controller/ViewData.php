@@ -85,7 +85,7 @@ class ViewData extends AbstractController
 			$totalPEV += ($fleetStats['nbs'.$i] ?? 0) * ShipResource::getInfo($i, 'pev');
 		}
 
-		$factions = $this->colorRepository->findAll();
+		$factions = $this->colorRepository->getAll();
 		$sectors = $sectorRepository->getAll();
 		$mapData = $this->getTacticalMapData($faction, $factions, $sectors);
 

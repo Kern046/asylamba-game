@@ -33,13 +33,7 @@ interface NotificationRepositoryInterface extends EntityRepositoryInterface
 		\DateTimeImmutable $arrivedAt,
 	): array;
 
-	/**
-	 * @return list<Notification>
-	 */
 	public function removePlayerNotifications(Player $player): int;
 
-	/**
-	 * @return list<Notification>
-	 */
 	public function cleanNotifications(int $readTimeout, int $unreadTimeout): int;
 }

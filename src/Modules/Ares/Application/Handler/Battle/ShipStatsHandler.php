@@ -42,6 +42,9 @@ readonly class ShipStatsHandler
 		return $initialValue;
 	}
 
+	/**
+	 * TODO think bout a way to be warned when a ship does not have an associated bonus
+	 */
 	private function getBonusIdForStat(int $shipNumber, ShipStat $stat): int|null
 	{
 		return match ($stat) {
@@ -57,12 +60,14 @@ readonly class ShipStatsHandler
 				Ship::TYPE_SIRENE, Ship::TYPE_DRYADE, Ship::TYPE_MEDUSE => PlayerBonusId::CORVETTE_DEFENSE,
 				Ship::TYPE_GRIFFON, Ship::TYPE_CYCLOPE => PlayerBonusId::FRIGATE_DEFENSE,
 				Ship::TYPE_MINOTAURE, Ship::TYPE_HYDRE => PlayerBonusId::DESTROYER_DEFENSE,
+				default => null,
 			},
 			ShipStat::Speed => match ($shipNumber) {
 				Ship::TYPE_PEGASE, Ship::TYPE_SATYRE, Ship::TYPE_CHIMERE => PlayerBonusId::FIGHTER_SPEED,
 				Ship::TYPE_SIRENE, Ship::TYPE_DRYADE, Ship::TYPE_MEDUSE => PlayerBonusId::CORVETTE_SPEED,
 				Ship::TYPE_GRIFFON, Ship::TYPE_CYCLOPE => PlayerBonusId::FRIGATE_SPEED,
 				Ship::TYPE_MINOTAURE, Ship::TYPE_HYDRE => PlayerBonusId::DESTROYER_SPEED,
+				default => null,
 			},
 			default => null,
 		};

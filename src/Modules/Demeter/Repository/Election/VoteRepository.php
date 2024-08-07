@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Repository\Election;
 
 use App\Modules\Demeter\Domain\Repository\Election\VoteRepositoryInterface;
@@ -10,9 +12,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
-/**
- * @extends DoctrineRepository<Vote>
- */
 class VoteRepository extends DoctrineRepository implements VoteRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

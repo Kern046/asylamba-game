@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Repository\Law;
 
 use App\Modules\Demeter\Domain\Repository\Law\LawRepositoryInterface;
@@ -9,9 +11,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Law>
- */
 class LawRepository extends DoctrineRepository implements LawRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

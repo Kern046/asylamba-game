@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\RecyclingLogRepositoryInterface;
@@ -9,9 +11,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
-/**
- * @extends DoctrineRepository<RecyclingLog>
- */
 class RecyclingLogRepository extends DoctrineRepository implements RecyclingLogRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

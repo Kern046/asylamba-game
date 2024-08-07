@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Atlas\Repository;
 
 use App\Modules\Athena\Model\CommercialRoute;
@@ -10,9 +12,6 @@ use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends DoctrineRepository<FactionRanking>
- */
 class FactionRankingRepository extends DoctrineRepository implements FactionRankingRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

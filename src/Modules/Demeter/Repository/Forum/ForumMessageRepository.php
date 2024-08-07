@@ -11,9 +11,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<ForumMessage>
- */
 class ForumMessageRepository extends DoctrineRepository implements ForumMessageRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

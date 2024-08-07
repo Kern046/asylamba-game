@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
@@ -10,9 +12,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Transaction>
- */
 class TransactionRepository extends DoctrineRepository implements TransactionRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

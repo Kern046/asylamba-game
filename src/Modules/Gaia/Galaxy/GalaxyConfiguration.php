@@ -4,6 +4,64 @@ namespace App\Modules\Gaia\Galaxy;
 
 abstract class GalaxyConfiguration
 {
+	/**
+	 * @var array{
+	 *     size: int,
+	 *     diag: int,
+	 *     mask: int,
+	 *     systemProportion: list<int>,
+	 *     systemPosition: list<int>|null,
+	 *     lineSystemPosition: list<array{
+	 *         0: array{0: int, 1: int},
+	 *         1: array{0: int, 1: int},
+	 *         2: int,
+	 *         3: int,
+	 *     }>,
+	 *     circleSystemPosition: list<array{
+	 *          0: array{0: int, 1: int},
+	 *          1: int,
+	 *          2: int,
+	 *          3: int,
+	 *      }>,
+	 *     population: list<int>,
+	 * }
+	 */
+	public array $galaxy;
+	/**
+	 * @var list<array{
+	 *   id: int,
+	 *   beginColor: int,
+	 *   vertices: list<int>,
+	 *   barycentre: array{0: int, 1: int},
+	 *   display: array{0: int, 1: int},
+	 *   name: string,
+	 *   danger: int,
+	 *   points: int,
+	 * }>
+	 */
+	public array $sectors;
+	/**
+	 * @var list<array{
+	 *     id: int,
+	 *     name: string,
+	 *     placesPropotion: array{0: int, 1: int, 2: int, 3: int, 4: int, 5: int},
+	 *     nbrPlaces: array{0: int, 1: int},
+	 * }>
+	 */
+	public array $systems;
+	/**
+	 * @var list<array{
+	 *     id: int,
+	 *     name: string,
+	 *     resources: int,
+	 *     credits: int,
+	 *     history: int,
+	 * }>
+	 */
+	public array $places;
+
+	public int $scale = 20;
+
 	public const DNG_CASUAL = 1;
 	public const DNG_EASY = 2;
 	public const DNG_MEDIUM = 3;

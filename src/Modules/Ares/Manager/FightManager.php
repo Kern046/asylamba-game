@@ -220,7 +220,7 @@ class FightManager
 
 		/* TODO VERIFY * */
 		$this->commanderExperienceHandler->setEarnedExperience($commander, $enemyCommander);
-		$commander->earnedExperience = round($commander->earnedExperience);
+		$commander->earnedExperience = intval(round($commander->earnedExperience));
 		$commander->winner = $isWinner;
 		$this->commanderArmyHandler->setArmyAtEnd($commander);
 

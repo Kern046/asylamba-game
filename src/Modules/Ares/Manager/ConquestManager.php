@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Manager;
 
 use App\Modules\Ares\Application\Handler\Movement\MoveFleet;
@@ -89,12 +91,7 @@ readonly class ConquestManager
 					}
 					LiveReport::$type = Commander::COLO;
 					LiveReport::$dFight = $commander->getArrivalDate();
-
-					if (Color::ALLY == $commanderColor->relations[$placePlayer->faction->identifier] || Color::PEACE == $commanderColor->relations[$place->playerColor]) {
-						LiveReport::$isLegal = Report::ILLEGAL;
-					} else {
-						LiveReport::$isLegal = Report::LEGAL;
-					}
+					LiveReport::$isLegal = $commanderColor->canAttackLegally($placePlayer->faction);
 
 					$this->commanderManager->startFight($place, $commander, $baseCommanders[$nbrBattle]);
 
@@ -102,7 +99,7 @@ readonly class ConquestManager
 					$reportArray[] = $report;
 					$reportIds[] = $report->id;
 					// PATCH DEGUEU POUR LES MUTLIS-COMBATS
-					$this->entityManager->clear($report);
+					$this->entityManager->clear();
 					$reports = $this->reportRepository->getByAttackerAndPlace(
 						$commander->player,
 						$place,
@@ -143,7 +140,7 @@ readonly class ConquestManager
 					$this->commanderManager->endTravel($commander, Commander::AFFECTED);
 					$commander->line = 2;
 
-					$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place), PlaceOwnerChangeEvent::NAME);
+					$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place));
 
 					// PATCH DEGUEU POUR LES MUTLIS-COMBATS
 					$this->notificationManager->patchForMultiCombats($commander->player, $place->player, $commander->getArrivalDate());
@@ -183,7 +180,7 @@ readonly class ConquestManager
 			// faire un combat
 			LiveReport::$type = Commander::COLO;
 			LiveReport::$dFight = $commander->getArrivalDate();
-			LiveReport::$isLegal = Report::LEGAL;
+			LiveReport::$isLegal = true;
 
 			$this->commanderManager->startFight($place, $commander);
 
@@ -222,7 +219,7 @@ readonly class ConquestManager
 
 				$this->placeManager->sendNotif($place, Place::CONQUEREMPTYSSUCCESS, $commander, $report);
 
-				$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place), PlaceOwnerChangeEvent::NAME);
+				$this->eventDispatcher->dispatch(new PlaceOwnerChangeEvent($place));
 
 				// défaite
 			} else {

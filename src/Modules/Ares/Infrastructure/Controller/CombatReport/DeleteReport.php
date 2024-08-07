@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Infrastructure\Controller\CombatReport;
 
 use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
@@ -20,17 +22,17 @@ class DeleteReport extends AbstractController
 		ReportRepositoryInterface $reportRepository,
 		Uuid $id,
 	): Response {
-		if (($report = $reportRepository->get($id)) !== null) {
-			if ($report->rPlayerAttacker == $currentPlayer->id) {
-				$report->statementAttacker = Report::DELETED;
-			} elseif ($report->rPlayerDefender == $currentPlayer->id) {
-				$report->statementDefender = Report::DELETED;
-			} else {
-				throw new AccessDeniedHttpException('Ce rapport ne vous appartient pas');
-			}
+		$report = $reportRepository->get($id)
+			?? throw $this->createNotFoundException('Ce rapport n\'existe pas');
+
+		if ($report->attacker->id === $currentPlayer->id) {
+			$report->attackerStatement = Report::DELETED;
+		} elseif ($report->defender->id === $currentPlayer->id) {
+			$report->defenderStatement = Report::DELETED;
 		} else {
-			throw new NotFoundHttpException('Ce rapport n\'existe pas');
+			throw $this->createAccessDeniedException('Ce rapport ne vous appartient pas');
 		}
+
 		$reportRepository->save($report);
 
 		return $this->redirectToRoute('fleet_archives');

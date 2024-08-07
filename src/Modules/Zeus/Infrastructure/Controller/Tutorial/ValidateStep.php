@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Zeus\Infrastructure\Controller\Tutorial;
 
 use App\Classes\Library\Format;
@@ -225,7 +227,7 @@ class ValidateStep extends AbstractController
 					break;
 			}
 			if (!$nextStepAlreadyDone) {
-				$currentPlayer->stepDone = 0;
+				$currentPlayer->stepDone = false;
 				$session->get('playerInfo')->add('stepDone', false);
 			}
 			$currentPlayer->stepTutorial = $nextStep;

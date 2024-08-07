@@ -3,6 +3,7 @@
 namespace App\Modules\Zeus\Application\Handler;
 
 use App\Classes\Library\Game;
+use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -12,14 +13,13 @@ use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use App\Modules\Zeus\Model\PlayerFinancialReport;
-use Doctrine\ORM\EntityManagerInterface;
 
 readonly class ShipsWageHandler
 {
 	public function __construct(
+		private CommanderRepositoryInterface $commanderRepository,
 		private NotificationRepositoryInterface $notificationRepository,
 		private TransactionRepositoryInterface  $transactionRepository,
-		private EntityManagerInterface          $entityManager,
 	) {
 	}
 
@@ -72,7 +72,7 @@ readonly class ShipsWageHandler
 				))
 				->for($player);
 			$this->notificationRepository->save($notification);
-			$this->entityManager->flush($commander);
+			$this->commanderRepository->save($commander);
 		}
 		// vaisseaux sur la planète
 		// TODO refactor this part for better carving

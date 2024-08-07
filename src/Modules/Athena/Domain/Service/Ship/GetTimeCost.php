@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Athena\Domain\Service\Ship;
 
-use App\Modules\Athena\Helper\ShipHelper;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Shared\Domain\Server\TimeMode;
 use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
@@ -15,11 +14,9 @@ readonly class GetTimeCost
 {
 	public function __construct(
 		private BonusApplierInterface $bonusApplier,
-		private ShipHelper $shipHelper,
 		#[Autowire('%server_time_mode%')]
 		private TimeMode $timeMode,
 	) {
-
 	}
 
 	public function __invoke(int $identifier, int $dockType, int $quantity): int

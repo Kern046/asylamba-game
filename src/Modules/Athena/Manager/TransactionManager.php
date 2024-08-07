@@ -6,6 +6,8 @@ use App\Classes\Library\Game;
 use App\Modules\Athena\Domain\Repository\CommercialTaxRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
+use App\Modules\Demeter\Model\Color;
+use App\Modules\Shared\Application\PercentageApplier;
 use App\Modules\Travel\Domain\Model\TravelType;
 use App\Modules\Travel\Domain\Service\GetTravelDuration;
 use App\Shared\Application\Handler\DurationHandler;
@@ -23,13 +25,13 @@ readonly class TransactionManager
 	 * @return array{
 	 *  export_price: int,
 	 * 	export_tax: int,
-	 *  export_faction: int,
+	 *  export_faction: Color,
 	 *  import_price: int,
 	 * 	import_tax: int,
-	 *  import_faction: int,
+	 *  import_faction: Color,
 	 *  total_price: int,
 	 *  time: float,
-	 *  rate: float,
+	 *  rate: float|null,
 	 * }
 	 */
 	public function getTransactionData(Transaction $transaction, OrbitalBase $ob, float $currentRate = null): array
@@ -62,8 +64,8 @@ readonly class TransactionManager
 		$importTax = $baseFactionTax->importTax;
 		$importFaction = $baseFactionTax->faction;
 
-		$exportPrice = round($transaction->price * $exportTax / 100);
-		$importPrice = round($transaction->price * $importTax / 100);
+		$exportPrice = PercentageApplier::toInt($transaction->price, $exportTax);
+		$importPrice = PercentageApplier::toInt($transaction->price, $importTax);
 
 		return [
 			'export_price' => $exportPrice,

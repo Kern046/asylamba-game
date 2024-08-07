@@ -40,7 +40,7 @@ interface PlayerRepositoryInterface extends EntityRepositoryInterface
 
 	public function countByFactionAndStatements(Color $faction, array $statements): int;
 
-	public function getFactionAccount(Color $faction): Player;
+	public function getFactionAccount(Color $faction): Player|null;
 
 	/**
 	 * @return list<Player>

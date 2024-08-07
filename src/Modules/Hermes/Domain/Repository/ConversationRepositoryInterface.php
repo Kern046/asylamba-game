@@ -9,6 +9,9 @@ use Symfony\Component\Uid\Uuid;
 
 interface ConversationRepositoryInterface extends EntityRepositoryInterface
 {
+	/**
+	 * TODO Maybe rename to getFactionConversation (it takes also system conversation so we need another name) ?
+	 */
 	public function getOneByPlayer(Player $player): Conversation;
 
 	public function getOne(Uuid $id): Conversation|null;

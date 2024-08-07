@@ -52,6 +52,7 @@ class CreditTransaction
 		return match (ClassUtils::getClass($part)) {
 			Color::class => '/embassy/faction-' . $part->id,
 			Player::class => '/embassy/player-' . $part->id,
+			default => throw new \RuntimeException('Match case not implemented'),
 		};
 	}
 
@@ -70,6 +71,7 @@ class CreditTransaction
 		return match (ClassUtils::getClass($part)) {
 			Color::class => ColorResource::getInfo($part->identifier, 'popularName'),
 			Player::class => $part->name,
+			default => throw new \RuntimeException('Match case not implemented'),
 		};
 	}
 
@@ -88,6 +90,7 @@ class CreditTransaction
 		return match (ClassUtils::getClass($part)) {
 			Color::class => 'color-' . $part->identifier,
 			Player::class => $part->avatar,
+			default => throw new \RuntimeException('Match case not implemented'),
 		};
 	}
 
@@ -107,6 +110,7 @@ class CreditTransaction
 			Color::class => ColorResource::getInfo($part->identifier, 'government'),
 			// TODO make a method to get a player status
 			Player::class => ColorResource::getInfo($part->faction->identifier, 'status')[$part->status - 1],
+			default => throw new \RuntimeException('Match case not implemented'),
 		};
 	}
 
@@ -125,6 +129,7 @@ class CreditTransaction
 		return match (ClassUtils::getClass($part)) {
 			Color::class => $part->identifier,
 			Player::class => $part->faction->identifier,
+			default => throw new \RuntimeException('Match case not implemented'),
 		};
 	}
 }

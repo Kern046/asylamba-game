@@ -6,9 +6,9 @@ use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @template T
+ * @template T of object
  * @extends ServiceEntityRepository<T>
- * @extends EntityRepositoryInterface<T>
+ * @implements EntityRepositoryInterface<T>
  */
 abstract class DoctrineRepository extends ServiceEntityRepository implements EntityRepositoryInterface
 {

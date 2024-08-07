@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
@@ -9,9 +11,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<BuildingQueue>
- */
 class BuildingQueueRepository extends DoctrineRepository implements BuildingQueueRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

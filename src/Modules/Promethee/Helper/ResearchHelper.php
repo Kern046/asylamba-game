@@ -71,14 +71,14 @@ readonly class ResearchHelper
 
 	private function calculateLevelPrice(int $level): int
 	{
-		return round(
+		return intval(round(
 			(0.0901 * pow($level, 5))
 			- (12.988 * pow($level, 4))
 			+ (579.8 * pow($level, 3))
 			- (5735.8 * pow($level, 2))
 			+ (28259 * $level)
 			- 25426
-		);
+		));
 	}
 
 	private function getDefaultResearchPrice(int $research): int

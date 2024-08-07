@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Atlas\Repository;
 
 use App\Modules\Ares\Model\Commander;
@@ -14,9 +16,6 @@ use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
-/**
- * TODO build ranking statement with queryBuilder
- */
 class PlayerRankingRepository extends DoctrineRepository implements PlayerRankingRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

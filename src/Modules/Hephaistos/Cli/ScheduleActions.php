@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Hephaistos\Cli;
 
 use App\Shared\Application\SchedulerInterface;
@@ -17,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 class ScheduleActions extends Command
 {
 	/**
-	 * @param SchedulerInterface $schedulers
+	 * @param list<SchedulerInterface> $schedulers
 	 */
 	public function __construct(
 		#[TaggedIterator('app.scheduler')]

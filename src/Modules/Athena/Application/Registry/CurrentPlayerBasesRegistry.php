@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Application\Registry;
 
 use App\Modules\Athena\Domain\Exception\NoCurrentBaseSetException;
@@ -63,7 +65,7 @@ class CurrentPlayerBasesRegistry
 		return count($this->bases);
 	}
 
-	/** @return list<OrbitalBase> */
+	/** @return array<string, OrbitalBase> */
 	public function all(): array
 	{
 		return $this->bases;

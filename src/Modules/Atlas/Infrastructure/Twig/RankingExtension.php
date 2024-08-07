@@ -49,7 +49,7 @@ class RankingExtension extends AbstractExtension
 					'position' => $playerRanking->traderPosition,
 					'variation' => $playerRanking->traderVariation,
 				],
-				default => throw new \InvalidArgumentException(sprintf('%s is not a valid ranking type')),
+				default => throw new \InvalidArgumentException(sprintf('%s is not a valid ranking type', $type)),
 			})
 		];
 	}

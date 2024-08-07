@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Hermes\Infrastructure\Repository;
 
 use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
@@ -9,9 +11,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Conversation>
- */
 class ConversationRepository extends DoctrineRepository implements ConversationRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

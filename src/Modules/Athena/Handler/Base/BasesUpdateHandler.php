@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Handler\Base;
 
 use App\Classes\Library\Game;
@@ -78,6 +80,6 @@ readonly class BasesUpdateHandler
 
 	protected function updateAntiSpy(OrbitalBase $orbitalBase): void
 	{
-		$orbitalBase->antiSpyAverage = round((($orbitalBase->antiSpyAverage * (24 - 1)) + $orbitalBase->iAntiSpy) / 24);
+		$orbitalBase->antiSpyAverage = intval(round((($orbitalBase->antiSpyAverage * (24 - 1)) + $orbitalBase->iAntiSpy) / 24));
 	}
 }

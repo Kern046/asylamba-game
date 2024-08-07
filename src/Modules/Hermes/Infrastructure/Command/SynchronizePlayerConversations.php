@@ -49,8 +49,7 @@ class SynchronizePlayerConversations extends Command
 
 			$factionAccount = $this->playerRepository->getFactionAccount($faction)
 				?? throw new \RuntimeException(sprintf('Faction account not found for %s', $factionName));
-			$factionConversation = $this->conversationRepository->getOneByPlayer($factionAccount)
-				?? throw new \RuntimeException(sprintf('Faction conversation not found for %s', $factionName));
+			$factionConversation = $this->conversationRepository->getOneByPlayer($factionAccount);
 
 			$players = $this->playerRepository->getFactionPlayersByName($faction);
 
@@ -61,8 +60,7 @@ class SynchronizePlayerConversations extends Command
 
 		$systemPlayer = $this->playerRepository->get($this->jeanMiId)
 			?? throw new \RuntimeException('Missing system Player');
-		$systemConversation = $this->conversationRepository->getOneByPlayer($systemPlayer)
-			?? throw new \RuntimeException('Missing system Conversation');
+		$systemConversation = $this->conversationRepository->getOneByPlayer($systemPlayer);
 
 		$this->includeMissingPlayers($systemConversation, $this->playerRepository->getActivePlayers(), $style);
 

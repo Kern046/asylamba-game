@@ -64,6 +64,6 @@ class Conversation
 
 	public function getLastPage(): int
 	{
-		return ceil($this->messagesCount / ConversationMessage::MESSAGE_BY_PAGE);
+		return intval(ceil($this->messagesCount / ConversationMessage::MESSAGE_BY_PAGE));
 	}
 }

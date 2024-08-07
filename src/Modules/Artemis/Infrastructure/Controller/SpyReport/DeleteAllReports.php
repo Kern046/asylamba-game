@@ -2,16 +2,16 @@
 
 namespace App\Modules\Artemis\Infrastructure\Controller\SpyReport;
 
-use App\Modules\Artemis\Manager\SpyReportManager;
+use App\Modules\Artemis\Domain\Repository\SpyReportRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
 class DeleteAllReports extends AbstractController
 {
-	public function __invoke(SpyReportManager $spyReportManager, Player $currentPlayer): Response
+	public function __invoke(SpyReportRepositoryInterface $spyReportRepository, Player $currentPlayer): Response
 	{
-		$nbr = $spyReportManager->deleteByRPlayer($currentPlayer->getId());
+		$nbr = $spyReportRepository->deletePlayerReports($currentPlayer);
 
 		if ($nbr > 1) {
 			$this->addFlash('success', $nbr.' rapports ont été supprimés.');

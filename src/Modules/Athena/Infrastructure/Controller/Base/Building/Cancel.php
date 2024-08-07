@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
 use App\Modules\Athena\Domain\Repository\BuildingQueueRepositoryInterface;
@@ -37,24 +39,26 @@ class Cancel extends AbstractController
 		$buildingQueues = $buildingQueueRepository->getBaseQueues($currentBase);
 
 		$index = null;
+		$dStart = null;
+		$targetLevel = null;
 		$nbBuildingQueues = count($buildingQueues);
 		for ($i = 0; $i < $nbBuildingQueues; ++$i) {
 			$queue = $buildingQueues[$i];
 			// get the last element from the correct building
-			if ($queue->buildingNumber == $identifier) {
+			if ($queue->buildingNumber === $identifier) {
 				$index = $i;
 				$targetLevel = $queue->targetLevel;
 				$dStart = $queue->getStartDate();
 			}
 		}
 
-		// if it's the first, the next must restart by now
-		if (0 == $index) {
-			$dStart = new \DateTimeImmutable();
+		if (null === $dStart || null === $index || null === $targetLevel) {
+			throw new ConflictHttpException('suppression de bâtiment impossible');
 		}
 
-		if (null === $index) {
-			throw new ConflictHttpException('suppression de bâtiment impossible');
+		// if it's the first, the next must restart by now
+		if (0 === $index) {
+			$dStart = new \DateTimeImmutable();
 		}
 		// shift
 		for ($i = $index + 1; $i < $nbBuildingQueues; ++$i) {

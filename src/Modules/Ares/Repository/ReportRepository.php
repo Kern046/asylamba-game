@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Repository;
 
 use App\Modules\Ares\Domain\Repository\ReportRepositoryInterface;
@@ -10,9 +12,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Report>
- */
 class ReportRepository extends DoctrineRepository implements ReportRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

@@ -2,34 +2,30 @@
 
 namespace App\Modules\Artemis\Infrastructure\Controller\SpyReport;
 
-use App\Modules\Artemis\Manager\SpyReportManager;
+use App\Modules\Artemis\Domain\Repository\SpyReportRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class DeleteReport extends AbstractController
 {
 	public function __invoke(
 		Player $currentPlayer,
-		SpyReportManager $spyReportManager,
-		int $id,
+		SpyReportRepositoryInterface $spyReportRepository,
+		Uuid $id,
 	): Response {
-		$spyReportManager->newSession();
-		$spyReportManager->load(['id' => $id]);
-		$report = $spyReportManager->get();
-		if (1 == $spyReportManager->size()) {
-			if ($report->rPlayer == $currentPlayer->getId()) {
-				$spyReportManager->deleteById($report->id);
-				$this->addFlash('success', 'Rapport d\'espionnage supprimé');
+		$spyReport = $spyReportRepository->get($id)
+			?? throw $this->createNotFoundException('Ce rapport n\'existe pas');
 
-				return $this->redirectToRoute('spy_reports');
-			} else {
-				throw new AccessDeniedHttpException('Ce rapport ne vous appartient pas');
-			}
-		} else {
-			throw new NotFoundHttpException('Ce rapport n\'existe pas');
+		if ($currentPlayer->id !== $spyReport->player->id) {
+			throw $this->createAccessDeniedException('Ce rapport ne vous appartient pas');
 		}
+
+		$spyReportRepository->remove($spyReport);
+
+		$this->addFlash('success', 'Rapport d\'espionnage supprimé');
+
+		return $this->redirectToRoute('spy_reports');
 	}
 }

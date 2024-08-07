@@ -114,7 +114,7 @@ readonly class OrbitalBaseHelper
 		return null;
 	}
 
-	public function haveRights($buildingId, $level, $type, $sup): bool
+	public function haveRights($buildingId, $level, $type, $sup): bool|string
 	{
 		if ($this->isABuilding($buildingId)) {
 			switch ($type) {
@@ -176,7 +176,6 @@ readonly class OrbitalBaseHelper
 					} else {
 						return 'il vous faut développer la technologie '.$this->technologyHelper->getInfo($this->getBuildingInfo($buildingId, 'techno'), 'name');
 					}
-					break;
 				default:
 					throw new \LogicException('$type invalide (entre 1 et 4) dans haveRights de OrbitalBaseResource');
 			}

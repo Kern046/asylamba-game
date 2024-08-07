@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Gaia\Repository;
 
 use App\Classes\Entity\AbstractRepository;
@@ -10,9 +12,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<System>
- */
 class SystemRepository extends DoctrineRepository implements SystemRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

@@ -49,7 +49,6 @@ class ColorResource
 	}
 
 	/**
-	 * @param Color $faction
 	 * @return list<string>
 	 */
 	public static function getStatuses(Color $faction): array
@@ -57,11 +56,6 @@ class ColorResource
 		return self::getInfo($faction->identifier, 'status');
 	}
 
-	/**
-	 * @param int $id
-	 * @param string $info
-	 * @return ()
-	 */
 	public static function getInfo(int $id, string $info): mixed
 	{
 		if ($id <= count(self::$colors)) {

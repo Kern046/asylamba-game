@@ -167,4 +167,9 @@ class Color implements CreditHolderInterface
 	{
 		return $this->credits >= $amount;
 	}
+
+	public function canAttackLegally(Color $faction): bool
+	{
+		return !in_array($this->relations[$faction->identifier], [static::PEACE, static::ALLY]);
+	}
 }

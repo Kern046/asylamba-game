@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Repository\Election;
 
 use App\Modules\Demeter\Domain\Repository\Election\CandidateRepositoryInterface;
@@ -10,9 +12,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Candidate>
- */
 class CandidateRepository extends DoctrineRepository implements CandidateRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Infrastructure\Controller\News;
 
 use App\Modules\Demeter\Domain\Repository\Forum\FactionNewsRepositoryInterface;
@@ -28,9 +30,9 @@ class Pin extends AbstractController
 		foreach ($factionNews as $factionNew) {
 			if ($factionNew->id->equals($id)) {
 				$newExists = true;
-				$factionNew->pinned = 1;
+				$factionNew->pinned = true;
 			} else {
-				$factionNew->pinned = 0;
+				$factionNew->pinned = false;
 			}
 		}
 		if (true !== $newExists) {

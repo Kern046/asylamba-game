@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Model;
 
 use App\Modules\Athena\Resource\ShipResource;
@@ -12,9 +14,6 @@ class Report
 	public const STANDARD = 0;
 	public const ARCHIVED = 1;
 	public const DELETED = 2;
-
-	public const ILLEGAL = 0;
-	public const LEGAL = 1;
 
 	public array $attackerArmyInBegin = [];
 	public array $defenderArmyInBegin = [];
@@ -65,9 +64,9 @@ class Report
 	) {
 	}
 
-	public static function fromLiveReport(Place $place): static
+	public static function fromLiveReport(Place $place): self
 	{
-		$report = new Report(
+		$report = new self(
 			id: Uuid::v4(),
 			attacker: LiveReport::$rPlayerAttacker,
 			defender: LiveReport::$rPlayerDefender,

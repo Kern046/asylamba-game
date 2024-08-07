@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;

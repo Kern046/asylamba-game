@@ -59,7 +59,7 @@ class LiveReport
 		self::$expPlayerA = 0;
 		self::$expPlayerD = 0;
 		self::$type = 0;
-		self::$isLegal = 0;
+		self::$isLegal = false;
 		self::$round = 0;
 		self::$attackerImportance = 0;
 		self::$defenderImportance = 0;

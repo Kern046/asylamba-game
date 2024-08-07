@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Repository;
 
 use App\Modules\Ares\Domain\Repository\SquadronRepositoryInterface;
@@ -10,9 +12,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
-/**
- * @extends DoctrineRepository<Squadron>
- */
 class SquadronRepository extends DoctrineRepository implements SquadronRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

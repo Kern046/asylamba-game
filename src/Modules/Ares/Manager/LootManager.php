@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Manager;
 
 use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
@@ -52,7 +54,7 @@ readonly class LootManager
 
 		// si la planète est vide
 		if (null === $placePlayer) {
-			LiveReport::$isLegal = Report::LEGAL;
+			LiveReport::$isLegal = true;
 
 			// planète vide : faire un combat
 			$this->commanderManager->startFight($place, $commander);
@@ -66,7 +68,7 @@ readonly class LootManager
 
 				// réduction de la force de la planète
 				$percentage = (($report->defenderPevAtEnd + 1) / ($report->defenderPevAtBeginning + 1)) * 100;
-				$place->danger = round(($percentage * $place->danger) / 100);
+				$place->danger = intval(round(($percentage * $place->danger) / 100));
 
 				($this->moveFleet)(
 					commander: $commander,
@@ -84,15 +86,12 @@ readonly class LootManager
 				// réduction de la force de la planète
 				// TODO Factorize in a service
 				$percentage = (($report->defenderPevAtEnd + 1) / ($report->defenderPevAtBeginning + 1)) * 100;
-				$place->danger = round(($percentage * $place->danger) / 100);
+				$place->danger = intval(round(($percentage * $place->danger) / 100));
 			}
 			// si il y a une base d'un joueur
 		} else {
 			// TODO Move to Specification class
-			LiveReport::$isLegal = (Color::ALLY === $commanderColor->relations[$place->player->faction->identifier]
-				|| Color::PEACE === $commanderColor->relations[$place->player->faction->identifier])
-				? Report::ILLEGAL
-				: Report::LEGAL;
+			LiveReport::$isLegal = $commanderColor->canAttackLegally($place->player->faction);
 
 			// planète à joueur : si $this->rColor != commandant->rColor
 			// si il peut l'attaquer
@@ -106,9 +105,9 @@ readonly class LootManager
 				}
 
 				// il y a des commandants en défense : faire un combat avec un des commandants
-				if (0 != count($dCommanders)) {
+				if (0 !== count($dCommanders)) {
 					$aleaNbr = rand(0, count($dCommanders) - 1);
-					$this->commanderManager->startFight($place, $commander, $dCommanders[$aleaNbr], true);
+					$this->commanderManager->startFight($place, $commander, $dCommanders[$aleaNbr]);
 
 					// victoire
 					if (!$commander->isDead()) {
@@ -149,7 +148,7 @@ readonly class LootManager
 				}
 			} else {
 				// si c'est la même couleur
-				if ($place->player->id == $commander->player->id) {
+				if ($place->player->id === $commander->player->id) {
 					// si c'est une de nos planètes
 					// on tente de se poser
 					$this->commanderManager->uChangeBase($commander);

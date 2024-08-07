@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Demeter\Repository\Forum;
 
 use App\Modules\Demeter\Domain\Repository\Forum\ForumTopicRepositoryInterface;
@@ -13,9 +15,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<ForumTopic>
- */
 class ForumTopicRepository extends DoctrineRepository implements ForumTopicRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

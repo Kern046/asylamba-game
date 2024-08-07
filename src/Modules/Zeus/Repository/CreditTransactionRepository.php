@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Zeus\Repository;
 
 use App\Modules\Demeter\Model\Color;
@@ -11,9 +13,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends DoctrineRepository<CreditTransaction>
- */
 class CreditTransactionRepository extends DoctrineRepository implements CreditTransactionRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)
@@ -27,6 +26,7 @@ class CreditTransactionRepository extends DoctrineRepository implements CreditTr
 			match (ClassUtils::getClass($sender)) {
 				Color::class => ['factionSender' => $sender],
 				Player::class => ['playerSender' => $sender],
+				default => throw new \RuntimeException('Match case not implemented'),
 			},
 			[
 				'createdAt' => 'DESC',

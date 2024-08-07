@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\CommercialTaxRepositoryInterface;
@@ -9,9 +11,6 @@ use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends DoctrineRepository<CommercialTax>
- */
 class CommercialTaxRepository extends DoctrineRepository implements CommercialTaxRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

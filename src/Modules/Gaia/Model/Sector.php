@@ -23,6 +23,5 @@ class Sector
 		public int $lifePlanet,
 		public bool $prime,
 	) {
-			
 	}
 }

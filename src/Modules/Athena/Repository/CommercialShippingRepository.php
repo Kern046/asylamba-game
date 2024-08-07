@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Repository;
 
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
@@ -11,9 +13,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<CommercialShipping>
- */
 class CommercialShippingRepository extends DoctrineRepository implements CommercialShippingRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

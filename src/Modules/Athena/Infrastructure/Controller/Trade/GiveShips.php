@@ -57,7 +57,6 @@ class GiveShips extends AbstractController
 		for ($i = 0; $i < ShipResource::SHIP_QUANTITY; ++$i) {
 			if ($request->request->has('identifier-'.$i)) {
 				$shipType = $i;
-				$shipName = ShipResource::getInfo($i, 'codeName');
 
 				if ($request->request->has('quantity-'.$i)) {
 					$ships = $request->request->get('quantity-'.$i) > 0
@@ -169,7 +168,7 @@ class GiveShips extends AbstractController
 						),
 						' a lancé un convoi de ',
 						NotificationBuilder::bold(Format::numberFormat($ships)),
-						' '.$shipName.' depuis sa base ',
+						' ' . ShipResource::getInfo($shipType, 'codeName') . ' depuis sa base ',
 						NotificationBuilder::link(
 							$this->generateUrl('map', ['place' => $currentBase->place->id]),
 							$currentBase->name,

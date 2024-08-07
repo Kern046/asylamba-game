@@ -33,7 +33,7 @@ class ViewEmbassy extends AbstractController
 		$data = [];
 
 		if (null !== ($playerId = $request->query->get('player'))) {
-			if (null === ($player = $playerRepository->find($playerId)) || !$player->isInGame()) {
+			if (null === ($player = $playerRepository->get($playerId)) || !$player->isInGame()) {
 				throw new NotFoundHttpException('Player not found');
 			}
 

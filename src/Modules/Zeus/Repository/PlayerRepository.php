@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Zeus\Repository;
 
 use App\Modules\Demeter\Model\Color;
@@ -10,9 +12,6 @@ use App\Shared\Domain\Specification\SelectorSpecification;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
-/**
- * @extends DoctrineRepository<Player>
- */
 class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)
@@ -97,7 +96,7 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 		return $qb->getQuery()->getSingleScalarResult();
 	}
 
-	public function getFactionAccount(Color $faction): Player
+	public function getFactionAccount(Color $faction): Player|null
 	{
 		return $this->findOneBy([
 			'faction' => $faction,

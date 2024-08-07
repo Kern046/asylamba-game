@@ -2,8 +2,10 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Trade\Route;
 
+use App\Modules\Athena\Application\Handler\CommercialRoute\GetCommercialRoutePrice;
 use App\Modules\Athena\Domain\Repository\CommercialRouteRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
+use App\Modules\Gaia\Application\Handler\GetDistanceBetweenPlaces;
 use App\Modules\Hermes\Application\Builder\NotificationBuilder;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Model\Notification;
@@ -21,6 +23,8 @@ class Cancel extends AbstractController
 		Request $request,
 		Player $currentPlayer,
 		CommercialRouteRepositoryInterface $commercialRouteRepository,
+		GetDistanceBetweenPlaces $getDistanceBetweenPlaces,
+		GetCommercialRoutePrice $getCommercialRoutePrice,
 		PlayerManager $playerManager,
 		NotificationRepositoryInterface $notificationRepository,
 		OrbitalBase $currentBase,
@@ -38,7 +42,8 @@ class Cancel extends AbstractController
 		$linkedBase = $cr->destinationBase;
 
 		// rend 80% des crédits investis
-		$playerManager->increaseCredit($currentPlayer, round($cr->price * $routeCancelRefund));
+		$commercialRoutePrice = $getCommercialRoutePrice($getDistanceBetweenPlaces($cr->originBase->place, $cr->destinationBase->place), $currentPlayer);
+		$playerManager->increaseCredit($currentPlayer, round($commercialRoutePrice * $routeCancelRefund));
 
 		// notification
 		$notification = NotificationBuilder::new()

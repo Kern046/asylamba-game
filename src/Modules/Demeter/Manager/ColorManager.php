@@ -150,7 +150,7 @@ readonly class ColorManager implements SchedulerInterface
 		}
 	}
 
-	public function updateStatus(Color $faction): void
+	public function updateSenate(Color $faction): void
 	{
 		$factionPlayers = $this->playerRepository->getFactionPlayersByRanking($faction);
 		$limit = round(count($factionPlayers) / 4);

@@ -107,7 +107,6 @@ class TechnologyHelper
 					$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::TECHNOSPHERE, 'level', $arg1->levelTechnosphere, 'nbQueues');
 
 					return $arg2 < $maxQueue;
-					break;
 				// a-t-on le droit de construire ce niveau ?
 				// $arg1 est le niveau cible
 				case 'levelPermit':
@@ -119,7 +118,6 @@ class TechnologyHelper
 				// no break
 				case 'technosphereLevel':
 					return $this->getInfo($techno, 'requiredTechnosphere') <= $arg1;
-					break;
 				// est-ce que les recherches de l'université sont acquises ?
 				// arg1 est le niveau de la technologie
 				// arg2 est une stacklist avec les niveaux de recherche
@@ -157,7 +155,6 @@ class TechnologyHelper
 						OrbitalBase::TYP_CAPITAL => in_array($this->getInfo($techno, 'column'), [1, 2, 3, 4, 5, 6, 7]),
 						default => false,
 					};
-					break;
 				default:
 					throw new \RuntimeException('Erreur dans haveRights() de TechnologyResource');
 			}

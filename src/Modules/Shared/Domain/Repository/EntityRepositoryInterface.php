@@ -3,7 +3,7 @@
 namespace App\Modules\Shared\Domain\Repository;
 
 /**
- * @template T
+ * @template T of object
  */
 interface EntityRepositoryInterface
 {

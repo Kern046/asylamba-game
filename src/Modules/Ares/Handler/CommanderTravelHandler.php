@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Handler;
 
 use App\Modules\Ares\Domain\Model\CommanderMission;
@@ -12,7 +14,6 @@ use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Gaia\Manager\PlaceManager;
 use App\Modules\Gaia\Model\Place;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -25,7 +26,6 @@ readonly class CommanderTravelHandler
 		private LootManager $lootManager,
 		private PlaceManager $placeManager,
 		private OrbitalBaseManager $orbitalBaseManager,
-		private EntityManagerInterface $entityManager,
 	) {
 	}
 
@@ -57,6 +57,6 @@ readonly class CommanderTravelHandler
 			$this->orbitalBaseManager->increaseResources($commander->base, $commander->resources);
 			$commander->resources = 0;
 		}
-		$this->entityManager->flush($commander);
+		$this->commanderRepository->save($commander);
 	}
 }

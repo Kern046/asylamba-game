@@ -52,7 +52,7 @@ class ChangeBaseType extends AbstractController
 
 		if ($currentBase->isColony()) {
 			// TODO Move to specification pattern
-			if ($currentBase->levelGenerator < $this->getParameter('athena.obm.change_type_min_level')) {
+			if ($currentBase->levelGenerator < intval($this->getParameter('athena.obm.change_type_min_level'))) {
 				throw new ConflictHttpException('Evolution de votre colonie impossible - niveau du générateur pas assez élevé');
 			}
 
@@ -75,7 +75,7 @@ class ChangeBaseType extends AbstractController
 				}
 			));
 		} elseif ($currentBase->isCommercialBase() || $currentBase->isMilitaryBase()) {
-			$baseMinLevelForCapital = $this->getParameter('athena.obm.capital_min_level');
+			$baseMinLevelForCapital = intval($this->getParameter('athena.obm.capital_min_level'));
 			if (OrbitalBase::TYP_CAPITAL === $type) {
 				if ($currentBase->levelGenerator < $baseMinLevelForCapital) {
 					throw new ConflictHttpException('Pour transformer votre base en capitale, vous devez augmenter votre générateur jusqu\'au niveau '.$baseMinLevelForCapital.'.');
@@ -163,7 +163,7 @@ class ChangeBaseType extends AbstractController
 		}
 		$orbitalBaseRepository->save($currentBase);
 
-		$eventDispatcher->dispatch(new PlaceOwnerChangeEvent($currentBase->place), PlaceOwnerChangeEvent::NAME);
+		$eventDispatcher->dispatch(new PlaceOwnerChangeEvent($currentBase->place));
 
 		return $this->redirectToRoute('base_overview');
 	}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Ares\Repository;
 
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
@@ -14,9 +16,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<Commander>
- */
 class CommanderRepository extends DoctrineRepository implements CommanderRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)

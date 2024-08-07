@@ -4,7 +4,7 @@ namespace App\Modules\Gaia\Galaxy;
 
 class GalaxyConfigurationV6 extends GalaxyConfiguration
 {
-	public $galaxy = [
+	public array $galaxy = [
 		'size' => 250,
 		'diag' => 177,
 		'mask' => 15,
@@ -23,7 +23,7 @@ class GalaxyConfigurationV6 extends GalaxyConfiguration
 		'population' => [700, 25000],
 	];
 
-	public $sectors = [
+	public array $sectors = [
 		/*[
 			'id' => 1,
 			'beginColor' => null,
@@ -582,7 +582,7 @@ class GalaxyConfigurationV6 extends GalaxyConfiguration
 		echo '</pre>';
 	}
 
-	public $systems = [
+	public array $systems = [
 		[
 			'id' => 1,
 			'name' => 'ruine',
@@ -610,7 +610,7 @@ class GalaxyConfigurationV6 extends GalaxyConfiguration
 			'nbrPlaces' => [3, 6],
 		],
 	];
-	public $places = [
+	public array $places = [
 		[
 			'id' => 1,
 			'name' => 'planète tellurique',
@@ -651,5 +651,5 @@ class GalaxyConfigurationV6 extends GalaxyConfiguration
 	];
 
 	// display params
-	public $scale = 20;
+	public int $scale = 20;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Artemis\Infrastructure\Repository;
 
 use App\Modules\Artemis\Domain\Repository\SpyReportRepositoryInterface;
@@ -9,9 +11,6 @@ use App\Modules\Zeus\Model\Player;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * @extends DoctrineRepository<SpyReport>
- */
 class SpyReportRepository extends DoctrineRepository implements SpyReportRepositoryInterface
 {
 	public function __construct(ManagerRegistry $registry)
@@ -41,5 +40,16 @@ class SpyReportRepository extends DoctrineRepository implements SpyReportReposit
 		], [
 			'createdAt' => 'DESC',
 		], 40, 0);
+	}
+
+	public function deletePlayerReports(Player $player): int
+	{
+		$qb = $this->createQueryBuilder('s');
+
+		$qb->delete()
+			->where('s.player = :player')
+			->setParameter('player', $player);
+
+		return $qb->getQuery()->getResult();
 	}
 }

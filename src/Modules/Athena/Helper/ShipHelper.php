@@ -3,7 +3,6 @@
 namespace App\Modules\Athena\Helper;
 
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
-use App\Modules\Athena\Manager\ShipQueueManager;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
@@ -15,7 +14,6 @@ readonly class ShipHelper
 	public function __construct(
 		private CurrentPlayerRegistry $currentPlayerRegistry,
 		private TechnologyHelper $technologyHelper,
-		private ShipQueueManager $shipQueueManager,
 		private OrbitalBaseHelper $orbitalBaseHelper,
 		private ShipQueueRepositoryInterface $shipQueueRepository,
 	) {
@@ -36,12 +34,9 @@ readonly class ShipHelper
 					}
 
 					return !($sup < $price);
-					// assez de points d'action pour construire ?
-				case 'pa':
-					return !($sup < self::getInfo($shipId, 'pa'));
-					// encore de la place dans la queue ?
-					// $sup est un objet de type OrbitalBase
-					// $quantity est le nombre de batiments dans la queue
+				// encore de la place dans la queue ?
+				// $sup est un objet de type OrbitalBase
+				// $quantity est le nombre de batiments dans la queue
 				case 'queue':
 					if ($this->orbitalBaseHelper->isAShipFromDock1($shipId)) {
 						$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK1, 'level', $sup->levelDock1, 'nbQueues');
@@ -68,7 +63,6 @@ readonly class ShipHelper
 
 						return ($shipId - 12) < $this->orbitalBaseHelper->getBuildingInfo(4, 'level', $level, 'releasedShip');
 					}
-					break;
 					// assez de pev dans le storage et dans la queue ?
 					// $sup est un objet de type OrbitalBase
 				case 'pev':
@@ -110,19 +104,15 @@ readonly class ShipHelper
 						$wanted = ShipResource::getInfo($shipId, 'pev') * $quantity;
 						// comparaison
 						return $wanted + $inQueue + $inStorage <= $totalSpace;
-					} else {
-						return true;
 					}
-					break;
+					return true;
 					// a la technologie nécessaire pour constuire ce vaisseau ?
 					// $sup est un objet de type Technology
 				case 'techno':
 					if (1 == $sup->getTechnology(ShipResource::getInfo($shipId, 'techno'))) {
 						return true;
-					} else {
-						return 'il vous faut développer la technologie '.$this->technologyHelper->getInfo(ShipResource::getInfo($shipId, 'techno'), 'name');
 					}
-					break;
+					return 'il vous faut développer la technologie '.$this->technologyHelper->getInfo(ShipResource::getInfo($shipId, 'techno'), 'name');
 				default:
 					throw new \ErrorException('type invalide dans haveRights de ShipResource');
 			}
