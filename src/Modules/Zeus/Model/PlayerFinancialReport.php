@@ -36,9 +36,14 @@ class PlayerFinancialReport
 			+ $this->shipsCost;
 	}
 
+	public function getDiff(): int
+	{
+		return $this->getTotalIncome() - $this->getTotalLosses();
+	}
+
 	public function getNewWallet(): int
 	{
-		return $this->initialWallet + $this->getTotalIncome() - $this->getTotalLosses();
+		return $this->initialWallet + $this->getDiff();
 	}
 
 	public function canAfford(int $amount): bool

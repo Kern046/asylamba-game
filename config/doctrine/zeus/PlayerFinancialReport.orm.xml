@@ -1,5 +1,5 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
-	<entity name="App\Modules\Zeus\Model\PlayerFinancialReport">
+	<entity name="App\Modules\Zeus\Model\PlayerFinancialReport" repository-class="App\Modules\Zeus\Infrastructure\Repository\PlayerFinancialReportRepository">
 		<id name="id" type="uuid" />
 
 		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player" />

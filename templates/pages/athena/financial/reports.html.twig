@@ -1,0 +1,38 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block body %}
+	<div id="background-paralax" class="financial"></div>
+
+	{{ include('molecules/financial/subnav.html.twig') }}
+	{{ include('molecules/common/movers.html.twig') }}
+
+	<div id="content">
+		{{ include ('molecules/common/advertising.html.twig') }}
+
+		<div class="component size3">
+			<div class="head skin-1">
+				<h1>Rapports financiers</h1>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					<canvas id="financial-report-chart">
+
+					</canvas>
+				</div>
+			</div>
+		</div>
+
+	</div>
+{% endblock body %}
+
+
+{% block javascripts %}
+	{{ parent() }}
+
+	<script type="application/javascript">
+		window.reports_labels = {{ reports_labels|json_encode()|raw }};
+		window.reports_data = {{ reports_data|json_encode()|raw }};
+	</script>
+
+	{{ encore_entry_script_tags('financial_reports') }}
+{% endblock javascripts %}
