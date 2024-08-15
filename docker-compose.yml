@@ -8,8 +8,22 @@ volumes:
     db-data:
     rabbitmq-data:
     redis-data:
+    caddy_data:
+    caddy_config:
 
 services:
+    phpfpm:
+        container_name: kalaxia_app
+        build: docker/fpm
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+        volumes:
+            - "./:/srv/app"
+        networks:
+            - asylamba
+
     mariadb:
         container_name: asylamba_mariadb
         image: mariadb:10
@@ -42,5 +56,35 @@ services:
             - "15672:15672"
         volumes:
             - rabbitmq-data:/var/lib/rabbitmq
+        networks:
+            - asylamba
+
+    caddy:
+        container_name: kalaxia_caddy_webserver
+        image: caddy
+        depends_on:
+            - 'phpfpm'
+        ports:
+            - '80:80'
+            - '443:443'
+        volumes:
+            - './docker/caddy/Caddyfile:/etc/caddy/Caddyfile'
+            - './:/srv/app'
+            - caddy_data:/data
+            - caddy_config:/config
+        networks:
+            - asylamba
+
+    supervisord:
+        container_name: kalaxia_worker
+        build: docker/supervisord
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+        volumes:
+            - "./:/srv/app"
+            - "./var/logs/supervisord/:/var/log/supervisord/"
+            - "./supervisord.conf:/etc/supervisor/supervisord.conf"
         networks:
             - asylamba
