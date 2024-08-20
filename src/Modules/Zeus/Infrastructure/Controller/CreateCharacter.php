@@ -186,10 +186,10 @@ class CreateCharacter extends AbstractController
 			throw new BadRequestHttpException('faction inconnues ou non-sélectionnable');
 		}
 
-		$nbAvatars = $this->getParameter('nb_avatar');
+		$nbAvatars = intval($this->getParameter('nb_avatar'));
 
 		return $this->render('pages/zeus/registration/profile.html.twig', array_merge([
-			'avatars' => $this->getAvatars($session->get('inscription')->get('ally'), $nbAvatars),
+			'avatars' => $this->getAvatars(intval($session->get('inscription')->get('ally')), $nbAvatars),
 			'nb_avatars' => $nbAvatars,
 		], $globalParameters));
 	}
@@ -296,7 +296,7 @@ class CreateCharacter extends AbstractController
 		try {
 			$this->entityManager->beginTransaction();
 
-			$faction = $this->colorRepository->getOneByIdentifier($session->get('inscription')->get('ally'))
+			$faction = $this->colorRepository->getOneByIdentifier(intval($session->get('inscription')->get('ally')))
 				?? throw new BadRequestHttpException('Invalid faction identifier');
 			// AJOUT DU JOUEUR EN BASE DE DONNEE
 			$player = new Player();
