@@ -5,14 +5,17 @@ namespace App\Shared\Infrastructure\Twig;
 use App\Classes\Library\Chronos;
 use App\Classes\Library\Format;
 use App\Classes\Library\Parser;
+use App\Modules\Shared\Domain\Service\GameTimeConverter;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class FormatterExtension extends AbstractExtension
 {
-	public function __construct(private Parser $parser)
-	{
+	public function __construct(
+		private readonly GameTimeConverter $gameTimeConverter,
+		private readonly Parser $parser,
+	) {
 	}
 
 	public function getFilters(): array
@@ -27,7 +30,7 @@ class FormatterExtension extends AbstractExtension
 			new TwigFilter('lite_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'lite')),
 			new TwigFilter('large_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'large')),
 			new TwigFilter('short_seconds', fn (int $seconds) => Chronos::secondToFormat($seconds, 'short')),
-			new TwigFilter('date', fn (string|\DateTimeImmutable $date, bool $returnHtml = true) => Chronos::transform($date, $returnHtml)),
+			new TwigFilter('game_date', fn (string|\DateTimeImmutable $date, bool $returnHtml = true) => $this->gameTimeConverter->convertDatetimeToGameDate($date, $returnHtml)),
 			new TwigFilter('unserialize', fn (string $data) => \unserialize($data)),
 		];
 	}

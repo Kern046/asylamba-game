@@ -32,14 +32,14 @@
 	<div class="fix-body">
 		<div class="body">
 			{% for transaction in faction_donations %}
-					<div class="player color{{ transaction.receiverColor }}">
-						<a href="{{ path('embassy', {'player': transaction.rReceiver}) }}">
-						<img src="{{ asset('build/media/avatar/small/' ~ transaction.receiverAvatar ~ '.png') }}" class="picto" alt="{{ transaction.receiverName }}">
+					<div class="player color{{ transaction.playerReceiver.faction.identifier }}">
+						<a href="{{ path('embassy', {'player': transaction.playerReceiver.id}) }}">
+						<img src="{{ asset('build/media/avatar/small/' ~ transaction.playerReceiver.avatar ~ '.png') }}" class="picto" alt="{{ transaction.playerReceiver.name }}">
 					</a>
 
-					{% set statuses = get_faction_info(transaction.receiverColor, 'status') %}
-					<span class="title">{{ statuses[transaction.receiverStatus - 1] }}</span>
-					<strong class="name">{{ transaction.receiverName }}</strong>
+					{% set statuses = get_faction_info(transaction.playerReceiver.faction.identifier, 'status') %}
+					<span class="title">{{ statuses[transaction.playerReceiver.status - 1] }}</span>
+					<strong class="name">{{ transaction.playerReceiver.name }}</strong>
 					<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
 				</div>
 			{% endfor %}

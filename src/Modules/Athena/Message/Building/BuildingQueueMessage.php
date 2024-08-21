@@ -2,10 +2,10 @@
 
 namespace App\Modules\Athena\Message\Building;
 
-use App\Shared\Domain\Message\AsyncMessage;
+use App\Shared\Domain\Message\AsyncHighPriorityMessage;
 use Symfony\Component\Uid\Uuid;
 
-class BuildingQueueMessage implements AsyncMessage
+class BuildingQueueMessage implements AsyncHighPriorityMessage
 {
 	public function __construct(private readonly Uuid $buildingQueueId)
 	{

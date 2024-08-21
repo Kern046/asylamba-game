@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Gaia\Application\Handler;
 
 use App\Modules\Gaia\Model\Place;
 
 readonly class GetDistanceBetweenPlaces
 {
-	public function __invoke(Place $from, Place $to): float
+	public function __invoke(Place $from, Place $to): int
 	{
 		return $this->getDistance(
 			$from->system->xPosition,

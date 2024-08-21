@@ -70,7 +70,7 @@
 							{% endif %}
 
 							<p class="footer">
-								— {{ message.createdAt|date|raw }}
+								— {{ message.createdAt|game_date|raw }}
 								{% if can_edit is same as (true) -%}
 									&#8195;|&#8195;
 									<a href="#" class="sh" data-target="edit-m-{{ message.id }}">Editer</a>

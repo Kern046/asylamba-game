@@ -24,7 +24,7 @@
 						<div class="footer">
 							<a href="{{ path('archive_notification', {'id': notification.id}) }}">archiver</a> ou
 							<a href="{{ path('delete_notification', {'id': notification.id}) }}">supprimer</a><br />
-							— {{ notification.sentAt|date|raw }}
+							— {{ notification.sentAt|game_date|raw }}
 						</div>
 					</div>
 				{% endfor %}

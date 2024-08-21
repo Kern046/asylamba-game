@@ -6,13 +6,29 @@
 
 		<field name="createdAt" column="created_at" type="datetime_immutable" />
 		<field name="initialWallet" column="initial_wallet" type="bigint" />
+
 		<field name="populationTaxes" column="population_taxes" type="integer" />
 		<field name="commercialRoutesIncome" column="commercial_routes_income" type="integer" />
+		<field name="resourcesSales" type="integer" />
+		<field name="shipsSales" type="integer" />
+		<field name="commandersSales" type="integer" />
+		<field name="recycledCredits" type="integer" />
+		<field name="receivedPlayersCreditTransactions" type="integer" />
+		<field name="receivedFactionsCreditTransactions" type="integer" />
+
 		<field name="factionTaxes" column="faction_taxes" type="integer" />
 		<field name="antiSpyInvestments" column="anti_spy_investments" type="integer" />
 		<field name="universityInvestments" column="university_investments" type="integer" />
 		<field name="schoolInvestments" column="school_investments" type="integer" />
 		<field name="commandersWages" column="commanders_wages" type="integer" />
 		<field name="shipsCost" column="ships_cost" type="integer" />
+		<field name="technologiesInvestments" type="integer" />
+		<field name="conquestInvestments" type="integer" />
+		<field name="commercialRoutesConstructions" type="integer" />
+		<field name="resourcesPurchases" type="integer" />
+		<field name="shipsPurchases" type="integer" />
+		<field name="commandersPurchases" type="integer" />
+		<field name="sentPlayersCreditTransactions" type="integer" />
+		<field name="sentFactionsCreditTransactions" type="integer" />
 	</entity>
 </doctrine-mapping>

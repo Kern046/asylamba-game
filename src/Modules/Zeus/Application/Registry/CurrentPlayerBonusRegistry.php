@@ -3,10 +3,11 @@
 namespace App\Modules\Zeus\Application\Registry;
 
 use App\Modules\Zeus\Model\PlayerBonus;
+use Symfony\Contracts\Service\ResetInterface;
 
-class CurrentPlayerBonusRegistry
+class CurrentPlayerBonusRegistry implements ResetInterface
 {
-	private PlayerBonus $playerBonus;
+	private PlayerBonus|null $playerBonus = null;
 	private bool $isInitialized = false;
 
 	public function setPlayerBonus(PlayerBonus $playerBonus): void
@@ -17,11 +18,17 @@ class CurrentPlayerBonusRegistry
 
 	public function getPlayerBonus(): PlayerBonus|null
 	{
-		return $this->playerBonus ?? null;
+		return $this->playerBonus;
 	}
 
 	public function isInitialized(): bool
 	{
 		return $this->isInitialized;
+	}
+
+	public function reset(): void
+	{
+		$this->playerBonus = null;
+		$this->isInitialized = false;
 	}
 }

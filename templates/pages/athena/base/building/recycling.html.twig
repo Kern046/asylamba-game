@@ -79,7 +79,7 @@
 							<strong>{{ (mission.target.resources * mission.target.population / 100)|number }}</strong> gaz nobles.
 						</p>
 
-						<p>Retour {{ mission.endedAt|date|raw }}</p>
+						<p>Retour {{ mission.endedAt|game_date|raw }}</p>
 						<p>
 							<span class="progress-bar">
 								<span style="width:{{ mission_data.percent }}%;" class="content"></span>
@@ -160,7 +160,7 @@
 									,
 								{%- endif %}
 							{% endfor %}
-							<em>{{ log.createdAt|date|raw }}</em>
+							<em>{{ log.createdAt|game_date|raw }}</em>
 						</p>
 					{% endfor %}
 				</div>

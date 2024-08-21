@@ -51,6 +51,11 @@ services:
     rabbitmq:
         container_name: asylamba_rabbitmq
         image: rabbitmq:3.9-management-alpine
+        healthcheck:
+            test: rabbitmq-diagnostics -q ping
+            interval: 30s
+            timeout: 30s
+            retries: 3
         ports:
             - "5672:5672"
             - "15672:15672"
@@ -63,7 +68,8 @@ services:
         container_name: kalaxia_caddy_webserver
         image: caddy
         depends_on:
-            - 'phpfpm'
+            phpfpm:
+                condition: service_started
         ports:
             - '80:80'
             - '443:443'
@@ -78,6 +84,9 @@ services:
     supervisord:
         container_name: kalaxia_worker
         build: docker/supervisord
+        depends_on:
+            rabbitmq:
+                condition: service_healthy
         logging:
             driver: "json-file"
             options:

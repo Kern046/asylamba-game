@@ -33,6 +33,14 @@ abstract class DoctrineRepository extends ServiceEntityRepository implements Ent
 	/**
 	 * @param T $entity
 	 */
+	public function detach(object $entity): void
+	{
+		$this->getEntityManager()->detach($entity);
+	}
+
+	/**
+	 * @param T $entity
+	 */
 	public function refresh(object $entity): void
 	{
 		$this->getEntityManager()->refresh($entity);

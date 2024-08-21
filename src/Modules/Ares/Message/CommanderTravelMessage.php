@@ -2,10 +2,10 @@
 
 namespace App\Modules\Ares\Message;
 
-use App\Shared\Domain\Message\AsyncMessage;
+use App\Shared\Domain\Message\AsyncHighPriorityMessage;
 use Symfony\Component\Uid\Uuid;
 
-class CommanderTravelMessage implements AsyncMessage
+class CommanderTravelMessage implements AsyncHighPriorityMessage
 {
 	public function __construct(private readonly Uuid $commanderId)
 	{

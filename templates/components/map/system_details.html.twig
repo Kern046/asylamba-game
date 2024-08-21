@@ -180,7 +180,7 @@
 									{% set report = reports|first %}
 									<div>
 										<em>
-											Dernier pillage {{ report.foughtAt|date|raw }}.
+											Dernier pillage {{ report.foughtAt|game_date|raw }}.
 										</em>
 									</div>
 								{% endif %}

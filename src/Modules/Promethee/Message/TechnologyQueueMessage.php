@@ -2,10 +2,10 @@
 
 namespace App\Modules\Promethee\Message;
 
-use App\Shared\Domain\Message\AsyncMessage;
+use App\Shared\Domain\Message\AsyncHighPriorityMessage;
 use Symfony\Component\Uid\Uuid;
 
-class TechnologyQueueMessage implements AsyncMessage
+class TechnologyQueueMessage implements AsyncHighPriorityMessage
 {
 	public function __construct(private readonly Uuid $technologyQueueId)
 	{

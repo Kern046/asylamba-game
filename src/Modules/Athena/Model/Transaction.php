@@ -52,6 +52,11 @@ class Transaction
 			message: 'A commander transaction must have a commander set',
 		)]
 		public Commander|null $commander = null,
+		public Player|null $buyer = null,
+		public int $sellerFactionFees = 0,
+		public int $sellerFactionTaxRate = 0,
+		public int $buyerFactionFees = 0,
+		public int $buyerFactionTaxRate = 0,
 		public int $price = 0,
 		public int $commercialShipQuantity = 0,	// ship needed for the transport
 		public int $statement = 0,
@@ -115,5 +120,10 @@ class Transaction
 	public function isCancelled(): bool
 	{
 		return self::ST_CANCELED === $this->statement;
+	}
+
+	public function getTotalPrice(): int
+	{
+		return $this->price + $this->sellerFactionFees + $this->buyerFactionFees;
 	}
 }

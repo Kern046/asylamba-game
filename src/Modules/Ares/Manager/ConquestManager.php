@@ -66,7 +66,7 @@ readonly class ConquestManager
 			$price -= round($price * ColorResource::BONUS_CARDAN_COLO / 100);
 		}
 
-		return $price;
+		return intval($price);
 	}
 
 	public function conquer(Commander $commander): void

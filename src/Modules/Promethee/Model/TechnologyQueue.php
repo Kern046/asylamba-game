@@ -24,6 +24,7 @@ class TechnologyQueue implements QueueableInterface
 		public Place $place,
 		public int $technology,
 		public int $targetLevel,
+		public \DateTimeImmutable $createdAt,
 		public \DateTimeImmutable $startedAt,
 		public \DateTimeImmutable $endedAt,
 	) {

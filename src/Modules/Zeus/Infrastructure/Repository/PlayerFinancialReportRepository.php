@@ -30,4 +30,30 @@ class PlayerFinancialReportRepository extends DoctrineRepository implements Play
 			$offset,
 		);
 	}
+
+	public function getPlayerLastReport(Player $player): PlayerFinancialReport|null
+	{
+		return $this->findOneBy(
+			[
+				'player' => $player,
+			],
+			[
+				'createdAt' => 'DESC',
+			],
+		);
+	}
+
+	public function cleanPlayerFinancialReports(int $timeout): int
+	{
+		$qb = $this->createQueryBuilder('pfr');
+
+		$qb
+			->delete()
+			->where(
+				$qb->expr()->gt('DATE_DIFF(CURRENT_DATE(), pfr.createdAt)', ':timeout')
+			)
+			->setParameter('timeout', $timeout);
+
+		return $qb->getQuery()->getResult();
+	}
 }

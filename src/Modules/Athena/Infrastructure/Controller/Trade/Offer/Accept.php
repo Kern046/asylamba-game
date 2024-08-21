@@ -107,6 +107,11 @@ class Accept extends AbstractController
 		// update transaction statement
 		$transaction->statement = Transaction::ST_COMPLETED;
 		$transaction->validatedAt = new \DateTimeImmutable();
+		$transaction->buyer = $currentPlayer;
+		$transaction->sellerFactionFees = $transactionData['export_price'];
+		$transaction->sellerFactionTaxRate = $transactionData['export_tax'];
+		$transaction->buyerFactionFees = $transactionData['import_price'];
+		$transaction->buyerFactionTaxRate = $transactionData['import_tax'];
 
 		// update exchange rate
 		$transaction->currentRate = Game::calculateCurrentRate(

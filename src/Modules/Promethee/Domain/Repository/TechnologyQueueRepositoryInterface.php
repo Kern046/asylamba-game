@@ -6,6 +6,7 @@ use App\Modules\Gaia\Model\Place;
 use App\Modules\Promethee\Model\TechnologyQueue;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -32,4 +33,9 @@ interface TechnologyQueueRepositoryInterface extends EntityRepositoryInterface
 	 * @return list<TechnologyQueue>
 	 */
 	public function getPlayerQueues(Player $player): array;
+
+	/**
+	 * @return Collection<TechnologyQueue>
+	 */
+	public function matchPlayerQueuesSince(Player $player, \DateTimeImmutable $since): Collection;
 }

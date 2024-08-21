@@ -9,6 +9,8 @@ use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -85,5 +87,19 @@ class TransactionRepository extends DoctrineRepository implements TransactionRep
 			->setParameter('statement', Transaction::ST_COMPLETED);
 
 		return $qb->getQuery()->getSingleScalarResult();
+	}
+
+	public function matchPlayerCompletedTransactionsSince(Player $player, \DateTimeImmutable $completedAt): Collection
+	{
+		return $this->matching(new Criteria(
+			Criteria::expr()->andX(
+				Criteria::expr()->orX(
+					Criteria::expr()->eq('player', $player),
+					Criteria::expr()->eq('buyer', $player),
+				),
+				Criteria::expr()->eq('statement', Transaction::ST_COMPLETED),
+				Criteria::expr()->gte('validatedAt', $completedAt),
+			)
+		));
 	}
 }
