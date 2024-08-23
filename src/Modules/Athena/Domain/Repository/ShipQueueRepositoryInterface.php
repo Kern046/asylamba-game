@@ -2,6 +2,7 @@
 
 namespace App\Modules\Athena\Domain\Repository;
 
+use App\Modules\Athena\Domain\Model\DockType;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\ShipQueue;
 use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
@@ -24,5 +25,5 @@ interface ShipQueueRepositoryInterface extends EntityRepositoryInterface
 	/**
 	 * @return list<ShipQueue>
 	 */
-	public function getByBaseAndDockType(OrbitalBase $base, int $dockType): array;
+	public function getByBaseAndDockType(OrbitalBase $base, DockType $dockType): array;
 }

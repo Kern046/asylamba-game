@@ -4,6 +4,8 @@ namespace App\Modules\Athena\Infrastructure\Controller\Ship;
 
 use App\Classes\Library\Format;
 use App\Modules\Athena\Application\Factory\ShipQueueFactory;
+use App\Modules\Athena\Domain\Model\DockType;
+use App\Modules\Athena\Domain\Model\ShipType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Domain\Service\Ship\GetResourceCost;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
@@ -35,33 +37,28 @@ class BuildShips extends AbstractController
 		TechnologyRepositoryInterface $technologyRepository,
 	): Response {
 		$session = $request->getSession();
-		$shipIdentifier = $request->query->getInt('ship') ?? throw new BadRequestHttpException('Missing ship identifier');
+		$shipIdentifier = $request->query->get('ship') ?? throw new BadRequestHttpException('Missing ship identifier');
 		$quantity = $request->query->getInt('quantity') ?? throw new BadRequestHttpException('Missing quantity');
 
 		if (0 === $quantity) {
 			throw new BadRequestHttpException('Quantity must be higher than 0');
 		}
-		if (!ShipResource::isAShip($shipIdentifier)) {
-			throw new BadRequestHttpException('Invalid ship identifier');
-		}
-		if ($orbitalBaseHelper->isAShipFromDock1($shipIdentifier)) {
-			$dockType = 1;
-		} elseif ($orbitalBaseHelper->isAShipFromDock2($shipIdentifier)) {
-			$dockType = 2;
-			$quantity = 1;
-		} else {
-			$dockType = 3;
+		$shipType = ShipType::tryFrom($shipIdentifier)
+			?? throw new BadRequestHttpException('Invalid ship identifier');
+
+		$dockType = $shipType->getDockType();
+		if (DockType::Factory !== $dockType) {
 			$quantity = 1;
 		}
 		$shipQueues = $shipQueueRepository->getByBaseAndDockType($currentBase, $dockType);
 		$shipQueuesCount = count($shipQueues);
 		$technos = $technologyRepository->getPlayerTechnology($currentPlayer);
 		// TODO Replace with Specification pattern
-		if (!$shipHelper->haveRights($shipIdentifier, 'resource', $currentBase->resourcesStorage, $quantity)
-			|| !$shipHelper->haveRights($shipIdentifier, 'queue', $currentBase, $shipQueuesCount)
-			|| !$shipHelper->haveRights($shipIdentifier, 'shipTree', $currentBase)
-			|| !$shipHelper->haveRights($shipIdentifier, 'pev', $currentBase, $quantity)
-			|| !$shipHelper->haveRights($shipIdentifier, 'techno', $technos)
+		if (!$shipHelper->haveRights($shipType, 'resource', $currentBase->resourcesStorage, $quantity)
+			|| !$shipHelper->haveRights($shipType, 'queue', $currentBase, $shipQueuesCount)
+			|| !$shipHelper->haveRights($shipType, 'shipTree', $currentBase)
+			|| !$shipHelper->haveRights($shipType, 'pev', $currentBase, $quantity)
+			|| !$shipHelper->haveRights($shipType, 'techno', $technos)
 		) {
 			throw new ConflictHttpException('Missing some conditions to launch the build order');
 		}
@@ -72,14 +69,13 @@ class BuildShips extends AbstractController
 
 		$shipQueue = $shipQueueFactory->create(
 			orbitalBase: $currentBase,
-			shipIdentifier: $shipIdentifier,
-			dockType: $dockType,
+			shipType: $shipType,
 			quantity: $quantity,
 			startedAt: $startedAt,
 		);
 
 		// débit des ressources au joueur
-		$resourcePrice = ($getResourceCost)($shipIdentifier, $quantity, $currentPlayer);
+		$resourcePrice = ($getResourceCost)($shipType, $quantity, $currentPlayer);
 		$orbitalBaseManager->decreaseResources($currentBase, $resourcePrice);
 
 		// ajout de l'event dans le contrôleur
@@ -95,9 +91,9 @@ class BuildShips extends AbstractController
 
 		// alerte
 		if (1 == $quantity) {
-			$this->addFlash('success', 'Construction d\'' . (ShipResource::isAFemaleShipName($shipIdentifier) ? 'une ' : 'un ') . ShipResource::getInfo($shipIdentifier, 'codeName') . ' commandée');
+			$this->addFlash('success', 'Construction d\'' . ($shipType->isFemale() ? 'une ' : 'un ') . ShipResource::getInfo($shipType, 'codeName') . ' commandée');
 		} else {
-			$this->addFlash('success', 'Construction de ' . $quantity . ' ' . ShipResource::getInfo($shipIdentifier, 'codeName') . Format::addPlural($quantity) . ' commandée');
+			$this->addFlash('success', 'Construction de ' . $quantity . ' ' . ShipResource::getInfo($shipType, 'codeName') . Format::addPlural($quantity) . ' commandée');
 		}
 
 		return $this->redirect($request->headers->get('referer'));
