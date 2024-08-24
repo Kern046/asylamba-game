@@ -173,8 +173,6 @@ const chart = new Chart(
 	}
 );
 
-console.debug(chart);
-
 new Chart(
 	document.getElementById('commercial-report-chart'),
 	{
@@ -256,7 +254,7 @@ new Chart(
 	{
 		type: 'bar',
 		data: {
-			labels: window.reports_labels.reverse(),
+			labels: window.reports_labels,
 			datasets: [
 				{
 					label: 'Crédits recyclés',
@@ -337,7 +335,7 @@ new Chart(
 	{
 		type: 'bar',
 		data: {
-			labels: window.reports_labels.reverse(),
+			labels: window.reports_labels,
 			datasets: [
 			{
 				label: 'Transferts de fonds personnels',
