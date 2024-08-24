@@ -63,7 +63,7 @@ class ViewDocks extends AbstractController
 
 		// place dans le hangar
 		$totalSpace = $orbitalBaseHelper->getBuildingInfo($buildingNumber, 'level', $dockLevel, 'storageSpace');
-		$storage = $currentBase->shipStorage;
+		$storage = $currentBase->getShipStorage();
 		$inStorage = 0;
 
 		foreach ($shipsRange as $m) {

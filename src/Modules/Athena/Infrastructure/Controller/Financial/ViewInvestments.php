@@ -151,7 +151,7 @@ class ViewInvestments extends AbstractController
 			$data['totalTaxInBonus'] += $populationTax->bonus;
 			$data['totalTaxOut'] += $populationTax->getTotal() * $base->place->system->sector->tax / 100;
 			$data['totalInvest'] += $base->iSchool + $base->iAntiSpy;
-			$data['totalShipsFees'] += Game::getFleetCost($base->shipStorage, false);
+			$data['totalShipsFees'] += Game::getFleetCost($base->getShipStorage(), false);
 
 			// @TODO cout des trucs en vente
 

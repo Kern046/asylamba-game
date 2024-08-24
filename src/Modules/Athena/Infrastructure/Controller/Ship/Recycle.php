@@ -24,9 +24,9 @@ class Recycle extends AbstractController
 		$quantity = $request->request->get('quantity');
 
 		if (false !== $typeOfShip and false !== $quantity) {
-			if ($quantity > 0 && $quantity <= $currentBase->shipStorage[$typeOfShip]) {
+			if ($quantity > 0 && $quantity <= $currentBase->getShipStorage()[$typeOfShip]) {
 				$resources = ($quantity * ShipResource::getInfo($typeOfShip, 'resourcePrice')) / 2;
-				$currentBase->shipStorage[$typeOfShip] -= $quantity;
+				$currentBase->removeShips($typeOfShip, $quantity);
 				$orbitalBaseManager->increaseResources($currentBase, $resources);
 
 				return $this->redirect($request->headers->get('referer'));

@@ -93,7 +93,7 @@ class OrbitalBase implements SystemUpdatable
 		$this->shipStorage[$shipIdentifier] = $currentQuantity - $quantity;
 
 		if ($this->shipStorage[$shipIdentifier] <= 0) {
-			unset($this->shipStorage[$shipIdentifier]);
+			$this->shipStorage[$shipIdentifier] = 0;
 		}
 	}
 

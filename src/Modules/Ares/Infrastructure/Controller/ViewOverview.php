@@ -60,7 +60,7 @@ class ViewOverview extends AbstractController
 		for ($i = 0; $i < count($obsets); ++$i) {
 			foreach ($playerBases as $orbitalBase) {
 				if ($orbitalBase->id->toRfc4122() == $obsets[$i]['info']['id']) {
-					$obsets[$i]['dock'] = $orbitalBase->shipStorage;
+					$obsets[$i]['dock'] = $orbitalBase->getShipStorage();
 				}
 			}
 		}

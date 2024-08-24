@@ -80,7 +80,8 @@ readonly class ShipsWageHandler
 		// vaisseaux sur la planète
 		// TODO refactor this part for better carving
 		foreach ($playerBases as $base) {
-			$cost = Game::getFleetCost($base->shipStorage, false);
+			$shipsStorage = $base->getShipStorage();
+			$cost = Game::getFleetCost($shipsStorage, false);
 
 			if ($playerFinancialReport->canAfford($cost)) {
 				$playerFinancialReport->shipsCost += $cost;
@@ -89,18 +90,18 @@ readonly class ShipsWageHandler
 			}
 			// n'arrive pas à tous les payer !
 			for ($j = ShipResource::SHIP_QUANTITY - 1; $j >= 0; --$j) {
-				if (0 === $base->shipStorage[$j]) {
+				if (0 === $shipsStorage[$j]) {
 					continue;
 				}
 				$unitCost = ShipResource::getInfo($j, 'cost');
 
 				$possibleMaintenable = floor($playerFinancialReport->getNewWallet() / $unitCost);
-				if ($possibleMaintenable > $base->shipStorage[$j]) {
-					$possibleMaintenable = $base->shipStorage[$j];
+				if ($possibleMaintenable > $shipsStorage[$j]) {
+					$possibleMaintenable = $shipsStorage[$j];
 				}
 				$playerFinancialReport->shipsCost += $possibleMaintenable * $unitCost;
 
-				$toKill = $base->shipStorage[$j] - $possibleMaintenable;
+				$toKill = $shipsStorage[$j] - $possibleMaintenable;
 				if (0 === $toKill) {
 					continue;
 				}
