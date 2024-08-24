@@ -193,8 +193,8 @@ class Commander implements TravellerInterface, \JsonSerializable, SystemUpdatabl
 
 	public function getSquadron(int $i): Squadron|null
 	{
-		if ($i > 11) {
-			throw new \LogicException('Squadron ID cannot be greater than 11');
+		if ($i > 16) {
+			throw new \LogicException(sprintf('Squadron ID cannot be greater than 16, %d given', $i));
 		}
 
 		return $this->squadrons->get($i) ?? $this->army[$i] ?? null;
