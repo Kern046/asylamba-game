@@ -70,7 +70,7 @@ class ViewData extends AbstractController
 
 		$membersDonations = $creditTransactionRepository->getAllByFactionReceiverFromMembers($faction);
 
-		$factionDonations = $creditTransactionRepository->getAllByFactionReceiverFromFactions($faction);
+		$factionDonations = $creditTransactionRepository->getAllBySender($faction);
 
 		$importaxes = $commercialTaxRepository->getFactionTaxesByImport($faction);
 

@@ -76,7 +76,7 @@ class Chronos
 	 * arg : $date
 	 *     : str => date au format sql (2012-08-01 18:30:00)
 	 */
-	public static function transform(string|\DateTimeImmutable $sourceDate)
+	public static function transform(string|\DateTimeImmutable $sourceDate, bool $returnHtml = true): string
 	{
 		if (\is_numeric($sourceDate)) {
 			$date = new \DateTimeImmutable();
@@ -94,7 +94,7 @@ class Chronos
 		$return = 'SEG'.$segment.' REL'.$releve;
 		$title = $date->format('j.m.Y à H:i:s');
 
-		return '<span class="hb lt" title="'.$title.'">'.$return.'</span>';
+		return $returnHtml ? '<span class="hb lt" title="'.$title.'">'.$return.'</span>' : $return;
 	}
 
 	public static function secondToFormat($seconds, $format = 'large')

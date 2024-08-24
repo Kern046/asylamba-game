@@ -61,7 +61,7 @@
 					>
 					<div class="content flex">
 						<div class="column info divide-y divide-stone-600">
-							{% set reports = spy_reports|filter(r => r.rPlace == place.id) %}
+							{% set reports = spy_reports|filter(r => r.place.id.equals(place.id)) %}
 							{% if reports|length > 0 %}
 								{% set report = reports|first %}
 								<a href="{{ path('spy_reports', {'report': report.id}) }}"
@@ -175,12 +175,12 @@
 							</div>
 
 							{% if place.typeOfPlace == 1 %}
-								{% set reports = combat_reports|filter(r => r.rPlace == place.id) %}
+								{% set reports = combat_reports|filter(r => r.place.id.equals(place.id)) %}
 								{% if reports|length > 0 %}
 									{% set report = reports|first %}
 									<div>
 										<em>
-											Dernier pillage {{ report.dFight|date|raw }}.
+											Dernier pillage {{ report.foughtAt|game_date|raw }}.
 										</em>
 									</div>
 								{% endif %}

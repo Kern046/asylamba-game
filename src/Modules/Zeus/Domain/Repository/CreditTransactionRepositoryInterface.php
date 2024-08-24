@@ -7,6 +7,7 @@ use App\Modules\Shared\Domain\Repository\EntityRepositoryInterface;
 use App\Modules\Zeus\Model\CreditHolderInterface;
 use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @extends EntityRepositoryInterface<CreditTransaction>
@@ -32,4 +33,9 @@ interface CreditTransactionRepositoryInterface extends EntityRepositoryInterface
 	 * @return list<CreditTransaction>
 	 */
 	public function getAllByFactionReceiverFromFactions(Color $faction): array;
+
+	/**
+	 * @return Collection<CreditTransaction>
+	 */
+	public function matchAllByPlayerSince(Player $player, \DateTimeImmutable $since): Collection;
 }

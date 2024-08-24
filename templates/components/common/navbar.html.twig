@@ -125,7 +125,7 @@
 													<div class="footer">
 														<a class="ajax-action" data-ajax-target="{{ path('archive_notification', {'id': notification.id }) }}">archiver</a> ou
 														<a class="ajax-action" data-ajax-target="{{ path('delete_notification', {'id': notification.id }) }}">supprimer</a><br />
-														— {{ notification.sentAt|date|raw }}
+														— {{ notification.sentAt|game_date|raw }}
 													</div>
 												</div>
 											{% endfor %}

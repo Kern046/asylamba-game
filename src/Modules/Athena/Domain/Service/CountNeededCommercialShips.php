@@ -16,8 +16,8 @@ class CountNeededCommercialShips
 			// 1000 ressources => 1 commercialShip
 			Transaction::TYP_RESOURCE => intval(ceil($quantity / 1000)),
 			// 1 PEV => 1 commercialShip
-			Transaction::TYP_SHIP => (ShipResource::isAShip($identifier) and $quantity > 0)
-				? $quantity * ShipResource::getInfo($identifier, 'pev')
+			Transaction::TYP_SHIP => (ShipResource::isAShip(intval($identifier)) and $quantity > 0)
+				? $quantity * ShipResource::getInfo(intval($identifier), 'pev')
 				: throw new \LogicException('Invalid ship or quantity'),
 			// 1 commander => 1 commercialShip
 			Transaction::TYP_COMMANDER => 1,

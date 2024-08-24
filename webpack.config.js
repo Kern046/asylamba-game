@@ -23,6 +23,7 @@ Encore
 	 * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
 	 */
 	.addEntry('app', './assets/js/app.js')
+	.addEntry('financial_reports', './assets/js/financial/report.js')
 
 	.copyFiles({
 		from: './assets/media-src',

@@ -12,6 +12,7 @@ use App\Modules\Promethee\Domain\Service\GetTimeCost;
 use App\Modules\Promethee\Message\TechnologyQueueMessage;
 use App\Modules\Promethee\Model\TechnologyQueue;
 use App\Shared\Application\Handler\DurationHandler;
+use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
@@ -19,6 +20,7 @@ use Symfony\Component\Uid\Uuid;
 readonly class TechnologyQueueFactory
 {
 	public function __construct(
+		private ClockInterface $clock,
 		private DurationHandler $durationHandler,
 		private EventDispatcherInterface $eventDispatcher,
 		private GetTimeCost $getTimeCost,
@@ -39,6 +41,7 @@ readonly class TechnologyQueueFactory
 			place: $orbitalBase->place,
 			technology: $identifier,
 			targetLevel: $targetLevel,
+			createdAt: $this->clock->now(),
 			startedAt: $createdAt,
 			endedAt: $this->durationHandler->getDurationEnd($createdAt, ($this->getTimeCost)(
 				$identifier,

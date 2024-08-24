@@ -207,7 +207,7 @@
 									{% if not route.isProposed %}
 										<li>
 											En service depuis<br />
-											{{ route.acceptedAt|date|raw }}
+											{{ route.acceptedAt|game_date|raw }}
 										</li>
 									{% endif %}
 								</ul>
@@ -293,7 +293,7 @@
 									{% if not route.isProposed %}
 										<li>
 											En service depuis <br />
-											{{ route.acceptedAt|date|raw }}
+											{{ route.acceptedAt|game_date|raw }}
 										</li>
 									{% endif %}
 								</ul>

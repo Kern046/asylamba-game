@@ -4,8 +4,9 @@ namespace App\Modules\Zeus\Application\Registry;
 
 use App\Modules\Zeus\Domain\Exception\NoCurrentPlayerSetException;
 use App\Modules\Zeus\Model\Player;
+use Symfony\Contracts\Service\ResetInterface;
 
-class CurrentPlayerRegistry
+class CurrentPlayerRegistry implements ResetInterface
 {
 	private Player|null $currentPlayer = null;
 
@@ -22,5 +23,10 @@ class CurrentPlayerRegistry
 	public function get(): Player
 	{
 		return $this->currentPlayer ?? throw new NoCurrentPlayerSetException();
+	}
+
+	public function reset(): void
+	{
+		$this->currentPlayer = null;
 	}
 }

@@ -9,6 +9,8 @@ use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Model\TechnologyQueue;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -49,5 +51,13 @@ class TechnologyQueueRepository extends DoctrineRepository implements Technology
 		return $this->findBy([
 			'player' => $player,
 		]);
+	}
+
+	public function matchPlayerQueuesSince(Player $player, \DateTimeImmutable $since): Collection
+	{
+		return $this->matching(new Criteria(Criteria::expr()->andX(
+			Criteria::expr()->eq('player', $player),
+			Criteria::expr()->gte('createdAt', $since),
+		)));
 	}
 }

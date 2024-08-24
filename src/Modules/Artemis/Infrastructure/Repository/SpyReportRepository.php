@@ -8,6 +8,7 @@ use App\Modules\Artemis\Domain\Repository\SpyReportRepositoryInterface;
 use App\Modules\Artemis\Model\SpyReport;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -25,12 +26,21 @@ class SpyReportRepository extends DoctrineRepository implements SpyReportReposit
 
 	public function getSystemReports(Player $player, array $places): array
 	{
-		return $this->findBy([
-			'player' => $player,
-			'place' => $places,
-		], [
-			'createdAt' => 'DESC',
-		], 30, 0);
+		$qb = $this->createQueryBuilder('sp');
+
+		$qb
+			->where('sp.player = :player')
+			->andWhere($qb->expr()->in('sp.place', ':places'))
+			->orderBy('sp.createdAt', 'DESC')
+			->setMaxResults(30)
+			->setFirstResult(0)
+			->setParameter('player', $player)
+			->setParameter('places', array_map(
+				fn(Uuid $uuid) => $uuid->toBinary(),
+				$places
+			), ArrayParameterType::BINARY);
+
+		return $qb->getQuery()->getResult();
 	}
 
 	public function getPlayerReports(Player $player): array

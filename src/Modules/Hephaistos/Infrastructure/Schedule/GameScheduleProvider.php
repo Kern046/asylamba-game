@@ -35,10 +35,10 @@ readonly class GameScheduleProvider implements ScheduleProviderInterface
 
 		return (new Schedule())->add(
 			// Hourly schedule
+			RecurringMessage::cron($hourlySchedule, new PlayersCreditsUpdateMessage()),
+			RecurringMessage::cron($hourlySchedule, new CommandersSchoolExperienceMessage()),
 			RecurringMessage::cron($hourlySchedule, new PlacesUpdateMessage()),
 			RecurringMessage::cron($hourlySchedule, new BasesUpdateMessage()),
-			RecurringMessage::cron($hourlySchedule, new CommandersSchoolExperienceMessage()),
-			RecurringMessage::cron($hourlySchedule, new PlayersCreditsUpdateMessage()),
 			// Night schedule
 			RecurringMessage::cron($nightlySchedule, new DailyRoutineMessage()),
 			RecurringMessage::cron($nightlySchedule, new RankingCreationMessage()),

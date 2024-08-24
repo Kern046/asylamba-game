@@ -10,6 +10,8 @@ use App\Modules\Zeus\Domain\Repository\CreditTransactionRepositoryInterface;
 use App\Modules\Zeus\Model\CreditHolderInterface;
 use App\Modules\Zeus\Model\CreditTransaction;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -62,5 +64,18 @@ class CreditTransactionRepository extends DoctrineRepository implements CreditTr
 		], [
 			'createdAt' => 'DESC',
 		], 20);
+	}
+
+	public function matchAllByPlayerSince(Player $player, \DateTimeImmutable $since): Collection
+	{
+		return $this->matching(new Criteria(
+			Criteria::expr()->andX(
+				Criteria::expr()->orX(
+					Criteria::expr()->eq('playerReceiver', $player),
+					Criteria::expr()->eq('playerSender', $player),
+				),
+				Criteria::expr()->gte('createdAt', $since),
+			)
+		));
 	}
 }

@@ -9,7 +9,9 @@ use App\Modules\Ares\Model\Report;
 use App\Modules\Gaia\Model\Place;
 use App\Modules\Shared\Infrastructure\Repository\Doctrine\DoctrineRepository;
 use App\Modules\Zeus\Model\Player;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 class ReportRepository extends DoctrineRepository implements ReportRepositoryInterface
@@ -35,10 +37,17 @@ class ReportRepository extends DoctrineRepository implements ReportRepositoryInt
 
 	public function getAttackReportsByPlaces(Player $attacker, array $places): array
 	{
-		return $this->findBy([
-			'attacker' => $attacker,
-			'place' => $places,
-		]);
+		$qb = $this->createQueryBuilder('r');
+
+		$qb->where('r.attacker = :attacker')
+			->andWhere($qb->expr()->in('r.place', ':places'))
+			->setParameter('attacker', $attacker)
+			->setParameter('places', array_map(
+				fn(Uuid $uuid) => $uuid->toBinary(),
+				$places
+			), ArrayParameterType::BINARY);
+
+		return $qb->getQuery()->getResult();
 	}
 
 	public function removePlayerReports(Player $player): void

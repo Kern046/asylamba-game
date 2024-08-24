@@ -20,5 +20,10 @@ interface EntityRepositoryInterface
 	/**
 	 * @param T $entity
 	 */
+	public function detach(object $entity): void;
+
+	/**
+	 * @param T $entity
+	 */
 	public function refresh(object $entity): void;
 }

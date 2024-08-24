@@ -69,7 +69,7 @@
 							</span>
 
 							<span class="data">
-								{{ conv.lastMessageAt|date|raw }}
+								{{ conv.lastMessageAt|game_date|raw }}
 								<br />
 								{% if conv.title is not empty %}
 									<strong>{{ conv.title }}</strong>
@@ -177,7 +177,7 @@
 									</p>
 									<p class="footer">
 										{{ player_status }} {{ message.player.name }}
-										{{ message.createdAt|date|raw }}
+										{{ message.createdAt|game_date|raw }}
 									</p>
 								</div>
 							</div>

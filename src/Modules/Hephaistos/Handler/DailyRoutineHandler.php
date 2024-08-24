@@ -4,6 +4,7 @@ namespace App\Modules\Hephaistos\Handler;
 
 use App\Modules\Hephaistos\Message\DailyRoutineMessage;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
+use App\Modules\Zeus\Domain\Repository\PlayerFinancialReportRepositoryInterface;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
@@ -21,6 +22,7 @@ readonly class DailyRoutineHandler
 		private DurationHandler $durationHandler,
 		private PlayerRepositoryInterface $playerRepository,
 		private NotificationRepositoryInterface $notificationRepository,
+		private PlayerFinancialReportRepositoryInterface $playerFinancialReportRepository,
 		#[Autowire('%zeus.player.inactive_time_limit%')]
 		private int                       $playerInactiveTimeLimit,
 		#[Autowire('%zeus.player.global_inactive_time%')]
@@ -28,7 +30,9 @@ readonly class DailyRoutineHandler
 		#[Autowire('%hermes.notifications.timeout.read%')]
 		private int                       $notificationsReadTimeout,
 		#[Autowire('%hermes.notifications.timeout.unread%')]
-		private int                       $notificationsUnreadTimeout
+		private int                       $notificationsUnreadTimeout,
+		#[Autowire('%zeus.player_financial_reports.timeout%')]
+		private int                       $playerFinancialReportsTimeout,
 	) {
 	}
 
@@ -38,6 +42,8 @@ readonly class DailyRoutineHandler
 			$this->notificationsReadTimeout,
 			$this->notificationsUnreadTimeout
 		);
+
+		$this->playerFinancialReportRepository->cleanPlayerFinancialReports($this->playerFinancialReportsTimeout);
 
 		$players = $this->playerRepository->getByStatements([Player::ACTIVE, Player::INACTIVE]);
 		$nbPlayers = count($players);

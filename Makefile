@@ -1,3 +1,6 @@
+cli:
+	docker exec -it kalaxia_app sh
+
 test:
 	php vendor/bin/phpunit
 
@@ -6,3 +9,6 @@ consume_game_scheduler:
 
 consume_async:
 	php bin/console messenger:consume async -vv
+
+restart_worker:
+	docker compose restart supervisord

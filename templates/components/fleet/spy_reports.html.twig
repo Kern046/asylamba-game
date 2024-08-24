@@ -17,7 +17,7 @@
 
 							<div class="center">
 								<strong><a href="{{ path('map', {'place': spy_report.place.id}) }}">{{ spy_report.placeName }}</a></strong>
-								{{- spy_report.createdAt|date|raw -}}
+								{{- spy_report.createdAt|game_date|raw -}}
 							</div>
 
 							<div class="right">

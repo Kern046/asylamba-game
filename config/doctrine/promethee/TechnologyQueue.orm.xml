@@ -11,6 +11,7 @@
 
 		<field name="technology" type="smallint" />
 		<field name="targetLevel" type="smallint" />
+		<field name="createdAt" type="datetime_immutable" />
 		<field name="startedAt" type="datetime_immutable" />
 		<field name="endedAt" type="datetime_immutable" />
 	</entity>

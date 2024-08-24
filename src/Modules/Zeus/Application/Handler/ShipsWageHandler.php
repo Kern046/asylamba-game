@@ -3,6 +3,7 @@
 namespace App\Modules\Zeus\Application\Handler;
 
 use App\Classes\Library\Game;
+use App\Modules\Ares\Application\Handler\CommanderArmyHandler;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
@@ -17,6 +18,7 @@ use App\Modules\Zeus\Model\PlayerFinancialReport;
 readonly class ShipsWageHandler
 {
 	public function __construct(
+		private CommanderArmyHandler $commanderArmyHandler,
 		private CommanderRepositoryInterface $commanderRepository,
 		private NotificationRepositoryInterface $notificationRepository,
 		private TransactionRepositoryInterface  $transactionRepository,
@@ -51,6 +53,7 @@ readonly class ShipsWageHandler
 		}
 		// vaisseaux affectés
 		foreach ($commanders as $commander) {
+			$this->commanderArmyHandler->setArmy($commander);
 			$ships = $commander->getNbrShipByType();
 			$cost = Game::getFleetCost($ships);
 

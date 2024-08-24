@@ -314,6 +314,33 @@ class CommercialRouteRepository extends DoctrineRepository implements Commercial
 			]);
 	}
 
+	public function getPlayerConstructedRoutesSince(Player $player, \DateTimeImmutable $since): array
+	{
+
+		$qb = $this->createQueryBuilder('cr');
+
+		$qb
+			->select()
+			->leftJoin('cr.originBase', 'ob')
+			->join('ob.place', 'obp')
+			->leftJoin('cr.destinationBase', 'db')
+			->join('db.place', 'dbp')
+			->where($qb->expr()->orX(
+				$qb->expr()->andX(
+					'db.player = :player',
+					$qb->expr()->gte('cr.acceptedAt', ':since'),
+				),
+				$qb->expr()->andX(
+					'ob.player = :player',
+					$qb->expr()->gte('cr.proposedAt', ':since'),
+				),
+			))
+			->setParameter('player', $player)
+			->setParameter('since', $since);
+
+		return $qb->getQuery()->getResult();
+	}
+
 	private function getBoundBasesStatement(QueryBuilder $qb): Expr\Orx
 	{
 		return $qb->expr()->orX(

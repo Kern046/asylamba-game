@@ -2,8 +2,8 @@
 
 namespace App\Modules\Zeus\Message;
 
-use App\Shared\Domain\Message\AsyncMessage;
+use App\Shared\Domain\Message\AsyncHighPriorityMessage;
 
-class PlayersCreditsUpdateMessage implements AsyncMessage
+class PlayersCreditsUpdateMessage implements AsyncHighPriorityMessage
 {
 }
