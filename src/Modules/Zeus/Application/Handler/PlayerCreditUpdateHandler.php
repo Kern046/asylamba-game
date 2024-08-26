@@ -28,7 +28,7 @@ use Symfony\Component\Uid\Uuid;
 #[AsMessageHandler]
 readonly class PlayerCreditUpdateHandler
 {
-	private const MAX_MESSAGES_TO_HANDLE = 5;
+	private const MAX_UPDATES = 5;
 
 	public function __construct(
 		private EntityManagerInterface $entityManager,
@@ -105,7 +105,7 @@ readonly class PlayerCreditUpdateHandler
 			$launchNewMessage = false;
 
 			for ($i = 0; $i < $missingUpdatesCount; ++$i) {
-				if ($i === self::MAX_MESSAGES_TO_HANDLE) {
+				if ($i === self::MAX_UPDATES) {
 					$launchNewMessage = true;
 
 					break;
