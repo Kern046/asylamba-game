@@ -5,11 +5,11 @@ namespace App\Modules\Zeus\Model;
 use App\Modules\Demeter\Model\Color;
 use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Resource\TutorialResource;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class Player implements CreditHolderInterface, SystemUpdatable
+class Player implements CreditHolderInterface, SystemUpdatable, UserInterface
 {
 	public int|null $id = 0;
-	public string|null $bind = null;
 	public Color|null $faction = null;
 	public Player|null $godFather = null;
 	public string $name = '';
@@ -129,5 +129,20 @@ class Player implements CreditHolderInterface, SystemUpdatable
 	public function hasCompletedTutorial(): bool
 	{
 		return !TutorialResource::stepExists($this->stepTutorial);
+	}
+
+	public function getRoles(): array
+	{
+		return ['ROLE_USER'];
+	}
+
+	public function eraseCredentials()
+	{
+		// TODO: Implement eraseCredentials() method.
+	}
+
+	public function getUserIdentifier(): string
+	{
+		return $this->name;
 	}
 }

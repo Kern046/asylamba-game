@@ -4,7 +4,6 @@ namespace App\Shared\Infrastructure\Controller;
 
 use App\Classes\Container\ArrayList;
 use App\Classes\Container\EventList;
-use App\Classes\Library\Security;
 use App\Classes\Library\Utils;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Zeus\Domain\Event\PlayerConnectionEvent;
@@ -12,7 +11,9 @@ use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -29,21 +30,14 @@ class ConnectController extends AbstractController
 		PlayerRepositoryInterface $playerRepository,
 		EntityManagerInterface $entityManager,
 		EventDispatcherInterface $eventDispatcher,
-		string $bindKey
+		LoggerInterface $logger,
+		int $playerId
 	): Response {
 		$session = $request->getSession();
 
-		// extraction du bindkey
-		$query = $security->uncrypt($bindKey);
-		$bindKey = $security->extractBindKey($query);
-		$time = $security->extractTime($query);
+		if (null === ($player = $playerRepository->get($playerId)) || !$player->canAccess()) {
+			$logger->debug('Player not found or cannot access game');
 
-		// vérification de la validité du bindkey
-		if (abs((int) $time - time()) > 300) {
-			return $this->redirectToRoute('homepage');
-		}
-
-		if (null === ($player = $playerRepository->getByBindKey($bindKey)) || !$player->canAccess()) {
 			return $this->redirectToRoute('homepage');
 		}
 		$player->statement = Player::ACTIVE;
@@ -51,6 +45,8 @@ class ConnectController extends AbstractController
 		$session->set('token', Utils::generateString(5));
 
 		$this->createSession($session, $player);
+
+		$security->login($player);
 
 		// mise de dLastConnection + dLastActivity
 		$player->dLastConnection = new \DateTimeImmutable();
