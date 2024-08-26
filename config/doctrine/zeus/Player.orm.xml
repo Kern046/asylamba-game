@@ -19,7 +19,6 @@
 			<join-column nullable="true" />
 		</many-to-one>
 
-		<field name="bind" type="string" column="bind" length="50" nullable="true" />
 		<field name="name" type="string" column="name" length="25" unique="true" />
 		<field name="avatar" type="string" column="avatar" length="12" />
 		<field name="sex" type="smallint">

@@ -15,7 +15,7 @@ homepage:
     controller: App\Shared\Infrastructure\Controller\HomepageController
 
 connect:
-    path: /connect/{bindKey}
+    path: /connect/{playerId}
     controller: App\Shared\Infrastructure\Controller\ConnectController
 
 logout:

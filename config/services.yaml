@@ -26,8 +26,6 @@ parameters:
     server_time_mode: '%env(enum:App\\Modules\\Shared\\Domain\\Server\\TimeMode:SERVER_TIME_MODE)%'
 
     security_api_key: '%env(SECURITY_API_KEY)%'
-    security_server_key: '%env(SECURITY_SERVER_KEY)%'
-    security_iv: '%env(SECURITY_IV)%'
 
     redis_timeout: '%env(REDIS_TIMEOUT)%'
 
@@ -130,11 +128,6 @@ services:
     App\Classes\Library\Parser:
         arguments:
             $mediaPath: '%media%'
-
-    App\Classes\Library\Security:
-        arguments:
-            $serverKey: "%security_server_key%"
-            $iv: "%security_iv%"
 
     App\Classes\Redis\RedisManager:
         arguments:

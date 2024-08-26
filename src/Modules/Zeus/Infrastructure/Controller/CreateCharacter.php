@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Zeus\Infrastructure\Controller;
 
 use App\Classes\Container\ArrayList;
-use App\Classes\Library\Security;
 use App\Modules\Ares\Model\Ship;
 use App\Modules\Athena\Application\Handler\OrbitalBasePointsHandler;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
@@ -38,7 +37,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
 
@@ -62,7 +60,6 @@ class CreateCharacter extends AbstractController
 		private readonly PlaceRepositoryInterface $placeRepository,
 		private readonly ResearchRepositoryInterface $researchRepository,
 		private readonly EntityManagerInterface $entityManager,
-		private readonly Security $security,
 		#[Autowire('%id_jeanmi%')]
 		private readonly int $jeanMiId,
 	) {
@@ -105,59 +102,39 @@ class CreateCharacter extends AbstractController
 		array $globalParameters,
 	): Response {
 		$session = $request->getSession();
-		if ($request->query->has('bindKey')) {
-			// extraction du bindkey
-			$query = $this->security->uncrypt($request->query->get('bindKey'));
-			$bindkey = $this->security->extractBindKey($query);
-			$time = $this->security->extractTime($query);
+		// mode de création de joueur
+		$session->set('high-mode', $this->getParameter('highmode') && $highMode);
 
-			// vérification de la validité du bindkey
-			if (abs((int) $time - time()) <= 300) {
-				$session->set('prebindkey', $bindkey);
+		// TODO Replace when portal is implemented
+		if ('enabled' === $this->getParameter('apimode')) {
+			// utilisation de l'API
 
-				// mode de création de joueur
-				$session->set('high-mode', $this->getParameter('highmode') && $highMode);
+			/*if ($this->api->userExist($session->get('prebindkey'))) {
+				if (null === $this->playerRepository->findOneBy(['bind' => $session->get('prebindkey')])) {
+					$session->set('inscription', new ArrayList());
+					$session->get('inscription')->add('bindkey', $session->get('prebindkey'));
+					$session->get('inscription')->add('portalPseudo', $this->api->data['userInfo']['pseudo']);
 
-				return $this->redirectToRoute('create_character', ['highMode' => $highMode]);
-			} else {
-				throw new UnauthorizedHttpException('Invalid bindkey');
-			}
-		} elseif ($session->has('prebindkey')) {
-			// TODO Replace when portal is implemented
-			if ('enabled' === $this->getParameter('apimode')) {
-				// utilisation de l'API
+					// check du rgodfather
+					if (!empty($this->api->data['userInfo']['sponsorship'])) {
+						list($server, $player) = explode('#', $this->api->data['userInfo']['sponsorship']);
 
-				/*if ($this->api->userExist($session->get('prebindkey'))) {
-					if (null === $this->playerRepository->findOneBy(['bind' => $session->get('prebindkey')])) {
-						$session->set('inscription', new ArrayList());
-						$session->get('inscription')->add('bindkey', $session->get('prebindkey'));
-						$session->get('inscription')->add('portalPseudo', $this->api->data['userInfo']['pseudo']);
-
-						// check du rgodfather
-						if (!empty($this->api->data['userInfo']['sponsorship'])) {
-							list($server, $player) = explode('#', $this->api->data['userInfo']['sponsorship']);
-
-							// TODO Replace when portal is implemented
-							if ($server == $this->getParameter('server_id')) {
-								$session->set('rgodfather', $player);
-							}
-						}
-					} else {
 						// TODO Replace when portal is implemented
-						return $this->redirect($this->getParameter('getout_root').'serveurs/message-useralreadysigned');
+						if ($server == $this->getParameter('server_id')) {
+							$session->set('rgodfather', $player);
+						}
 					}
 				} else {
 					// TODO Replace when portal is implemented
-					return $this->redirect($this->getParameter('getout_root').'serveurs/message-unknowuser');
-				}*/
+					return $this->redirect($this->getParameter('getout_root').'serveurs/message-useralreadysigned');
+				}
 			} else {
-				$session->set('inscription', new ArrayList());
-				$session->get('inscription')->add('bindkey', $session->get('prebindkey'));
-				$session->get('inscription')->add('portalPseudo', null);
-			}
+				// TODO Replace when portal is implemented
+				return $this->redirect($this->getParameter('getout_root').'serveurs/message-unknowuser');
+			}*/
 		} else {
-			// TODO Replace when portal is implemented
-			return $this->redirect($this->getParameter('getout_root').'serveurs/message-nobindkey');
+			$session->set('inscription', new ArrayList());
+			$session->get('inscription')->add('portalPseudo', null);
 		}
 
 		return $this->render('pages/zeus/registration/faction_choice.html.twig', array_merge([
@@ -251,36 +228,31 @@ class CreateCharacter extends AbstractController
 	private function save(Request $request): Response
 	{
 		$session = $request->getSession();
-		if (null === $session->get('bindkey') || null === $this->playerRepository->getByBindKey($session->get('bindkey'))) {
-			if ($session->has('inscription')) {
-				$check = new CheckName();
+		if ($session->has('inscription')) {
+			$check = new CheckName();
 
-				if ($request->request->has('base') && $check->checkLength($request->request->get('base'))) {
-					if ($check->checkChar($request->request->get('base'))) {
-						$session->get('inscription')->add('base', $request->request->get('base'));
+			if ($request->request->has('base') && $check->checkLength($request->request->get('base'))) {
+				if ($check->checkChar($request->request->get('base'))) {
+					$session->get('inscription')->add('base', $request->request->get('base'));
 
-						$sectors = $this->sectorRepository->getAll();
+					$sectors = $this->sectorRepository->getAll();
 
-						$factionSectors = [];
-						foreach ($sectors as $sector) {
-							if ($sector->faction?->identifier == $session->get('inscription')->get('ally')) {
-								$factionSectors[] = $sector->id;
-							}
+					$factionSectors = [];
+					foreach ($sectors as $sector) {
+						if ($sector->faction?->identifier == $session->get('inscription')->get('ally')) {
+							$factionSectors[] = $sector->id;
 						}
-						if (in_array($request->request->get('sector'), $factionSectors)) {
-							$session->get('inscription')->add('sector', $request->request->get('sector'));
-						} else {
-							throw new BadRequestHttpException('il faut sélectionner un des secteurs de la couleur de votre faction');
-						}
+					}
+					if (in_array($request->request->get('sector'), $factionSectors)) {
+						$session->get('inscription')->add('sector', $request->request->get('sector'));
 					} else {
-						throw new BadRequestHttpException('le nom de votre base ne doit pas contenir de caractères spéciaux');
+						throw new BadRequestHttpException('il faut sélectionner un des secteurs de la couleur de votre faction');
 					}
 				} else {
-					throw new BadRequestHttpException('le nom de votre base doit contenir entre '.$check->getMinLength().' et '.$check->getMaxLength().' caractères');
+					throw new BadRequestHttpException('le nom de votre base ne doit pas contenir de caractères spéciaux');
 				}
 			} else {
-				// TODO Replace when portal is implemented
-				return $this->redirect($this->getParameter('getout_root').'serveurs/message-forbiddenaccess');
+				throw new BadRequestHttpException('le nom de votre base doit contenir entre '.$check->getMinLength().' et '.$check->getMaxLength().' caractères');
 			}
 		} else {
 			// TODO Replace when portal is implemented
@@ -302,7 +274,6 @@ class CreateCharacter extends AbstractController
 			$player = new Player();
 
 			// ajout des variables inchangées
-			$player->bind = $session->get('inscription')->get('bindkey');
 			$player->faction = $faction;
 			$player->name = trim($session->get('inscription')->get('pseudo'));
 			$player->avatar = $session->get('inscription')->get('avatar');
@@ -497,7 +468,6 @@ class CreateCharacter extends AbstractController
 			}*/
 			// clear les sessions
 			$session->remove('inscription');
-			$session->remove('prebindkey');
 
 			// ajout aux conversation de faction et techniques
 			if (($factionAccount = $this->playerRepository->getFactionAccount($player->faction)) !== null) {
@@ -508,7 +478,7 @@ class CreateCharacter extends AbstractController
 			}
 			// redirection vers connection
 			return $this->redirectToRoute('connect', [
-				'bindKey' => $this->security->crypt($this->security->buildBindkey($player->bind)),
+				'playerId' => $player->id,
 			]);
 		} catch (\Throwable $t) {
 			// @TODO handle this
