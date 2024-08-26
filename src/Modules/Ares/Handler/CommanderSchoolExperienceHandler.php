@@ -72,7 +72,7 @@ readonly class CommanderSchoolExperienceHandler
 				$earnedExperience += (1 == rand(0, 1))
 					? rand(0, intval(round($earnedExperience / 20)))
 					: -(rand(0, intval(round($earnedExperience / 20))));
-				$earnedExperience = max(round($earnedExperience), 0);
+				$earnedExperience = max(intval(round($earnedExperience)), 0);
 
 				$this->commanderExperienceHandler->upExperience($commander, $earnedExperience);
 
