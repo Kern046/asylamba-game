@@ -12,21 +12,6 @@ class Utils
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 	];
 
-	public static function isAdmin($bindkey): bool
-	{
-		return in_array($bindkey, [
-			'player1', 'player2', 'gil', 'noe', 'jacky',
-			'YNbrdEaJpDw8mLZ2u6jYqgt6a',
-			'jq2Bjf0uKzzE0aMErO6rpBxcg',
-			'E6GatZvhO1W9seBHU7mgQe49c',
-			'FaDcTV3lWokXHZO8tXH4divWZ',
-			'KD6wb29ElI6sxVVtVoLJY0BbO',
-			'nEYzsAcZYv',
-			'xQTjMBnqbk6rO4ysglCJxLL63',
-			'Dcc8VXaEeG6nQ49ZdkD2HusQi',
-		]);
-	}
-
 	/**
 	 * @deprecated use {@see \DateTimeImmutable} instead
 	 */

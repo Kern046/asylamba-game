@@ -29,11 +29,6 @@ class PlayerRepository extends DoctrineRepository implements PlayerRepositoryInt
 		return $this->findOneBy(['name' => $name]);
 	}
 
-	public function getByBindKey(string $bindKey): Player|null
-	{
-		return $this->findOneBy(['bind' => $bindKey]);
-	}
-
 	public function getGodSons(Player $player): array
 	{
 		return $this->findBy(['rGodFather' => $player]);

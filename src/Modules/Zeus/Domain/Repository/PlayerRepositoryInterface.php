@@ -13,8 +13,6 @@ interface PlayerRepositoryInterface extends EntityRepositoryInterface
 
 	public function getByName(string $name): Player|null;
 
-	public function getByBindKey(string $bindKey): Player|null;
-
 	/**
 	 * @return list<Player>
 	 */
