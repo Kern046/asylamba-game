@@ -22,6 +22,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -39,6 +42,8 @@ class Propose extends AbstractController
 		CountNeededCommercialShips $countNeededCommercialShips,
 		CountAvailableCommercialShips $countAvailableCommercialShips,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
+		HubInterface $mercureHub,
+		SerializerInterface $serializer,
 		ValidatorInterface $validator,
 	): Response {
 		$type = $request->query->get('type') ?? throw new BadRequestHttpException('Missing type');
@@ -154,6 +159,13 @@ class Propose extends AbstractController
 		$commercialShippingRepository->save($cs);
 
 		$transactionRepository->save($tr);
+
+		$mercureHub->publish(new Update(
+			'/trade-offers',
+			$this->renderView('components/base/trade/turbo/new_transaction.stream.html.twig', [
+				'transaction' => $tr,
+			]),
+		));
 
 		$this->addFlash('market_success', 'Votre proposition a été envoyée sur le marché.');
 

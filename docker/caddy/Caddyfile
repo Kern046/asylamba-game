@@ -13,6 +13,10 @@ kalaxia.local {
 	import game
 }
 
+mercure.kalaxia.local {
+	reverse_proxy * http://kalaxia_mercure
+}
+
 api.kalaxia.com {
 	import game
 

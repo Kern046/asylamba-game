@@ -8,7 +8,7 @@ use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Component\Uid\Uuid;
 
-class OrbitalBase implements SystemUpdatable
+class OrbitalBase implements SystemUpdatable, \JsonSerializable
 {
 	// type of base
 	public const TYP_NEUTRAL = 0;
@@ -134,5 +134,13 @@ class OrbitalBase implements SystemUpdatable
 	public function lastUpdatedBySystemAt(): \DateTimeImmutable
 	{
 		return $this->updatedAt;
+	}
+
+	public function jsonSerialize(): array
+	{
+		return [
+			'id' => $this->id,
+			'name' => $this->name,
+		];
 	}
 }

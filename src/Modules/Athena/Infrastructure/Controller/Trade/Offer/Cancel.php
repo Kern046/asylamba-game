@@ -14,6 +14,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Uid\Uuid;
 
 class Cancel extends AbstractController
@@ -24,10 +26,12 @@ class Cancel extends AbstractController
 		GetMaxStorage $getMaxStorage,
 		OrbitalBaseManager $orbitalBaseManager,
 		PlayerManager $playerManager,
+		HubInterface $mercure,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
 		TransactionRepositoryInterface $transactionRepository,
 		Uuid $id,
 	): Response {
+
 		$transaction = $transactionRepository->get($id)
 			?? throw $this->createNotFoundException('Transaction not found');
 
@@ -84,6 +88,13 @@ class Cancel extends AbstractController
 
 		$transactionRepository->save($transaction);
 
-		return $this->redirect($request->headers->get('referer'));
+		$mercure->publish(new Update(
+			'/trade-offers',
+			$this->renderView('components/base/trade/turbo/remove_transaction.stream.html.twig', [
+				'transaction' => $transaction,
+			]),
+		));
+
+		return $this->redirectToRoute('trade_market');
 	}
 }

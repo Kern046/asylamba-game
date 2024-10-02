@@ -5,9 +5,7 @@ ares:
     type: attribute
 
 zeus:
-    resource:
-        path: ../../src/Modules/Zeus/Infrastructure/Controller/
-        namespace: App\Modules\Zeus\Infrastructure\Controller
+    resource: '../../src/Modules/Zeus/Infrastructure/Controller/'
     type: attribute
 
 homepage:

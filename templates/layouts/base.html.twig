@@ -16,25 +16,16 @@
 		<meta name="description" content="Kalaxia, jeu de stratégie multijoueurs" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ (faction_id != 0 ? faction_id : 1) ~ '.png') }}" />
-		<link rel="stylesheet" media="screen" type="text/css" href="{{ asset('build/css/main.faction' ~ (faction_id != 0 ? faction_id : 1) ~ '.css') }}" />
+		{# <link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ (faction_id != 0 ? faction_id : 1) ~ '.png') }}" /> #}
+		{% block stylesheets %}
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/all.css') }}" />
+		{% endblock %}
+
+		{% block javascripts %}
+			{% block importmap %}{{ importmap('app') }}{% endblock %}
+		{% endblock %}
 	</head>
-	<body class="color{{ faction_id }} {% block bodyClasses %}no-scrolling{% endblock bodyClasses %} {% if app.request.get('_route') == 'create_character' %}inscription{% endif %}" data-init-sftr="2">
+	<body class="color{{ faction_id }} {% block bodyClasses %}no-scrolling{% endblock bodyClasses %} {% if 'registration' in app.request.get('_route') %}inscription{% endif %}" data-init-sftr="2">
 		{% block body %}{% endblock body %}
-
-		<script type="text/javascript" src="{{ asset('build/js/jquery1.8.2.min.js') }}"></script>
-
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				game = {
-					path: '{{ get_api_endpoint() }}/',
-					shipsName: [{{ get_ship_names()|join(',')|raw }}],
-					shipsPev: [{{ get_ship_pevs()|join(',') }}]
-				};
-			});
-			</script>
-		<script type="text/javascript" src="{{ asset('build/js/main.js') }}"></script>
-		<script type="text/javascript" src="{{ asset('build/js/main.desktop.js') }}"></script>
-		<script type="text/javascript" src="{{ asset('build/js/autocomplete.module.js') }}"></script>
 	</body>
 </html>

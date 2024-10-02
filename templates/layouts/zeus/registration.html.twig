@@ -1,27 +1,40 @@
 {% extends 'layouts/base.html.twig' %}
 
 {% block body %}
-	<div id="nav">
-		<div class="box left">
-			<span {% if app.request.attributes.get('step') == 'faction-choice' %}class="active"{% endif %}>Etape 1</span>
+	<nav aria-label="Progress" class="bg-stone-800">
+		<ol role="list" class="divide-y divide-gray-300 border-b border-gray-300 md:flex md:divide-y-0">
+			{% if app.request.get('_route') == 'registration_choose_faction' %}
+				{% set factionChoiceStatus = 'current' %}
+				{% set profileStatus = 'next' %}
+				{% set placeChoiceStatus = 'next' %}
+			{% elseif app.request.get('_route') == 'registration_create_character' %}
+				{% set factionChoiceStatus = 'done' %}
+				{% set profileStatus = 'current' %}
+				{% set placeChoiceStatus = 'next' %}
+			{% elseif app.request.get('_route') == 'registration_choose_place' %}
+				{% set factionChoiceStatus = 'done' %}
+				{% set profileStatus = 'done' %}
+				{% set placeChoiceStatus = 'current' %}
+			{% endif %}
 
-			<span {% if app.request.attributes.get('step') == 'profile' %}class="active"{% endif %}>Etape 2</span>
-
-			<span {% if app.request.attributes.get('step') == 'place-choice' %}class="active"{% endif %}>Etape 3</span>
-		</div>
-
-		<div class="box right">
-			<a href="#" class="square sh" data-target="disconnect-box">≡</a>
-		</div>
-
-		<div class="overbox" id="disconnect-box">
-			<a target="_blank" href="/">aller à l'accueil</a>
-			<a target="_blank" href="/blog">voir le blog</a>
-			<a target="_blank" href="{{ facebook_link }}">rejoindre la page Facebook</a>
-			<a target="_blank" href="{{ google_plus_link }}">nous suivre sur Google+</a>
-			<a target="_blank" href="{{ twitter_link }}">nous suivre sur Twitter</a>
-		</div>
-	</div>
+			{{ component('Form:Molecules:Step', {
+				status: factionChoiceStatus,
+				label: 'Choisissez votre faction',
+				number: 1,
+			}) }}
+			{{ component('Form:Molecules:Step', {
+				status: profileStatus,
+				label: 'Créez votre personnage',
+				number: 2,
+			}) }}
+			{{ component('Form:Molecules:Step', {
+				status: placeChoiceStatus,
+				label: 'Choisissez votre secteur de départ',
+				number: 3,
+				isLast: true,
+			}) }}
+		</ol>
+	</nav>
 
 	<div id="container">
 		{% block content %}{% endblock content %}

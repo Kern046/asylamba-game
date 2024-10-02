@@ -231,6 +231,7 @@ class Commander implements TravellerInterface, \JsonSerializable, SystemUpdatabl
 		return [
 			'id' => $this->id,
 			'name' => $this->name,
+			'avatar' => $this->avatar,
 		];
 	}
 

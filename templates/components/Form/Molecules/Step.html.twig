@@ -1,0 +1,26 @@
+<li class="relative md:flex md:flex-1">
+	<a href="#" class="group flex w-full items-center {% if status != 'current' %}hidden md:block{% endif %}">
+        <span class="flex items-center px-6 py-4 text-sm font-medium">
+          <span class="flex size-10 shrink-0 items-center justify-center rounded-full {{ this.stepClass }}">
+			  {% if status == 'done' %}
+				<svg class="size-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon">
+				  <path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" />
+				</svg>
+			  {% elseif status == 'current' %}
+				  <span class="text-stone-200">{{ number }}</span>
+			  {% else %}
+				  <span class="text-gray-500 group-hover:text-gray-600">{{ number }}</span>
+			  {% endif %}
+          </span>
+          <span class="ml-4 text-sm font-medium {{ this.labelClass }}">{{ label }}</span>
+        </span>
+	</a>
+
+	{% if not isLast %}
+		<div class="absolute right-0 top-0 hidden h-full w-5 md:block" aria-hidden="true">
+			<svg class="size-full text-gray-300" viewBox="0 0 22 80" fill="none" preserveAspectRatio="none">
+				<path d="M0 -2L20 40L0 82" vector-effect="non-scaling-stroke" stroke="currentcolor" stroke-linejoin="round" />
+			</svg>
+		</div>
+	{% endif %}
+</li>

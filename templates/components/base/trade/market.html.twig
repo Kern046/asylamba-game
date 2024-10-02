@@ -1,98 +1,100 @@
-{% if commercial_shippings['incoming'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_GOING')]|length > 0 %}
+<div {{ turbo_stream_listen('/trade-offers') }}>
+	{% if commercial_shippings['incoming'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_GOING')]|length > 0 %}
+		<div class="component transaction">
+			<div class="head skin-2">
+				<h2>Aperçu des achats</h2>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					<h4>Convoi en approche</h4>
+					{% for commercial_shipping in commercial_shippings['incoming'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_GOING')] %}
+						{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+
 	<div class="component transaction">
-		<div class="head skin-2">
-			<h2>Aperçu des achats</h2>
+		<div class="head skin-4">
+			<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="main" />
+			<h2>Ressources</h2>
+			<em>cours actuel | 1:{{ resources_current_rate|number(3) }}</em>
 		</div>
 		<div class="fix-body">
 			<div class="body">
-				<h4>Convoi en approche</h4>
-				{% for commercial_shipping in commercial_shippings['incoming'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_GOING')] %}
-					{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
-				{% endfor %}
-			</div>
-		</div>
-	</div>
-{% endif %}
+				<div class="tool sort-button">
+					<span>trier par</span>
+					<span><a href="#" data-sort-type="quantity" data-sort-direction="up" class="hb lt" title="quantité de ressources"><img src="{{ asset('build/media/resources/resource.png') }}" class="icon-color" alt="ressources" /></a></span>
+					<span><a href="#" data-sort-type="price" data-sort-direction="down" class="hb lt" title="prix"><img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" /></a></span>
+					<span><a href="#" data-sort-type="far" data-sort-direction="down" class="hb lt" title="temps de trajet"><img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="temps" /></a></span>
+					<span><a href="#" data-sort-type="cr" data-sort-direction="down" class="hb lt" title="cours de la marchandise"><img src="{{ asset('build/media/resources/rate.png') }}" class="icon-color" alt="cours" /></a></span>
+				</div>
 
-<div class="component transaction">
-	<div class="head skin-4">
-		<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="main" />
-		<h2>Ressources</h2>
-		<em>cours actuel | 1:{{ resources_current_rate|number(3) }}</em>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="tool sort-button">
-				<span>trier par</span>
-				<span><a href="#" data-sort-type="quantity" data-sort-direction="up" class="hb lt" title="quantité de ressources"><img src="{{ asset('build/media/resources/resource.png') }}" class="icon-color" alt="ressources" /></a></span>
-				<span><a href="#" data-sort-type="price" data-sort-direction="down" class="hb lt" title="prix"><img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" /></a></span>
-				<span><a href="#" data-sort-type="far" data-sort-direction="down" class="hb lt" title="temps de trajet"><img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="temps" /></a></span>
-				<span><a href="#" data-sort-type="cr" data-sort-direction="down" class="hb lt" title="cours de la marchandise"><img src="{{ asset('build/media/resources/rate.png') }}" class="icon-color" alt="cours" /></a></span>
-			</div>
-
-			<div class="sort-content">
-				{% for transaction in resource_transactions %}
-					{% if current_player.id != transaction.player.id %}
-						{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': resources_current_rate }) }}
-					{% endif %}
-				{% endfor %}
+				<div id="resource-transactions" class="sort-content">
+					{% for transaction in resource_transactions %}
+						{% if current_player.id != transaction.player.id %}
+							{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': resources_current_rate }) }}
+						{% endif %}
+					{% endfor %}
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
 
-<div class="component transaction">
-	<div class="head skin-4">
-		<img src="{{ asset('build/media/orbitalbase/school.png') }}" alt="commandants" class="main" />
-		<h2>Commandants</h2>
-		<em>cours actuel | 1:{{ commander_current_rate|number(3) }}</em>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="tool sort-button">
-				<span>trier par</span>
-				<span><a href="#" data-sort-type="xp" data-sort-direction="up" class="hb lt" title="expérience du commandant"><img src="{{ asset('build/media/resources/xp.png') }}" class="icon-color" alt="experience" /></a></span>
-				<span><a href="#" data-sort-type="price" data-sort-direction="down" class="hb lt" title="prix"><img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" /></a></span>
-				<span><a href="#" data-sort-type="far" data-sort-direction="down" class="hb lt" title="temps de trajet"><img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="temps" /></a></span>
-				<span><a href="#" data-sort-type="cr" data-sort-direction="down" class="hb lt" title="cours de la marchandise"><img src="{{ asset('build/media/resources/rate.png') }}" class="icon-color" alt="cours" /></a></span>
-			</div>
+	<div class="component transaction">
+		<div class="head skin-4">
+			<img src="{{ asset('build/media/orbitalbase/school.png') }}" alt="commandants" class="main" />
+			<h2>Commandants</h2>
+			<em>cours actuel | 1:{{ commander_current_rate|number(3) }}</em>
+		</div>
+		<div class="fix-body">
+			<div class="body">
+				<div class="tool sort-button">
+					<span>trier par</span>
+					<span><a href="#" data-sort-type="xp" data-sort-direction="up" class="hb lt" title="expérience du commandant"><img src="{{ asset('build/media/resources/xp.png') }}" class="icon-color" alt="experience" /></a></span>
+					<span><a href="#" data-sort-type="price" data-sort-direction="down" class="hb lt" title="prix"><img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" /></a></span>
+					<span><a href="#" data-sort-type="far" data-sort-direction="down" class="hb lt" title="temps de trajet"><img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="temps" /></a></span>
+					<span><a href="#" data-sort-type="cr" data-sort-direction="down" class="hb lt" title="cours de la marchandise"><img src="{{ asset('build/media/resources/rate.png') }}" class="icon-color" alt="cours" /></a></span>
+				</div>
 
-			<div class="sort-content">
-				{% for transaction in commander_transactions %}
-					{% if current_player.id != transaction.player.id %}
-						{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': commander_current_rate }) }}
-					{% endif %}
-				{% endfor %}
+				<div id="commander-transactions" class="sort-content">
+					{% for transaction in commander_transactions %}
+						{% if current_player.id != transaction.player.id %}
+							{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': commander_current_rate }) }}
+						{% endif %}
+					{% endfor %}
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
 
-<div class="component transaction">
-	<div class="head skin-4">
-		<img src="{{ asset('build/media/orbitalbase/dock2.png') }}" alt="vaisseaux" class="main" />
-		<h2>Vaisseaux</h2>
-		<em>cours actuel | 1:{{ ship_current_rate|number(3) }}</em>
-		</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="tool sort-button">
-				<span>trier par</span>
-				<span><a href="#" data-sort-type="quantity" data-sort-direction="up" class="hb lt" title="nombre de vaisseaux"><img src="{{ asset('build/media/resources/pev.png') }}" class="icon-color" alt="pev" /></a></span>
-				<span><a href="#" data-sort-type="price" data-sort-direction="down" class="hb lt" title="prix"><img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" /></a></span>
-				<span><a href="#" data-sort-type="far" data-sort-direction="down" class="hb lt" title="temps de trajet"><img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="temps" /></a></span>
-				<span><a href="#" data-sort-type="cr" data-sort-direction="down" class="hb lt" title="cours de la marchandise"><img src="{{ asset('build/media/resources/rate.png') }}" class="icon-color" alt="cours" /></a></span>
+	<div class="component transaction">
+		<div class="head skin-4">
+			<img src="{{ asset('build/media/orbitalbase/dock2.png') }}" alt="vaisseaux" class="main" />
+			<h2>Vaisseaux</h2>
+			<em>cours actuel | 1:{{ ship_current_rate|number(3) }}</em>
 			</div>
+		<div class="fix-body">
+			<div class="body">
+				<div class="tool sort-button">
+					<span>trier par</span>
+					<span><a href="#" data-sort-type="quantity" data-sort-direction="up" class="hb lt" title="nombre de vaisseaux"><img src="{{ asset('build/media/resources/pev.png') }}" class="icon-color" alt="pev" /></a></span>
+					<span><a href="#" data-sort-type="price" data-sort-direction="down" class="hb lt" title="prix"><img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="crédit" /></a></span>
+					<span><a href="#" data-sort-type="far" data-sort-direction="down" class="hb lt" title="temps de trajet"><img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="temps" /></a></span>
+					<span><a href="#" data-sort-type="cr" data-sort-direction="down" class="hb lt" title="cours de la marchandise"><img src="{{ asset('build/media/resources/rate.png') }}" class="icon-color" alt="cours" /></a></span>
+				</div>
 
-			<div class="sort-content">
-				{% for transaction in ship_transactions %}
-					{% if current_player.id != transaction.player.id %}
-						{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': ship_current_rate }) }}
-					{% endif %}
-				{% endfor %}
+				<div id="ship-transactions" class="sort-content">
+					{% for transaction in ship_transactions %}
+						{% if current_player.id != transaction.player.id %}
+							{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': ship_current_rate }) }}
+						{% endif %}
+					{% endfor %}
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+</div>

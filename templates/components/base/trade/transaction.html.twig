@@ -1,13 +1,14 @@
 {% set transaction_data = get_transaction_data(transaction, current_base, current_rate) %}
-{% set transaction_type = get_transaction_type(transaction) %}
 
-<div class="transaction {{ transaction_type }}"
+<div
+	id="transaction-{{ transaction.id }}"
+	class="transaction {{ transaction.getTypeString() }}"
 	 data-sort-quantity="{{ transaction.quantity }}"
 	 data-sort-price="{{ transaction_data.total_price }}"
 	 data-sort-xp="{{ transaction.commander.experience ?? 0 }}"
 	 data-sort-far="{{ transaction_data.time }}"
 	 data-sort-cr="{{ transaction_data.rate }}">
-	<div class="product sh" data-target="transaction-{{ transaction_type }}-{{ transaction.id }}">
+	<div class="product sh" data-target="transaction-{{ transaction.id }}-dropdown">
 		{% if transaction.hasResources %}
 			<img src="{{ asset('build/media/market/resources-pack-' ~ transaction|transaction_picto ~ '.png') }}" alt="" class="picto" />
 			<span class="rate">{{ transaction_data.rate }} %</span>
@@ -40,7 +41,7 @@
 			</div>
 		</div>
 
-	<div class="hidden" id="transaction-{{ transaction_type }}-{{ transaction.id }}">
+	<div class="hidden" id="transaction-{{ transaction.id }}-dropdown">
 		<div class="info">
 			<div class="seller">
 				<p>

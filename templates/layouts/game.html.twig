@@ -13,40 +13,30 @@
 
 		<link href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic" rel="stylesheet" type="text/css">
 		{% block stylesheets %}
-			{{ encore_entry_link_tags('css/main.faction' ~ current_player_faction_id) }}
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/all.css') }}" />
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/color' ~ current_player_faction_id ~ '.css') }}" />
 		{% endblock %}
 
-		<link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ current_player_faction_id ~ '.png') }}" />
+		{# <link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ current_player_faction_id ~ '.png') }}" /> #}
+
+		{% block javascripts %}
+			{% block importmap %}{{ importmap('app') }}{% endblock %}
+		{% endblock %}
 	</head>
 	<body class="color{{ current_player_faction_id }} no-scrolling" data-init-sftr="2">
 
 		<div id="app">
-			{{ include('components/common/navbar.html.twig') }}
+			{# {{ include('components/common/navbar.html.twig') }} #}
 
 			<div id="container" class="z-0">
-				{% block body %}{% endblock body %}
+				<turbo-frame id="main-frame">
+					{% block body %}{% endblock body %}
+				</turbo-frame>
 			</div>
 
 			{{ include('components/common/toolbar.html.twig') }}
 			{{ include('components/common/alerts.html.twig') }}
 		</div>
 
-		{% block javascripts %}
-			<script type="text/javascript" src="{{ asset('build/js/jquery1.8.2.min.js') }}"></script>
-			<script type="text/javascript">
-				jQuery(document).ready(function($) {
-					game = {
-						path: '{{ get_api_endpoint() }}/',
-						shipsName: [{{ get_ship_names()|join(',')|raw }}],
-						shipsPev: [{{ get_ship_pevs()|join(',') }}]
-					};
-				});
-			</script>
-			<script type="text/javascript" src="{{ asset('build/js/main.js') }}"></script>
-			<script type="text/javascript" src="{{ asset('build/js/main.desktop.js') }}"></script>
-			<script type="text/javascript" src="{{ asset('build/js/autocomplete.module.js') }}"></script>
-
-			{{ encore_entry_script_tags('app') }}
-		{% endblock %}
 	</body>
 </html>

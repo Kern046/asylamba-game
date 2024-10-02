@@ -1,0 +1,10 @@
+{% if faction %}
+	{% set faction_classes = 'border-dark' ~ faction.identifier ~ ' bg-medium' ~ faction.identifier %}
+{% endif %}
+
+<button {{ attributes.defaults({
+	type: 'button',
+	class: 'block py-2 px-4 rounded-md shadow-sm hover:shadow-md border text-white text-left %s'|format(faction_classes|default('')),
+}) }}>
+	{% block content %}{% endblock content %}
+</button>

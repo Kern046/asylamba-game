@@ -8,7 +8,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-class Transaction
+class Transaction implements \JsonSerializable
 {
 	// statement
 	public const ST_PROPOSED = 0;		// transaction proposée
@@ -125,5 +125,30 @@ class Transaction
 	public function getTotalPrice(): int
 	{
 		return $this->price + $this->sellerFactionFees + $this->buyerFactionFees;
+	}
+
+	public function getTypeString(): string
+	{
+		return match ($this->type) {
+			self::TYP_RESOURCE => 'resources',
+			self::TYP_SHIP => 'ship',
+			self::TYP_COMMANDER => 'commander',
+		};
+	}
+
+	public function jsonSerialize(): array
+	{
+		return [
+			'id' => $this->id,
+			'statement' => $this->statement,
+			'player' => $this->player,
+			'base' => $this->base,
+			'type' => $this->type,
+			'quantity' => $this->quantity,
+			'identifier' => $this->identifier,
+			'commander' => $this->commander,
+			'publishedAt' => $this->publishedAt,
+			'currentRate' => $this->currentRate,
+		];
 	}
 }

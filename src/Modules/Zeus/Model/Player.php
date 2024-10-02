@@ -7,7 +7,7 @@ use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class Player implements CreditHolderInterface, SystemUpdatable, UserInterface
+class Player implements CreditHolderInterface, SystemUpdatable, UserInterface, \JsonSerializable
 {
 	public int|null $id = 0;
 	public Color|null $faction = null;
@@ -144,5 +144,14 @@ class Player implements CreditHolderInterface, SystemUpdatable, UserInterface
 	public function getUserIdentifier(): string
 	{
 		return $this->name;
+	}
+
+	public function jsonSerialize(): array
+	{
+		return [
+			'id' => $this->id,
+			'name' => $this->name,
+			'avatar' => $this->avatar,
+		];
 	}
 }
