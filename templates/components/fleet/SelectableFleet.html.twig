@@ -1,0 +1,48 @@
+<a href="#"
+   class="item {% if commander.isMoving %}striped{% endif %} selectable-commander"
+   data-id="{{ commander.id }}"
+   data-color="{{ current_player.faction.identifier }}"
+   data-max-jump="{{ get_max_travel_distance() }}"
+   data-available="{{ commander.isMoving ? 'false' : 'true' }}"
+   data-name="{{ commander|commander_rank }} {{ commander.name }}"
+	{# @TODO move this logic in a dedicated service #}
+   data-wedge="{{ (constant('App\\Modules\\Ares\\Model\\Commander::COEFFLOOT') * commander|pev)|number }}"
+>
+	<span class="picto">
+		<img src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
+		<span class="number">{{ commander.level }}</span>
+	</span>
+	<span class="content skin-2">
+		<span class="sub-content">
+			{{ commander|commander_rank }} {{ commander.name }}<br/>
+			{{ commander|pev|number }} pev
+			<hr />
+			{% if commander.isMoving %}
+				{# @TODO Implement translator to replace the switch #}
+				{% if commander.isTransferring %}
+					Déplacement
+				{% elseif commander.isLooting %}
+					Pillage
+				{% elseif commander.isInvading %}
+					Colonisation
+				{% elseif commander.isComingBack %}
+					Retour
+				{% endif %}
+			{% else %}
+				A quai
+			{% endif %}
+			<hr />
+
+			<div class="flex flex-wrap">
+				{% set ships_by_type = commander.nbrShipByType %}
+				{% for type in ships_by_type|keys %}
+					{% set quantity = ships_by_type[type] %}
+					<div class="ship m-0.5">
+						<img src="{{ asset('build/media/ship/picto/ship' ~ type ~ '.png') }}" {% if quantity == 0 %}class="zero"{% endif %}/>
+						<span class="number">{{ quantity }}</span>
+					</div>
+				{% endfor %}
+			</div>
+		</span>
+	</span>
+</a>

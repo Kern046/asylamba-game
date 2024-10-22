@@ -473,7 +473,7 @@ jQuery(document).ready(function($) {
 
 		selectCommander: function(commander) {
 			var id = mapController.commanders.id;
-			$('.map-commander').removeClass('active');
+			$('.selectable-commander').removeClass('active');
 
 			mapController.commanders.active = false;
 			mapController.commanders.id = undefined;
@@ -624,7 +624,7 @@ jQuery(document).ready(function($) {
 			mapController.mouseMoving.lastY = e.pageY;
 		}
 	});
-	$('.map-commander').on('click', function(e) {
+	$('.selectable-commander').on('click', function(e) {
 		e.preventDefault();
 
 		mapController.selectCommander($(this));

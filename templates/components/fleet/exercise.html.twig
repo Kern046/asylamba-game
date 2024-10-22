@@ -1,0 +1,16 @@
+<div class="component size2 commander-fleet">
+	<div class="head skin-1">
+		<img src="{{ asset('build/media/fleet/movement.png') }}" alt="Exercices militaires" />
+		<h2>Exercices militaires</h2>
+		<em>Simulation de combat entre 2 flottes</em>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="overflow" style="position: relative;">
+				{% for commander in commanders %}
+					{{ component('SelectableFleet', { commander }) }}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</div>

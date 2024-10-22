@@ -37,6 +37,7 @@
         "symfony/security-bundle": "^6.4",
         "symfony/twig-bundle": "^6.4",
         "symfony/uid": "^6.4",
+        "symfony/ux-twig-component": "^2.20",
         "symfony/validator": "^6.4",
         "symfony/var-dumper": "^6.4",
         "symfony/webpack-encore-bundle": "^2.0",

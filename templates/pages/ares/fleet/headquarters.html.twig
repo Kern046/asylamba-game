@@ -6,5 +6,7 @@
 	{% if commander is defined and commander is not null %}
 		{{ include('components/fleet/commander_fleet.html.twig') }}
 		{{ include('components/fleet/commander_details.html.twig') }}
+	{% else %}
+		{{ include('components/fleet/exercise.html.twig', { commanders: obsets|filter(base => base.info.id.equals(current_base.id))[0].fleets }) }}
 	{% endif %}
 {% endblock content %}
