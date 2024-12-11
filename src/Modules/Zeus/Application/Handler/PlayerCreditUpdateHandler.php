@@ -111,10 +111,14 @@ readonly class PlayerCreditUpdateHandler
 					break;
 				}
 
+				$createdAt = (null !== $lastFinancialReport)
+					? (clone $lastFinancialReport->createdAt)->modify(sprintf('+%d seconds', $secondsPerGameCycle))
+					: new \DateTimeImmutable();
+
 				$playerFinancialReport = new PlayerFinancialReport(
 					id: Uuid::v4(),
 					player: $player,
-					createdAt: (clone $lastFinancialReport->createdAt)->modify(sprintf('+%d seconds', $secondsPerGameCycle)),
+					createdAt: $createdAt,
 					initialWallet: $player->credit,
 				);
 
