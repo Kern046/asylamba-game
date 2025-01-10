@@ -93,11 +93,13 @@ readonly class PlayerCreditUpdateHandler
 
 		$lastFinancialReport = $this->playerFinancialReportRepository->getPlayerLastReport($player);
 
-		$this->logger->debug('Last financial report for player {playerName} was created at {createdAt}', [
-			'playerName' => $player->name,
-			'playerId' => $player->id,
-			'createdAt' => $lastFinancialReport->createdAt,
-		]);
+		if (null !== $lastFinancialReport) {
+			$this->logger->debug('Last financial report for player {playerName} was created at {createdAt}', [
+				'playerName' => $player->name,
+				'playerId' => $player->id,
+				'createdAt' => $lastFinancialReport->createdAt,
+			]);
+		}
 
 		$this->entityManager->beginTransaction();
 
@@ -178,7 +180,7 @@ readonly class PlayerCreditUpdateHandler
 	 */
 	private function updatePlayerCredits(
 		PlayerFinancialReport $playerFinancialReport,
-		PlayerFinancialReport $lastFinancialReport,
+		PlayerFinancialReport|null $lastFinancialReport,
 		Player $rebelPlayer,
 		array $commanders,
 		array $bases,

@@ -16,11 +16,11 @@ readonly class PlayerTransactionReportHandler
 
 	}
 
-	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport $lastFinancialReport): void
+	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport|null $lastFinancialReport): void
 	{
 		$transactions = $this->transactionRepository->matchPlayerCompletedTransactionsSince(
 			$playerFinancialReport->player,
-			$lastFinancialReport->createdAt,
+			$lastFinancialReport->createdAt ?? $playerFinancialReport->player->dInscription,
 		);
 
 		foreach ($transactions as $transaction) {
