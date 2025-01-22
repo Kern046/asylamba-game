@@ -20,15 +20,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ViewGenerator extends AbstractController
 {
-	public function __construct(
-		private readonly BuildingLevelHandler $buildingLevelHandler,
-		private readonly BuildingQueueRepositoryInterface $buildingQueueRepository,
-		private readonly ValidatorInterface $validator,
-	) {
-
-	}
-
 	public function __invoke(
+		BuildingQueueRepositoryInterface $buildingQueueRepository,
 		CurrentPlayerBonusRegistry $currentPlayerBonusRegistry,
 		Player $currentPlayer,
 		OrbitalBase $currentBase,
@@ -36,46 +29,16 @@ class ViewGenerator extends AbstractController
 		TechnologyRepositoryInterface $technologyRepository,
 	): Response {
 		$technology = $technologyRepository->getPlayerTechnology($currentPlayer);
+		$buildingQueues = $buildingQueueRepository->getBaseQueues($currentBase);
+		$buildingQueuesCount = count($buildingQueues);
 
 		return $this->render('pages/athena/generator.html.twig', [
 			'technology' => $technology,
 			'generator_speed_bonus' => $currentPlayerBonusRegistry
 				->getPlayerBonus()->bonuses->get(PlayerBonusId::GENERATOR_SPEED),
 			'building_resource_refund' => $this->getParameter('athena.building.building_queue_resource_refund'),
-			'buildings_data' => $this->getBuildingsData($currentBase, $technology),
+			'building_queues' => $buildingQueues,
+			'building_queues_count' => $buildingQueuesCount,
 		]);
-	}
-
-	private function getBuildingsData(OrbitalBase $currentBase, Technology $technology): array
-	{
-		$data = [];
-		$buildingQueues = $this->buildingQueueRepository->getBaseQueues($currentBase);
-		$buildingQueuesCount = count($buildingQueues);
-
-		foreach (OrbitalBaseResource::$building as $buildingNumber => $buildingData) {
-			$level = $this->buildingLevelHandler->getBuildingLevel($currentBase, $buildingNumber);
-			$realLevel = $this->buildingLevelHandler->getBuildingRealLevel(
-				$currentBase,
-				$buildingNumber,
-				$buildingQueues,
-			);
-			$nextLevel = $realLevel + 1;
-
-			$buildingConstructionOrder = new BuildingConstructionOrder(
-				orbitalBase: $currentBase,
-				targetLevel: $nextLevel,
-				buildingIdentifier: $buildingNumber,
-				technology: $technology,
-			);
-
-			$data[$buildingNumber] = [
-				'real_level' => $realLevel,
-				'next_level' => $nextLevel,
-				'level' => $level,
-				'building_requirements' => $this->validator->validate($buildingConstructionOrder, new CanMakeBuilding($buildingQueuesCount)),
-			];
-		}
-
-		return $data;
 	}
 }

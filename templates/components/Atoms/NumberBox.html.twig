@@ -1,0 +1,13 @@
+<div {{ attributes.defaults({
+	class: 'flex flex-wrap items-baseline justify-between md:gap-x-4 md:gap-y-2 text-white md:p-2 lg:px-4 rounded-sm',
+}) }}>
+	<dt class="hidden md:block text-sm/6 font-medium text-gray-300">{{ label }}</dt>
+	{% if bonus is not null %}
+		<dd class="text-xs font-medium text-gray-200">
+			{{ bonus }}
+		</dd>
+	{% endif %}
+	<dd class="w-full flex-none text-sm md:text-3xl/10 font-medium tracking-tight text-gray-100">
+		{{ value|number }} {{ unit }}
+	</dd>
+</div>

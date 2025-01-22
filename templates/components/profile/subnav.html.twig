@@ -1,15 +1,8 @@
 <div id="subnav">
-	<button class="move-side-bar top" data-dir="up"> </button>
-	<div class="overflow">
+	<div class="">
 		{% set is_active = app.request.get('_route') == 'profile' ? 'active' : '' %}
-		<a href="{{ path('profile') }}" class="item {{ is_active }}">
-			<span class="picto">
-				<img src="{{ asset('build/media/profil/profil.png') }}" alt="" />
-			</span>
-			<span class="content skin-1">
-				<span>Profil
-			</span>
+		<a href="{{ path('profile') }}" class="{{ is_active }}">
+			Profil
 		</a>
 	</div>
-	<button class="move-side-bar bottom" data-dir="down"> </button>
 </div>

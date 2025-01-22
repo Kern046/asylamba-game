@@ -19,6 +19,9 @@ readonly class ShipHelper
 	) {
 	}
 
+	/**
+	 * TODO Refactor with Specification Pattern
+	 */
 	public function haveRights($shipId, $type, $sup, $quantity = 1): bool|string
 	{
 		if (ShipResource::isAShip($shipId)) {

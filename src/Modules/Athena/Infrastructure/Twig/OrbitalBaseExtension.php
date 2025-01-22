@@ -10,7 +10,7 @@ use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
 use App\Modules\Athena\Domain\Service\Base\Building\BuildingDataHandler;
 use App\Modules\Athena\Domain\Service\Base\Building\GetTimeCost;
 use App\Modules\Athena\Domain\Service\Base\GetCoolDownBeforeLeavingBase;
-use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
+use App\Modules\Athena\Domain\Service\Base\GetMaxResourceStorage;
 use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -26,13 +26,13 @@ use Twig\TwigFunction;
 class OrbitalBaseExtension extends AbstractExtension
 {
 	public function __construct(
-		private readonly BuildingDataHandler $buildingDataHandler,
-		private readonly GetTimeCost $getTimeCost,
+		private readonly BuildingDataHandler          $buildingDataHandler,
+		private readonly GetTimeCost                  $getTimeCost,
 		private readonly GetCoolDownBeforeLeavingBase $getCoolDownBeforeLeavingBase,
-		private readonly DurationHandler $durationHandler,
-		private readonly OrbitalBaseHelper $orbitalBaseHelper,
-		private readonly PopulationTaxHandler $populationTaxHandler,
-		private readonly GetMaxStorage $getMaxStorage,
+		private readonly DurationHandler              $durationHandler,
+		private readonly OrbitalBaseHelper            $orbitalBaseHelper,
+		private readonly PopulationTaxHandler         $populationTaxHandler,
+		private readonly GetMaxResourceStorage        $getMaxStorage,
 	) {
 	}
 

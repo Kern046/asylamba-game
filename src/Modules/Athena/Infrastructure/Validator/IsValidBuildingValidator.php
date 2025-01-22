@@ -24,7 +24,7 @@ class IsValidBuildingValidator extends ConstraintValidator
 			throw new UnexpectedValueException($value, HasBuildingIdentifier::class);
 		}
 
-		if (!\in_array($value->getBuildingIdentifier(), OrbitalBaseResource::$orbitalBaseBuildings)) {
+		if (!\in_array($value->getBuildingIdentifier(), OrbitalBaseResource::BUILDINGS)) {
 			$this->context->buildViolation('Invalid building number')
 				->addViolation();
 		}

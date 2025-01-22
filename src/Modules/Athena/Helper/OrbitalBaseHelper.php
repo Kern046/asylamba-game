@@ -19,7 +19,7 @@ readonly class OrbitalBaseHelper
 
 	public function isABuilding(int $building): bool
 	{
-		return \in_array($building, OrbitalBaseResource::$orbitalBaseBuildings);
+		return \in_array($building, OrbitalBaseResource::BUILDINGS);
 	}
 
 	public function isAShipFromDock1(int $ship): bool

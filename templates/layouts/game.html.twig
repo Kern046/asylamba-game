@@ -23,20 +23,21 @@
 			{% block importmap %}{{ importmap('app') }}{% endblock %}
 		{% endblock %}
 	</head>
-	<body class="color{{ current_player_faction_id }} no-scrolling" data-init-sftr="2">
+	<body class="h-screen bg-gray-900 text-white">
+		<div id="container" class="z-0 relative flex flex-col h-full">
+			{{ include('components/common/navbar.html.twig') }}
 
-		<div id="app">
-			{# {{ include('components/common/navbar.html.twig') }} #}
-
-			<div id="container" class="z-0">
-				<turbo-frame id="main-frame">
-					{% block body %}{% endblock body %}
-				</turbo-frame>
-			</div>
+			{% block body %}{% endblock body %}
 
 			{{ include('components/common/toolbar.html.twig') }}
+
+			<div class="hidden md:block absolute left-0 top-20">
+				{% block left_sidebar %}{% endblock left_sidebar %}
+			</div>
+			<div class="hidden md:block absolute right-0 top-0">
+				{% block right_sidebar %}{% endblock right_sidebar %}
+			</div>
 			{{ include('components/common/alerts.html.twig') }}
 		</div>
-
 	</body>
 </html>

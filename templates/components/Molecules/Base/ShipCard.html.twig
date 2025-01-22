@@ -1,0 +1,60 @@
+{% extends 'components/common/card.html.twig' %}
+
+{% block title %}
+	<div class="flex justify-between items-center">
+		<h5 class="text-sm md:text-base">{{ get_ship_info(shipIdentifier, 'codeName')  }}</h5>
+		<em class="text-xs md:text-sm font-normal">{{ get_ship_info(shipIdentifier, 'name') }}</em>
+	</div>
+{% endblock %}
+
+{% block picto %}
+	<img src="{{ asset('images/legacy/shipyard/frame/' ~ get_ship_info(shipIdentifier, 'thumbnail') ~ '.svg') }}" class="w-36" alt="Building"/>
+{% endblock picto %}
+
+{% block footer %}
+	{% set cost %}
+		<em class="text-xs md:text-sm">
+			{{ this.resourceCost|number(-1) }} Res
+			et
+			{{ this.timeCost|lite_seconds }}
+		</em>
+	{% endset %}
+
+	{# @TODO replace this and the JS management of the links update with a proper form #}
+	{% if not hasShipQueueRequirements %}
+		<twig:Button type="button" :disabled="true">
+			file de construction pleine<br />
+			{{ cost }}
+		</twig:Button>
+	{% elseif hasTechnologyRequirements is not same as(true) %}
+		<twig:Button type="button" :disabled="true">
+			{{ missingTechnology }}
+		</twig:Button>
+	{% elseif hasShipTreeRequirements is not same as(true) %}
+		<twig:Button type="button" :disabled="true">
+			il vous faut augmenter votre chantier {% if isHeavyShipyard %}de ligne{% else %}alpha{% endif %} au niveau {{ dockNeededLevel }}
+		</twig:Button>
+	{% elseif maxShips < 1 %}
+		<twig:Button type="button" :disabled="true">
+			pas assez de ressources / hangar plein<br />
+			{{ cost }}
+		</twig:Button>
+	{% else %}
+		{% if not isHeavyShipyard %}
+			<input class="ship-pack text-stone-800" type="text" maxlength="2" name="quantity" value="{{ maxShips }}" data-max-ship="{{ maxShips }}" />
+		{% endif %}
+
+		<a href="{{ absolute_url(path('build_ships', { 'ship': shipIdentifier, 'quantity': maxShips })) }}">
+			<twig:Button :faction="current_player.faction" type="button">
+				<p class="md:font-semibold">
+					construire {% if isHeavyShipyard %}1{% else %}<span class="final-number">{{ maxShips }}</span>{% endif %} {{ get_ship_info(shipIdentifier, 'codeName') }} pour<br />
+				</p>
+				<span class="flex justify-end items-center">
+					<span class="final-cost">{{ (resourceCost * (isHeavyShipyard ? 1 : maxShips))|number }}</span>
+					et
+					<span class="final-time">{{ (timeCost * (isHeavyShipyard ? 1 : maxShips))|lite_seconds }}</span>
+				</span>
+			</twig:Button>
+		</a>
+	{% endif %}
+{% endblock footer %}

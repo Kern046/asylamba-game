@@ -15,4 +15,5 @@ class Button
 {
 	public string $content;
 	public Color|null $faction = null;
+	public bool $disabled = false;
 }

@@ -5,7 +5,7 @@ namespace App\Modules\Athena\Infrastructure\Controller\Trade\Offer;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
-use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
+use App\Modules\Athena\Domain\Service\Base\GetMaxResourceStorage;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Zeus\Manager\PlayerManager;
@@ -21,15 +21,15 @@ use Symfony\Component\Uid\Uuid;
 class Cancel extends AbstractController
 {
 	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		GetMaxStorage $getMaxStorage,
-		OrbitalBaseManager $orbitalBaseManager,
-		PlayerManager $playerManager,
-		HubInterface $mercure,
-		CommercialShippingRepositoryInterface $commercialShippingRepository,
-		TransactionRepositoryInterface $transactionRepository,
-		Uuid $id,
+        Request                               $request,
+        Player                                $currentPlayer,
+        GetMaxResourceStorage                 $getMaxStorage,
+        OrbitalBaseManager                    $orbitalBaseManager,
+        PlayerManager                         $playerManager,
+        HubInterface                          $mercure,
+        CommercialShippingRepositoryInterface $commercialShippingRepository,
+        TransactionRepositoryInterface        $transactionRepository,
+        Uuid                                  $id,
 	): Response {
 
 		$transaction = $transactionRepository->get($id)

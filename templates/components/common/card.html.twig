@@ -1,0 +1,21 @@
+<div class="bg-gray-700
+	overflow-hidden
+	rounded-md
+	ring-1
+	ring-white/15
+	flex
+	md:flex-col
+	{% if this.isDisabled %}
+		disable
+	{% endif %}">
+	<header class="flex justify-center md:max-h-36 md:overflow-hidden">
+		{% block picto %}{% endblock %}
+	</header>
+
+	<section class="text-white py-1 px-1 md:py-2 md:px-4">
+		<strong class="leading-none">{% block title %}{% endblock title %}</strong>
+		{% block content %}{% endblock content %}
+		{% block footer %}{% endblock footer %}
+	</section>
+</div>
+

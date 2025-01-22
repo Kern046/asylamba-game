@@ -12,7 +12,7 @@ use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\RecyclingMissionRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
-use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
+use App\Modules\Athena\Domain\Service\Base\GetMaxResourceStorage;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
@@ -26,17 +26,17 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 readonly class OrbitalBaseManager
 {
 	public function __construct(
-		private GetMaxStorage $getMaxStorage,
-		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-		private TechnologyQueueRepositoryInterface $technologyQueueRepository,
-		private CommercialRouteManager $commercialRouteManager,
+		private GetMaxResourceStorage                 $getMaxStorage,
+		private CurrentPlayerBasesRegistry            $currentPlayerBasesRegistry,
+		private TechnologyQueueRepositoryInterface    $technologyQueueRepository,
+		private CommercialRouteManager                $commercialRouteManager,
 		private CommercialShippingRepositoryInterface $commercialShippingRepository,
-		private CommanderRepositoryInterface $commanderRepository,
-		private TransactionRepositoryInterface $transactionRepository,
-		private RecyclingMissionRepositoryInterface $recyclingMissionRepository,
-		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private EntityManagerInterface $entityManager,
-		private EventDispatcherInterface $eventDispatcher,
+		private CommanderRepositoryInterface          $commanderRepository,
+		private TransactionRepositoryInterface        $transactionRepository,
+		private RecyclingMissionRepositoryInterface   $recyclingMissionRepository,
+		private OrbitalBaseRepositoryInterface        $orbitalBaseRepository,
+		private EntityManagerInterface                $entityManager,
+		private EventDispatcherInterface              $eventDispatcher,
 		private CommanderManager $commanderManager,
 	) {
 	}

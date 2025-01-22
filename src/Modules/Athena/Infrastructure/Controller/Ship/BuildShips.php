@@ -4,14 +4,14 @@ namespace App\Modules\Athena\Infrastructure\Controller\Ship;
 
 use App\Classes\Library\Format;
 use App\Modules\Athena\Application\Factory\ShipQueueFactory;
+use App\Modules\Athena\Domain\Enum\DockType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
-use App\Modules\Athena\Domain\Service\Ship\GetResourceCost;
+use App\Modules\Athena\Domain\Service\Base\Ship\CountShipResourceCost;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Helper\ShipHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +28,7 @@ class BuildShips extends AbstractController
 		OrbitalBase                   $currentBase,
 		OrbitalBaseManager            $orbitalBaseManager,
 		OrbitalBaseHelper             $orbitalBaseHelper,
-		GetResourceCost               $getResourceCost,
+		CountShipResourceCost         $countShipResourceCost,
 		ShipHelper                    $shipHelper,
 		ShipQueueRepositoryInterface  $shipQueueRepository,
 		ShipQueueFactory              $shipQueueFactory,
@@ -45,15 +45,14 @@ class BuildShips extends AbstractController
 			throw new BadRequestHttpException('Invalid ship identifier');
 		}
 		if ($orbitalBaseHelper->isAShipFromDock1($shipIdentifier)) {
-			$dockType = 1;
+			$dockType = DockType::Manufacture;
 		} elseif ($orbitalBaseHelper->isAShipFromDock2($shipIdentifier)) {
-			$dockType = 2;
+			$dockType = DockType::Shipyard;
 			$quantity = 1;
 		} else {
-			$dockType = 3;
-			$quantity = 1;
+			throw new \InvalidArgumentException('Invalid ship identifier');
 		}
-		$shipQueues = $shipQueueRepository->getByBaseAndDockType($currentBase, $dockType);
+		$shipQueues = $shipQueueRepository->getByBaseAndDockType($currentBase, $dockType->getIdentifier());
 		$shipQueuesCount = count($shipQueues);
 		$technos = $technologyRepository->getPlayerTechnology($currentPlayer);
 		// TODO Replace with Specification pattern
@@ -79,7 +78,7 @@ class BuildShips extends AbstractController
 		);
 
 		// débit des ressources au joueur
-		$resourcePrice = ($getResourceCost)($shipIdentifier, $quantity, $currentPlayer);
+		$resourcePrice = ($countShipResourceCost)($shipIdentifier, $quantity, $currentPlayer);
 		$orbitalBaseManager->decreaseResources($currentBase, $resourcePrice);
 
 		// ajout de l'event dans le contrôleur
