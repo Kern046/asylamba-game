@@ -6,14 +6,97 @@
 	</twig:Headline>
 
 	<div class="flex flex-col md:flex-row gap-4 md:items-start mt-2">
-		<twig:Queues
-			queueComponent="ShipQueue"
-			:queues="ship_queues"
-			:queuesCount="nb_ship_queues"
-			:buildingIdentifier="building_number"
-			:buildingLevel="dock_type.getLevel(current_base)"
-			:speedBonus="dock_speed_bonus"
-			:refund="ship_resource_refund" />
+		<div>
+			<twig:Queues
+				queueComponent="ShipQueue"
+				:queues="ship_queues"
+				:queuesCount="nb_ship_queues"
+				:buildingIdentifier="building_number"
+				:buildingLevel="dock_type.getLevel(current_base)"
+				:speedBonus="dock_speed_bonus"
+				:refund="ship_resource_refund" />
+
+			<twig:LayoutBox class="mt-4 rounded-bl-xl">
+				<h3 class="font-bold text-sm md:text-lg text-gray-300">
+					Hangar
+				</h3>
+
+				<twig:NumberBox label="capacité du hangar" class="md:bg-gray-700">
+					<p>{{ in_storage }} / {{ total_space}}</p>
+
+					{% set percent = in_storage|percent(total_space) %}
+
+					<twig:ProgressBar :current="percent" :faction="current_player.faction" />
+				</twig:NumberBox>
+
+				<div>
+					<nav>
+						{# TODO check the original destination of this link #}
+						<a href="{{ path('fleet_overview') }}">
+							intégrer à vos armées
+						</a>
+						<a href="#" class="sh hb lt" title="information" data-target="info-dock{{ dock_type.identifier }}">
+							?
+						</a>
+					</nav>
+
+					{# TODO enable this dialog with Stimulus #}
+					<dialog class="info" id="info-dock{{ dock_type.identifier }}">
+						Le hangar de votre chantier vous sert à stocker des vaisseaux. Les vaisseaux
+						sont stockés directement après leur construction. Si vous ne disposez pas suffisamment de place, vous ne pourrez plus en construire. Faites
+						donc bien attention de vider votre hangar régulièrement.<br />
+						Chaque vaisseau prend une place différente dans votre hangar. Cette place correspond au point équivalent vaisseau (PEV). Le hangar dispose
+						d’un certain nombre de PEV qui augmente en fonction du niveau de votre chantier.<br />
+						Le bouton intégration vous renverra à l’amirauté, ce qui vous permettra de vider votre hangar et de répartir vos vaisseaux dans vos flottes
+						en orbite autour de la planète sur laquelle vous avez construit votre chantier.
+					</dialog>
+
+					<div class="component market-sell">
+						{% for i in ships_range %}
+							{% set ships_count = current_base.shipStorage[i] ?? 0 %}
+							<div class="queue sh" data-target="sell-ships-{{ i }}">
+								<div class="item">
+									<strong>
+										<span class="big">{{ ships_count }}</span>
+										{{ get_ship_info(i, 'codeName') ~ ships_count|plural }}
+									</strong>
+									<em>{{ ships_count * get_ship_info(i, 'pev') }} PEV</em>
+								</div>
+							</div>
+
+							{# TODO Enable this dialog #}
+							{% if ships_count != 0 %}
+								<form id="sell-ships-{{ i }}"
+									  class="sell-form"
+									  data-max-quantity="{{ ships_count }}"
+									  data-min-price="{{ get_ship_info(i, 'resourcePrice') / 2 }}"
+									  action="{{ path('recycle_ships', {'ship_identifier': i}) }}"
+									  method="post"
+									  style="display:none;">
+
+									<h4>recycler des vaisseaux</h4>
+									<hr />
+									<div class="label-box sf-quantity">
+										<label for="sell-market-quantity-ship" class="label">Quantité</label>
+										<input id="sell-market-quantity-ship" class="value" type="text" name="quantity" autocomplete="off" />
+									</div>
+
+									<div class="label-box sf-min-price">
+										<span class="label">Ressources</span>
+										<span class="value"></span>
+										<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/resource.png') }}">
+									</div>
+
+									<hr />
+									<p><input type="submit" value="Recycler" /></p>
+								</form>
+							{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</twig:LayoutBox>
+		</div>
+
 
 		<twig:LayoutBox class="grow grid grid-cols-1 md:grid-cols-3 gap-x-2 gap-y-3 md:gap-y-2 lg:gap-4 rounded-r-xl">
 			{% for ship_identifier in ships_range %}
@@ -26,82 +109,5 @@
 					:queuesCount="nb_ship_queues"/>
 			{% endfor %}
 		</twig:LayoutBox>
-	</div>
-
-	<div class="component">
-			<div class="head skin-2">
-				<h2>Hangars</h2>
-			</div>
-			<div class="fix-body">
-				<div class="body">
-					<div class="tool">
-						{# @TODO check the original destination of this link #}
-						<span><a href="{{ path('fleet_overview') }}">intégrer à vos armées</a></span>
-						<span><a href="#" class="sh hb lt" title="information" data-target="info-dock{{ dock_type.identifier }}">?</a></span>
-					</div>
-
-					<p class="info" id="info-dock{{ dock_type.identifier }}" style="display:none;">Le hangar de votre chantier vous sert à stocker des vaisseaux. Les vaisseaux
-						sont stockés directement après leur construction. Si vous ne disposez pas suffisamment de place, vous ne pourrez plus en construire. Faites
-						donc bien attention de vider votre hangar régulièrement.<br />
-						Chaque vaisseau prend une place différente dans votre hangar. Cette place correspond au point équivalent vaisseau (PEV). Le hangar dispose
-						d’un certain nombre de PEV qui augmente en fonction du niveau de votre chantier.<br />
-						Le bouton intégration vous renverra à l’amirauté, ce qui vous permettra de vider votre hangar et de répartir vos vaisseaux dans vos flottes
-						en orbite autour de la planète sur laquelle vous avez construit votre chantier.</p>
-
-					<div class="component market-sell">
-						{% for i in ships_range %}
-							{% set ships_count = storage[i] ?? 0 %}
-							<div class="queue sh" data-target="sell-ships-{{ i }}">
-								<div class="item">
-									<strong>
-										<span class="big">{{ ships_count }}</span>
-										{{ get_ship_info(i, 'codeName') ~ ships_count|plural }}
-									</strong>
-									<em>{{ ships_count * get_ship_info(i, 'pev') }} PEV</em>
-								</div>
-							</div>
-
-							{% if ships_count != 0 %}
-								<form id="sell-ships-{{ i }}"
-									  class="sell-form"
-									  data-max-quantity="{{ ships_count }}"
-									  data-min-price="{{ get_ship_info(i, 'resourcePrice') / 2 }}"
-									  action="{{ path('recycle_ships', {'ship_identifier': i}) }}"
-									  method="post"
-									  style="display:none;">
-
-								<h4>recycler des vaisseaux</h4>
-								<hr />
-								<div class="label-box sf-quantity">
-									<label for="sell-market-quantity-ship" class="label">Quantité</label>
-									<input id="sell-market-quantity-ship" class="value" type="text" name="quantity" autocomplete="off" />
-								</div>
-
-								<div class="label-box sf-min-price">
-									<span class="label">Ressources</span>
-									<span class="value"></span>
-									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/resource.png') }}">
-								</div>
-
-								<hr />
-								<p><input type="submit" value="Recycler" /></p>
-								</form>
-							{% endif %}
-						{% endfor %}
-						<div class="number-box">
-							<span class="label">capacité du hangar</span>
-							<span class="value">
-								{{ in_storage }} <img class="icon-color" alt="" src="{{ asset('build/media/resources/pev.png') }}">
-								/
-								{{ total_space}} <img class="icon-color" alt="" src="{{ asset('build/media/resources/pev.png') }}">
-							</span>
-							{% set percent = in_storage|percent(total_space) %}
-							<span class="progress-bar hb bl" title="remplissage : {{ percent|number }}%">
-							<span style="width:{{ percent }}%;" class="content"></span>
-						</span>
-					</div>
-				</div>
-			</div>
-		</div>
 	</div>
 {% endblock content %}

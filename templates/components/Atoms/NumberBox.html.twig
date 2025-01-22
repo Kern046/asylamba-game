@@ -8,6 +8,6 @@
 		</dd>
 	{% endif %}
 	<dd class="w-full flex-none text-sm md:text-3xl/10 font-medium tracking-tight text-gray-100">
-		{{ value|number }} {{ unit }}
+		{% block content %}{% endblock content %}
 	</dd>
 </div>

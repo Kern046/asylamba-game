@@ -16,7 +16,7 @@ class ProgressBar
 	public Color $faction;
 	public int $start = 0;
 	public int $current;
-	public int $end;
+	public int $end = 100;
 
 	public function getWidth(): float
 	{

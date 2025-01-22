@@ -36,25 +36,37 @@
 		</twig:Button>
 	{% elseif maxShips < 1 %}
 		<twig:Button type="button" :disabled="true">
+			{# TODO Differentiate these two cases #}
 			pas assez de ressources / hangar plein<br />
 			{{ cost }}
 		</twig:Button>
 	{% else %}
-		{% if not isHeavyShipyard %}
-			<input class="ship-pack text-stone-800" type="text" maxlength="2" name="quantity" value="{{ maxShips }}" data-max-ship="{{ maxShips }}" />
-		{% endif %}
+		<div class="flex gap-x-1 items-start justify-between w-full">
+			{% if not isHeavyShipyard %}
+				<twig:InsetLabelInput
+					label="Quantité"
+					for="quantity"
+					:faction="current_player.faction"
+					input:name="quantity"
+					input:type="number"
+					:input:max="min(99, maxShips)"
+					:input:value="maxShips"
+					:input:data-max-ships="maxShips"
+				/>
+			{% endif %}
 
-		<a href="{{ absolute_url(path('build_ships', { 'ship': shipIdentifier, 'quantity': maxShips })) }}">
-			<twig:Button :faction="current_player.faction" type="button">
-				<p class="md:font-semibold">
-					construire {% if isHeavyShipyard %}1{% else %}<span class="final-number">{{ maxShips }}</span>{% endif %} {{ get_ship_info(shipIdentifier, 'codeName') }} pour<br />
-				</p>
-				<span class="flex justify-end items-center">
-					<span class="final-cost">{{ (resourceCost * (isHeavyShipyard ? 1 : maxShips))|number }}</span>
-					et
-					<span class="final-time">{{ (timeCost * (isHeavyShipyard ? 1 : maxShips))|lite_seconds }}</span>
-				</span>
-			</twig:Button>
-		</a>
+			<a class="basis-1/2" href="{{ absolute_url(path('build_ships', { 'ship': shipIdentifier, 'quantity': maxShips })) }}">
+				<twig:Button :faction="current_player.faction" type="button">
+					<p class="text-sm md:font-semibold">
+						Commander
+					</p>
+					<span class="flex justify-end items-center text-xs">
+						{{ (resourceCost * (isHeavyShipyard ? 1 : maxShips))|number }}
+						et
+						{{ (timeCost * (isHeavyShipyard ? 1 : maxShips))|lite_seconds }}
+					</span>
+				</twig:Button>
+			</a>
+		</div>
 	{% endif %}
 {% endblock footer %}

@@ -4,11 +4,9 @@
 			File de construction
 		</h3>
 
-		<twig:NumberBox label="bonus de vitesse de construction"
-						:value="speedBonus"
-						unit="%"
-						class="md:bg-gray-700 md:mt-2"
-		/>
+		<twig:NumberBox label="bonus de vitesse de construction" class="md:bg-gray-700 md:mt-2">
+			{{ speedBonus|number }} %
+		</twig:NumberBox>
 	</header>
 
 	<section class="flex md:flex-col gap-2 mt-2">

@@ -13,7 +13,5 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 final class NumberBox
 {
 	public string $label;
-	public int $value;
 	public float|null $bonus = null;
-	public string|null $unit = null;
 }
