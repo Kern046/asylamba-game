@@ -2,16 +2,22 @@
 
 namespace App\Modules\Athena\Helper;
 
+use App\Modules\Athena\Domain\Enum\DockType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Base\Ship\CountAffordableShips;
+use App\Modules\Athena\Domain\Service\Base\Ship\CountMaxShipQueues;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Helper\TechnologyHelper;
+use App\Modules\Shared\Application\PercentageApplier;
 use App\Modules\Zeus\Application\Registry\CurrentPlayerRegistry;
 
 readonly class ShipHelper
 {
 	public function __construct(
+		private CountMaxShipQueues $countMaxShipQueues,
+		private CountAffordableShips $countAffordableShips,
 		private CurrentPlayerRegistry $currentPlayerRegistry,
 		private TechnologyHelper $technologyHelper,
 		private OrbitalBaseHelper $orbitalBaseHelper,
@@ -22,34 +28,26 @@ readonly class ShipHelper
 	/**
 	 * TODO Refactor with Specification Pattern
 	 */
-	public function haveRights($shipId, $type, $sup, $quantity = 1): bool|string
+	public function haveRights(int $shipId, string $type, $sup, int $quantity = 1): bool|string
 	{
 		if (ShipResource::isAShip($shipId)) {
 			switch ($type) {
 				// assez de ressources pour construire ?
 				case 'resource':
 					$price = ShipResource::getInfo($shipId, 'resourcePrice') * $quantity;
-					if (ShipResource::CERBERE == $shipId || ShipResource::PHENIX == $shipId) {
-						if (ColorResource::EMPIRE == $this->currentPlayerRegistry->get()->faction->identifier) {
-							// bonus if the player is from the Empire
-							$price -= round($price * ColorResource::BONUS_EMPIRE_CRUISER / 100);
-						}
+					if (
+						ColorResource::EMPIRE === $this->currentPlayerRegistry->get()->faction->identifier
+						&& in_array($shipId, [ShipResource::CERBERE, ShipResource::PHENIX])
+					) {
+						$price -= PercentageApplier::toInt($price, ColorResource::BONUS_EMPIRE_CRUISER);
 					}
 
 					return !($sup < $price);
-				// encore de la place dans la queue ?
-				// $sup est un objet de type OrbitalBase
-				// $quantity est le nombre de batiments dans la queue
 				case 'queue':
-					if ($this->orbitalBaseHelper->isAShipFromDock1($shipId)) {
-						$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK1, 'level', $sup->levelDock1, 'nbQueues');
-					} elseif ($this->orbitalBaseHelper->isAShipFromDock2($shipId)) {
-						$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK2, 'level', $sup->levelDock2, 'nbQueues');
-					} else {
-						$maxQueue = 0;
-					}
-
-					return $quantity < $maxQueue;
+					return $quantity < ($this->countMaxShipQueues)(
+						orbitalBase: $sup,
+						dockType: DockType::fromShipIdentifier($shipId),
+					);
 					// droit de construire le vaisseau ?
 					// $sup est un objet de type OrbitalBase
 				case 'shipTree':
@@ -115,7 +113,7 @@ readonly class ShipHelper
 					if (1 == $sup->getTechnology(ShipResource::getInfo($shipId, 'techno'))) {
 						return true;
 					}
-					return 'il vous faut développer la technologie '.$this->technologyHelper->getInfo(ShipResource::getInfo($shipId, 'techno'), 'name');
+					return 'il vous faut développer la technologie ' . $this->technologyHelper->getInfo(ShipResource::getInfo($shipId, 'techno'), 'name');
 				default:
 					throw new \ErrorException('type invalide dans haveRights de ShipResource');
 			}

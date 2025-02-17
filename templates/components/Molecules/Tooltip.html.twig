@@ -1,0 +1,8 @@
+<div class="relative" {{ stimulus_controller('ui--tooltip') }}>
+	<dialog {{ stimulus_target('ui--tooltip', 'dialog') }} class="absolute bottom-8 right-8">
+		{% block content %}{% endblock content %}
+	</dialog>
+	<div {{ stimulus_action('ui--tooltip', 'toggle', 'click') }} class="outline outline-1 rounded-full w-6 h-6 text-center cursor-pointer">
+		?
+	</div>
+</div>

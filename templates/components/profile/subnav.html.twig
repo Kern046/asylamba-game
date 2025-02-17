@@ -1,8 +1,0 @@
-<div id="subnav">
-	<div class="">
-		{% set is_active = app.request.get('_route') == 'profile' ? 'active' : '' %}
-		<a href="{{ path('profile') }}" class="{{ is_active }}">
-			Profil
-		</a>
-	</div>
-</div>

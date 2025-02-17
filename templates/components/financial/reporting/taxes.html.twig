@@ -1,42 +1,42 @@
 {% apply spaceless %}
-	<div class="component financial">
-		<div class="head skin-1">
-			<img src="{{ asset('build/media/financial/taxout.png') }}" alt="" />
-			<h2>Redevances</h2>
-			<em>Redevances aux factions</em>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				<ul class="list-type-1">
-					{% for base in player_bases %}
-						{% set base_tax = get_base_tax(base, tax_coeff) %}
-						{# @TODO move that logic somewhere legit #}
-						{% set base_tax_out = base_tax.total * base.place.system.sector.tax / 100 %}
+	<twig:LayoutBox>
+		<header class="flex items-start justify-between">
+			<div>
+				<h3 class="font-bold text-lg">Redevances</h3>
+				<em class="text-sm">Redevances aux factions</em>
+			</div>
 
-						<li>
-							<span class="label">{{ base.name }} [{{ base.place.system.sector.tax }}% de taxe]</span>
-							<span class="value">
-								{{- base_tax_out|number -}}
-								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
-							</span>
-						</li>
-					{% endfor %}
+			<twig:Tooltip>
+				La redevance de faction est une taxe que vous devez payer. Cette taxe est versée à la faction qui a le contrôle
+				du secteur dans lequel vous vous situez. De ce fait, vous pouvez très bien verser un impôt à une faction ennemie. Cette taxe est
+				versée chaque relève.
+			</twig:Tooltip>
+		</header>
 
-					<li class="strong">
-						<span class="label">total de la redevance</span>
+		<section class="mt-4">
+			<ul class="list-type-1">
+				{% for base in player_bases %}
+					{% set base_tax = get_base_tax(base, tax_coeff) %}
+					{# @TODO move that logic somewhere legit #}
+					{% set base_tax_out = base_tax.total * base.place.system.sector.tax / 100 %}
+
+					<li>
+						<span class="label">{{ base.name }} [{{ base.place.system.sector.tax }}% de taxe]</span>
 						<span class="value">
-							{{- investments_data.totalTaxOut|number -}}
+							{{- base_tax_out|number -}}
 							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
 						</span>
 					</li>
-				</ul>
+				{% endfor %}
 
-				<p class="info">
-					La redevance de faction est une taxe que vous devez payer. Cette taxe est versée à la faction qui a le contrôle
-					du secteur dans lequel vous vous situez. De ce fait, vous pouvez très bien verser un impôt à une faction ennemie. Cette taxe est
-					versée chaque relève.
-				</p>
-			</div>
-		</div>
-	</div>
+				<li class="strong">
+					<span class="label">total de la redevance</span>
+					<span class="value">
+						{{- investments_data.totalTaxOut|number -}}
+						<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
+					</span>
+				</li>
+			</ul>
+		</section>
+	</twig:LayoutBox>
 {% endapply %}

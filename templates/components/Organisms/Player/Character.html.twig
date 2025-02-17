@@ -1,0 +1,28 @@
+<div class="text-center">
+	<h1>Votre profil</h1>
+
+	<div class="font-bold">
+		<span class="font-bold">
+			{{ get_faction_statuses(current_player_faction_id)[player.status - 1] }}
+			de
+			{{  get_faction_name(current_player_faction_id) }}
+		</span>
+		<span class="value">{{ player.name }}</span>
+	</div>
+
+	<div class="profil-flag">
+		<twig:Avatar :player="current_player" />
+		<span class="level">Niveau {{ player.level }}</span>
+	</div>
+
+	<twig:NumberBox label="Expérience" class="bg-gray-700 mt-2">
+		{{ player.experience|number }}
+	</twig:NumberBox>
+
+	<twig:NumberBox label="Expérience nécessaire pour le prochain niveau" class="bg-gray-700 mt-2">
+		{{ playerMissingExperience|number }}
+
+		<twig:ProgressBar :current="playerExperienceProgress" :faction="player.faction" />
+	</twig:NumberBox>
+</div>
+

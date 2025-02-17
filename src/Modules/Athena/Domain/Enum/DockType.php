@@ -7,6 +7,7 @@ namespace App\Modules\Athena\Domain\Enum;
 use App\Modules\Ares\Model\Ship;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
+use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Zeus\Model\PlayerBonusId;
 
 enum DockType: string
@@ -51,6 +52,15 @@ enum DockType: string
 		return match ($this) {
 			self::Manufacture => 1,
 			self::Shipyard => 2,
+		};
+	}
+
+	public static function fromShipIdentifier(int $identifier): self
+	{
+		return match (true) {
+			ShipResource::isAShipFromDock1($identifier) => self::Manufacture,
+			ShipResource::isAShipFromDock2($identifier) => self::Shipyard,
+			default => throw new \InvalidArgumentException(sprintf('Invalid ship identifier %d', $identifier)),
 		};
 	}
 }

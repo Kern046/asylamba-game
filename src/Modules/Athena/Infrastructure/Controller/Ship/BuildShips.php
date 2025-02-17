@@ -35,8 +35,10 @@ class BuildShips extends AbstractController
 		TechnologyRepositoryInterface $technologyRepository,
 	): Response {
 		$session = $request->getSession();
-		$shipIdentifier = $request->query->getInt('ship') ?? throw new BadRequestHttpException('Missing ship identifier');
-		$quantity = $request->query->getInt('quantity') ?? throw new BadRequestHttpException('Missing quantity');
+		$shipIdentifier = $request->query->getInt('ship')
+			?? throw new BadRequestHttpException('Missing ship identifier');
+		$quantity = $request->query->getInt('quantity')
+			?? throw new BadRequestHttpException('Missing quantity');
 
 		if (0 === $quantity) {
 			throw new BadRequestHttpException('Quantity must be higher than 0');
@@ -44,19 +46,16 @@ class BuildShips extends AbstractController
 		if (!ShipResource::isAShip($shipIdentifier)) {
 			throw new BadRequestHttpException('Invalid ship identifier');
 		}
-		if ($orbitalBaseHelper->isAShipFromDock1($shipIdentifier)) {
-			$dockType = DockType::Manufacture;
-		} elseif ($orbitalBaseHelper->isAShipFromDock2($shipIdentifier)) {
-			$dockType = DockType::Shipyard;
+		$dockType = DockType::fromShipIdentifier($shipIdentifier);
+		if (DockType::Shipyard === $dockType) {
 			$quantity = 1;
-		} else {
-			throw new \InvalidArgumentException('Invalid ship identifier');
 		}
 		$shipQueues = $shipQueueRepository->getByBaseAndDockType($currentBase, $dockType->getIdentifier());
 		$shipQueuesCount = count($shipQueues);
 		$technos = $technologyRepository->getPlayerTechnology($currentPlayer);
 		// TODO Replace with Specification pattern
-		if (!$shipHelper->haveRights($shipIdentifier, 'resource', $currentBase->resourcesStorage, $quantity)
+		if (
+			!$shipHelper->haveRights($shipIdentifier, 'resource', $currentBase->resourcesStorage, $quantity)
 			|| !$shipHelper->haveRights($shipIdentifier, 'queue', $currentBase, $shipQueuesCount)
 			|| !$shipHelper->haveRights($shipIdentifier, 'shipTree', $currentBase)
 			|| !$shipHelper->haveRights($shipIdentifier, 'pev', $currentBase, $quantity)

@@ -13,5 +13,24 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 final class NumberBox
 {
 	public string $label;
+	public string $size = 'big';
 	public float|null $bonus = null;
+
+	public function getNumberSize(): string
+	{
+		return match ($this->size) {
+			'big' => 'md:text-3xl/10',
+			'small' => 'md:text-lg',
+			default => throw new \InvalidArgumentException(sprintf('Invalid size: %s', $this->size)),
+		};
+	}
+
+	public function getBoxSize(): string
+	{
+		return match ($this->size) {
+			'big' => 'md:gap-x-4 md:gap-y-2 md:p-2 lg:px-4 ',
+			'small' => 'md:gap-2 md:p-2',
+			default => throw new \InvalidArgumentException(sprintf('Invalid size: %s', $this->size)),
+		};
+	}
 }
