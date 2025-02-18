@@ -16,12 +16,17 @@ readonly class ExceptionListener
 	public function __invoke(ExceptionEvent $event): void
 	{
 		$exception = $event->getThrowable();
+
 		if (!$exception instanceof HttpExceptionInterface) {
 			return;
 		}
 
 		$request = $event->getRequest();
 		if (null === ($referer = $request->headers->get('referer'))) {
+			return;
+		}
+
+		if (!str_contains($request->headers->get('accept'), 'text/html')) {
 			return;
 		}
 
