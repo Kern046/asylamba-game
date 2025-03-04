@@ -1,43 +1,26 @@
-{% extends 'layouts/game.html.twig' %}
+{% extends 'layouts/map.html.twig' %}
 
 {% set map_size = galaxy_configuration.scale * galaxy_configuration.galaxy.size %}
 
-{% block body %}
-	{# control include #}
-	{{ include('molecules/map/minimap/filters.html.twig', { default_map_parameters }) }}
-	{{ include('molecules/map/minimap/minimap.html.twig', { galaxy_configuration, sectors, default_map_parameters }) }}
+{% block left_sidebar %}
 	{{ include('molecules/map/commanders.html.twig', { local_commanders }) }}
+{% endblock left_sidebar %}
 
-	<div id="coord-box"></div>
+{% block body %}
+	<twig:MapLoader />
 
-	{% if default_position.system is not null %}
-		{% set no_ajax = true %}
-
-		<div id="action-box" class="active">
-			{{ include('components/map/system_details.html.twig', {
-				places,
-				no_ajax,
-				moving_commanders,
-				recycling_missions,
-				technologies,
-				colonization_cost,
-				conquest_cost,
-			}) }}
-		</div>
-	{% else %}
-		<div id="action-box"></div>
-	{% endif %}
 	{# map sytems #}
 	<div id="map"
-		 {# Skip VueJS compilation for this element and all its children. Avoid performance issue #}
-		 v-pre v-once
-		data-begin-x-position="{{ default_position.x }}"
-		data-begin-y-position="{{ default_position.y }}"
-		data-map-size="{{ map_size }}"
-		data-map-ratio="{{ galaxy_configuration.scale }}"
-		style="width: {{ map_size }}px; height: {{ map_size }}px;"
+		 class="relative bg-black w-full h-full transition-transform ease-out duration-500 active:cursor-grabbing group/map"
+		 data-map--movements-begin-x-position-value="{{ default_position.x }}"
+		 data-map--movements-begin-y-position-value="{{ default_position.y }}"
+		 data-map--movements-map-size-value="{{ map_size }}"
+		 data-map--movements-scale-value="{{ galaxy_configuration.scale }}"
+		 data-controller="map--movements"
+		 data-map--movements-map--loader-outlet="#loader-overlay"
+		 data-action="mousedown@window->map--movements#onMouseDown mouseup@window->map--movements#onMouseUp mousemove@window->map--movements#onMouseMove:prevent wheel@window->map--movements#onWheel:prevent:stop"
+		 style="width: {{ map_size }}px; height: {{ map_size }}px;"
 	>
-		<div id="background"></div>
 
 		{{ include('components/map/sectors.html.twig', { sectors, map_size, galaxy_configuration }) }}
 		{{ include('molecules/map/spying_circles.html.twig', { player_bases, map_size, galaxy_configuration }) }}
@@ -48,6 +31,30 @@
 		{{ include('molecules/map/attacks.html.twig', { attacking_commanders, default_map_parameters, map_size }) }}
 
 		{{ include('molecules/map/systems.html.twig', { 'current_system_id': default_position['system_id'], systems, sectors, map_size }) }}
-		{{ include('molecules/map/legend.html.twig') }}
+		{# {{ include('molecules/map/legend.html.twig') }} #}
 	</div>
+	
+	
+
+	<div id="coord-box"></div>
+
+	{% if default_position.system is not null %}
+		{% set no_ajax = true %}
+
+		<dialog id="action-box" open data-controller="map--action-box">
+			{{ include('components/map/system_details.html.twig', {
+				places,
+				no_ajax,
+				moving_commanders,
+				recycling_missions,
+				technologies,
+				colonization_cost,
+				conquest_cost,
+			}) }}
+		</dialog>
+	{% else %}
+		<dialog id="action-box" data-controller="map--action-box" class="fixed bottom-0 w-full bg-black text-white z-[1200]">
+
+		</dialog>
+	{% endif %}
 {% endblock body %}

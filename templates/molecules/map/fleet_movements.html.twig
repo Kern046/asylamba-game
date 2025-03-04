@@ -1,6 +1,8 @@
 {% set fleet_param = constant('App\\Classes\\Container\\Params::SHOW_MAP_FLEETOUT') %}
 
-<div id="fleet-movements" {% if false == app.request.cookies.get('p' ~ fleet_param, default_map_parameters[fleet_param]) %}style="display:none;"{% endif %}>
+<div id="fleet-movements"
+	 class="absolute top-0 left-0 z-[700] w-full h-full overflow-hidden"
+	 {% if false == app.request.cookies.get('p' ~ fleet_param, default_map_parameters[fleet_param]) %}style="display:none;"{% endif %}>
 	<svg viewBox="0, 0, {{ map_size }}, {{ map_size }}" xmlns="http://www.w3.org/2000/svg">
 		{% for commander in moving_commanders|filter(c => c.destinationPlace is not null) %}
 			{% set start_place = commander.startPlace %}

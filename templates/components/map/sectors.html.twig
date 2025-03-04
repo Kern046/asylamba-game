@@ -1,8 +1,10 @@
-<div id="sectors">
+<div id="sectors" class="absolute z-[300] w-full h-full top-0 left-0">
 	<svg viewBox="0, 0, {{ map_size }}, {{ map_size }}" xmlns="http://www.w3.org/2000/svg">
 		{% for sector in sectors %}
 			<polygon
-				class="ally{{ sector.faction.identifier ?? 0 }}"
+				class="stroke-1 stroke-white {% if sector.faction %}
+					fill-medium{{ sector.faction.identifier }}
+				{% endif %} opacity-20 group-[.sector-only]/map:opacity-60 [stroke-dasharray:4,4] group-[.sector-only]/map:[stroke-dasharray:none]"
 				points="{{ galaxy_configuration.getSectorCoord(sector.identifier, galaxy_configuration.scale, 0) }}"
 				data-x-brc="{{ sector.xBarycentric }}"
 				data-y-brc="{{ sector.yBarycentric }}"

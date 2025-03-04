@@ -1,32 +1,36 @@
-<div id="systems" v-pre>
+<div id="systems" class="absolute z-[900] w-full">
 	{% set current_player_bases_sector_ids = player_bases|map(b => b.place.system) %}
 
 	{% for system in systems %}
 		{% set has_bases_in = system.id in current_player_bases_sector_ids %}
-		<a href="#" v-pre
-			class="loadSystem {{ current_system_id }} {% if system.id == current_system_id %}active{% endif %}"
-			data-system-id="{{ system.id.toRfc4122() }}"
+		<div
+			class="{% if system.id == current_system_id %}active{% endif %} cursor-pointer absolute border border-4 {% if system.faction is not null %}border-light{{ system.faction.identifier }}{% endif%} rounded-full w-4 h-4 cursor-pointer group-[.sector-only]/map:hidden"
 			data-x-position="{{ system.xPosition }}"
 			data-y-position="{{ system.yPosition }}"
+		   	data-controller="map--system"
+		   	data-action="click->map--system#select"
+			data-map--system-map--action-box-outlet="#action-box"
+			data-map--system-id-value="{{ system.id.toRfc4122() }}"
 			style="top: {{ system.yPosition * galaxy_configuration.scale - 10 }}px; left: {{ system.xPosition * galaxy_configuration.scale - 10 }}px"
 		>
-			<img src="{{ asset('build/media/map/systems/t' ~ system.typeOfSystem ~ 'c' ~ (system.faction.identifier ?? 0) ~ '.png') }}"
+			{# <img src="{{ asset('build/media/map/systems/t' ~ system.typeOfSystem ~ 'c' ~ (system.faction.identifier ?? 0) ~ '.png') }}"
 				 {% if has_bases_in %}class="own"{% endif%}
-				alt="" />
-		</a>
+				alt="" /> #}
+
+		</div>
 	{% endfor %}
 
 	{% for sector in sectors %}
 		{% set sectorCenterX = sector.xBarycentric * galaxy_configuration.scale %}
 		{% set sectorCenterY = sector.yBarycentric * galaxy_configuration.scale %}
-		<span v-pre
-		class="sector-number color{{ sector.faction.identifier ?? 0 }} sh"
+		<span
+		class="absolute sector-number color{{ sector.faction.identifier ?? 0 }} sh"
 		data-target="sector-info-{{ sector.identifier }}"
 		style="left: {{ sectorCenterX }}px; top: {{ sectorCenterY }}px">
 			{{ sector.identifier }}
 		</span>
 
-		<div v-pre id="sector-info-{{ sector.identifier }}" class="sector-info color{{ sector.faction.identifier ?? 0 }}" style="left: {{ sectorCenterX + 55 }}px; top: {{ sectorCenterY - 10 }}px">
+		<div id="sector-info-{{ sector.identifier }}" class="absolute sector-info color{{ sector.faction.identifier ?? 0 }}" style="left: {{ sectorCenterX + 55 }}px; top: {{ sectorCenterY - 10 }}px">
 			<h2>{{ sector.name }}</h2>
 			<p>
 				<a href="#">+</a>

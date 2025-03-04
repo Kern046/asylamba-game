@@ -31,7 +31,7 @@
 
 	<div class="bottom">
 		{% if place.typeOfPlace == 1 %}
-			<div class="box" data-id="1">
+			<div class="box hidden" data-id="1">
 				<h2>Lancer un pillage</h2>
 				<div class="box-content">
 					{% if place.player is null and place.typeOfPlace != 1 %}
@@ -65,7 +65,7 @@
 			{% set max_bases = technologies.getTechnology(constant('App\\Modules\\Promethee\\Model\\TechnologyId::BASE_QUANTITY')) + 1 %}
 			{% set total_bases = get_player_bases_count(moving_commanders) %}
 
-			<div class="box" data-id="2">
+			<div class="box hidden" data-id="2">
 				<h2>Lancer une {{ place.player is null ? 'colonisation' : 'conquête' }}</h2>
 				<div class="box-content">
 					{% if place.player is null and place.typeOfPlace != 1 %}
@@ -109,7 +109,7 @@
 				</div>
 			</div>
 
-			<div class="box" data-id="3">
+			<div class="box hidden" data-id="3">
 				<h2>
 					{{ place.player is not null and place.player.id == current_base.player.id ? 'Déplacer une flotte' : 'Donner votre flotte' }}
 				</h2>
@@ -141,7 +141,7 @@
 				</div>
 			</div>
 
-			<div class="box" data-id="4">
+			<div class="box hidden" data-id="4">
 				<h2>Proposer une route commerciale</h2>
 				<div class="box-content">
 					{% if place.player is null %}
@@ -200,7 +200,7 @@
 				</div>
 			</div>
 
-			<div class="box" data-id="5">
+			<div class="box hidden" data-id="5">
 				<h2>Lancer un espionnage</h2>
 				<div class="box-content">
 					{% if place.player is not null and place.player.faction.id == current_player.faction.id %}
@@ -233,7 +233,7 @@
 				</div>
 			</div>
 		{% else %}
-			<div class="box" data-id="1">
+			<div class="box hidden" data-id="1">
 				<h2>Envoyer des recycleurs</h2>
 				<div class="box-content">
 					{% if place.system.sector.faction is not null and place.system.sector.faction.id != current_player.faction.id %}

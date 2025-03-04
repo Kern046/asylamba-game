@@ -1,14 +1,15 @@
 {% extends 'layouts/game.html.twig' %}
 
+{% block left_sidebar %}
+	{{ include('molecules/embassy/sidebar.html.twig') }}
+{% endblock left_sidebar %}
+
 {% block body %}
 	<div id="background-paralax" class="embassy"></div>
 
-	{{ include('molecules/embassy/sidebar.html.twig') }}
 	{{ include('molecules/common/movers.html.twig') }}
 
-	<div id="content">
-		{{ include('molecules/common/advertising.html.twig') }}
-
+	<div id="content" class="mx-4 md:mx-56 mt-2 md:mt-6">
 		{% if player is defined %}
 			{{ include('molecules/embassy/player_search.html.twig') }}
 			{{ include('molecules/embassy/player_bases.html.twig') }}
@@ -18,7 +19,7 @@
 			{{ include('molecules/embassy/faction_flag.html.twig') }}
 			{{ include('molecules/embassy/faction_infos.html.twig') }}
 			{{ include('molecules/embassy/faction_government.html.twig') }}
-			{{ include('components/faction/data/diplomacy/relations.html.twig') }}
+			{{ include('components/Faction/data/diplomacy/relations.html.twig') }}
 		{% endif %}
 	</div>
 {% endblock body %}

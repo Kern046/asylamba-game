@@ -1,9 +1,11 @@
 {% apply spaceless %}
 	{% set systemFactionIdentifier = system.faction.identifier ?? 0 %}
-	<div class="header"
+
+	<header
+		class="flex justify-between"
 		 data-sector-color="{{ places[0].system.sector.faction.identifier ?? 0 }}"
 		 data-distance="{{ get_place_distance(current_base, places[0])|number }}">
-		<ul>
+		<ul class="flex">
 			<li>Système #{{ system.id }}</li>
 			<li>Cordonnées {{ system|coords }}</li>
 			<li>
@@ -19,14 +21,15 @@
 				<span>{{ get_system_info(system.typeOfSystem, 'frenchName') }}</span>
 			</li>
 		</ul>
-		<a href="#" class="button closeactionbox">×</a>
-	</div>
+
+		<div class="button cursor-pointer p-2 bg-gray-800" data-action="click->map--action-box#close">×</div>
+	</header>
 
 	<div class="body">
 		<a class="actbox-movers" id="actboxToLeft" href="#"></a>
 		<a class="actbox-movers" id="actboxToRight" href="#"></a>
 		<div class="system">
-			<ul>
+			<ul class="flex">
 				<li class="star"></li>
 
 				{% for place in places %}

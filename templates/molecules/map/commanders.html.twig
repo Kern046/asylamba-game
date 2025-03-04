@@ -48,7 +48,6 @@
 							{% for type in ships_by_type|keys %}
 								{% set quantity = ships_by_type[type] %}
 								<div class="ship m-0.5">
-									<img src="{{ asset('build/media/ship/picto/ship' ~ type ~ '.png') }}" {% if quantity == 0 %}class="zero"{% endif %}/>
 									<span class="number">{{ quantity }}</span>
 								</div>
 							{% endfor %}

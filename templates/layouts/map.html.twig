@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<title>
+			{%- block title -%}
+				Kalaxia
+			{%- endblock title -%}
+		</title>
+
+		<meta charset="utf-8" />
+		<meta name="description" content="Kalaxia, jeu de stratégie multijoueurs" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic" rel="stylesheet" type="text/css">
+		{% block stylesheets %}
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/all.css') }}" />
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/color' ~ current_player_faction_id ~ '.css') }}" />
+		{% endblock %}
+
+		{# <link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ current_player_faction_id ~ '.png') }}" /> #}
+
+		{% block javascripts %}
+			{% block importmap %}{{ importmap('app') }}{% endblock %}
+		{% endblock %}
+	</head>
+	<body class="bg-black text-white overflow-hidden">
+			{{ include('components/common/navbar.html.twig', { absolute: true }) }}
+
+			{% block body %}{% endblock body %}
+
+			{{ include('components/common/toolbar.html.twig') }}
+
+			<div class="hidden md:block fixed left-0 top-20 z-[1100]">
+				{% block left_sidebar %}{% endblock left_sidebar %}
+			</div>
+			<div class="hidden md:block fixed right-0 top-0 z-[1100]">
+				{% block right_sidebar %}{% endblock right_sidebar %}
+			</div>
+			{{ include('components/common/alerts.html.twig') }}
+		</div>
+	</body>
+</html>

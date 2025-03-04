@@ -1,9 +1,10 @@
 {% set rate = 400 / galaxy_configuration.galaxy.size %}
 {% set minimap_param = constant('App\\Classes\\Container\\Params::SHOW_MAP_MINIMAP') %}
 
-<div id="map-content" v-pre v-once {% if false == app.request.cookies.get('p' ~ minimap_param, default_map_parameters[minimap_param]) %}style="display:none;"{% endif %}>
-	<div class="mini-map">
-		<svg class="sectors" viewBox="0, 0, 400, 400" xmlns="http://www.w3.org/2000/svg">
+<div id="map-content"
+	 class="{% if false == app.request.cookies.get('p' ~ minimap_param, default_map_parameters[minimap_param]) %}hidden{% endif %} absolute right-12 top-20 z-[1000] border border-white">
+	<div id="mini-map" class="relative w-72 h-72">
+		<svg id="sectors" class="absolute top-0 left-0" viewBox="0, 0, 400, 400" xmlns="http://www.w3.org/2000/svg">
 			{% for sector in sectors %}
 				<polygon
 					class="ally{{ sector.faction.identifier ?? 0 }} moveTo"
@@ -13,16 +14,16 @@
 				/>
 			{% endfor %}
 		</svg>
-		<div class="number">
+		<div id="numbers" class="absolute top-0 left-0">
 			{% for sector in sectors %}
 				{% set i = sector.identifier - 1 %}
 				{% set display_params = galaxy_configuration.sectors[i].display %}
-				<span style="top: {{ display_params[1] * rate / 1.35 }}px; left: {{ display_params[0] * rate / 1.35 }}px;">
+				<span class="absolute" style="top: {{ display_params[1] * rate / 1.35 }}px; left: {{ display_params[0] * rate / 1.35 }}px;">
 					{{ sector.identifier }}
 				</span>
 			{% endfor %}
 		</div>
-		<svg class="bases" viewBox="0, 0, 400, 400" xmlns="http://www.w3.org/2000/svg">
+		<svg id="bases" class="absolute top-0 left-0" viewBox="0, 0, 400, 400" xmlns="http://www.w3.org/2000/svg">
 			{% for base in player_bases %}
 				{% set base_system = base.place.system %}
 				<circle cx="{{ base_system.xPosition * rate }}"
