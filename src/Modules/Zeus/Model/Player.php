@@ -136,7 +136,7 @@ class Player implements CreditHolderInterface, SystemUpdatable, UserInterface, \
 		return ['ROLE_USER'];
 	}
 
-	public function eraseCredentials()
+	public function eraseCredentials(): void
 	{
 		// TODO: Implement eraseCredentials() method.
 	}
