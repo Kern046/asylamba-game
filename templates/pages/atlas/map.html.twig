@@ -10,28 +10,35 @@
 	<twig:MapLoader />
 
 	{# map sytems #}
-	<div id="map"
-		 class="relative bg-black w-full h-full transition-transform ease-out duration-500 active:cursor-grabbing group/map"
-		 data-map--movements-begin-x-position-value="{{ default_position.x }}"
-		 data-map--movements-begin-y-position-value="{{ default_position.y }}"
-		 data-map--movements-map-size-value="{{ map_size }}"
-		 data-map--movements-scale-value="{{ galaxy_configuration.scale }}"
-		 data-controller="map--movements"
-		 data-map--movements-map--loader-outlet="#loader-overlay"
-		 data-action="mousedown@window->map--movements#onMouseDown mouseup@window->map--movements#onMouseUp mousemove@window->map--movements#onMouseMove:prevent wheel@window->map--movements#onWheel:prevent:stop"
-		 style="width: {{ map_size }}px; height: {{ map_size }}px;"
+
+	<div id="map-container"
+		 class="fixed top-0 left-0 w-full h-full origin-[50%_50%] transition-transform ease-out duration-500"
+		 data-controller="map--zoom"
+		 data-action="wheel@window->map--zoom#onWheel:prevent:stop"
 	>
+		<div id="map"
+			 class="relative w-full h-full transition-transform ease-out duration-500 active:cursor-grabbing group/map"
+			 data-controller="map--movements"
+			 data-action="mousedown@window->map--movements#onMouseDown mouseup@window->map--movements#onMouseUp mousemove@window->map--movements#onMouseMove:prevent"
+			 data-map--movements-begin-x-position-value="50"
+			 data-map--movements-begin-y-position-value="50"
+			 data-map--movements-scale-value="{{ galaxy_configuration.scale }}"
+			 data-map--movements-map--loader-outlet="#loader-overlay"
+			 data-map--zoom-target="map"
+			 style="width: {{ map_size }}px; height: {{ map_size }}px;"
+		>
 
-		{{ include('components/map/sectors.html.twig', { sectors, map_size, galaxy_configuration }) }}
-		{{ include('molecules/map/spying_circles.html.twig', { player_bases, map_size, galaxy_configuration }) }}
+			{{ include('components/map/sectors.html.twig', { sectors, map_size, galaxy_configuration }) }}
+			{{ include('molecules/map/spying_circles.html.twig', { player_bases, map_size, galaxy_configuration }) }}
 
-		{{ include('molecules/map/current_base.html.twig', { player_bases, map_size, galaxy_configuration }) }}
-		{{ include('molecules/map/commercial_routes.html.twig', { commercial_routes, default_map_parameters, map_size, galaxy_configuration }) }}
-		{{ include('molecules/map/fleet_movements.html.twig', { moving_commanders, default_map_parameters, map_size }) }}
-		{{ include('molecules/map/attacks.html.twig', { attacking_commanders, default_map_parameters, map_size }) }}
+			{{ include('molecules/map/current_base.html.twig', { player_bases, map_size, galaxy_configuration }) }}
+			{{ include('molecules/map/commercial_routes.html.twig', { commercial_routes, default_map_parameters, map_size, galaxy_configuration }) }}
+			{{ include('molecules/map/fleet_movements.html.twig', { moving_commanders, default_map_parameters, map_size }) }}
+			{{ include('molecules/map/attacks.html.twig', { attacking_commanders, default_map_parameters, map_size }) }}
 
-		{{ include('molecules/map/systems.html.twig', { 'current_system_id': default_position['system_id'], systems, sectors, map_size }) }}
-		{# {{ include('molecules/map/legend.html.twig') }} #}
+			{{ include('molecules/map/systems.html.twig', { 'current_system_id': default_position['system_id'], systems, sectors, map_size }) }}
+			{# {{ include('molecules/map/legend.html.twig') }} #}
+		</div>
 	</div>
 	
 	

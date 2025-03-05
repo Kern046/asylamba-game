@@ -4,6 +4,8 @@
 			<polygon
 				class="stroke-1 stroke-white {% if sector.faction %}
 					fill-medium{{ sector.faction.identifier }}
+				{% else %}
+					fill-gray-700
 				{% endif %} opacity-20 group-[.sector-only]/map:opacity-60 [stroke-dasharray:4,4] group-[.sector-only]/map:[stroke-dasharray:none]"
 				points="{{ galaxy_configuration.getSectorCoord(sector.identifier, galaxy_configuration.scale, 0) }}"
 				data-x-brc="{{ sector.xBarycentric }}"

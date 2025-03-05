@@ -126,57 +126,11 @@ export default class extends Controller {
 		this.lastMovement.y = event.pageY;
 	}
 
-	onWheel(event) {
-		if (this.isLoading) {
-			return;
-		}
-		if (!this.scrollTick) {
-			window.requestAnimationFrame(() => {
-				let zoom = this.zoom * Math.pow(1 + this.zoomStep, -event.deltaY / 125);
-				const previousZoom = this.zoom;
-
-				console.log('New zoom : %f; previous zoom : %f; Min zoom : %f; Max Zoom : %f', zoom, previousZoom, this.minZoom, this.maxZoom);
-
-				this.zoom = Math.max(Math.min(zoom, this.maxZoom), this.minZoom);
-
-				if (this.zoom === previousZoom) {
-					this.scrollTick = false;
-
-					return;
-				}
-
-				this.updateViewport(this.lastPosition.x, this.lastPosition.y, this.zoom);
-
-				this.scrollTick = false;
-			});
-
-			this.scrollTick = true;
-		}
-	}
-
-	translateWithNewScale(currentTranslation, previousScale)
-	{
-		const result = currentTranslation * (1 - this.zoom / previousScale);
-
-		console.log('New translation : %d * (1 - %f / %f) = %f', currentTranslation, this.zoom, previousScale, result);
-
-		return result;
-	}
-
 	updateViewport(x, y, zoom) {
-		this.element.style.transform = `perspective(200px) translate3d(${x}px, ${y}px, ${zoom * this.scaleValue}px)`;
+		this.element.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
 
 		this.lastPosition.x = x;
 		this.lastPosition.y = y;
-		this.zoom = zoom;
-
-		console.log('New position : (%d;%d;%f)', x, y, zoom);
-/*
-		if (this.zoom < this.sectorOnlyZoomLevel) {
-			this.element.classList.add('sector-only');
-		} else {
-			this.element.classList.remove('sector-only');
-		}*/
 	}
 
 	getOverflow() {
