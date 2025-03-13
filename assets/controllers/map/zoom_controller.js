@@ -8,7 +8,7 @@ export default class extends Controller
 		super.initialize();
 
 		this.isLoading = true;
-		this.minZoom = 0.6;
+		this.minZoom = 0.4;
 		this.maxZoom = 2;
 		this.zoom = 1;
 		this.zoomStep = 0.2;

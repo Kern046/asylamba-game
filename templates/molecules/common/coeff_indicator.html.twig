@@ -1,9 +1,0 @@
-<div class="flex items-center py-1">
-	<span class="w-20 font-medium">{{ label }}</span>
-	<div class="flex items-center">
-		{% set icons_number = values|filter(v => coeff >= v)|length %}
-		{% for i in range(1, icons_number) %}
-			<img src="{{ media_path }}" class="icon-color w-6 h-6" alt="" />
-		{% endfor %}
-	</div>
-</div>

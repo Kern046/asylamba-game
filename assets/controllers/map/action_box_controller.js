@@ -2,6 +2,8 @@ import {Controller} from "@hotwired/stimulus";
 
 export default class extends Controller
 {
+	static targets = ['place', 'action'];
+
 	changeSystem(systemId) {
 		this.close();
 
@@ -43,15 +45,29 @@ export default class extends Controller
 
 	open() {
 		this.element.show();
-
-		this.element.classList.add('active');
 	}
 
 	close() {
-		console.debug('ok');
-
 		this.element.close();
+	}
 
-		// $('.loadSystem.active').removeClass('active');
+	deployPlacePanel(event) {
+		this.placeTargets.forEach(element => {
+			delete element.dataset['active'];
+		});
+
+		event.currentTarget.dataset['active'] = '';
+	}
+
+	chooseAction(event) {
+		this.actionTargets.forEach(element => {
+			if (element.dataset.id === event.currentTarget.dataset.actionId) {
+				element.classList.remove('hidden');
+			} else {
+				element.classList.add('hidden');
+			}
+		});
+
+		event.currentTarget.dataset.active = '';
 	}
 }

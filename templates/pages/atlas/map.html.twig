@@ -20,8 +20,8 @@
 			 class="relative w-full h-full transition-transform ease-out duration-500 active:cursor-grabbing group/map"
 			 data-controller="map--movements"
 			 data-action="mousedown@window->map--movements#onMouseDown mouseup@window->map--movements#onMouseUp mousemove@window->map--movements#onMouseMove:prevent"
-			 data-map--movements-begin-x-position-value="50"
-			 data-map--movements-begin-y-position-value="50"
+			 data-map--movements-begin-x-position-value="{{ default_position.x }}"
+			 data-map--movements-begin-y-position-value="{{ default_position.y }}"
 			 data-map--movements-scale-value="{{ galaxy_configuration.scale }}"
 			 data-map--movements-map--loader-outlet="#loader-overlay"
 			 data-map--zoom-target="map"
@@ -45,10 +45,13 @@
 
 	<div id="coord-box"></div>
 
-	{% if default_position.system is not null %}
-		{% set no_ajax = true %}
+	<dialog id="action-box"
+			data-controller="map--action-box"
+			{% if default_position.system is not null %}open{% endif %}
+			class="fixed bottom-0 w-full bg-black text-white z-[1000]">
+		{% if default_position.system is not null %}
+			{% set no_ajax = true %}
 
-		<dialog id="action-box" open data-controller="map--action-box">
 			{{ include('components/map/system_details.html.twig', {
 				places,
 				no_ajax,
@@ -58,10 +61,6 @@
 				colonization_cost,
 				conquest_cost,
 			}) }}
-		</dialog>
-	{% else %}
-		<dialog id="action-box" data-controller="map--action-box" class="fixed bottom-0 w-full bg-black text-white z-[1200]">
-
-		</dialog>
-	{% endif %}
+		{% endif %}
+	</dialog>
 {% endblock body %}

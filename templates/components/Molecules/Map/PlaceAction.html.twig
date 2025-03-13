@@ -1,0 +1,6 @@
+<button {{ attributes.defaults({
+	class: "rounded-full bg-gray-800 border border-gray-500 p-2 disabled:border-gray-800 disabled:bg-gray-900 group/place-action data-[active]:border-2 transition-[border-width] ease-in duration-200",
+	title: name ~ "\n" ~ tooltip,
+}) }}>
+	<img src="{{ asset(picto) }}" class="w-6 h-6 group-disabled/place-action:opacity-30" alt="" />
+</button>

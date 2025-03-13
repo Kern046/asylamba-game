@@ -14,13 +14,7 @@ export default class extends Controller {
 		super.initialize();
 
 		this.isLoading = true;
-		this.minZoom = -20;
-		this.maxZoom = 10;
-		this.zoom = 1;
-		this.zoomStep = 0.5;
-		this.sectorOnlyZoomLevel = 0.8;
 		this.locked = false;
-		this.scrollTick = false;
 		this.lastMovement = {
 			x: 0,
 			y: 0,
@@ -41,14 +35,13 @@ export default class extends Controller {
 			this.mapLoaderOutlet.close();
 
 			this.isLoading = false;
-		}, 1000);
+		}, 1200);
 	}
 
 	move(left, top) {
 		this.updateViewport(
 			this.lastPosition.x + left,
 			this.lastPosition.y + top,
-			this.zoom,
 		);
 	}
 
@@ -65,8 +58,8 @@ export default class extends Controller {
 	moveTo(x, y) {
 		const halfScreenLength = this.getHalfScreenLength();
 
-		const xDiff = this.lastPosition.x - (x * this.scaleValue) + 12;
-		const yDiff = this.lastPosition.y - (y * this.scaleValue) + 12;
+		const xDiff = this.lastPosition.x - (x * this.scaleValue) + 8;
+		const yDiff = this.lastPosition.y - (y * this.scaleValue) + 8;
 
 		// console.debug(halfScreenLength, x, y, xDiff, yDiff, this.scaleValue);
 

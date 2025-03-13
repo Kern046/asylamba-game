@@ -13,7 +13,6 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 )]
 class Button
 {
-	public string $content;
 	public Color|null $faction = null;
 	public bool $disabled = false;
 }
