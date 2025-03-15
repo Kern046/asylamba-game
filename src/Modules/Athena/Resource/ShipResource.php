@@ -2,6 +2,8 @@
 
 namespace App\Modules\Athena\Resource;
 
+use App\Modules\Athena\Domain\Model\ShipType;
+
 class ShipResource
 {
 	public const PEGASE = 0;
@@ -55,15 +57,10 @@ class ShipResource
 		return in_array($ship, self::$femaleShipNames);
 	}
 
-	public static function getInfo($shipNumber, $info)
+	public static function getInfo(ShipType $shipType, $info)
 	{
-		if (self::isAShip($shipNumber)) {
-			if (in_array($info, ['codeName', 'name', 'class', 'pev', 'life', 'speed', 'defense', 'attack', 'cost', 'time', 'resourcePrice', 'points', 'imageLink', 'techno', 'description'])) {
-				return self::$ship[$shipNumber][$info];
-			}
-			throw new \InvalidArgumentException(sprintf('info inconnue dans getInfo de ShipResource: "%s"', $info));
-		}
-		throw new \InvalidArgumentException(sprintf('shipId inconnu (entre 0 et 14) dans getInfo de ShipResource: %d', $shipNumber));
+		return self::$ship[$shipType->name][$info]
+			?? throw new \InvalidArgumentException(sprintf('info inconnue dans getInfo de ShipResource: "%s"', $info));
 	}
 
 	public static function countAvailableShips(): int

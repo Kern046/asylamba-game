@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Athena\Repository;
 
+use App\Modules\Athena\Domain\Model\DockType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\ShipQueue;
@@ -35,7 +36,7 @@ class ShipQueueRepository extends DoctrineRepository implements ShipQueueReposit
 		]);
 	}
 
-	public function getByBaseAndDockType(OrbitalBase $base, int $dockType): array
+	public function getByBaseAndDockType(OrbitalBase $base, DockType $dockType): array
 	{
 		return $this->findBy([
 			'base' => $base,

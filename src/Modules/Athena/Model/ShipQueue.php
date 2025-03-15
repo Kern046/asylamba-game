@@ -11,6 +11,7 @@
 
 namespace App\Modules\Athena\Model;
 
+use App\Modules\Athena\Domain\Model\ShipType;
 use App\Shared\Domain\Model\QueueableInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -19,11 +20,10 @@ class ShipQueue implements QueueableInterface
 	public function __construct(
 		public Uuid $id,
 		public OrbitalBase $base,
+		public ShipType $shipType,
+		public int $quantity,
 		public \DateTimeImmutable $startedAt,
-		public \DateTimeImmutable|null $endedAt = null,
-		public int $dockType = 0,
-		public int $shipNumber = 0,
-		public int $quantity = 1,
+		public \DateTimeImmutable $endedAt,
 	) {
 	}
 
@@ -39,6 +39,6 @@ class ShipQueue implements QueueableInterface
 
 	public function getResourceIdentifier(): int
 	{
-		return $this->shipNumber;
+		return $this->shipType->getIdentifier();
 	}
 }

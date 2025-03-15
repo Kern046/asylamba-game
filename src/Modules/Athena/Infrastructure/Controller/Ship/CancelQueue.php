@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Athena\Infrastructure\Controller\Ship;
 
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
@@ -38,8 +40,7 @@ class CancelQueue extends AbstractController
 
 		$index = null;
 		$startDate = null;
-		$shipNumber = null;
-		$dockType = null;
+		$shipType = null;
 		$quantity = null;
 		for ($i = 0; $i < $nbShipQueues; ++$i) {
 			$shipQueue = $shipQueues[$i];
@@ -47,14 +48,13 @@ class CancelQueue extends AbstractController
 			if ($shipQueue->id->equals($id)) {
 				$index = $i;
 				$startDate = $shipQueue->getStartDate();
-				$shipNumber = $shipQueue->shipNumber;
-				$dockType = $shipQueue->dockType;
+				$shipType = $shipQueue->shipType;
 				$quantity = $shipQueue->quantity;
 				break;
 			}
 		}
 
-		if (null === $index || null === $startDate || null === $shipNumber || null === $dockType || null === $quantity) {
+		if (null === $index || null === $startDate || null === $shipType || null === $quantity) {
 			throw $this->createNotFoundException('Queue not found');
 		}
 
@@ -81,17 +81,17 @@ class CancelQueue extends AbstractController
 		// @TODO handle cancellation
 		// $scheduler->cancel($shipQueues[$index], $shipQueues[$index]->dEnd);
 		$shipQueueRepository->remove($shipQueues[$index]);
+		// TODO Move that refund part to a little service
 		// give a part of the resources back
-		$resourcePrice = ShipResource::getInfo($shipNumber, 'resourcePrice');
-		if (1 == $dockType) {
-			$resourcePrice *= $quantity;
-		}
-		$shipResourceRefund = $this->getParameter('athena.building.ship_queue_resource_refund');
+		$resourcePrice = intval(ShipResource::getInfo($shipType, 'resourcePrice')) * $quantity;
+
+		$shipResourceRefund = floatval($this->getParameter('athena.building.ship_queue_resource_refund'));
+
 		$resourcePrice *= $shipResourceRefund;
 
-		$orbitalBaseManager->increaseResources($currentBase, $resourcePrice, true);
+		$orbitalBaseManager->increaseResources($currentBase, intval(round($resourcePrice)));
 
-		$this->addFlash('success', 'Commande annulée, vous récupérez le '.$shipResourceRefund * 100 .'% du montant investi pour la construction');
+		$this->addFlash('success', 'Commande annulée, vous récupérez '.$shipResourceRefund * 100 .'% du montant investi pour la construction');
 
 		return $this->redirect($request->headers->get('referer'));
 	}

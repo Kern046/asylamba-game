@@ -2,6 +2,8 @@
 
 namespace App\Modules\Athena\Helper;
 
+use App\Modules\Athena\Domain\Model\DockType;
+use App\Modules\Athena\Domain\Model\ShipType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
@@ -19,15 +21,15 @@ readonly class ShipHelper
 	) {
 	}
 
-	public function haveRights($shipId, $type, $sup, $quantity = 1): bool|string
+	public function haveRights(ShipType $shipType, $type, $sup, $quantity = 1): bool|string
 	{
-		if (ShipResource::isAShip($shipId)) {
 			switch ($type) {
 				// assez de ressources pour construire ?
 				case 'resource':
-					$price = ShipResource::getInfo($shipId, 'resourcePrice') * $quantity;
-					if (ShipResource::CERBERE == $shipId || ShipResource::PHENIX == $shipId) {
-						if (ColorResource::EMPIRE == $this->currentPlayerRegistry->get()->faction->identifier) {
+					$price = ShipResource::getInfo($shipType, 'resourcePrice') * $quantity;
+					if (in_array($shipType, [ShipType::Cerbere, ShipType::Phenix])) {
+						// TODO Move that to Bonus Applier
+						if (ColorResource::EMPIRE === $this->currentPlayerRegistry->get()->faction->identifier) {
 							// bonus if the player is from the Empire
 							$price -= round($price * ColorResource::BONUS_EMPIRE_CRUISER / 100);
 						}
@@ -38,31 +40,19 @@ readonly class ShipHelper
 				// $sup est un objet de type OrbitalBase
 				// $quantity est le nombre de batiments dans la queue
 				case 'queue':
-					if ($this->orbitalBaseHelper->isAShipFromDock1($shipId)) {
-						$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK1, 'level', $sup->levelDock1, 'nbQueues');
-					} elseif ($this->orbitalBaseHelper->isAShipFromDock2($shipId)) {
-						$maxQueue = $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK2, 'level', $sup->levelDock2, 'nbQueues');
-					} else {
-						$maxQueue = 0;
-					}
+					$maxQueue = match ($shipType->getDockType()) {
+						DockType::Factory => $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK1, 'level', $sup->levelDock1, 'nbQueues'),
+						DockType::Shipyard => $this->orbitalBaseHelper->getBuildingInfo(OrbitalBaseResource::DOCK2, 'level', $sup->levelDock2, 'nbQueues'),
+					};
 
 					return $quantity < $maxQueue;
 					// droit de construire le vaisseau ?
 					// $sup est un objet de type OrbitalBase
 				case 'shipTree':
-					if (ShipResource::isAShipFromDock1($shipId)) {
-						$level = $sup->levelDock1;
-
-						return $shipId < $this->orbitalBaseHelper->getBuildingInfo(2, 'level', $level, 'releasedShip');
-					} elseif (ShipResource::isAShipFromDock2($shipId)) {
-						$level = $sup->levelDock2;
-
-						return ($shipId - 6) < $this->orbitalBaseHelper->getBuildingInfo(3, 'level', $level, 'releasedShip');
-					} else {
-						$level = $sup->levelDock3;
-
-						return ($shipId - 12) < $this->orbitalBaseHelper->getBuildingInfo(4, 'level', $level, 'releasedShip');
-					}
+					return match ($shipType->getDockType()) {
+						DockType::Factory => $shipType->getIdentifier() < $this->orbitalBaseHelper->getBuildingInfo(2, 'level', $sup->levelDock1, 'releasedShip'),
+						DockType::Shipyard => ($shipType->getIdentifier() - 6) < $this->orbitalBaseHelper->getBuildingInfo(3, 'level', $sup->levelDock2, 'releasedShip'),
+					};
 					// assez de pev dans le storage et dans la queue ?
 					// $sup est un objet de type OrbitalBase
 				case 'pev':
@@ -116,9 +106,6 @@ readonly class ShipHelper
 				default:
 					throw new \ErrorException('type invalide dans haveRights de ShipResource');
 			}
-		} else {
-			throw new \ErrorException('shipId invalide (entre 0 et 14) dans haveRights de ShipResource');
-		}
 	}
 
 	public function dockLevelNeededFor($shipId)

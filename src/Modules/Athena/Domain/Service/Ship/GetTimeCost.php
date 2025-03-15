@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Athena\Domain\Service\Ship;
 
+use App\Modules\Athena\Domain\Model\DockType;
+use App\Modules\Athena\Domain\Model\ShipType;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Shared\Domain\Server\TimeMode;
 use App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface;
@@ -19,17 +21,15 @@ readonly class GetTimeCost
 	) {
 	}
 
-	public function __invoke(int $identifier, int $dockType, int $quantity): int
+	public function __invoke(ShipType $shipType, int $quantity): int
 	{
 		$time = $this->timeMode->isStandard()
-			? ShipResource::getInfo($identifier, 'time') * $quantity
-			: (pow($identifier, 2) + 5) * $quantity;
+			? ShipResource::getInfo($shipType, 'time') * $quantity
+			: (pow($shipType->getIdentifier(), 2) + 5) * $quantity;
 
-		$bonus = $this->bonusApplier->apply($time, match ($dockType) {
-			1 => PlayerBonusId::DOCK1_SPEED,
-			2 => PlayerBonusId::DOCK2_SPEED,
-			3 => PlayerBonusId::DOCK3_SPEED,
-			default => throw new \LogicException('Invalid Dock ID'),
+		$bonus = $this->bonusApplier->apply($time, match ($shipType->getDockType()) {
+			DockType::Factory => PlayerBonusId::DOCK1_SPEED,
+			DockType::Shipyard => PlayerBonusId::DOCK2_SPEED,
 		});
 
 		return intval(round($time - $bonus));

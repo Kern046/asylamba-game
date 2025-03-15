@@ -6,6 +6,7 @@ namespace App\Modules\Athena\Application\Factory;
 
 use App\Classes\Library\DateTimeConverter;
 use App\Modules\Athena\Domain\Event\NewShipQueueEvent;
+use App\Modules\Athena\Domain\Model\ShipType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
 use App\Modules\Athena\Domain\Service\Ship\GetTimeCost;
 use App\Modules\Athena\Message\Ship\ShipQueueMessage;
@@ -29,8 +30,7 @@ readonly class ShipQueueFactory
 
 	public function create(
 		OrbitalBase $orbitalBase,
-		int $shipIdentifier,
-		int $dockType,
+		ShipType $shipType,
 		int $quantity,
 		\DateTimeImmutable $startedAt,
 	): ShipQueue {
@@ -38,15 +38,10 @@ readonly class ShipQueueFactory
 		$shipQueue = new ShipQueue(
 			id: Uuid::v4(),
 			base: $orbitalBase,
-			startedAt: $startedAt,
-			endedAt: $this->durationHandler->getDurationEnd($startedAt, ($this->getTimeCost)(
-				identifier: $shipIdentifier,
-				dockType: $dockType,
-				quantity: $quantity,
-			)),
-			dockType: $dockType,
-			shipNumber: $shipIdentifier,
+			shipType: $shipType,
 			quantity: $quantity,
+			startedAt: $startedAt,
+			endedAt: $this->durationHandler->getDurationEnd($startedAt, ($this->getTimeCost)($shipType,  $quantity)),
 		);
 
 		$this->shipQueueRepository->save($shipQueue);
