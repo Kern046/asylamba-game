@@ -1,7 +1,7 @@
 {% set travel_time = get_travel_time(current_base, place)|lite_seconds %}
 
 {% apply spaceless %}
-<div class="w-full border-l-2 border-stone-900 min-w-96">
+<div class="w-full border-l-2 border-stone-900 min-w-80">
 	<div class="flex items-center justify-around p-4 border-b-2 border-stone-900">
 		{% if place.typeOfPlace == 1 %}
 			{% if place.player is null and place.typeOfPlace != 1 %}
@@ -46,7 +46,7 @@
 				:disabled="can_player_attack_place(current_player, place) == false"
 				:name="'Lancer une ' ~ (place.player is null ? 'colonisation' : 'conquête')"
 				:tooltip="tooltip"
-				picto="images/legacy/picto/Victory.svg" />
+				picto="images/map/conquer.svg" />
 
 
 			{% if place.id == current_base.id %}
@@ -98,7 +98,7 @@
 				name="Lancer un espionnage"
 				:disabled="can_spy(current_player, place) == false"
 				:tooltip="tooltip"
-				picto="images/legacy/picto/Combat.svg" />
+				picto="images/map/spy.svg" />
 		{% else %}
 			{% if place.system.sector.faction is not null and place.system.sector.faction.id != current_player.faction.id %}
 				{% set tooltip = 'Vous ne pouvez envoyer des recycleurs que dans des secteurs non-revendiqués ou contrôlés par votre faction.' %}
@@ -116,91 +116,61 @@
 				name="Envoyer des recycleurs"
 				:tooltip="tooltip"
 				:disabled="can_recycle(current_player, place) == false"
-				picto="images/legacy/picto/Combat.svg" />
+				picto="images/map/recycling.svg" />
 		{% endif %}
 	</div>
 
-	<div class="">
+	<div class="h-full">
 		{% if place.typeOfPlace == 1 %}
-			<twig:PlaceActionPanel title="Lancer un pillage" id="1">
-				<div class="commander-tile">
-					<p data-map--action-box-target="no-commander" class="text-xs">
-						Aucun commandant selectionné. Sélectionnez-en un sur la barre latérale gauche.<br/>
-						Si aucun commandant n'est visible, vous pouvez en affecter un depuis l'école de commandement.
-					</p>
-					<p data-map--action-box-target="commander-too-far" class="text-xs">
-						Ce commandant est trop éloigné pour piller cette planète.
-					</p>
-					<div class="item move">
-						<strong class="name"></strong><br />
-						Temps de l'attaque : {{ travel_time }} <img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="" /><br />
-						Capacité de la soute : <span class="wedge"></span> <img src="{{ asset('build/media/resources/resource.png') }}" class="icon-color" alt="" /><br />
-						<twig:Button data-url="{{ path('loot', {'id': '{id}', 'placeId': place.id}) }}" :faction="current_player.faction">
-							Lancer l'attaque
-						</twig:Button>
-					</div>
-				</div>
+			<twig:PlaceActionPanel title="Lancer un pillage" id="1" :actionUrl="path('loot', {'id': '{id}', 'placeId': place.id})">
+				<twig:CommanderTile :travelTime="travel_time" :place="place">
+					<twig:block name="travel_details">
+						{{ parent() }}
+
+						<twig:TravelDetail valueId="capacity" label="Soute" />
+					</twig:block>
+				</twig:CommanderTile>
 			</twig:PlaceActionPanel>
 
-			<div class="box hidden" data-map--action-box-target="action" data-id="2">
-				<h2>Lancer une {{ place.player is null ? 'colonisation' : 'conquête' }}</h2>
-				<div class="box-content">
-					<div class="commander-tile">
-						<div class="item no-commander">
-							Aucun commandant selectionné. Sélectionnez-en un sur la barre latérale gauche.<br/><br />
-							Si aucun commandant n\'est visible, vous pouvez en affecter un depuis l\'école de commandement.
-						</div>
-						<div class="item too-far">
-							Ce commandant est trop éloigné pour coloniser cette planète.
-						</div>
-						<div class="item move">
-							<strong class="name"></strong><br />
-							Temps de l'attaque : {{ travel_time }}
-							<img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="" /><br />
+			{% if place.player is null %}
+				{% set cost = colonization_cost|number %}
+				{% set action_url = path('colonize', {'id': '{id}', 'placeId': place.id}) %}
+				{% set label = 'Lancer la colonisation' %}
+			{% else %}
+				{% set cost = conquest_cost|number %}
+				{% set action_url = path('conquer', {'id': '{id}', 'placeId': place.id}) %}
+				{% set label = 'Lancer la conquête' %}
+			{% endif %}
+			<twig:PlaceActionPanel :title="'Lancer une ' ~ (place.player is null ? 'colonisation' : 'conquête')" id="2" :actionUrl="action_url">
+				<twig:CommanderTile :travelTime="travel_time" :place="place">
+					<twig:block name="travel_details">
+						{{ parent() }}
 
-							{% if place.player is null %}
-								Coût : <span class="price">{{ colonization_cost|number }}</span>
-								<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="" /><br />
-								<a class="button" href="#" data-url="{{ path('colonize', {'id': '{id}', 'placeId': place.id}) }}">Lancer la colonisation</a>
-							{% else %}
-								Coût : <span class="price">{{ conquest_cost|number }}</span>
-								<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="" /><br />
-								<a class="button" href="#" data-url="{{ path('conquer', {'id': '{id}', 'placeId': place.id}) }}">Lancer la conquête</a>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
+						<twig:TravelDetail label="Coût" :value="cost" />
+					</twig:block>
+				</twig:CommanderTile>
+			</twig:PlaceActionPanel>
 
-			<div class="box hidden" data-map--action-box-target="action" data-id="3">
-				<h2>
-					{{ place.player is not null and place.player.id == current_base.player.id ? 'Déplacer une flotte' : 'Donner votre flotte' }}
-				</h2>
+			<twig:PlaceActionPanel :title="place.player is not null and place.player.id == current_base.player.id ? 'Déplacer une flotte' : 'Donner votre flotte'" id="3" :actionUrl="path('move_fleet', {'id': '{id}', 'placeId': place.id})">
+				<twig:CommanderTile :travelTime="travel_time" :place="place">
+					<twig:block name="alerts">
+						{{ parent() }}
 
-				<div class="box-content">
-					<div class="commander-tile">
-						<div class="item no-commander">
-							Aucun commandant selectionné. Sélectionnez-en un sur la barre latérale gauche.<br/><br />
-							Si aucun commandant n\'est visible, vous pouvez en affecter un depuis l\'école de commandement.
-						</div>
-						<div class="item too-far">
-							Ce commandant est trop éloigné pour se déplacer jusqu\'ici.
-						</div>
-						<div class="item move">
-							<strong class="name"></strong><br />
-							Temps du déplacement : {{ travel_time}} <img src="{{ asset('build/media/resources/time.png') }}" class="icon-color" alt="" /><br />
-							{% if place.player is not null and place.player.id != current_player.id %}
-								Attention, vous perdrez votre flotte !<br />
-							{% endif %}
-							<a class="button" href="#" data-url="{{ path('move_fleet', {'id': '{id}', 'placeId': place.id}) }}">Lancer la mission</a>
-						</div>
-					</div>
-				</div>
-			</div>
+						{% if place.player is not null and place.player.id != current_player.id %}
+							<twig:CommanderAlert identifier="lost-fleet" :factionIdentifier="current_player.faction.identifier">
+								Attention, vous perdrez votre flotte !
+							</twig:CommanderAlert>
+						{% endif %}
+					</twig:block>
+
+					<twig:block name="travel_details">
+						{{ parent() }}
+					</twig:block>
+				</twig:CommanderTile>
+			</twig:PlaceActionPanel>
 
 			{% if place.base is not null %}
-				<div class="box hidden" data-map--action-box-target="action" data-id="4">
-					<h2>Proposer une route commerciale</h2>
+				<twig:PlaceActionPanel title="Proposer une route commerciale" id="4">
 					<div class="box-content">
 						{% set commercial_route_data = get_commercial_route_data(current_base, place) %}
 						{% set distance = get_place_distance(current_base, place) %}
@@ -260,11 +230,10 @@
 							{% endif %}
 						</div>
 					</div>
-				</div>
+				</twig:PlaceActionPanel>
 			{% endif %}
 
-			<div class="box hidden" data-map--action-box-target="action" data-id="5">
-				<h2>Lancer un espionnage</h2>
+			<twig:PlaceActionPanel title="Lancer un espionnage" id="5">
 				<div class="box-content">
 					{% set prices = {
 						'Impact faible': 1000,
@@ -288,10 +257,9 @@
 						<button type="submit">Espionner</button>
 					</form>
 				</div>
-			</div>
+			</twig:PlaceActionPanel>
 		{% else %}
-			<div class="box hidden" data-map--action-box-target="action" data-id="1">
-				<h2>Envoyer des recycleurs</h2>
+			<twig:PlaceActionPanel title="Envoyer des recycleurs" id="1">
 				<div class="box-content">
 					{% set total_ships = get_building_info(
 						constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING'),
@@ -318,7 +286,7 @@
 						<button type="submit">Envoyer</button>
 					</form>
 				</div>
-			</div>
+			</twig:PlaceActionPanel>
 		{% endif %}
 	</div>
 </div>

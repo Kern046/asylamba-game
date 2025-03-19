@@ -1,12 +1,11 @@
-{% if faction and not disabled %}
+{% if faction is not null %}
 	{% set extra_classes = 'border-dark' ~ faction.identifier ~ ' bg-medium' ~ faction.identifier %}
-{% elseif disabled %}
-	{% set extra_classes = 'bg-gray-800 border-gray-700' %}
 {% endif %}
 
 <button {{ attributes.defaults({
 	type: 'button',
-	class: 'block py-1 px-2 md:py-2 md:px-4 rounded-md shadow-xs hover:shadow-md border text-white text-left text-sm md:text-base %s'|format(extra_classes|default('')),
+	class: 'block py-1 px-2 md:py-2 md:px-4 rounded-md shadow-xs hover:shadow-md border text-white text-left text-sm md:text-base %s disabled:bg-gray-800 disabled:border-gray-700'|format(extra_classes|default('')),
+	disabled: false,
 }) }}>
 	{% block content %}{% endblock content %}
 </button>

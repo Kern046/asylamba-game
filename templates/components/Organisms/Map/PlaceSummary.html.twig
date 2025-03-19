@@ -1,6 +1,6 @@
 {% set playerFactionIdentifier = place.player.faction.identifier ?? 0 %}
 
-<div class="column info divide-y divide-stone-900 py-4 min-w-48">
+<div class="column info divide-y divide-stone-900 py-4 min-w-48 h-full">
 	{% set reports = spyReports|filter(r => r.place.id.equals(place.id)) %}
 	{% if reports|length > 0 %}
 		{% set report = reports|first %}

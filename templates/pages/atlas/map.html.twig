@@ -47,6 +47,7 @@
 
 	<dialog id="action-box"
 			data-controller="map--action-box"
+			data-map--action-box-map--commander-outlet="#commanders"
 			{% if default_position.system is not null %}open{% endif %}
 			class="fixed bottom-0 w-full bg-black text-white z-[1000]">
 		{% if default_position.system is not null %}

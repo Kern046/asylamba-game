@@ -1,7 +1,5 @@
-<div class="box hidden" data-map--action-box-target="action" data-id="{{ id }}">
-	<h4 class="font-bold">{{ title }}</h4>
+<div class="hidden px-2 py-1 h-full" data-map--action-box-target="action" data-id="{{ id }}">
+	<h4 class="font-bold mb-2">{{ title }}</h4>
 
-	<div class="box-content">
-		{% block content %}{% endblock content %}
-	</div>
+	{% block content %}{% endblock content %}
 </div>

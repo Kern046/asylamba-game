@@ -91,7 +91,7 @@
 					<div class="list-ship squadron">
 						{% for i in range(0, 11) %}
 							<a href="#" class="empty" data-ship-id="{{ i }}">
-								<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
+								<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'thumbnail') ~ '.png') }}" alt="" />
 								<span class="text">
 									<span class="quantity">0</span>
 									<span>{{ get_ship_info(i, 'codeName') }}</span>
@@ -103,7 +103,7 @@
 						{% for i in range(0, 11) %}
 							{% set storage = dock_storage[i] ?? 0 %}
 							<a href="#" {% if storage == 0 %}class="empty"{% endif %} data-ship-id="{{ i }}">
-								<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
+								<img src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'thumbnail') ~ '.png') }}" alt="" />
 								<span class="text">
 									<span class="quantity">{{ storage }}</span>
 									<span>{{ get_ship_info(i, 'codeName') }}</span>

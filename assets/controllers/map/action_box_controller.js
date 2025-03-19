@@ -3,6 +3,17 @@ import {Controller} from "@hotwired/stimulus";
 export default class extends Controller
 {
 	static targets = ['place', 'action'];
+	static outlets = ['map--commander'];
+
+	connect()
+	{
+		this.application.element.addEventListener('map:commander-selection', () => this.applyCommander());
+	}
+
+	disconnect()
+	{
+		this.application.element.removeEventListener('map:commander-selection');
+	}
 
 	changeSystem(systemId) {
 		this.close();
@@ -17,30 +28,47 @@ export default class extends Controller
 			});
 	}
 
-	applyCommander() {
-		if (actionbox.opened) {
-			if (mapController.commanders.active) {
-				actionbox.obj.find('.commander-tile .item').hide();
-
-				if (actionbox.obj.find('.header').data('distance') > mapController.commanders.maxJump && actionbox.obj.find('.header').data('sector-color') != mapController.commanders.color) {
-					actionbox.obj.find('.commander-tile .item.too-far').show();
-				} else {
-					var items = actionbox.obj.find('.commander-tile .item.move');
-
-					items.find('a').each(function() {
-						var url = $(this).data('url');
-						$(this).attr('href', url.replace(encodeURI('{id}'), mapController.commanders.id));
-					});
-
-					items.show();
-					items.find('.name').text(mapController.commanders.name);
-					items.find('.wedge').text(mapController.commanders.wedge);
-				}
-			} else {
-				actionbox.obj.find('.commander-tile .item').hide();
-				actionbox.obj.find('.commander-tile .item.no-commander').show();
+	applyCommander()
+	{
+		this.actionTargets.forEach(element => {
+			if (!('active' in element.dataset)) {
+				return;
 			}
-		}
+
+			const commander = this.mapCommanderOutlet.commander;
+			const commanderDetails = element.querySelector('.commander-details');
+
+			if (commander === null) {
+				element.querySelector('.no-commander').classList.remove('hidden');
+				element.querySelector('.commander-too-far').classList.add('hidden');
+				element.querySelector('.confirm-button').disabled = true;
+
+				commanderDetails.classList.add('hidden');
+
+			} else {
+				element.querySelector('.no-commander').classList.add('hidden');
+
+				const { distance, sectorColor } = this.element.querySelector('header').dataset;
+
+				if (distance > commander.maxDistance && sectorColor !== commander.factionIdentifier) {
+					element.querySelector('.commander-too-far').classList.remove('hidden');
+
+					return;
+				}
+				element.querySelector('.commander-too-far').classList.add('hidden');
+				element.querySelector('.confirm-button').disabled = false;
+
+				commanderDetails.querySelector('.name').innerText = commander.name;
+				commanderDetails.querySelector('.rank').innerText = commander.rank;
+				const capacityValue = commanderDetails.querySelector('.capacity');
+
+				if (capacityValue !== null) {
+					capacityValue.innerText = commander.capacity;
+				}
+
+				commanderDetails.classList.remove('hidden')
+			}
+		});
 	}
 
 	open() {
@@ -57,17 +85,37 @@ export default class extends Controller
 		});
 
 		event.currentTarget.dataset['active'] = '';
+
+		this.applyCommander();
 	}
 
 	chooseAction(event) {
 		this.actionTargets.forEach(element => {
 			if (element.dataset.id === event.currentTarget.dataset.actionId) {
 				element.classList.remove('hidden');
+				element.dataset.active = '';
 			} else {
 				element.classList.add('hidden');
+				delete element.dataset['active'];
 			}
 		});
 
 		event.currentTarget.dataset.active = '';
+	}
+
+	launchAction(event) {
+		let actionUrl = decodeURI(event.currentTarget.dataset.url);
+
+		if (actionUrl.includes('{id}')) {
+			actionUrl = actionUrl.replace('{id}', this.mapCommanderOutlet.commander.id);
+		}
+
+		fetch(actionUrl, {
+			headers: {
+				Accept: 'application/json',
+			},
+		})
+			.then(response => console.debug(response))
+			.catch(error => console.error(error));
 	}
 }

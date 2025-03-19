@@ -14,5 +14,4 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 class Button
 {
 	public Color|null $faction = null;
-	public bool $disabled = false;
 }
