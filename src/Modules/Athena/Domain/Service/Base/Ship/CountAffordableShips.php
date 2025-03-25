@@ -13,11 +13,8 @@ use App\Modules\Shared\Application\PercentageApplier;
 
 readonly class CountAffordableShips
 {
-	public function __construct(
-		private CountQueuedShipPoints      $countQueuedShipPoints,
-		private CountStoredShipPoints      $countStoredShipPoints,
-		private CountMaxStorableShipPoints $countMaxStorableShipPoints,
-	) {
+	public function __construct(private CountHangarAvailableStorableShipPoints $countHangarAvailableStorableShipPoints)
+	{
 	}
 
 	/**
@@ -40,11 +37,8 @@ readonly class CountAffordableShips
 		DockType $dockType,
 		array $shipQueues,
 	): int {
-		$maxStorableShipPoints = ($this->countMaxStorableShipPoints)($base, $dockType);
-		$storedShipPoints = ($this->countStoredShipPoints)($base, $dockType);
-		$queuedShipPoints = ($this->countQueuedShipPoints)($shipQueues);
+		$affordableShipPoints = ($this->countHangarAvailableStorableShipPoints)($base, $shipQueues, $dockType);
 
-		$affordableShipPoints = $maxStorableShipPoints - $storedShipPoints - $queuedShipPoints;
 		$affordableShipsCount = intval(floor($affordableShipPoints / ShipResource::getInfo($shipIdentifier, 'pev')));
 
 		return min($affordableShipsCount, 99);

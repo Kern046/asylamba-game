@@ -4,7 +4,7 @@ namespace App\Modules\Athena\Helper;
 
 use App\Modules\Athena\Domain\Enum\DockType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
-use App\Modules\Athena\Domain\Service\Base\Ship\CountAffordableShips;
+use App\Modules\Athena\Domain\Service\Base\Ship\CountHangarAvailableStorableShipPoints;
 use App\Modules\Athena\Domain\Service\Base\Ship\CountMaxShipQueues;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
@@ -17,7 +17,7 @@ readonly class ShipHelper
 {
 	public function __construct(
 		private CountMaxShipQueues $countMaxShipQueues,
-		private CountAffordableShips $countAffordableShips,
+		private CountHangarAvailableStorableShipPoints $countHangarAvailableStorableShipPoints,
 		private CurrentPlayerRegistry $currentPlayerRegistry,
 		private TechnologyHelper $technologyHelper,
 		private OrbitalBaseHelper $orbitalBaseHelper,
@@ -64,51 +64,17 @@ readonly class ShipHelper
 
 						return ($shipId - 12) < $this->orbitalBaseHelper->getBuildingInfo(4, 'level', $level, 'releasedShip');
 					}
-					// assez de pev dans le storage et dans la queue ?
-					// $sup est un objet de type OrbitalBase
+				// assez de pev dans le storage et dans la queue ?
+				// $sup est un objet de type OrbitalBase
 				case 'pev':
-					if (ShipResource::isAShipFromDock1($shipId)) {
-						// place dans le hangar
-						$totalSpace = $this->orbitalBaseHelper->getBuildingInfo(2, 'level', $sup->levelDock1, 'storageSpace');
-						// ce qu'il y a dans le hangar
-						$storage = $sup->shipStorage;
-						$inStorage = 0;
-						for ($i = 0; $i < 6; ++$i) {
-							$inStorage += ShipResource::getInfo($i, 'pev') * ($storage[$i] ?? 0);
-						}
-						// ce qu'il y a dans la queue
-						$inQueue = 0;
-						$shipQueues = $this->shipQueueRepository->getByBaseAndDockType($sup, 1);
-						foreach ($shipQueues as $shipQueue) {
-							$inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * $shipQueue->quantity;
-						}
-						// ce qu'on veut rajouter
-						$wanted = ShipResource::getInfo($shipId, 'pev') * $quantity;
-						// comparaison
-						return $wanted + $inQueue + $inStorage <= $totalSpace;
-					} elseif (ShipResource::isAShipFromDock2($shipId)) {
-						// place dans le hangar
-						$totalSpace = $this->orbitalBaseHelper->getBuildingInfo(3, 'level', $sup->levelDock2, 'storageSpace');
-						// ce qu'il y a dans le hangar
-						$storage = $sup->shipStorage;
-						$inStorage = 0;
-						for ($i = 6; $i < 12; ++$i) {
-							$inStorage += ShipResource::getInfo($i, 'pev') * ($storage[$i] ?? 0);
-						}
-						// ce qu'il y a dans la queue
-						$inQueue = 0;
-						$shipQueues = $this->shipQueueRepository->getByBaseAndDockType($sup, 2);
-						foreach ($shipQueues as $shipQueue) {
-							$inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * 1;
-						}
-						// ce qu'on veut rajouter
-						$wanted = ShipResource::getInfo($shipId, 'pev') * $quantity;
-						// comparaison
-						return $wanted + $inQueue + $inStorage <= $totalSpace;
-					}
-					return true;
-					// a la technologie nécessaire pour constuire ce vaisseau ?
-					// $sup est un objet de type Technology
+					$dockType = DockType::fromShipIdentifier($shipId);
+					$wanted = ShipResource::getInfo($shipId, 'pev') * $quantity;
+
+					$shipQueues = $this->shipQueueRepository->getByBaseAndDockType($sup, $dockType->getIdentifier());
+
+					return $wanted <= ($this->countHangarAvailableStorableShipPoints)($sup, $shipQueues, $dockType);
+				// a la technologie nécessaire pour constuire ce vaisseau ?
+				// $sup est un objet de type Technology
 				case 'techno':
 					if (1 == $sup->getTechnology(ShipResource::getInfo($shipId, 'techno'))) {
 						return true;

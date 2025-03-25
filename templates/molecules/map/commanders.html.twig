@@ -16,7 +16,7 @@
 		   data-capacity="{{ (constant('App\\Modules\\Ares\\Model\\Commander::COEFFLOOT') * commander|pev)|number }}"
 		>
 			<div class="relative bg-gray-700 border border-white rounded-full p-2 cursor-pointer transition-[background-color] ease-in duration-200 hover:bg-gray-800 group-data-[selected]/commander:bg-gray-800">
-				<img src="{{ asset('images/map/commander.svg') }}" class="w-8 h-8 group-data-[selected]/commander:animate-pulse" alt="" />
+				<twig:CommanderAvatar :commander="commander" class="group-data-[selected]/commander:animate-pulse" />
 				<span class="absolute flex justify-center items-center w-6 h-6 top-0 -right-4 border border-white bg-medium{{ current_player.faction.identifier }} rounded-full bg-gray-900 text-white">{{ commander.level }}</span>
 			</div>
 			<div class="absolute top-0 left-20 hidden group-hover/commander:block bg-gray-800 border border-gray-600 rounded-md w-64 py-2 px-4">

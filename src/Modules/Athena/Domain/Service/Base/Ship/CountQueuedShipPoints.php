@@ -9,10 +9,6 @@ use App\Modules\Athena\Resource\ShipResource;
 
 readonly class CountQueuedShipPoints
 {
-	public function __construct()
-	{
-	}
-
 	/**
 	 * @param list<ShipQueue> $shipQueues
 	 */

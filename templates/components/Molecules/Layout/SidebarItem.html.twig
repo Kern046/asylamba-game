@@ -1,0 +1,8 @@
+<a href="{{ path(route) }}" class="item {% if app.request.get('_route') == route %}active{% endif %}">
+	<span class="picto">
+<!--				<img src="{{ asset(picto) }}" alt="" />-->
+	</span>
+	<span class="content skin-1">
+		<span>{{ label }}</span>
+	</span>
+</a>
