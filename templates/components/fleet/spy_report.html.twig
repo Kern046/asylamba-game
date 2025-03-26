@@ -1,21 +1,22 @@
 {% set affected = constant('App\\Modules\\Ares\\Model\\Commander::AFFECTED') %}
 
-<div class="component size3 space">
-	<div class="head skin-1">
-		{# @TODO move the default NPC avatar to a constant #}
-		<img src="{{ asset('build/media/' ~ (spy_report.targetPlayer is null ? 'commander/big/t1-c0' : ('avatar/medium/' ~ spy_report.targetPlayer.avatar ?? 't3-c4')) ~ '.png') }}" alt="'{{ spy_report.targetPlayer.name ?? 'Rebelle' }}" />
-		<h2>{{ spy_report.placeName }}</h2>
-		<em>{{ spy_report.targetPlayer.name ?? 'Rebelle' }}</em>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="situation-content color{{ spy_report.placeFaction.identifier ?? 0 }} place1">
-				<div class="toolbar">
-					<span>
+<twig:LayoutBox class="col-span-3">
+	<header class="flex justify-between items-start">
+		<div class="">
+			{# @TODO move the default NPC avatar to a constant #}
+			<!--		<img src="{{ asset('build/media/' ~ (spy_report.targetPlayer is null ? 'commander/big/t1-c0' : ('avatar/medium/' ~ spy_report.targetPlayer.avatar ?? 't3-c4')) ~ '.png') }}" alt="'{{ spy_report.targetPlayer.name ?? 'Rebelle' }}" />-->
+			<h2 class="text-lg" style="font-variant: all-small-caps">
+				{{ spy_report.placeName }}
+			</h2>
+			<em>{{ (spy_report.targetPlayer.name ?? 'Rebelle')|raw }}</em>
+		</div>
+
+		<div class="flex w-fit bg-medium{{ spy_report.player.faction.identifier }} rounded-md divide-x divide-gray-900 border-2 border-gray-700 text-sm">
+					<span class="px-4 py-1">
 						Opération de {{ spy_report.price|number }}
-						<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">
+<!--						<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">-->
 					</span>
-					<span>
+			<span class="px-4 py-1">
 						{% if spy_report.isNotCaught %}
 							L'ennemi ne sait rien
 						{% elseif spy_report.isAnonymouslyCaught %}
@@ -24,145 +25,115 @@
 							L'ennemi vous a vu
 						{% endif %}
 					</span>
-					<span>{{ spy_report.successRate }} % de réussite de l'espionnage</span>
-					<a href="{{ path('delete_spy_report', {'id': spy_report.id}) }}" class="hb" title="supprimer le rapport">&#215;</a>
+			<span class="px-4 py-1">{{ spy_report.successRate }} % de réussite de l'espionnage</span>
+			<a href="{{ path('delete_spy_report', {'id': spy_report.id}) }}" class="px-4 py-1 bg-medium{{ spy_report.player.faction.identifier }} hover:bg-dark{{ spy_report.player.faction.identifier }} transition-[background-color] ease-in duration-200" title="supprimer le rapport">
+				&#215;
+			</a>
+		</div>
+	</header>
+
+	<section id="data" class="mt-4">
+		<h3 class="font-bold mb-2">Informations</h3>
+
+		<div class="flex justify-between">
+			<div class="stellar">
+				<div class="info top">
+					{{ get_base_type_info(spy_report.place.typeOfPlace, 'name') }}<br />
+					{% if spy_report.hasSpottedPoints %}
+						{{ spy_report.points|number }}
+					{% else %}
+						???
+					{% endif %}
+					points
 				</div>
-
-				<span class="line-help line-1">I</span>
-				<span class="line-help line-2">II</span>
-
-				{% set vanguard_position = 0 %}
-				{% set rear_position = 0 %}
-
-				{% set orbital_base_type = spy_report.place.base.type ?? constant('App\\Modules\\Athena\\Model\\OrbitalBase::TYP_NEUTRAL') %}
-
-				{% set vanguard_positions = get_base_type_info(orbital_base_type, 'l-line-position') %}
-				{% set rear_positions = get_base_type_info(orbital_base_type, 'r-line-position') %}
-
-				{% set commanders = spy_report.commanders %}
-
-				{% if spy_report.hasSpottedFleets %}
-					{% for commander in commanders %}
-						<span class="commander full show-army position-{{ commander.line }}-{{ (commander.line == 1 ? vanguard_positions[vanguard_position] : rear_positions[rear_position]) }}"
-							  data-army="{{ (spy_report.hasSpottedArmies ? commander.army : range(0, 11)|map(v => -1))|json_encode }}">
-							<img src="{{ asset('build/media/map/fleet/army' ~ (spy_report.hasSpottedMovements and commander.statement != affected ? '-away' : '') ~ '.png') }}" alt="plein" />
-							<span class="info">
-								{% if spy_report.hasSpottedCommanders %}
-									{{ get_commander_rank(commander.level) }} <strong>{{ commander.name }}</strong><br />
-								{% else %}
-									Commandant inconnu<br />
-								{% endif %}
-								{% if spy_report.hasSpottedPevs %}
-									{{ commander.pev }} Pev
-								{% else %}
-									??? Pev
-								{% endif %}
-								{% if spy_report.hasSpottedMovements and commander.statement != affected %}
-									<br />&#8594; déplacement
-								{% endif %}
-							</span>
-						</span>
-
-						{% if commander.line == 1 %}
-							{% set vanguard_position = vanguard_position + 1 %}
-						{% else %}
-							{% set rear_position = rear_position + 1 %}
-						{% endif %}
-					{% endfor %}
-				{% endif %}
-
-				{% set positions = vanguard_position < vanguard_positions|length ? range(vanguard_position, vanguard_positions|length - 1) : [] %}
-				{% for i in positions %}
-					<span class="commander empty position-1-{{ vanguard_positions[i] }}">
-						<img src="{{ asset('build/media/map/fleet/army-' ~ (spy_report.hasSpottedFleets ? 'empty' : 'unknown') ~ '.png') }}" alt="vide" />'
-					</span>
-				{% endfor %}
-
-
-				{% set positions = rear_position < rear_positions|length ? range(rear_position, rear_positions|length - 1) : [] %}
-				{% for i in positions %}
-					<span class="commander empty position-2-{{ rear_positions[i] }}">
-						<img src="{{ asset('build/media/map/fleet/army-' ~ (spy_report.hasSpottedFleets ? 'empty' : 'unknown') ~ '.png') }}" alt="vide" />'
-					</span>
-				{% endfor %}
-
-				{% if spy_report.place.typeOfPlace is not constant('App\\Modules\\Gaia\\Model\\Place::TYP_EMPTY') %}
-					<span class="commander {{ (spy_report.hasSpottedFleets and spy_report.hasShipsInStorage ? 'full' : 'empty') }} show-army position-3"
-						data-army="{{ (spy_report.hasSpottedDocks ? spy_report.shipsInStorage|unserialize : range(0, 11)|map(v => -1))|json_encode }}">
-						<img src="{{ asset('build/media/orbitalbase/dock1.png') }}" alt="chantier" />
-					</span>
-				{% endif %}
-
-				<div class="stellar">
-					<div class="info top">
-						{{ get_base_type_info(spy_report.place.typeOfPlace, 'name') }}<br />
-						<strong>{{ spy_report.placeName }}</strong><br />
-						{% if spy_report.hasSpottedPoints %}
-							{{ spy_report.points|number }}
-						{% else %}
-							???
-						{% endif %}
-						points
-					</div>
-					<div class="info middle">
-						coordonnées<br />
-						<strong>
-							<a href="{{ path('map', {'place': spy_report.id }) }}">
-								{{- spy_report|spy_report_coords -}}
-							</a>
-						</strong>
-					</div>
-					<img src="{{ asset('build/media/orbitalbase/place1-' ~ get_place_demography(place) ~ '.png') }}" alt="planète" />
-
-					<div class="info bottom">
-						<strong>{{ (place.population * 1000000)|number }}</strong> habitants<br />
-						<strong>{{ place.coefResources }}</strong> % coeff. ressource<br />
-						<strong>{{ get_place_technosphere_improvement_coeff(place) }}</strong> % de bonus scientifique
-					</div>
+				<div class="info middle">
+					coordonnées
+					<strong>
+						<a href="{{ path('map', {'place': spy_report.id }) }}">
+							{{- spy_report|spy_report_coords -}}
+						</a>
+					</strong>
 				</div>
+				<!--					<img src="{{ asset('build/media/orbitalbase/place1-' ~ get_place_demography(place) ~ '.png') }}" alt="planète" />-->
 
-				<div class="attack-link">
-					<a href="{{ path('map', {'place': spy_report.place.id}) }}">Attaquer la planète</a>
-					</div>
-				</div>
+			</div>
 
 			<div class="situation-info">
 				<div class="item">
 					Ressources dans les entrepôts
 					<span class="value">
-						{% if spy_report.hasSpottedResourcesStorage %}
-							{{- spy_report.resources -}}
-						{% else %}
-							???
-						{% endif %}
-						<img class="icon-color" src="{{ asset('build/media/resources/resource.png') }}" alt="ressources">
-					</span>
+					{% if spy_report.hasSpottedResourcesStorage %}
+						{{- spy_report.resources -}}
+					{% else %}
+						???
+					{% endif %}
+<!--						<img class="icon-color" src="{{ asset('build/media/resources/resource.png') }}" alt="ressources">-->
+				</span>
 				</div>
 
 				<div class="item">
 					Investissement dans le contre-espionnage
 					<span class="value">
-						{% if spy_report.hasSpottedAntiSpy %}
-							{{- spy_report.antiSpyInvest -}}
-						{% else %}
-							???
-						{% endif %}
-						<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">
-					</span>
+					{% if spy_report.hasSpottedAntiSpy %}
+						{{- spy_report.antiSpyInvest -}}
+					{% else %}
+						???
+					{% endif %}
+<!--						<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">-->
+				</span>
 				</div>
 
 				<div class="item">
 					Revenus des routes commerciales
 					<span class="value">
-						{% if spy_report.hasSpottedCommercialRoutesIncome %}
-							{{- spy_report.commercialRouteIncome -}}
-						{% else %}
-							???
-						{% endif %}
-					 	<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">
-					</span>
+					{% if spy_report.hasSpottedCommercialRoutesIncome %}
+						{{- spy_report.commercialRouteIncome -}}
+					{% else %}
+						???
+					{% endif %}
+<!--					 	<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">-->
+				</span>
 				</div>
 			</div>
+
+			<div>
+				<strong>{{ (place.population * 1000000)|number }}</strong> habitants<br />
+				<strong>{{ place.coefResources }}</strong> % coeff. ressource<br />
+				<strong>{{ get_place_technosphere_improvement_coeff(place) }}</strong> % de bonus scientifique
+			</div>
 		</div>
-	</div>
-</div>
+	</section>
+
+	<section id="commanders" class="mt-4">
+		<div class="situation-content color{{ spy_report.placeFaction.identifier ?? 0 }} place1">
+<!--				<span class="line-help line-1">I</span>
+			<span class="line-help line-2">II</span>-->
+
+			{% set orbital_base_type = spy_report.place.base.type ?? constant('App\\Modules\\Athena\\Model\\OrbitalBase::TYP_NEUTRAL') %}
+
+			{% set commanders = spy_report.commanders %}
+
+			{% if spy_report.hasSpottedFleets and commanders|length > 0 %}
+				<h3 class="font-bold mb-2">Commandants en orbite</h3>
+			{% endif %}
+
+			{% if spy_report.hasSpottedFleets %}
+				{% for commander in commanders %}
+					<twig:FleetSpyReport :spyReport="spy_report"
+										 :commander="commander"
+										 :army="spy_report.hasSpottedArmies ? commander.army : range(0, 11)|map(v => -1)" />
+				{% endfor %}
+			{% endif %}
+
+			{% if spy_report.place.typeOfPlace is not constant('App\\Modules\\Gaia\\Model\\Place::TYP_EMPTY') %}
+				<twig:FleetSpyReport :spyReport="spy_report" :army="(spy_report.hasSpottedDocks ? spy_report.shipStorage : range(0, 11)|map(v => -1))" />
+			{% endif %}
+		</div>
+	</section>
+
+	<footer class="flex justify-center mt-8">
+		<twig:Button class="attack-link" :faction="spy_report.placeFaction">
+			<a href="{{ path('map', {'place': spy_report.place.id}) }}">Attaquer la planète</a>
+		</twig:Button>
+	</footer>
+</twig:LayoutBox>

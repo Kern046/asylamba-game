@@ -1,0 +1,51 @@
+<details class="marker:content-[''] bg-gray-900 border border-gray-300 rounded-md py-1 px-2 [&_img]:open:rotate-90">
+	<summary class="cursor-pointer flex justify-between items-center">
+		<div class="">
+			{% if commander is not null %}
+				<h4>
+					<!-- <img src="{{ asset('build/media/map/fleet/army' ~ (spyReport.hasSpottedMovements and commander.statement != affected ? '-away' : '') ~ '.png') }}" alt="plein" />-->
+					{% if spyReport.hasSpottedCommanders %}
+						{{ get_commander_rank(commander.level) }} <strong>{{ commander.name }}</strong>
+					{% else %}
+						Commandant inconnu
+					{% endif %}
+				</h4>
+				<h5 class="text-sm">
+					{% if commander.line == 1 %}
+						1ère
+					{% else %}
+						2nde
+					{% endif %}
+					ligne
+					-
+					{% if spyReport.hasSpottedPevs %}
+						{{ commander.pev }} Pev
+					{% else %}
+						??? Pev
+					{% endif %}
+				</h5>
+				<span class="info">
+					{% if spyReport.hasSpottedMovements and commander.statement != affected %}
+						<br />&#8594; déplacement
+					{% endif %}
+				</span>
+			{% else %}
+				<h4>Au hangar</h4>
+			{% endif %}
+		</div>
+
+		<div>
+			<img src="{{ asset('images/legacy/picto/arrow_right.svg') }}" class="w-6 h-6 transition-transform duration-200 ease-in" alt="deploy" />
+		</div>
+	</summary>
+
+	<section class="border-t border-dashed mt-2 py-2 border-gray-300 grid grid-cols-4 grid-rows-3 grid-flow-col">
+		{% for quantity in army %}
+			{% set ship_identifier = loop.index0 %}
+
+			<div>
+				{{ quantity }} {{ get_ship_info(ship_identifier, 'codeName') }}
+			</div>
+		{% endfor %}
+	</section>
+</details>

@@ -8,7 +8,7 @@ class CanAfford extends Constraint
 {
 	public function __construct(
 		public int $price,
-		array $groups = null,
+		array|null $groups = null,
 		mixed $payload = null
 	) {
 		parent::__construct([], $groups, $payload);

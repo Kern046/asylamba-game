@@ -1,0 +1,23 @@
+<div class="flex items-center">
+	<div class="">
+		<img src="{{ asset('images/map/spy.svg') }}" alt="" class="w-8 h-8 p-2 rounded-full bg-gray-900" />
+	</div>
+
+	<div class="grow px-4">
+		<div>
+			<a href="{{ path('map', {'place': spyReport.place.id}) }}" style="font-variant: all-small-caps">{{ spyReport.placeName }}</a>
+		</div>
+		<div class="text-xs">
+			<time datetime="{{ spyReport.createdAt|date('C') }}">
+				{{- spyReport.createdAt|game_date|raw -}}
+			</time>
+		</div>
+	</div>
+
+	<div class="right">
+		<a class="{% if isActive %}active{% endif %}"
+		   href="{{ path('spy_reports', {'report': spyReport.id}) }}">
+			<img src="{{ asset('images/legacy/picto/arrow_right.svg') }}" class="w-6 h-6" alt="See"/>
+		</a>
+	</div>
+</div>
