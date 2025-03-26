@@ -34,7 +34,7 @@ class FactionRoutineTest extends KernelTestCase
 		$this->rankings = [];
 	}
 
-	public function testExecute()
+	public function testExecute(): never
 	{
 		static::markTestSkipped('Must migrate to the new domain model classes');
 
@@ -56,7 +56,7 @@ class FactionRoutineTest extends KernelTestCase
 		$this->assertEquals(140, $results[1]['points']);
 	}
 
-	public function testProcessResults()
+	public function testProcessResults(): never
 	{
 		static::markTestSkipped('Must migrate to the new domain model classes');
 

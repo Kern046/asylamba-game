@@ -29,19 +29,19 @@ class CheckName
 
 	public function checkLength($str)
 	{
-		$length = strlen($str);
+		$length = strlen((string) $str);
 
 		return $length >= $this->minLength && $length <= $this->maxLength;
 	}
 
 	public function checkChar($str)
 	{
-		return preg_match('^[\p{L}\p{N}]*\p{L}[\p{L}\p{N}]*$^', $str);
+		return preg_match('^[\p{L}\p{N}]*\p{L}[\p{L}\p{N}]*$^', (string) $str);
 	}
 
 	public function checkBeauty($str)
 	{
-		$newStr = ucfirst($str);
+		$newStr = ucfirst((string) $str);
 
 		$revStr = strrev($newStr);
 		$troncateStr = $newStr;
@@ -62,7 +62,7 @@ class CheckName
 			$ban = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
 
 			if ($number > 1200) {
-				$number = rand(50, 1200);
+				$number = random_int(50, 1200);
 			}
 			if ($number <= 0) {
 				$number = 1;
@@ -78,7 +78,7 @@ class CheckName
 
 			while ($number > 0) {
 				if ($number >= $ban[$i]) {
-					$number = $number - $ban[$i];
+					$number -= $ban[$i];
 					$romanNumber .= $brn[$i];
 				} else {
 					++$i;
@@ -107,6 +107,6 @@ class CheckName
 	{
 		$name = ['Ametah', 'Anla', 'Aumshi', 'Bastier', 'Enigma', 'Eirukis', 'Erah', 'Ehdis', 'Fransa', 'Greider', 'Grerid', 'Haema', 'Hemhild', 'Renga', 'Hidar', 'Horski', 'Hreirek', 'Hroa', 'Hordis', 'Hydring', 'Imsin', 'Asmin', 'Ansami', 'Kar', 'Kili', 'Kolver', 'Kolfinna', 'Lisa', 'Marta', 'Meto', 'Leto', 'Ragni', 'Ranela', 'Runa', 'Siri', 'Mastro', 'Svenh', 'Thalestris', 'Thannd', 'Arsine', 'Val', 'Vori', 'Yi', 'Agata', 'Agneta', 'Nolgi', 'Edla', 'Else', 'Eyja', 'Jensine', 'Kirsten', 'Maeva', 'Malena', 'Magarte', 'Olava', 'Petrine', 'Rigmor', 'Signy', 'Sigrid', 'Skjorta'];
 
-		return $name[rand(0, (count($name) - 1))];
+		return $name[random_int(0, (count($name) - 1))];
 	}
 }

@@ -40,11 +40,7 @@ class Alert
 	 */
 	public function get($position)
 	{
-		if (isset($this->alerts[$position])) {
-			return $this->alerts[$position];
-		}
-
-		return false;
+		return $this->alerts[$position] ?? false;
 	}
 
 	/**

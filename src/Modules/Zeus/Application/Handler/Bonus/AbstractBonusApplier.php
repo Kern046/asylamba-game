@@ -12,10 +12,9 @@ abstract class AbstractBonusApplier implements BonusApplierInterface
 	{
 	}
 
-	public function apply(float|int $initialValue, int $modifierId, PlayerBonus $playerBonus = null): float
+	public function apply(float|int $initialValue, int $modifierId, ?PlayerBonus $playerBonus = null): float
 	{
-		$playerBonus = $playerBonus
-			?? $this->currentPlayerBonusRegistry->getPlayerBonus()
+		$playerBonus ??= $this->currentPlayerBonusRegistry->getPlayerBonus()
 			?? throw new \LogicException('Could not retrieve player bonus');
 
 		$modifierValue = $playerBonus->bonuses->get($modifierId);

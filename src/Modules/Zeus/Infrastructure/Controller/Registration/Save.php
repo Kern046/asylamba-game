@@ -81,7 +81,7 @@ class Save extends AbstractController
 
 			$player = $playerFactory->create(
 				faction: $faction,
-				name: trim($session->get('inscription')->get('pseudo')),
+				name: trim((string) $session->get('inscription')->get('pseudo')),
 				avatar: $session->get('inscription')->get('avatar'),
 				sector: $sector,
 				baseName: $session->get('inscription')->get('base'),

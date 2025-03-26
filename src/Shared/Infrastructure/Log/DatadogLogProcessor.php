@@ -12,7 +12,7 @@ class DatadogLogProcessor
 	private array $requestParams = [];
 	private array $queryParams = [];
 
-	private const PRIVATE_PARAMS = [
+	private const array PRIVATE_PARAMS = [
 		'password',
 		'csrf_token',
 	];

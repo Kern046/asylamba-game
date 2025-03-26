@@ -23,7 +23,7 @@ class ShipCard extends Card
 	public int $shipIdentifier;
 	public int $maxShips;
 	public int $dockNeededLevel;
-	public string|null $missingTechnology;
+	public string|null $missingTechnology = null;
 	public string|bool $hasTechnologyRequirements;
 	public string|bool $hasShipQueueRequirements;
 	public string|bool $hasShipTreeRequirements;

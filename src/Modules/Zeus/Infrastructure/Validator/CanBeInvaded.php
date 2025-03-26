@@ -9,7 +9,7 @@ class CanBeInvaded extends Constraint
 {
 	public function __construct(
 		public Player|null $targetedPlayer = null,
-		array $groups = null,
+		?array $groups = null,
 		mixed $payload = null
 	) {
 		parent::__construct([], $groups, $payload);

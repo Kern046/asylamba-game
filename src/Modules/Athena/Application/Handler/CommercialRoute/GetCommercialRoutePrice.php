@@ -10,7 +10,7 @@ use App\Modules\Zeus\Model\Player;
 
 readonly class GetCommercialRoutePrice
 {
-	public function __invoke(int $distance, Player $player = null): int
+	public function __invoke(int $distance, ?Player $player = null): int
 	{
 		$price = $distance * CommercialRoute::COEF_PRICE;
 

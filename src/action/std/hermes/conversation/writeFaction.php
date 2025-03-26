@@ -23,7 +23,7 @@ $content = $parser->parse($request->request->get('message'));
 if (false !== $content) {
 	if (($player = $playerManager->get($session->get('playerId')))) {
 		if ($player->status > Player::PARLIAMENT) {
-			if ('' !== $content && strlen($content) < 25000) {
+			if ('' !== $content && strlen((string) $content) < 25000) {
 				if (($factionAccount = $playerManager->getFactionAccount($player->rColor)) !== null) {
 					$S_CVM = $conversationManager->getCurrentSession();
 					$conversationManager->newSession();

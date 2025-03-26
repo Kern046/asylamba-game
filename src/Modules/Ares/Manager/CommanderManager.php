@@ -215,7 +215,7 @@ readonly class CommanderManager implements SchedulerInterface
 		LiveReport::$resources = $resourcesLooted;
 	}
 
-	public function startFight(Place $place, Commander $commander, Commander $enemyCommander = null): void
+	public function startFight(Place $place, Commander $commander, ?Commander $enemyCommander = null): void
 	{
 		if (null === $enemyCommander) {
 			$enemyCommander = $this->virtualCommanderHandler->createVirtualCommander($place);

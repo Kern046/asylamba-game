@@ -26,7 +26,7 @@ readonly class ExceptionListener
 			return;
 		}
 
-		if (!str_contains($request->headers->get('accept'), 'text/html')) {
+		if (!str_contains((string) $request->headers->get('accept'), 'text/html')) {
 			return;
 		}
 

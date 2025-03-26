@@ -35,7 +35,7 @@ echo '<div class="component player profil rank">';
 			} else {
 				echo '<div class="center-box">';
 				echo '<span class="label">La classement de victoire n\'est pas encore activé. Il le sera à partir du </span>';
-				echo '<span class="value">'.date('d.m.Y à H:i:s', strtotime(Utils::addSecondsToDate($serverStartTime, $hoursBeforeStartOfRanking * 3600))).'</span>';
+				echo '<span class="value">'.date('d.m.Y à H:i:s', strtotime((string) Utils::addSecondsToDate($serverStartTime, $hoursBeforeStartOfRanking * 3600))).'</span>';
 				echo '</div>';
 			}
 		echo '</div>';

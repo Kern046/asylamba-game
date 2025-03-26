@@ -29,8 +29,8 @@ echo '<div class="component">';
 			echo '</div>';
 
 			$exp = $player_playerTechnicalProfil->getExperience();
-			$nlv = $playerBaseLevel * (pow(2, ($player_playerTechnicalProfil->getLevel() - 1)));
-			$clv = $playerBaseLevel * (pow(2, ($player_playerTechnicalProfil->getLevel() - 2)));
+			$nlv = $playerBaseLevel * (2 ** ($player_playerTechnicalProfil->getLevel() - 1));
+			$clv = $playerBaseLevel * (2 ** ($player_playerTechnicalProfil->getLevel() - 2));
 			$prc = ((($exp - $clv) * 200) / $nlv);
 
 			echo '<div class="number-box">';

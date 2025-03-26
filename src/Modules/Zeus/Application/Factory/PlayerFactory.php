@@ -167,7 +167,7 @@ readonly class PlayerFactory
 		// choix de la place
 		$candidatePlaces = $this->placeRepository->findPlacesIdsForANewBase($sector);
 
-		$placeId = $candidatePlaces[rand(0, count($candidatePlaces) - 1)];
+		$placeId = $candidatePlaces[random_int(0, count($candidatePlaces) - 1)];
 		$place = $this->placeRepository->get($placeId);
 		// CREATION DE LA BASE ORBITALE
 		$ob = new OrbitalBase(

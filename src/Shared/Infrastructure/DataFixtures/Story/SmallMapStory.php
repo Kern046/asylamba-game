@@ -16,7 +16,7 @@ class SmallMapStory extends Story
 {
 	public function build(): void
 	{
-		Factory::delayFlush(function () {
+		Factory::delayFlush(function (): void {
 			FactionFactory::createMany(3);
 
 			SectorFactory::createMany(3);

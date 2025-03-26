@@ -40,14 +40,16 @@ class MapExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFilters(): array
+	#[\Override]
+    public function getFilters(): array
 	{
 		return [
 			new TwigFilter('coords', fn (System $system) => Game::formatCoord($system->xPosition, $system->yPosition)),
 		];
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_base_antispy_radius', fn (OrbitalBase $base) => $this->antiSpyHandler->getAntiSpyRadius($base->antiSpyAverage)),

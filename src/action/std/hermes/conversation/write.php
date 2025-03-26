@@ -19,7 +19,7 @@ $content = $request->request->get('content');
 $content = $parser->parse($content);
 
 if (!empty($conversation) && !empty($content)) {
-	if (strlen($content) < 10000) {
+	if (strlen((string) $content) < 10000) {
 		$S_CVM = $conversationManager->getCurrentSession();
 		$conversationManager->newSession();
 		$conversationManager->load(

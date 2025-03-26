@@ -17,7 +17,7 @@ class AppliedBonusDataCollector extends AbstractDataCollector
 	) {
 	}
 
-	public function collect(Request $request, Response $response, \Throwable $exception = null): void
+	public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
 	{
 		if (!$this->bonusApplier instanceof TraceableBonusApplier) {
 			return;

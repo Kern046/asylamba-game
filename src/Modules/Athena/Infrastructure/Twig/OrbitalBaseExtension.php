@@ -36,7 +36,8 @@ class OrbitalBaseExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFilters(): array
+	#[\Override]
+    public function getFilters(): array
 	{
 		return [
 			new TwigFilter('base_demography', fn (OrbitalBase $orbitalBase) => Game::getSizeOfPlanet($orbitalBase->place->population)),
@@ -54,7 +55,8 @@ class OrbitalBaseExtension extends AbstractExtension
 		];
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_planet_size', fn (int|float $population) => Game::getSizeOfPlanet($population)),
@@ -63,7 +65,7 @@ class OrbitalBaseExtension extends AbstractExtension
 			new TwigFunction('can_leave_base', fn (OrbitalBase $orbitalBase) => $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt) < ($this->getCoolDownBeforeLeavingBase)()),
 			new TwigFunction('get_time_until_cooldown_end', fn (OrbitalBase $orbitalBase) => ($this->getCoolDownBeforeLeavingBase)() - $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt)),
 			new TwigFunction('get_cooldown_before_leaving_base', fn () => ($this->getCoolDownBeforeLeavingBase)()),
-			new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, int $level = null) => Game::resourceProduction(
+			new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, ?int $level = null) => Game::resourceProduction(
 				$this->orbitalBaseHelper->getBuildingInfo(
 					OrbitalBaseResource::REFINERY,
 					'level',

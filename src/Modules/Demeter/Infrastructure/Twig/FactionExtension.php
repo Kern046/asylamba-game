@@ -21,7 +21,8 @@ class FactionExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			// @TODO move get_faction_info here and replace these methods

@@ -9,11 +9,12 @@ use Twig\TwigFunction;
 
 class JavascriptExtension extends AbstractExtension
 {
-	public function __construct(private RequestStack $requestStack)
+	public function __construct(private readonly RequestStack $requestStack)
 	{
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_api_endpoint', fn () => $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost()),

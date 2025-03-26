@@ -14,7 +14,8 @@ class Cookie extends ArrayList
 	 * @param string $key
 	 * @param mixed  $value
 	 */
-	public function add($key, $value, $new = false)
+	#[\Override]
+    public function add($key, $value, $new = false)
 	{
 		$this->elements[$key] = $value;
 
@@ -28,13 +29,10 @@ class Cookie extends ArrayList
 	 *
 	 * @return mixed
 	 */
-	public function get($key, $default = null)
+	#[\Override]
+    public function get($key, $default = null)
 	{
-		if (isset($this->elements[$key])) {
-			return $this->elements[$key];
-		}
-
-		return $default;
+		return $this->elements[$key] ?? $default;
 	}
 
 	/**
@@ -42,7 +40,8 @@ class Cookie extends ArrayList
 	 *
 	 * @return bool
 	 */
-	public function remove($key)
+	#[\Override]
+    public function remove($key)
 	{
 		if (!isset($this->elements[$key])) {
 			return false;
@@ -50,7 +49,8 @@ class Cookie extends ArrayList
 		unset($this->elements[$key]);
 	}
 
-	public function clear()
+	#[\Override]
+    public function clear()
 	{
 		$this->elements = [];
 	}

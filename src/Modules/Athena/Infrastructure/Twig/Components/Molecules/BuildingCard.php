@@ -68,7 +68,8 @@ final class BuildingCard extends Card
 		$this->requirements = $this->validator->validate($buildingConstructionOrder, new CanMakeBuilding($buildingQueuesCount));
 	}
 
-	public function isDisabled(): bool
+	#[\Override]
+    public function isDisabled(): bool
 	{
 		// TODO investigate this condition. Previously `not realLevel` \_()_/ in `ViewGenerator` Controller
 		return false;

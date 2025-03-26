@@ -28,7 +28,7 @@ use Symfony\Component\Uid\Uuid;
 #[AsMessageHandler]
 readonly class PlayerCreditUpdateHandler
 {
-	private const MAX_UPDATES = 5;
+	private const int MAX_UPDATES = 5;
 
 	public function __construct(
 		private EntityManagerInterface $entityManager,

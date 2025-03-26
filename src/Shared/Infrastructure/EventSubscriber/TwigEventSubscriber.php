@@ -17,7 +17,7 @@ use Twig\Environment;
 
 class TwigEventSubscriber implements EventSubscriberInterface
 {
-	protected SessionInterface|null $session;
+	protected SessionInterface|null $session = null;
 
 	public function __construct(
 		private readonly Environment $twig,

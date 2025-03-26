@@ -26,12 +26,12 @@ class Utils
 	public static function interval($date1, $date2, $precision = 'h')
 	{
 		if ('h' == $precision) {
-			$date1 = explode(' ', $date1);
+			$date1 = explode(' ', (string) $date1);
 			$hour1 = explode(':', $date1[1]);
 			$newDate1 = $date1[0].' '.$hour1[0].':00:00';
 			$time1 = strtotime($newDate1) / 3600;
 
-			$date2 = explode(' ', $date2);
+			$date2 = explode(' ', (string) $date2);
 			$hour2 = explode(':', $date2[1]);
 			$newDate2 = $date2[0].' '.$hour2[0].':00:00';
 			$time2 = strtotime($newDate2) / 3600;
@@ -39,8 +39,8 @@ class Utils
 
 			return $interval;
 		} elseif ('s' == $precision) {
-			$time1 = strtotime($date1);
-			$time2 = strtotime($date2);
+			$time1 = strtotime((string) $date1);
+			$time2 = strtotime((string) $date2);
 
 			$interval = abs($time1 - $time2);
 
@@ -60,7 +60,7 @@ class Utils
 		$endDate = ($date1 < $date2) ? $date2 : $date1;
 
 		if ('h' == $precision) {
-			$baseTmst = strtotime($baseDate);
+			$baseTmst = strtotime((string) $baseDate);
 			$tail = new \DateTime($endDate);
 			$cursor = new \DateTime(
 				date('Y', $baseTmst).'-'.
@@ -80,9 +80,9 @@ class Utils
 			}
 		} elseif ('d' == $precision) {
 			// the changement is at 01:00:00
-			$daysInterval = floor((abs(strtotime($date1) - strtotime($date2))) / (60 * 60 * 24));
+			$daysInterval = floor((abs(strtotime((string) $date1) - strtotime((string) $date2))) / (60 * 60 * 24));
 
-			$seconds = strtotime($baseDate) + 86400;
+			$seconds = strtotime((string) $baseDate) + 86400;
 			$nextDay = floor($seconds / 86400) * 86400;
 			$fullDay = date('Y-m-d H:i:s', $nextDay);
 
@@ -108,14 +108,14 @@ class Utils
 	 */
 	public static function addSecondsToDate($date, $seconds)
 	{
-		return date('Y-m-d H:i:s', strtotime($date) + $seconds);
+		return date('Y-m-d H:i:s', strtotime((string) $date) + $seconds);
 	}
 
 	public static function generateString($nbr)
 	{
 		$password = '';
 		for ($i = 0; $i < $nbr; ++$i) {
-			$aleaChar = self::$autorizedChar[rand(0, count(self::$autorizedChar) - 1)];
+			$aleaChar = self::$autorizedChar[random_int(0, count(self::$autorizedChar) - 1)];
 			$password .= $aleaChar;
 		}
 
@@ -124,7 +124,7 @@ class Utils
 
 	public static function check($string, $mode = '')
 	{
-		$string = trim($string);
+		$string = trim((string) $string);
 		$string = htmlspecialchars($string);
 		if ('complex' == $mode) {
 			$string = nl2br($string);

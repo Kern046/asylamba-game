@@ -34,7 +34,7 @@ readonly class PlayerBonusManager
 			if ($this->currentPlayerRegistry->get()->id === $player->id && $this->currentPlayerBonusRegistry->isInitialized()) {
 				return $this->currentPlayerBonusRegistry->getPlayerBonus();
 			}
-		} catch (NoCurrentPlayerSetException $exception) {
+		} catch (NoCurrentPlayerSetException) {
 		}
 
 

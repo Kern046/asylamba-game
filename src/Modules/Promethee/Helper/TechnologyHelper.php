@@ -66,13 +66,13 @@ class TechnologyHelper
 			} else {
 				switch (TechnologyResource::$technology[$techno]['category']) {
 					case 1:
-						$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.5, $level - 1));
+						$value = round(TechnologyResource::$technology[$techno][$info] * 1.5 ** ($level - 1));
 						break;
 					case 2:
-						$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.3, $level - 1));
+						$value = round(TechnologyResource::$technology[$techno][$info] * 1.3 ** ($level - 1));
 						break;
 					case 3:
-						$value = round(TechnologyResource::$technology[$techno][$info] * pow(1.2, $level - 1));
+						$value = round(TechnologyResource::$technology[$techno][$info] * 1.2 ** ($level - 1));
 						break;
 					default:
 						return false;

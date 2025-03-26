@@ -31,10 +31,10 @@ class Player implements CreditHolderInterface, SystemUpdatable, UserInterface, \
 	public int $partLifeSciences = 25;
 	public int $partSocialPoliticalSciences = 25;
 	public int $partInformaticEngineering = 25;
-	public \DateTimeImmutable|null $uPlayer;
-	public \DateTimeImmutable|null $dInscription;
-	public \DateTimeImmutable|null $dLastConnection;
-	public \DateTimeImmutable|null $dLastActivity;
+	public \DateTimeImmutable|null $uPlayer = null;
+	public \DateTimeImmutable|null $dInscription = null;
+	public \DateTimeImmutable|null $dLastConnection = null;
+	public \DateTimeImmutable|null $dLastActivity = null;
 	public bool $premium = false;
 	public int $statement = 0;
 

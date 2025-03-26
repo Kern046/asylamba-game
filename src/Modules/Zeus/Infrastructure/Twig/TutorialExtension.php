@@ -9,7 +9,8 @@ use Twig\TwigFunction;
 
 class TutorialExtension extends AbstractExtension
 {
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('tutorial_info', fn (int $step, string $info) => TutorialResource::getInfo($step, $info)),

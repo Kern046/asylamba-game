@@ -20,7 +20,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsMessageHandler]
 readonly class CommanderSchoolExperienceHandler
 {
-	private const MAX_UPDATES = 20;
+	private const int MAX_UPDATES = 20;
 
 	public function __construct(
 		private GameTimeConverter $gameTimeConverter,
@@ -69,9 +69,9 @@ readonly class CommanderSchoolExperienceHandler
 				// xp gagnée
 				// TODO Factorize in a service and check potential duplicates
 				$earnedExperience = $invest / Commander::COEFFSCHOOL;
-				$earnedExperience += (1 == rand(0, 1))
-					? rand(0, intval(round($earnedExperience / 20)))
-					: -(rand(0, intval(round($earnedExperience / 20))));
+				$earnedExperience += (1 == random_int(0, 1))
+					? random_int(0, intval(round($earnedExperience / 20)))
+					: -(random_int(0, intval(round($earnedExperience / 20))));
 				$earnedExperience = max(intval(round($earnedExperience)), 0);
 
 				$this->commanderExperienceHandler->upExperience($commander, $earnedExperience);

@@ -33,7 +33,7 @@ class ScheduleActions extends Command
 		$style = new SymfonyStyle($input, $output);
 
 		foreach ($this->schedulers as $scheduler) {
-			$style->info(\sprintf('Scheduling %s actions', get_class($scheduler)));
+			$style->info(\sprintf('Scheduling %s actions', $scheduler::class));
 
 			$scheduler->schedule();
 		}

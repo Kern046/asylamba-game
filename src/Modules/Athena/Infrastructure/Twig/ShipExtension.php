@@ -16,7 +16,8 @@ class ShipExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_ship_info', fn (int $shipNumber, string $info) => ShipResource::getInfo($shipNumber, $info)),

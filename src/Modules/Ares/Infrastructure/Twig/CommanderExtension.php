@@ -24,7 +24,8 @@ class CommanderExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFilters(): array
+	#[\Override]
+    public function getFilters(): array
 	{
 		return [
 			new TwigFilter('mission_label', fn (Commander $commander) => match ($commander->travelType) {
@@ -39,7 +40,8 @@ class CommanderExtension extends AbstractExtension
 		];
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_commander_level_up_from_report', fn (int $level, int $newExperience) => $this->commanderExperienceHandler->nbLevelUp($level, $newExperience)),

@@ -21,7 +21,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 class TutorialStepValidationListener
 {
 	public function __construct(
-		private TutorialHelper $tutorialHelper,
+		private readonly TutorialHelper $tutorialHelper,
 	) {
 	}
 

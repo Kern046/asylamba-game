@@ -60,7 +60,7 @@ echo '<div class="component report topic nav">';
 					foreach ($topic_topics as $t) {
 						if ($t->id == $request->query->get('topic')) {
 							$isNew = '';
-						} elseif (null == $t->lastView || strtotime($t->lastView) < strtotime($t->dLastMessage)) {
+						} elseif (null == $t->lastView || strtotime((string) $t->lastView) < strtotime((string) $t->dLastMessage)) {
 							$isNew = ' round-color'.$session->get('playerInfo')->get('color');
 						} else {
 							$isNew = '';

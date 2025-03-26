@@ -68,7 +68,7 @@ class LeaveBase extends AbstractController
 
 		// change base type if it is a capital
 		if ($currentBase->isCapital()) {
-			$newType = (0 === rand(0, 1)) ? OrbitalBase::TYP_COMMERCIAL : OrbitalBase::TYP_MILITARY;
+			$newType = (0 === random_int(0, 1)) ? OrbitalBase::TYP_COMMERCIAL : OrbitalBase::TYP_MILITARY;
 			// delete extra buildings
 			for ($i = 0; $i < OrbitalBaseResource::BUILDING_QUANTITY; ++$i) {
 				$maxLevel = $orbitalBaseHelper->getBuildingInfo($i, 'maxLevel', $newType);

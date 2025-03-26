@@ -82,13 +82,13 @@ class Propose extends AbstractController
 		$price = $getCommercialRoutePrice($distance, $currentPlayer);
 
 		if (1 == $distance) {
-			$imageLink = '1-'.rand(1, 3);
+			$imageLink = '1-'.random_int(1, 3);
 		} elseif ($distance < 26) {
-			$imageLink = '2-'.rand(1, 3);
+			$imageLink = '2-'.random_int(1, 3);
 		} elseif ($distance < 126) {
-			$imageLink = '3-'.rand(1, 3);
+			$imageLink = '3-'.random_int(1, 3);
 		} else {
-			$imageLink = '4-'.rand(1, 3);
+			$imageLink = '4-'.random_int(1, 3);
 		}
 
 		if (!$currentPlayer->canAfford($price)) {

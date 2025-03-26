@@ -106,7 +106,7 @@ readonly class LootManager
 
 				// il y a des commandants en défense : faire un combat avec un des commandants
 				if (0 !== count($dCommanders)) {
-					$aleaNbr = rand(0, count($dCommanders) - 1);
+					$aleaNbr = random_int(0, count($dCommanders) - 1);
 					$this->commanderManager->startFight($place, $commander, $dCommanders[$aleaNbr]);
 
 					// victoire

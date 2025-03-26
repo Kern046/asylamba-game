@@ -10,9 +10,9 @@ use App\Modules\Athena\Model\OrbitalBase;
 class CountHangarAvailableStorableShipPoints
 {
 	public function __construct(
-		private CountQueuedShipPoints      $countQueuedShipPoints,
-		private CountStoredShipPoints      $countStoredShipPoints,
-		private CountMaxStorableShipPoints $countMaxStorableShipPoints,
+		private readonly CountQueuedShipPoints      $countQueuedShipPoints,
+		private readonly CountStoredShipPoints      $countStoredShipPoints,
+		private readonly CountMaxStorableShipPoints $countMaxStorableShipPoints,
 	) {
 	}
 

@@ -11,8 +11,8 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 class PlayerLossListener
 {
 	public function __construct(
-		private OrbitalBaseRepositoryInterface $orbitalBaseRepository,
-		private PlayerManager $playerManager,
+		private readonly OrbitalBaseRepositoryInterface $orbitalBaseRepository,
+		private readonly PlayerManager $playerManager,
 	) {
 
 	}

@@ -24,7 +24,7 @@ readonly class GetCommercialRouteIncome
 	) {
 	}
 
-	public function __invoke(OrbitalBase $from, OrbitalBase $to, Player $player = null): int
+	public function __invoke(OrbitalBase $from, OrbitalBase $to, ?Player $player = null): int
 	{
 		$bonusA = (!$from->place->system->sector->id->equals($to->place->system->sector->id)) ? $this->sectorBonus : 1;
 		$bonusB = (!$from->player->faction->id->equals($to->player->faction->id)) ? $this->factionBonus : 1;

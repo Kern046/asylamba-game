@@ -17,8 +17,8 @@ use Symfony\Component\Uid\Uuid;
 class ViewHeadquarters extends AbstractController
 {
 	public function __construct(
-		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-		private CommanderRepositoryInterface $commanderRepository,
+		private readonly CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		private readonly CommanderRepositoryInterface $commanderRepository,
 	) {
 
 	}

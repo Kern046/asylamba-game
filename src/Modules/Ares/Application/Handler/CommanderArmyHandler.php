@@ -83,7 +83,7 @@ readonly class CommanderArmyHandler
 		}
 	}
 
-	public function initializeShips(Squadron $squadron, PlayerBonus $playerBonus = null): void
+	public function initializeShips(Squadron $squadron, ?PlayerBonus $playerBonus = null): void
 	{
 		if ($squadron->areShipsInitialized) {
 			return;

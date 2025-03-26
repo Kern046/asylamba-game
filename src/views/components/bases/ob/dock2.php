@@ -30,7 +30,7 @@ $appRoot = $container->getParameter('app_root');
 
 $shipQueues = $shipQueueManager->getByBaseAndDockType($ob_dock2->rPlace, 2);
 $nbShipQueues = count($shipQueues);
-$s = array('', '', '', '', '', '');
+$s = ['', '', '', '', '', ''];
 $technology = $technologyManager->getPlayerTechnology($session->get('playerId'));
 
 #place dans le hangar
@@ -44,7 +44,7 @@ for ($m = 6; $m < ShipResource::SHIP_QUANTITY; $m++) {
 
 $inQueue = 0;
 
-foreach ($shipQueues as $shipQueue) { ,
+foreach ($shipQueues as $shipQueue) {
 	$inQueue += ShipResource::getInfo($shipQueue->shipNumber, 'pev') * $shipQueue->quantity;
 }
 

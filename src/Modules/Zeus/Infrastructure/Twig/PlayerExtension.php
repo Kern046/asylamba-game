@@ -26,7 +26,8 @@ class PlayerExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('apply_player_bonus', fn (int|float $initialValue, int $playerBonusId) => $this->bonusApplier->apply($initialValue, $playerBonusId)),

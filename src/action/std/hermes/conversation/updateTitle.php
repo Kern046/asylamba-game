@@ -25,7 +25,7 @@ if (false !== $conversation) {
 	);
 
 	if (1 == $conversationManager->size()) {
-		if (strlen($title) < 255) {
+		if (strlen((string) $title) < 255) {
 			$conv = $conversationManager->get()->title = $title;
 		} else {
 			throw new ErrorException('Le titre est trop long.');

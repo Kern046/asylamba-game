@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 readonly class SectorManager
 {
-	private const CONTROLLED_SYSTEM_POINTS = 2;
+	private const int CONTROLLED_SYSTEM_POINTS = 2;
 
 	public function __construct(
 		private ColorRepositoryInterface $colorRepository,

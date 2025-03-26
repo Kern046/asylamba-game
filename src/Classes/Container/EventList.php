@@ -23,11 +23,7 @@ class EventList
 	 */
 	public function get($index = 0)
 	{
-		if (isset($this->events[$index])) {
-			return $this->events[$index];
-		}
-
-		return null;
+		return $this->events[$index] ?? null;
 	}
 
 	/**

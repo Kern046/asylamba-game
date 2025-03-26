@@ -23,7 +23,7 @@ readonly class CountShipTimeCost
 	{
 		$time = $this->timeMode->isStandard()
 			? ShipResource::getInfo($identifier, 'time') * $quantity
-			: (pow($identifier, 2) + 5) * $quantity;
+			: ($identifier ** 2 + 5) * $quantity;
 
 		$bonus = $this->bonusApplier->apply($time, $dockType->getSpeedBonusId());
 

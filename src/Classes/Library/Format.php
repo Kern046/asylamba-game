@@ -27,24 +27,16 @@ class Format
 
 	public static function ordinalNumber(int $nbr): string
 	{
-		switch ($nbr) {
-			case 1:
-				return 'premier';
-			case 2:
-				return 'deuxième';
-			case 3:
-				return 'troisième';
-			case 4:
-				return 'quatrième';
-			case 5:
-				return 'cinquième';
-			case 6:
-				return 'sixième';
-			case 7:
-				return 'septième';
-			default:
-				return $nbr.'ème';
-		}
+		return match ($nbr) {
+            1 => 'premier',
+            2 => 'deuxième',
+            3 => 'troisième',
+            4 => 'quatrième',
+            5 => 'cinquième',
+            6 => 'sixième',
+            7 => 'septième',
+            default => $nbr.'ème',
+        };
 	}
 
 	public static function plural(int $number, string $return = '', string $expression = ''): string

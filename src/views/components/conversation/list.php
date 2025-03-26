@@ -73,7 +73,7 @@ for ($i = 0; $i < $conversationManager->size(); ++$i) {
 	echo '<span class="cover">';
 	echo '<img src="'.$mediaPath.'avatar/small/'.$convAvatar.'.png" alt="" class="picture color'.$convColor.'" />';
 	echo '<span class="number">'.$conv->messages.'</span>';
-	if (strtotime($ownLastView) < strtotime($conv->dLastMessage)) {
+	if (strtotime((string) $ownLastView) < strtotime((string) $conv->dLastMessage)) {
 		echo '<span class="new-message"><img src="'.$mediaPath.'common/nav-message.png" alt="" /></span>';
 	}
 	echo '</span>';
