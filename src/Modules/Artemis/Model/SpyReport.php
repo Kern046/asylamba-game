@@ -49,6 +49,13 @@ class SpyReport
 
 	}
 
+	public function getShipStorage(): array
+	{
+		static $storage = null;
+
+		return $storage ??= $this->shipStorage + array_fill(0, 12, 0);
+	}
+
 	public function isNotCaught(): bool
 	{
 		return self::TYP_NOT_CAUGHT === $this->type;

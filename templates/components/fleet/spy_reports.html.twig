@@ -8,9 +8,14 @@
 				<span><a href="{{ path('delete_all_spy_reports') }}">tout supprimer</a></span>
 			</div>
 			{% if spy_reports|length > 0 %}
-				<div class="flex flex-col gap-y-2 mt-4">
+				<div class="flex flex-col mt-4 divide-gray-400 divide-y">
 					{% for spy_report in spy_reports %}
-						<twig:SpyReportListItem :spyReport="spy_report" :isActive="app.request.query.get('report') == spy_report.id or (not app.request.query.has('report') and loop.index == 1)" />
+						<twig:ReportListItem
+							:href="path('spy_reports', {'report': spy_report.id})"
+							picto="images/map/spy.svg"
+							:placeName="spy_report.placeName"
+							:isActive="app.request.query.get('report') == spy_report.id or (not app.request.query.has('report') and loop.index == 1)"
+							:createdAt="spy_report.createdAt"/>
 					{% endfor %}
 				</div>
 			{% else %}

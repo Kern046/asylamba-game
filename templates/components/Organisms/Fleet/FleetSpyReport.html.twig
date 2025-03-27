@@ -1,3 +1,5 @@
+{% set affected = constant('App\\Modules\\Ares\\Model\\Commander::AFFECTED') %}
+
 <details class="marker:content-[''] bg-gray-900 border border-gray-300 rounded-md py-1 px-2 [&_img]:open:rotate-90">
 	<summary class="cursor-pointer flex justify-between items-center">
 		<div class="">
@@ -40,11 +42,13 @@
 	</summary>
 
 	<section class="border-t border-dashed mt-2 py-2 border-gray-300 grid grid-cols-4 grid-rows-3 grid-flow-col">
+		{% dump(army) %}
+
 		{% for quantity in army %}
 			{% set ship_identifier = loop.index0 %}
 
 			<div>
-				{{ quantity }} {{ get_ship_info(ship_identifier, 'codeName') }}
+				<strong class="pr-2">{{ quantity }}</strong> {{ get_ship_info(ship_identifier, 'codeName') }}
 			</div>
 		{% endfor %}
 	</section>

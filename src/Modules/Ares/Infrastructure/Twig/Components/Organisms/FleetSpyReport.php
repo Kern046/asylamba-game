@@ -15,7 +15,7 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 final class FleetSpyReport
 {
 	public SpyReport $spyReport;
-	public Commander|null $commander = null;
+	public array|null $commander = null;
 	/** @var list<int|string>  */
 	public array $army;
 }
