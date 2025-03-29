@@ -5,6 +5,10 @@
 {% endblock left_sidebar %}
 
 {% block body %}
+	<twig:PageTitle>
+		Finances
+	</twig:PageTitle>
+
 	<div id="content" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mx-4 md:mx-56 mt-2 md:mt-6">
 		{{ include('components/financial/reporting/general.html.twig') }}
 		{{ include('components/financial/reporting/imposition.html.twig') }}

@@ -1,14 +1,23 @@
-<div class="component new-message">
-	<div class="head"></div>
-	<div class="fix-body">
-		<div class="body">
-			<h4>A votre faction</h4>
-			<form action="{{ path('send_credits_to_faction') }}" method="post" >
-				<p><label for="send-credit-faction">Nombre de crédit</label></p>
-				<p class="input input-text"><input type="text" id="send-credit-faction" name="quantity" /></p>
+<twig:LayoutBox class="component new-message">
+	<header>
+		<twig:H2>
+			Envoyer à votre faction
+		</twig:H2>
+	</header>
 
-				<p class="button"><button type="submit">Envoyer</button></p>
-			</form>
-		</div>
-	</div>
-</div>
+	<section>
+		<form action="{{ path('send_credits_to_faction') }}" method="post" >
+			<div>
+				<label for="send-credit-faction">Nombre de crédits</label>
+			</div>
+
+			<div>
+				<twig:Input type="number" id="send-credit-faction" name="quantity" />
+			</div>
+
+			<twig:Button type="submit" :faction="current_player.faction" class="mt-2">
+				Envoyer
+			</twig:Button>
+		</form>
+	</section>
+</twig:LayoutBox>

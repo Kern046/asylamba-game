@@ -1,24 +1,24 @@
-<div class="component player rank">
-	<div class="head"></div>
-	<div class="fix-body">
-		<div class="body">
-			<h4>Derniers envois</h4>
+<twig:LayoutBox class="component player rank">
+	<header>
+		<twig:H2>
+			Derniers envois
+		</twig:H2>
+	</header>
+	<section>
+		{% for transaction in sendings %}
+			<div class="player color{{ transaction.receiverColor }}">
+				<a href="{{ transaction.receiverLink }}">
+					<img src="{{ asset('build/media/avatar/small/' ~ transaction.receiverAvatar ~ '.png') }}" alt="{{ transaction.receiverName }}" class="picto" />
+				</a>
 
-			{% for transaction in sendings %}
-				<div class="player color{{ transaction.receiverColor }}">
-					<a href="{{ transaction.receiverLink }}">
-						<img src="{{ asset('build/media/avatar/small/' ~ transaction.receiverAvatar ~ '.png') }}" alt="{{ transaction.receiverName }}" class="picto" />
-					</a>
+				<span class="title">{{ transaction.receiverStatus }}</span>
+				<strong class="name">{{ transaction.receiverName }}</strong>
+				<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
+			</div>
+		{% endfor %}
 
-					<span class="title">{{ transaction.receiverStatus }}</span>
-					<strong class="name">{{ transaction.receiverName }}</strong>
-					<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
-				</div>
-			{% endfor %}
-
-			{% if sendings|length == 0 %}
-				<p>Vous n'avez fait aucun envoi de crédit.</p>
-			{% endif %}
-		</div>
-	</div>
-</div>
+		{% if sendings|length == 0 %}
+			<p>Vous n'avez fait aucun envoi de crédit.</p>
+		{% endif %}
+	</section>
+</twig:LayoutBox>

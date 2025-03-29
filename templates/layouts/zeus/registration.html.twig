@@ -17,17 +17,17 @@
 				{% set placeChoiceStatus = 'current' %}
 			{% endif %}
 
-			{{ component('Form:Molecules:Step', {
+			{{ component('FormStep', {
 				status: factionChoiceStatus,
 				label: 'Choisissez votre faction',
 				number: 1,
 			}) }}
-			{{ component('Form:Molecules:Step', {
+			{{ component('FormStep', {
 				status: profileStatus,
 				label: 'Créez votre personnage',
 				number: 2,
 			}) }}
-			{{ component('Form:Molecules:Step', {
+			{{ component('FormStep', {
 				status: placeChoiceStatus,
 				label: 'Choisissez votre secteur de départ',
 				number: 3,

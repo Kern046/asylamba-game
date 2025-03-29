@@ -1,19 +1,8 @@
 {% apply spaceless %}
 	<twig:LayoutBox class="md:col-span-2 row-span-2">
-		<header class="flex justify-between">
-			<h1 class="font-bold text-xl">Finance</h1>
-
-			<twig:Tooltip>
-				Ces deux colonnes sont un résumé de vos recettes et de vos dépenses pendant la durée d’une relève. Dans la
-				colonne des recettes vous pouvez voir tous les éléments qui vous rapportent des crédits dans Asylamba. Dans la colonne des dépenses,
-				c’est l’inverse, vous voyez les éléments qui vous coûtent sur vos bases. La différence entre ces deux colonnes vous donne soit une
-				perte (sous la colonne des recettes) soit un bénéfice (sous la colonne des dépenses).
-			</twig:Tooltip>
-		</header>
-
 		<section class="mt-2 flex justify-between">
 			<div class="grow">
-				<h4 class="font-bold text-lg">recettes</h4>
+				<twig:H2>recettes</twig:H2>
 
 				<div>
 					<twig:NumberBox label="impôts" :bonus="investments_data.totalTaxInBonus" size="small">
@@ -37,7 +26,7 @@
 			</div>
 
 			<div class="basis-1/2">
-				<h4 class="font-bold text-lg">dépenses</h4>
+				<twig:H2>dépenses</twig:H2>
 				<div>
 					<twig:NumberBox label="investissements planétaires" size="small">
 						{{- investments_data.totalInvest|number -}}
@@ -79,10 +68,17 @@
 					{% endif %}
 				</div>
 			</div>
+
+			<twig:Tooltip>
+				Ces deux colonnes sont un résumé de vos recettes et de vos dépenses pendant la durée d’une relève. Dans la
+				colonne des recettes vous pouvez voir tous les éléments qui vous rapportent des crédits dans Asylamba. Dans la colonne des dépenses,
+				c’est l’inverse, vous voyez les éléments qui vous coûtent sur vos bases. La différence entre ces deux colonnes vous donne soit une
+				perte (sous la colonne des recettes) soit un bénéfice (sous la colonne des dépenses).
+			</twig:Tooltip>
 		</section>
 
-		<section class="mt-2">
-			<h4 class="font-bold text-lg">évolution des finances</h4>
+		<section class="mt-4">
+			<twig:H2>évolution des finances</twig:H2>
 			<div class="flex">
 				<twig:NumberBox label="crédits en possession" size="small">
 					{{- current_player.credit|number -}}

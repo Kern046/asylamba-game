@@ -1,14 +1,15 @@
 {% extends 'layouts/game.html.twig' %}
 
-{% block body %}
-	<div id="background-paralax" class="financial"></div>
-
+{% block left_sidebar %}
 	{{ include('molecules/financial/subnav.html.twig') }}
-	{{ include('molecules/common/movers.html.twig') }}
+{% endblock left_sidebar %}
 
-	<div id="content">
-		{{ include ('molecules/common/advertising.html.twig') }}
+{% block body %}
+	<twig:PageTitle>
+		Transferts de crédits
+	</twig:PageTitle>
 
+	<div id="content" class="grid grid-cols-2 gap-4 mx-4 md:mx-56 mt-2 md:mt-6">
 		{{ include('components/financial/transfers/player_sending.html.twig') }}
 		{{ include('components/financial/transfers/faction_sending.html.twig') }}
 		{{ include('components/financial/transfers/sendings_history.html.twig') }}

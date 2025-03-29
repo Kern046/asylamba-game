@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Shared\Infrastructure\Twig\Components\Form\Molecules;
+namespace App\Modules\Shared\Infrastructure\Twig\Components\Molecules\Form;
 
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
-#[AsTwigComponent()]
+#[AsTwigComponent(
+	name: 'FormStep',
+	template: 'components/Molecules/Form/Step.html.twig',
+)]
 class Step
 {
 	public int $number;
