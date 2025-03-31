@@ -9,10 +9,10 @@
 		Transferts de crédits
 	</twig:PageTitle>
 
-	<div id="content" class="grid grid-cols-2 gap-4 mx-4 md:mx-56 mt-2 md:mt-6">
+	<twig:ContentContainer class="grid grid-cols-2 gap-4">
 		{{ include('components/financial/transfers/player_sending.html.twig') }}
 		{{ include('components/financial/transfers/faction_sending.html.twig') }}
 		{{ include('components/financial/transfers/sendings_history.html.twig') }}
 		{{ include('components/financial/transfers/receivings_history.html.twig') }}
-	</div>
+	</twig:ContentContainer>
 {% endblock body %}

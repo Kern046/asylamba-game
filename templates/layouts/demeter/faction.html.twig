@@ -1,13 +1,9 @@
 {% extends 'layouts/game.html.twig' %}
 
 {% block body %}
-	<div id="background-paralax" class="profil"></div>
-
 	{{ include('molecules/faction/sidebar.html.twig') }}
-	{{ include('molecules/common/movers.html.twig') }}
-	<div id="content">
-		{{ include('molecules/common/advertising.html.twig') }}
 
-		{% block content %}{% endblock content %}
-	</div>
+	<twig:ContentContainer>
+		{{ block(outerBlocks.content) }}
+	</twig:ContentContainer>
 {% endblock body %}

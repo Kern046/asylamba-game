@@ -1,5 +1,7 @@
 {% extends 'layouts/atlas/ranking.html.twig' %}
 
+{% block page_title 'Classement faction' %}
+
 {% block content %}
 	{% if has_ranking %}
 		{{ include('components/rankings/faction/best_faction.html.twig', { best_faction }) }}

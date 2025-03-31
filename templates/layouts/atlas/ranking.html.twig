@@ -1,12 +1,18 @@
 {% extends 'layouts/game.html.twig' %}
 
+{% block left_sidebar %}
+	<twig:Sidebar>
+		<twig:SidebarItem route="player_rankings" picto="build/media/rank/player.png" :isActive="app.request.get('_route') == 'player_rankings'" label="Classement des joueurs" />
+		<twig:SidebarItem route="faction_rankings" picto="build/media/rank/faction.png" :isActive="app.request.get('_route') == 'faction_rankings'" label="Classement des factions" />
+	</twig:Sidebar>
+{% endblock left_sidebar %}
+
 {% block body %}
-	<div id="background-paralax" class="rank"></div>
+	<twig:PageTitle>
+		{{ block(outerBlocks.page_title) }}
+	</twig:PageTitle>
 
-	{{ include('molecules/rankings/sidebar.html.twig') }}
-	{{ include('molecules/common/movers.html.twig') }}
-
-	<div id="content">
-		{% block content %}{% endblock content %}
-	</div>
+	<twig:ContentContainer class="flex gap-x-4">
+		{{ block(outerBlocks.content) }}
+	</twig:ContentContainer>
 {% endblock body %}

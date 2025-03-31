@@ -5,7 +5,7 @@
 {% endblock left_sidebar %}
 
 {% block body %}
-	<div id="content" class="mx-4 md:mx-56 mt-2 md:mt-6">
-		{% block content %}{% endblock content %}
-	</div>
+	<twig:ContentContainer>
+		{{ block(outerBlocks.content) }}
+	</twig:ContentContainer>
 {% endblock body %}

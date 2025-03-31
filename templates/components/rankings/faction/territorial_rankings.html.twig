@@ -1,19 +1,18 @@
-<div class="component player rank">
-	<div class="head skin-4">
-		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">
-		<h2>Territorial</h2>
-		<em>Nombre de points des secteurs controlés</em>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			{% for faction_ranking in territorial_rankings %}
-				{{ include('molecules/rankings/faction_ranking_card.html.twig', {
-					faction_ranking,
-					'value': faction_ranking.territorial|number(-1) ~ ' points',
-					'position': faction_ranking.territorialPosition,
-					'variation': faction_ranking.territorialVariation,
-				}) }}
-			{% endfor %}
-		</div>
-	</div>
-</div>
+<twig:LayoutBox>
+	<header>
+<!--		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">-->
+		<twig:H2>Territorial</twig:H2>
+		<twig:H5>Nombre de points des secteurs controlés</twig:H5>
+	</header>
+
+	<section>
+		{% for faction_ranking in territorial_rankings %}
+			{{ include('molecules/rankings/faction_ranking_card.html.twig', {
+				faction_ranking,
+				'value': faction_ranking.territorial|number(-1) ~ ' points',
+				'position': faction_ranking.territorialPosition,
+				'variation': faction_ranking.territorialVariation,
+			}) }}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

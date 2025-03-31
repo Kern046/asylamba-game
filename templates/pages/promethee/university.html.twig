@@ -1,14 +1,11 @@
 {% extends 'layouts/game.html.twig' %}
 
-{% block body %}
-	<div id="background-paralax" class="technology"></div>
-
+{% block left_sidebar %}
 	{{ include('molecules/common/subnav.html.twig') }}
-	{{ include('molecules/common/movers.html.twig') }}
+{% endblock left_sidebar %}
 
-	<div id="content">
-		{{ include('molecules/common/advertising.html.twig') }}
-
+{% block body %}
+	<twig:ContentContainer>
 		<div class="component">
 			<div class="head skin-1">
 				<img src="{{ asset('build/media/orbitalbase/university.png') }}" alt="" />
@@ -250,5 +247,5 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</twig:ContentContainer>
 {% endblock body %}

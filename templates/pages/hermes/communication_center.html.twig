@@ -1,16 +1,11 @@
 {% extends 'layouts/game.html.twig' %}
 
-{% block body %}
-
-	<div id="background-paralax" class="profil"></div>
-
+{% block left_sidebar %}
 	{{ include('molecules/common/subnav.html.twig') }}
+{% endblock left_sidebar %}
 
-	{{ include('molecules/common/movers.html.twig') }}
-	
-	<div id="content">
-		{{ include('molecules/common/advertising.html.twig') }}
-		
+{% block body %}
+	<twig:ContentContainer>
 		<div class="component">
 			<div class="head"><h1>Messagerie</h1></div>
 			<div class="fix-body">
@@ -208,5 +203,5 @@
 		{% if archived_notifications|length > 0 %}
 
 		{% endif %}
-	</div>
+	</twig:ContentContainer>
 {% endblock body %}

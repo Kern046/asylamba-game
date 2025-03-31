@@ -1,18 +1,24 @@
+{% extends 'components/Molecules/Ranking/RankingCard.html.twig' %}
+
 {% set statuses = get_faction_info(player_ranking.player.faction.identifier, 'status') %}
 
-<div class="player min-w-full color{{ player_ranking.player.faction.identifier }} {% if current_player.id == player_ranking.player.id %}active{% endif %}">
+{% block picture %}
 	<a href="{{ path('embassy', {'player': player_ranking.player.id}) }}">
-		<img src="{{ asset('build/media/avatar/small/' ~ player_ranking.player.avatar ~ '.png') }}" alt="{{ player_ranking.player.name }}" class="picto" />
+		<twig:Avatar :player="player_ranking.player" class="min-w-12 max-w-12 min-h-12 max-h-12" />
 	</a>
+{% endblock picture %}
 
-	<span class="title">{{ statuses[player_ranking.player.status - 1] }}</span>
+{% block name %}
+	<span class="title text-sm">{{ statuses[player_ranking.player.status - 1] }}</span>
 	<strong class="name">{{ player_ranking.player.name }}</strong>
+{% endblock name %}
 
-	<span class="experience">
-		{{ value|raw }}
-	</span>
+{% block value value|raw %}
 
-	<span class="position">{{ position }}</span>
+{% block extra_classes 'border-l-8 my-2 border-medium' ~ player_ranking.player.faction.identifier ~ current_player.id == player_ranking.player.id  ? ' active' : '' %}
 
-	{{ include('atoms/rankings/variation.html.twig', { variation }) }}
-</div>
+{% block position_class current_player.id == player_ranking.player.id ? 'bg-gray-200 text-gray-900' : 'bg-gray-800' %}
+
+{% block variation %}
+	{{ include('atoms/rankings/faction_position.html.twig', { position, variation })}}
+{% endblock variation %}

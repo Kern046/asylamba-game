@@ -1,11 +1,28 @@
-<div class="player faction color{{ faction_ranking.faction.identifier }} {% if current_player.faction.id == faction_ranking.faction.id %}active{% endif %}">
-	<img src="{{ asset('build/media/faction/flag/flag-' ~ faction_ranking.faction.identifier ~ '.png') }}" alt="{{ faction_ranking.faction.identifier }}" class="picto" />
+{% extends 'components/Molecules/Ranking/RankingCard.html.twig' %}
 
-	<span class="title">{{ get_faction_info(faction_ranking.faction.identifier, 'government') }}</span>
-	<strong class="name">{{ get_faction_info(faction_ranking.faction.identifier, 'popularName') }}</strong>
-	<span class="experience">
-		{{ value|raw }}
-	</span>
+{% block picture %}
+	<a href="{{ path('embassy', {'faction': faction_ranking.faction.identifier}) }}">
+		<twig:FactionBanner :faction="faction_ranking.faction" class="w-12 h-12 mr-2" />
+	</a>
+{% endblock picture %}
 
+{% block name %}
+	<div class="text-xs">
+		{{ get_faction_info(faction_ranking.faction.identifier, 'government') }}
+	</div>
+	<div class="font-semibold">
+		{{ get_faction_info(faction_ranking.faction.identifier, 'popularName') }}
+	</div>
+{% endblock name %}
+
+{% block value %}
+	{{ value|raw }}
+{% endblock value %}
+
+{% block extra_classes current_player.faction.id == faction_ranking.faction.id ? 'active' : '' %}
+
+{% block position_class current_player.faction.id == faction_ranking.faction.id ? 'bg-gray-200 text-gray-900' : 'bg-gray-800' %}
+
+{% block variation %}
 	{{ include('atoms/rankings/faction_position.html.twig', { position, variation })}}
-</div>
+{% endblock variation %}

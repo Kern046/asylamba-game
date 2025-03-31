@@ -13,12 +13,12 @@
 
 	{{ include('molecules/common/movers.html.twig') }}
 
-	<div id="content" class="flex gap-x-4 mx-4 md:mx-56 mt-2 md:mt-6">
+	<twig:ContentContainer class="flex gap-x-4">
 		<twig:Character :player="current_player" />
 
 		{# obFastView component #}
 		{% for orbital_base in player_bases %}
 			<twig:FastView :orbitalBase="orbital_base" :index="loop.index" :isProfileView="true" />
 		{% endfor %}
-	</div>
+	</twig:ContentContainer>
 {% endblock body %}
