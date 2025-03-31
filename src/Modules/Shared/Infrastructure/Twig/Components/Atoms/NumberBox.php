@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Shared\Infrastructure\Twig\Components\Atoms;
 
+use App\Modules\Demeter\Model\Color;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 #[AsTwigComponent(
@@ -15,6 +16,8 @@ final class NumberBox
 	public string $label;
 	public string $size = 'big';
 	public float|null $bonus = null;
+	public float|int|null $percent = null;
+	public Color|null $faction = null;
 
 	public function getNumberSize(): string
 	{

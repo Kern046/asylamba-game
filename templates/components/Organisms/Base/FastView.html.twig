@@ -1,18 +1,20 @@
 <twig:LayoutBox>
-	{% if isProfileView %}
-		<div class="head skin-1">
-			<img src="{{ asset('build/media/map/place/place1-' ~ orbitalBase|base_demography ~ '.png') }}" alt=" {{ orbitalBase.name }}" />
-			<h2>{{ orbitalBase.name }}</h2>
-			<em>
-				{{ orbitalBase|base_type }} — {{ orbitalBase.points}} points
-			</em>
-		</div>
-	{% else %}
-		<div class="head skin-2">
-			<h2>Vue de situation</h2>
-		</div>
-	{% endif %}
-	<div class="fix-body">
+	<header class="flex items-center gap-x-2">
+		{% if isProfileView %}
+<!--			<img src="{{ asset('build/media/map/place/place1-' ~ orbitalBase|base_demography ~ '.png') }}" alt=" {{ orbitalBase.name }}" />-->
+			<img class="w-16 h-16" src="{{ asset('images/legacy/planet/Tempered.png') }}" alt="planet" />
+
+			<div>
+				<twig:H2>{{ orbitalBase.name }}</twig:H2>
+				<twig:H5>
+					{{ orbitalBase|base_type }} — {{ orbitalBase.points}} points
+				</twig:H5>
+			</div>
+		{% else %}
+			<twig:H2>Vue de situation</twig:H2>
+		{% endif %}
+	</header>
+	<section class="mt-4">
 		<div class="body">
 			{# pending commercial routes display #}
 			{% if orbitalBase.levelSpatioport > 0 and commercialRoutesData.waiting_for_me is defined and commercialRoutesData.waiting_for_me != 0 %}
@@ -22,23 +24,15 @@
 				</a>
 			{% endif %}
 
-			{# resources display #}
-			<div class="number-box">
-				<span class="label">Ressources en stock</span>
-				<span class="value">
-					{{ orbitalBase.resourcesStorage|number }}
-				 	<img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">
-				</span>
+			<twig:NumberBox label="Ressources en stock" :percent="orbitalBase|base_storage_percent">
+				{{ orbitalBase.resourcesStorage|number }}
 
-				<span class="progress-bar hb bl" title="remplissage : {{ orbitalBase|base_storage_percent }}%">
-					<span style="width: {{ orbitalBase|base_storage_percent }}%;" class="content"></span>
-				</span>
-				<span class="group-link">
+				<twig:block name="upper_links">
 					<a href="{{ path('switchbase', {'baseId': orbitalBase.id, 'page': 'refinery'}) }}" class="link hb lt" title="vers la raffinerie">→</a>
-				</span>
-			</div>
+				</twig:block>
+			</twig:NumberBox>
 
-			<h4>Générateur</h4>
+			<twig:H4 class="mt-4">Générateur</twig:H4>
 
 			{% set nextTime = 0 %}
 			{% set nextTotalTime = 0 %}
@@ -77,7 +71,7 @@
 			</div>
 
 			{% if orbitalBase.levelDock1 > 0 %}
-			<h4>Chantier Alpha</h4>
+			<twig:H4>Chantier Alpha</twig:H4>
 
 			{% set realSizeQueue = 0 %}
 
@@ -120,7 +114,7 @@
 				{% endif %}
 
 				{% if orbitalBase.levelDock2 > 0 %}
-				<h4>Chantier de Ligne</h4>
+				<twig:H4>Chantier de Ligne</twig:H4>
 
 				{% set realSizeQueue = 0 %}
 
@@ -163,7 +157,7 @@
 					{% endif %}
 
 					{% if orbitalBase.levelTechnosphere > 0 %}
-						<h4>Technosphère</h4>
+						<twig:H4>Technosphère</twig:H4>
 
 						{% set realSizeQueue = 0 %}
 						{% set remainingTotalTime = 0 %}
@@ -208,26 +202,19 @@
 					{% endif %}
 
 					{% if orbitalBase.levelSpatioport > 0 %}
-						<h4>Spatioport</h4>
+						{% set percent = commercialRoutesData.total|percent(commercialRoutesData.max) %}
+						<twig:H4>Spatioport</twig:H4>
 
-						<div class="number-box">
-							<span class="label">Routes commerciales</span>
-							<span class="value">
-						{{ commercialRoutesData.total }} / {{ commercialRoutesData.max }}
-					</span>
+						<twig:NumberBox label="Routes commerciales" :percent="percent">
+							{{ commercialRoutesData.total }} / {{ commercialRoutesData.max }}
 
-							{% set percent = commercialRoutesData.total|percent(commercialRoutesData.max) %}
-							<span class="progress-bar hb bl" title="remplissage : {{ percent }}%">
-						<span style="width:{{ percent }}%;" class="content"></span>
-					</span>
-
-							<span class="group-link">
-						<a href="{{ path('switchbase', {'baseId': orbitalBase.id, 'page': 'spatioport'}) }}" class="link hb lt" title="vers le spatioport">→</a>
-					</span>
-						</div>
+							<twig:block name="upper_links">
+								<a href="{{ path('switchbase', {'baseId': orbitalBase.id, 'page': 'spatioport'}) }}" class="link hb lt" title="vers le spatioport">→</a>
+							</twig:block>
+						</twig:NumberBox>
 					{% endif %}
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
 </twig:LayoutBox>

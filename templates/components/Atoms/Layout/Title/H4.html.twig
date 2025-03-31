@@ -1,1 +1,5 @@
-<h4 class="font-bold">{% block content %}{% endblock content %}</h4>
+<h4 {{ attributes.defaults({
+	class: 'font-bold',
+}) }}>
+	{% block content %}{% endblock content %}
+</h4>
