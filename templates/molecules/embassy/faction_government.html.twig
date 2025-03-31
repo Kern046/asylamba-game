@@ -1,44 +1,47 @@
 {% set statuses = get_faction_info(faction.identifier, 'status') %}
 
-<div class="component player rank">
-	<div class="head"></div>
+<twig:LayoutBox>
+	<header>
+		<twig:H2>
+			Gouvernement
+		</twig:H2>
+	</header>
+
 	<div class="fix-body">
 		<div class="body">
-			<h4>Gouvernement</h4>
 			{% for minister in government_members %}
-				<div class="player color{{ faction.identifier }}">
-					<a href="{{ path('embassy', {'player': minister.id}) }}">
-						<img src="{{ asset('build/media/avatar/small/' ~ minister.avatar ~ '.png') }}" alt="{{ minister.name }}" class="picto" />
+				<div class="flex items-center">
+					<a href="{{ path('embassy', {'player': minister.id}) }}" alt="">
+						<twig:Avatar :player="minister" class="w-10 h-10" />
 					</a>
-					<span class="title">{{ statuses[minister.status - 1] }}</span>
-					<strong class="name">{{ minister.name }}</strong>
+					<div>
+						<span class="title">{{ statuses[minister.status - 1] }}</span>
+						<strong class="name">{{ minister.name }}</strong>
+					</div>
 				</div>
 			{% endfor %}
 
 			{% if government_members|length == 0 %}
-				<p>Aucun gouvernement formé</p>
+				<p class="text-sm italic">Aucun gouvernement formé</p>
 			{% endif %}
 
-			<h4>Informations</h4>
-			<div class="number-box grey">
-				<span class="label">Nombre de points de la faction</span>
-				<span class="value">{{ faction.points|number }}</span>
-			</div>
-			<div class="number-box grey">
-				<span class="label">Richesse de la faction</span>
-				<span class="value">
-					{{ faction.credits|number }}
-					<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
-				</span>
-			</div>
-			<div class="number-box grey">
-				<span class="label">Nombre de points des territoires contrôlés</span>
-				<span class="value">{{ sectors_count }}</span>
-			</div>
-			<div class="number-box grey">
-				<span class="label">Nombre de joueurs actifs</span>
-				<span class="value">{{ active_players_count }}</span>
-			</div>
+			<twig:H3>Informations</twig:H3>
+
+			<twig:NumberBox label="Nombre de points de la faction">
+				{{ faction.points|number }}
+			</twig:NumberBox>
+
+			<twig:NumberBox label="Richesse de la faction">
+				{{ faction.credits|number }}
+			</twig:NumberBox>
+
+			<twig:NumberBox label="Nombre de points des territoires contrôlés">
+				{{ sectors_count }}
+			</twig:NumberBox>
+
+			<twig:NumberBox label="Nombre de joueurs actifs">
+				{{ active_players_count }}
+			</twig:NumberBox>
 		</div>
 	</div>
-</div>
+</twig:LayoutBox>

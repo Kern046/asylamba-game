@@ -13,6 +13,7 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 class SidebarItem
 {
 	public string $route;
+	public array $params = [];
 	public string $picto;
 	public string $label;
 }

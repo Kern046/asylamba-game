@@ -8,15 +8,17 @@
 {% endblock left_sidebar %}
 
 {% block body %}
-	<twig:ContentContainer>
+	<twig:PageTitle>
+		Ambassades
+	</twig:PageTitle>
+
+	<twig:ContentContainer class="flex gap-x-4">
 		{% if player is defined %}
 			{{ include('molecules/embassy/player_search.html.twig') }}
 			{{ include('molecules/embassy/player_bases.html.twig') }}
-			{{ include('molecules/common/default.html.twig') }}
 		{% else %}
 			{{ include('molecules/embassy/faction_nav.html.twig') }}
 			{{ include('molecules/embassy/faction_flag.html.twig') }}
-			{{ include('molecules/embassy/faction_infos.html.twig') }}
 			{{ include('molecules/embassy/faction_government.html.twig') }}
 			{{ include('components/Faction/data/diplomacy/relations.html.twig') }}
 		{% endif %}

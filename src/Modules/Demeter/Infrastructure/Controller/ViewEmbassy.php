@@ -50,7 +50,6 @@ class ViewEmbassy extends AbstractController
 			if (null !== ($faction = $colorRepository->getOneByIdentifier($factionId)) && $faction->isInGame) {
 				$data = [
 					'faction' => $faction,
-					'parsed_description' => $colorManager->getParsedDescription($faction),
 					'government_members' => $playerRepository->getBySpecification(new IsGovernmentMember($faction)),
 					'diplomacy_statements' => [
 						Color::ENEMY => 'En guerre',

@@ -37,7 +37,6 @@ class ViewGovernment extends AbstractController
 
 		return $this->render('pages/demeter/faction/government.html.twig', [
 			'faction' => $faction,
-			'parsed_description' => $colorManager->getParsedDescription($faction),
 			'credit_transactions' => $creditTransactionRepository->getAllBySender($faction),
 			'senators' => $playerRepository->getBySpecification(new IsParliamentMember($faction)),
 			'faction_sectors' => $sectorRepository->getFactionSectors($faction),
