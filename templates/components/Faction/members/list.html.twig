@@ -1,35 +1,36 @@
 {% set statuses = get_faction_info(faction.identifier, 'status') %}
 
-<div class="component player size3">
-	<div class="head"></div>
-	<div class="fix-body">
-		<div class="body">
-			{% for type in players_by_type|keys %}
-				{% set players = players_by_type[type] %}
-				<h4>{{ type }}</h4>
+<div class="flex flex-col gap-y-4">
+	{% for type in players_by_type|keys %}
+		{% set players = players_by_type[type] %}
+		<section>
+			<twig:H3>{{ type }}</twig:H3>
 
+			{% if players|length == 0 %}
+				<p>aucun joueur</p>
+			{% endif %}
 
-				{% if players|length == 0 %}
-					<p>aucun joueur</p>
-				{% endif %}
-
+			<div class="flex mt-4">
 				{% for player in players %}
-					<div class="player">
+					<div class="flex items-center gap-x-2 bg-gray-800 w-64 p-2 rounded-md shadow-md">
 						<a href="{{ path('embassy', {'player': player.id}) }}">
-							<img src="{{ asset('build/media/avatar/small/' ~ player.avatar ~ '.png') }}" class="picto" alt="{{ player.name }}" />
+							<twig:Avatar :player="player" class="max-w-14 max-h-14" />
 						</a>
-						<span class="title">{{ statuses[player.status - 1] }}</span>
-						<strong class="name">{{ player.name }}</strong>
-						<span class="experience">{{ player.factionPoint|number }} points</span>
+
+						<div class="grow">
+							<span class="text-sm">{{ statuses[player.status - 1] }}</span><br>
+							<strong class="name">{{ player.name }}</strong><br>
+							<span class="text-xs">{{ player.factionPoint|number }} points</span>
+						</div>
 
 						{% if is_player_online(player) %}
-							<span class="online hb lt" title="est en ligne actuellement"></span>
+							<div class="w-3 h-3 self-start rounded-full bg-light{{ faction.identifier }}" title="est en ligne actuellement"></div>
 						{% elseif is_player_inactive(player) %}
-							<span class="inactive hb lt" title="ne s'est plus connecté depuis une semaine"></span>
+							<div class="w-3 h-3 self-start rounded-full bg-gray-500" title="ne s'est plus connecté depuis une semaine"></div>
 						{% endif %}
 					</div>
 				{% endfor %}
-			{% endfor %}
-		</div>
-	</div>
+			</div>
+		</section>
+	{% endfor %}
 </div>

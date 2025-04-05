@@ -13,18 +13,18 @@ interface SquadronRepositoryInterface extends EntityRepositoryInterface
 {
 	/**
 	 * @return array{
-	 *     nb0: int,
-	 *     nb1: int,
-	 *     nb2: int,
-	 *     nb3: int,
-	 *     nb4: int,
-	 *     nb5: int,
-	 *     nb6: int,
-	 *     nb7: int,
-	 *     nb8: int,
-	 *     nb9: int,
-	 *     nb10: int,
-	 *     nb11: int,
+	 *     nbs0: int,
+	 *     nbs1: int,
+	 *     nbs2: int,
+	 *     nbs3: int,
+	 *     nbs4: int,
+	 *     nbs5: int,
+	 *     nbs6: int,
+	 *     nbs7: int,
+	 *     nbs8: int,
+	 *     nbs9: int,
+	 *     nbs10: int,
+	 *     nbs11: int,
 	 * }
 	 */
 	public function getFactionFleetStats(Color $faction): array;

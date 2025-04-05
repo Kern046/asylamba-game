@@ -56,7 +56,7 @@ module.exports = {
 	safelist: [
 		{
 			pattern: /(bg|fill|stroke|text|border|outline)-(light|medium|dark)+/,
-			variants: ['hover', 'peer-checked', 'focus-within', 'focus', 'data'],
+			variants: ['hover', 'peer-checked', 'focus-within', 'focus', 'data', 'group-odd', 'group-even'],
 		},
 	]
 }

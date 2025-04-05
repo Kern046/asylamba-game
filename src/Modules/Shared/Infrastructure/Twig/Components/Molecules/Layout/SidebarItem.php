@@ -14,6 +14,6 @@ class SidebarItem
 {
 	public string $route;
 	public array $params = [];
-	public string $picto;
+	public string|null $picto = null;
 	public string $label;
 }

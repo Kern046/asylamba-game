@@ -1,6 +1,10 @@
 {% extends 'layouts/demeter/faction.html.twig' %}
 
+{% block page_title 'Membres' %}
+
 {% block content %}
-	{% include('components/faction/members/stats.html.twig') %}
-	{% include('components/faction/members/list.html.twig') %}
+	<div class="grid grid-cols-3 gap-x-4">
+		{% include('components/Faction/members/stats.html.twig') %}
+		{% include('components/Faction/members/list.html.twig') %}
+	</div>
 {% endblock content %}

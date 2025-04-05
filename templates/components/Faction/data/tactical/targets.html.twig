@@ -1,30 +1,25 @@
+<div class="min-w-64">
+	<header>
+		<twig:H2>Objectifs de victoires</twig:H2>
+	</header>
 
-<div class="component">
-	<div class="head skin-2">
-		<h2>Objectifs de victoires</h2>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			{% if not faction.isWinner %}
-				<h4>Conditions de victoire</h4>
-				<p>Pour gagner, votre faction doit collecter {{ points_to_win|number }} points au classement total de faction.</p>
-				<p>Vous avez actuellement {{ faction.rankingPoints }} points.</p>
+	<section class="mt-4">
+		{% if not faction.isWinner %}
+			<twig:H3>Conditions de victoire</twig:H3>
+			<p class="text-sm">Pour gagner, votre faction doit collecter {{ points_to_win|number }} points au classement total de faction.</p>
+			<p class="mt-2">Vous avez actuellement {{ faction.rankingPoints }} points.</p>
 
-				{% set percent = faction.rankingPoints|percent(points_to_win) %}
-				<ul class="list-type-1">
-					<li>
-						<span class="label">avancement</span>
-						<span class="value">{{ percent}} %</span>
-						<span class="progress-bar hb bl" title="points">
-						<span style="width:{{ percent }}%;" class="content {{ faction.id }}"></span>
-						</span>
-					</li>
-				</ul>
-
-			{% else %}
-				<h4>Vous avez gagné</h4>
-				<p>Vous avez atteint les {{ points_to_win|number }} points, vous avez donc gagné la partie. Félicitations !</p>
-			{% endif %}
-		</div>
-	</div>
+			{% set percent = faction.rankingPoints|percent(points_to_win) %}
+			<ul class="list-type-1">
+				<li>
+					<span class="label">avancement</span>
+					<span class="value">{{ percent}} %</span>
+					<twig:ProgressBar :current="percent" :faction="faction" />
+				</li>
+			</ul>
+		{% else %}
+			<h4>Vous avez gagné</h4>
+			<p>Vous avez atteint les {{ points_to_win|number }} points, vous avez donc gagné la partie. Félicitations !</p>
+		{% endif %}
+	</section>
 </div>

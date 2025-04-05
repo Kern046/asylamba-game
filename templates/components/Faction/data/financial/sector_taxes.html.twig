@@ -1,20 +1,21 @@
-<div class="component profil">
-	<div class="head skin-2">
-		<h2>Imposition</h2>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<h4>Impôts courants</h4>
+<div class="w-96">
+	<header>
+		<twig:H2>Imposition</twig:H2>
+	</header>
+	<section class="mt-2">
+		<twig:H4>Impôts courants</twig:H4>
 
-			<ul class="list-type-1">
-				{% for sector in faction_sectors %}
-					<li>
-						<a href="#" class="picto color{{ sector.faction.identifier ?? 0 }}">{{ sector.identifier }}</a>
-						<span class="label">{{ sector.name }}</span>
-						<span class="value">{{ sector.tax }} %</span>
-					</li>
-				{% endfor %}
-			</ul>
-		</div>
-	</div>
+		<ul class="flex flex-col mt-4">
+			{% for sector in faction_sectors %}
+				<li class="flex justify-between items-center p-2 border-t border-gray-700">
+					<a href="#" class="flex justify-center items-center w-10 h-10 rounded-full bg-medium{{ sector.faction.identifier ?? 0 }}">{{ sector.identifier }}</a>
+
+					<div class="text-right">
+						<span class="text-sm">{{ sector.name }}</span><br>
+						<span class="text-xl">{{ sector.tax }} %</span>
+					</div>
+				</li>
+			{% endfor %}
+		</ul>
+	</section>
 </div>

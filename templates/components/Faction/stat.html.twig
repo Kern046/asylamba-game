@@ -1,117 +1,134 @@
-<div class="component size2 player new-message profil">
-	<div class="head">
-		</div>
-	<div class="fix-body">
-		<div class="body">
-			<h4>Agenda politique</h4>
-
-			{% if faction.hasElections %}
-				<div class="faction-flow" style="margin: 10px 0 40px 0;">
-					<div class="mandate" style="padding: 50px 20px 10px 20px;">
-						<span class="progress-bar">
-							<span style="width: {{ remaining_mandate|percent(total_mandate, false) }}%;" class="content"></span>
-							<span class="step" style="left: 0%;">
-								<span class="label">Début du mandat courant</span>
-							</span>
-							<span class="step" style="left: 100%;">
-								<span class="label right">Fin du mandat courant</span>
-							</span>
+<twig:LayoutBox class="col-span-2">
+	<header>
+		<twig:H2>
+			Agenda politique
+		</twig:H2>
+	</header>
+	<section>
+		{% if faction.hasElections %}
+			<div class="faction-flow" style="margin: 10px 0 40px 0;">
+				<div class="mandate" style="padding: 50px 20px 10px 20px;">
+					<div class="relative w-full">
+						<twig:ProgressBar :current="remaining_mandate|percent(total_mandate, false)" :faction="faction" />
+						<span class="absolute" style="left: 0%;">
+							<span class="label">Début du mandat courant</span>
+						</span>
+						<span class="absolute" style="left: 100%;">
+							<span class="label right">Fin du mandat courant</span>
 						</span>
 					</div>
+				</div>
 
-					<div class="election" style="padding: 10px 20px;">
-						<span class="progress-bar" style="width: {{ (100 - total_before_campaign|percent(total_mandate, false)) }}%; margin-left: auto;">
-								<span style="width: {{ election_progress }}%;" class="content"></span>
-								<span class="step" style="left: 0%;">
-									<span class="label bottom right">Campagne</span>
-								</span>
-
-								{% if faction.isDemocratic %}
-									<span class="step" style="left: {{ total_campaign|percent(total_campaign_election, false) }}%;">
-										<span class="label bottom right">Elections</span>
-									</span>
-									<span class="step" style="left: 100%;">
-										<span class="label bottom right">Résultats</span>
-									</span>
-								{% else %}
-									<span class="step" style="left: 100%;">
-										<span class="label bottom right">Décision divine</span>
-									</span>
-								{% endif %}
+				<div class="election" style="padding: 10px 20px;">
+					<span class="relative" style="width: {{ (100 - total_before_campaign|percent(total_mandate, false)) }}%; margin-left: auto;">
+							<twig:ProgressBar :current="election_progress" :faction="faction" />
+							<span class="absolute" style="left: 0%;">
+								<span class="label bottom right">Campagne</span>
 							</span>
-						</div>
+
+							{% if faction.isDemocratic %}
+								<span class="absolute" style="left: {{ total_campaign|percent(total_campaign_election, false) }}%;">
+									<span class="label bottom right">Elections</span>
+								</span>
+								<span class="absolute" style="left: 100%;">
+									<span class="label bottom right">Résultats</span>
+								</span>
+							{% else %}
+								<span class="absolute" style="left: 100%;">
+									<span class="label bottom right">Décision divine</span>
+								</span>
+							{% endif %}
+						</span>
 					</div>
-
-				{% if faction.isInCampaign %}
-					<a class="centred-link" href="{{ path('view_faction_election') }}">{{ faction.isDemocratic ? 'Présentez-vous aux élections' : 'Se proposer comme Guide' }}</a>
-				{% elseif faction.isInElection %}
-					<a class="centred-link" href="{{ path('view_faction_election') }}">Votez dès maintenant pour votre candidat favori</a>
-				{% endif %}
-			{% else %}
-				<div class="faction-flow" style="margin: 20px 0 30px 0;">
-					{% if faction.isInElection %}
-						<div class="center-box">
-							<span class="label">La tentative de coup d'état se termine dans</span>
-							<span class="value">{{ remaining_coup_time|lite_seconds }}</span>
-							</div>
-						<a class="centred-link" href="{{ path('view_faction_election') }}">Prendre position sur le coup d'état</a>
-					{% else %}
-						{% if current_player.isParliamentMember %}
-							<a class="centred-link sh" href="#" data-target="makeacoup">Tenter un coup d'état</a>
-
-							<form action="{{ path('initiate_faction_coup') }}" method="post" id="makeacoup" style="display: none;">
-								<p><label for="program">Votre message politique</label></p>
-								<p class="input input-area"><textarea id="program" name="program" required style="height: 200px;"></textarea></p>
-
-								<p class="button"><button type="submit">Lancer le coup d'état</button></p>
-							</form>
-						{% else %}
-							<span class="centred-link">Vous ne pouvez pas tenter un coup d'état</span>
-						{% endif %}
-					{% endif %}
 				</div>
+
+			{% if faction.isInCampaign %}
+				<a class="centred-link" href="{{ path('view_faction_election') }}">
+					<twig:Button :faction="faction">
+						{{ faction.isDemocratic ? 'Présentez-vous aux élections' : 'Se proposer comme Guide' }}
+					</twig:Button>
+				</a>
+			{% elseif faction.isInElection %}
+				<a class="centred-link" href="{{ path('view_faction_election') }}">
+					<twig:Button :faction="faction">
+						Votez dès maintenant pour votre candidat favori
+					</twig:Button>
+				</a>
 			{% endif %}
-
-			<h4>Gouvernement actuel</h4>
-
-			{% set statuses = get_faction_info(faction.identifier, 'status') %}
-
-			{% for minister in government_members %}
-				<div class="player">
-					<a href="{{ path('embassy', {'player': minister.id}) }}">
-						<img src="{{ asset('build/media/avatar/small/' ~ minister.avatar ~ '.png') }}" alt="{{ minister.name }}" class="picto" />
+		{% else %}
+			<div class="faction-flow" style="margin: 20px 0 30px 0;">
+				{% if faction.isInElection %}
+					<div class="center-box">
+						<span class="label">La tentative de coup d'état se termine dans</span>
+						<span class="value">{{ remaining_coup_time|lite_seconds }}</span>
+						</div>
+					<a class="centred-link" href="{{ path('view_faction_election') }}">Prendre position sur le coup d'état</a>
+				{% else %}
+					{% if current_player.isParliamentMember %}
+						<a class="centred-link sh" href="#" data-target="makeacoup">
+							<twig:Button :faction="faction">
+								Tenter un coup d'état
+							</twig:Button>
 						</a>
-					<span class="title">{{ statuses[minister.status - 1] }}</span>
-					<strong class="name">{{ minister.name }}</strong>
-					<span class="experience">{{ minister.factionPoint|number }} points</span>
-				</div>
-			{% endfor %}
 
-			<h4>Statistiques générales</h4>
+						<form action="{{ path('initiate_faction_coup') }}" method="post" id="makeacoup" class="hidden">
+							<p><label for="program">Votre message politique</label></p>
+							<p class="input input-area"><textarea id="program" name="program" required style="height: 200px;"></textarea></p>
 
-			<div class="number-box half">
-				<span class="label">Classement général de la faction</span>
-				<span class="value">{{ faction_ranking is not null ? faction_ranking|ranking : 'n/a' }}</span>
+							<p class="button">
+								<twig:Button type="submit">
+									Lancer le coup d'état
+								</twig:Button>
+							</p>
+						</form>
+					{% else %}
+						<span class="centred-link">Vous ne pouvez pas tenter un coup d'état</span>
+					{% endif %}
+				{% endif %}
 			</div>
-			<div class="number-box half grey">
-				<span class="label">Nombre de points de la faction</span>
-				<span class="value">{{ faction.points|number }}</span>
+		{% endif %}
+
+		<twig:H2 class="mt-4">
+			Gouvernement actuel
+		</twig:H2>
+
+		{% set statuses = get_faction_info(faction.identifier, 'status') %}
+
+		{% for minister in government_members %}
+			<div class="player">
+				<a href="{{ path('embassy', {'player': minister.id}) }}">
+					<img src="{{ asset('build/media/avatar/small/' ~ minister.avatar ~ '.png') }}" alt="{{ minister.name }}" class="picto" />
+					</a>
+				<span class="title">{{ statuses[minister.status - 1] }}</span>
+				<strong class="name">{{ minister.name }}</strong>
+				<span class="experience">{{ minister.factionPoint|number }} points</span>
 			</div>
-			<div class="number-box half grey">
-				<span class="label">Richesse de la faction</span>
-				<span class="value">
-					{{ faction.credits|number }}
-					<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
-				</span>
-			</div>
-			<div class="number-box half grey">
-				<span class="label">Nombre de points des territoires contrôlés</span>
-				<span class="value">{{ sectors_count }}</span>
-			</div>
-			<div class="number-box half grey">
-				<span class="label">Nombre de joueurs actifs</span>
-				<span class="value">{{ active_players_count }}</span>
-			</div>
+		{% endfor %}
+
+		<twig:H2 class="mt-4">
+			Statistiques générales
+		</twig:H2>
+
+		<div class="grid grid-cols-2 gap-4 mt-2">
+			<twig:NumberBox label="Classement général de la faction" :faction="faction" class="">
+				{{ faction_ranking is not null ? faction_ranking|ranking : 'n/a' }}
+			</twig:NumberBox>
+
+			<twig:NumberBox label="Nombre de points de la faction" :faction="faction" class="">
+				{{ faction.points|number }}
+			</twig:NumberBox>
+
+			<twig:NumberBox label="Richesse de la faction" :faction="faction" class="">
+				{{ faction.credits|number }}
+			</twig:NumberBox>
+
+			<twig:NumberBox label="Nombre de points des territoires contrôlés" :faction="faction" class="">
+				{{ sectors_count }}
+			</twig:NumberBox>
+
+			<twig:NumberBox label="Nombre de joueurs actifs" :faction="faction" class="">
+				{{ active_players_count }}
+			</twig:NumberBox>
 		</div>
-	</div>
-</div>
+	</section>
+</twig:LayoutBox>

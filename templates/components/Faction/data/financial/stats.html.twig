@@ -1,32 +1,25 @@
-<div class="component profil">
-	<div class="head skin-2">
-		<h2>Finance</h2>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<h4>Richesse</h4>
+<div class="w-96">
+	<twig:H2>Finance</twig:H2>
 
-			<div class="number-box grey">
-				<span class="label">Fortune de la faction</span>
-				<span class="value">
-					{{ faction.credits|number }}
-					<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
-				</span>
-			</div>
+	<twig:H4 class="mt-2">Richesse</twig:H4>
 
-			<div class="evolution">
-				<div class="header">Evolution de la puissance commerciale de la faction sur les 20 derniers segments.</div>
-				{# @TODO fix that class name #}
-				<div class="diargam">
-					{% for ranking in faction_rankings %}
-						<span class="progress-bar">
-							<span style="width:{{ ranking.wealth|percent(credit_base) }}%;" class="content">
-								{{ ranking.wealth|number(-2) }}
-							</span>
-						</span>
-					{% endfor %}
+	<twig:NumberBox label="Fortune de la faction" :faction="faction">
+		{{ faction.credits|number }}
+	</twig:NumberBox>
+
+	<div class="evolution">
+		<twig:H3 class="mt-4">
+			Evolution de la puissance commerciale de la faction sur les 20 derniers segments
+		</twig:H3>
+		{# @TODO fix that class name #}
+		<div class="flex flex-col">
+			{% for ranking in faction_rankings %}
+				<div class="w-full group">
+					<div style="width:{{ ranking.wealth|percent(credit_base) }}%;" class="min-w-4 group-odd:bg-medium{{ faction.identifier }} group-even:bg-light{{ faction.identifier }} text-xs p-1">
+						{{ ranking.wealth|number(-2) }}
+					</div>
 				</div>
-			</div>
+			{% endfor %}
 		</div>
 	</div>
 </div>

@@ -1,7 +1,9 @@
 {% extends 'layouts/demeter/faction.html.twig' %}
 
 {% block content %}
-	{{ include('components/Faction/news.html.twig') }}
-	{{ include('components/Faction/stat.html.twig') }}
-	{{ include('components/Faction/laws.html.twig') }}
+	<div class="grid grid-cols-3 gap-x-4">
+		{{ include('components/Faction/news.html.twig') }}
+		{{ include('components/Faction/stat.html.twig') }}
+		{{ include('components/Faction/laws.html.twig') }}
+	</div>
 {% endblock content %}

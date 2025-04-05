@@ -1,44 +1,49 @@
-<div class="component nav">
-	<div class="head skin-1">
-		<h1>Registres</h1>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<a href="{{ path('faction_data', {'mode': 'financial'}) }}" class="nav-element {% if 'financial' == mode %}active{% endif %}">
-				<img src="{{ asset('build/media/financial/taxout.png') }}" alt="" />
-				<strong>Finance</strong>
-				<em>Richesse, imposition et donations</em>
-			</a>
-
-			<a href="{{ path('faction_data', {'mode': 'trade'}) }}" class="nav-element {% if 'trade' == mode %}active{% endif %}">
-				<img src="{{ asset('build/media/orbitalbase/commercialplateforme.png') }}" alt="" />
-				<strong>Commerce</strong>
-				<em>Routes commerciales et taxes sur le commerce</em>
-			</a>
-
-			<a href="{{ path('faction_data', {'mode': 'war'}) }}" class="nav-element {% if 'war' == mode %}active{% endif %}">
-				<img src="{{ asset('build/media/fleet/movement.png') }}" alt="" />
-				<strong>Guerre</strong>
-				<em>Armées, mouvements de flottes et rapports de combat</em>
-			</a>
-
-			<a href="{{ path('faction_data', {'mode': 'tactical'}) }}" class="nav-element {% if 'tactical' == mode %}active{% endif %}">
-				<img src="{{ asset('build/media/faction/data/tactical.png') }}" alt="" />
-				<strong>Tactique</strong>
-				<em>Territoires et objectifs de victoire</em>
-			</a>
-
-			<a href="{{ path('faction_data', {'mode': 'diplomacy'}) }}" class="nav-element {% if 'diplomacy' == mode %}active{% endif %}">
-				<img src="{{ asset('build/media/faction/data/diplomacy.png') }}" alt="" />
-				<strong>Diplomatie</strong>
-				<em>Accords et traités</em>
-			</a>
-
-			<a href="{{ path('faction_data', {'mode': 'law'}) }}" class="nav-element {% if 'law' == mode %}active{% endif %}">
-				<img src="{{ asset('build/media/faction/data/law.png') }}" alt="" />
-				<strong>Lois</strong>
-				<em>Table des Lois</em>
-			</a>
+<twig:LayoutBox class="min-w-80 flex flex-col divide-y divide-gray-900">
+	<a href="{{ path('faction_data', {'mode': 'financial'}) }}" class="flex gap-x-2 py-2 px-4 bg-gray-700 hover:bg-gray-900 transition-[background-color] duration-200 ease-in {% if 'financial' == mode %}bg-gray-900{% endif %}">
+<!--		<img src="{{ asset('build/media/financial/taxout.png') }}" alt="" />-->
+		<div>
+			<strong>Finance</strong><br>
+			<em class="text-xs">Richesse, imposition et donations</em>
 		</div>
-	</div>
-</div>
+	</a>
+
+	<a href="{{ path('faction_data', {'mode': 'trade'}) }}" class="flex gap-x-2 py-2 px-4 bg-gray-700 hover:bg-gray-900 transition-[background-color] duration-200 ease-in {% if 'trade' == mode %}bg-gray-900{% endif %}">
+<!--		<img src="{{ asset('build/media/orbitalbase/commercialplateforme.png') }}" alt="" />-->
+		<div>
+			<strong>Commerce</strong><br>
+			<em class="text-xs">Routes commerciales et taxes sur le commerce</em>
+		</div>
+	</a>
+
+	<a href="{{ path('faction_data', {'mode': 'war'}) }}" class="flex gap-x-2 py-2 px-4 bg-gray-700 hover:bg-gray-900 transition-[background-color] duration-200 ease-in {% if 'war' == mode %}bg-gray-900{% endif %}">
+<!--		<img src="{{ asset('build/media/fleet/movement.png') }}" alt="" />-->
+		<div>
+			<strong>Guerre</strong><br>
+			<em class="text-xs">Armées, mouvements de flottes et rapports de combat</em>
+		</div>
+	</a>
+
+	<a href="{{ path('faction_data', {'mode': 'tactical'}) }}" class="flex gap-x-2 py-2 px-4 bg-gray-700 hover:bg-gray-900 transition-[background-color] duration-200 ease-in {% if 'tactical' == mode %}bg-gray-900{% endif %}">
+<!--		<img src="{{ asset('build/media/faction/data/tactical.png') }}" alt="" />-->
+		<div>
+			<strong>Tactique</strong><br>
+			<em class="text-xs">Territoires et objectifs de victoire</em>
+		</div>
+	</a>
+
+	<a href="{{ path('faction_data', {'mode': 'diplomacy'}) }}" class="flex gap-x-2 py-2 px-4 bg-gray-700 hover:bg-gray-900 transition-[background-color] duration-200 ease-in {% if 'diplomacy' == mode %}bg-gray-900{% endif %}">
+<!--		<img src="{{ asset('build/media/faction/data/diplomacy.png') }}" alt="" />-->
+		<div>
+			<strong>Diplomatie</strong><br>
+			<em class="text-xs">Accords et traités</em>
+		</div>
+	</a>
+
+	<a href="{{ path('faction_data', {'mode': 'law'}) }}" class="flex gap-x-2 py-2 px-4 bg-gray-700 hover:bg-gray-900 transition-[background-color] duration-200 ease-in {% if 'law' == mode %}bg-gray-900{% endif %}">
+<!--		<img src="{{ asset('build/media/faction/data/law.png') }}" alt="" />-->
+		<div>
+			<strong>Lois</strong><br>
+			<em class="text-xs">Table des Lois</em>
+		</div>
+	</a>
+</twig:LayoutBox>

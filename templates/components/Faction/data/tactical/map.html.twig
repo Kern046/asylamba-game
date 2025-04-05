@@ -1,27 +1,25 @@
 <div class="component size2">
-	<div class="head skin-2">
-		<h2>Carte tactique</h2>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="tactical-map">
-				<svg class="sectors" viewBox="0, 0, 750, 750" xmlns="http://www.w3.org/2000/svg">
-					{% for sector in sectors %}
-						<polygon data-id="{{ sector.identifier }}"
-						class="ally{{ sector.faction.identifier ?? 0 }} {{ (sector.faction.identifier ?? 0) != 0 ? 'enabled' : 'disabled' }}"
-						points="{{ galaxy_configuration.sectorCoord(sector.identifier, map_scale, 0) }}"
-						/>
-					{% endfor %}
-				</svg>
-				<div class="number">
-					{% for sector in sectors %}
-						{% set i = sector.identifier - 1 %}
-						<span id="sector{{ sector.identifier }}" class="ally{{ sector.faction.identifier ?? 0 }}" style="top: {{ galaxy_configuration.sectors[i].display[1] * map_scale / 1.35 }}px; left: {{ galaxy_configuration.sectors[i].display[0] * map_scale / 1.35 }}px;">
-							{{ sector.identifier }}
-						</span>
-					{% endfor %}
-				</div>
+	<header>
+		<twig:H2>Carte tactique</twig:H2>
+	</header>
+	<section>
+		<div class="tactical-map relative">
+			<svg class="sectors" viewBox="0, 0, 750, 750" xmlns="http://www.w3.org/2000/svg" style="width: 579px; height: 579px;">
+				{% for sector in sectors %}
+					<polygon data-id="{{ sector.identifier }}"
+					class="{% if sector.faction %}fill-medium{{ sector.faction.identifier }}{% else %}fill-gray-800 stroke-gray-900 {% endif %} {{ (sector.faction.identifier ?? 0) != 0 ? 'enabled' : 'disabled' }}"
+					points="{{ galaxy_configuration.sectorCoord(sector.identifier, map_scale, 0) }}"
+					/>
+				{% endfor %}
+			</svg>
+			<div class="number">
+				{% for sector in sectors %}
+					{% set i = sector.identifier - 1 %}
+					<span id="sector{{ sector.identifier }}" class="absolute flex justify-center w-6 h-6 border border-gray-500 rounded-full items-center text-xs {% if sector.faction %}bg-dark{{ sector.faction.identifier }}{% else %}bg-gray-800{% endif %}" style="top: {{ galaxy_configuration.sectors[i].display[1] * map_scale / 1.35 }}px; left: {{ galaxy_configuration.sectors[i].display[0] * map_scale / 1.35 }}px;">
+						{{ sector.identifier }}
+					</span>
+				{% endfor %}
 			</div>
 		</div>
-	</div>
+	</section>
 </div>
