@@ -75,9 +75,10 @@ class Parser
 		return $string;
 	}
 
+	/** @TODO Refactor this inferno */
 	public function getToolbar(): string
 	{
-		$tl = '<span class="toolbar">';
+		$tl = '<div class="toolbar">';
 		if ($this->parseTag) {
 			$tl .= '<button data-tag="bl">Gras</button>';
 			$tl .= '<button data-tag="it">Italique</button>';
@@ -91,7 +92,7 @@ class Parser
 		if ($this->parsePlace) {
 			$tl .= '<button data-tag="pl">Planète</button>';
 		}
-		$tl .= '</span>';
+		$tl .= '</div>';
 
 		return $tl;
 	}

@@ -1,19 +1,17 @@
-<div class="component nav">
-	<div class="head skin-1">
-		<h1>Forum</h1>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<a href="{{ path('faction_forum') }}" class="more-button">Revenir aux forums</a>
+<twig:LayoutBox class="component nav">
+	<section>
+		<a href="{{ path('faction_forum') }}" class="more-button text-sm italic">Revenir aux forums</a>
 
+		<div class="mt-2 flex flex-col divide-y divide-gray-900">
 			{% for forumId in forum_ids %}
-				{% set activeClass = (not app.request.attributes.has('forumId') and 1 == forumId) or forumId == app.request.attributes.get('forumId') ? 'active' : '' %}
-				<a href="{{ path('faction_forum', { forumId }) }}" class="nav-element {{ activeClass }}">
-					<img src="{{ asset('build/media/orbitalbase/situation.png') }}" alt="" />
-					<strong>{{ get_forum_info(forumId, 'name') }}</strong>
-					<em>{{ get_forum_info(forumId, 'shortDescription') }}</em>
+				{% set activeClass = (not app.request.attributes.has('forumId') and 1 == forumId) or forumId == app.request.attributes.get('forumId') ? 'bg-gray-900' : '' %}
+				<a href="{{ path('faction_forum', { forumId }) }}" class="block p-2 bg-gray-700 hover:bg-gray-900 {{ activeClass }}">
+					<!--				<img src="{{ asset('build/media/orbitalbase/situation.png') }}" alt="" />-->
+					<strong>{{ get_forum_info(forumId, 'name') }}</strong><br>
+					<em class="text-xs">{{ get_forum_info(forumId, 'shortDescription') }}</em>
 				</a>
 			{% endfor %}
 		</div>
-	</div>
-</div>
+
+	</section>
+</twig:LayoutBox>

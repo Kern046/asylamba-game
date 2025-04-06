@@ -1,15 +1,19 @@
 {% extends 'layouts/demeter/faction.html.twig' %}
 
+{% block page_title 'Forum' %}
+
 {% block content %}
-	{% if show_home is same as(false) %}
-		{% include 'components/Faction/forum/navbar.html.twig' %}
-	{% endif %}
+	<div class="flex gap-x-4">
+		{% if show_home is same as(false) %}
+			{% include 'components/Faction/forum/navbar.html.twig' %}
+		{% endif %}
 
-	{% for forumId, topics_with_last_views in topics_by_forum %}
-		{% include 'components/Faction/forum/topics.html.twig' with { forumId, topics_with_last_views } %}
-	{% endfor %}
+		{% for forumId, topics_with_last_views in topics_by_forum %}
+			{% include 'components/Faction/forum/topics.html.twig' with { forumId, topics_with_last_views } %}
+		{% endfor %}
 
-	{% if 'create' == app.request.query.get('mode') %}
-		{% include 'components/Faction/forum/new_topic.html.twig' with { forumId: selected_forum_id } %}
-	{% endif %}
+		{% if 'create' == app.request.query.get('mode') %}
+			{% include 'components/Faction/forum/new_topic.html.twig' with { forumId: selected_forum_id } %}
+		{% endif %}
+	</div>
 {% endblock content %}
