@@ -24,14 +24,13 @@
 		{% endblock %}
 	</head>
 	<body class="h-screen bg-gray-900 text-white">
-		<div id="container" class="flex flex-col h-full w-fit min-w-full py-20">
+		<div id="container" class="flex flex-col h-full w-fit min-w-full py-[70px]">
 			{{ include('components/common/navbar.html.twig') }}
+			{{ include('components/common/toolbar.html.twig') }}
 
 			{% block body %}{% endblock body %}
 
-			{{ include('components/common/toolbar.html.twig') }}
-
-			<div class="hidden md:block fixed left-0 top-20">
+			<div class="hidden md:block fixed left-0 top-32">
 				{% block left_sidebar %}{% endblock left_sidebar %}
 			</div>
 			<div class="hidden md:block fixed right-0 top-0">

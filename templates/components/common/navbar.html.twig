@@ -3,68 +3,75 @@
 {% set tutorial_step = current_player.stepTutorial %}
 
 {% apply spaceless %}
-	<header class="fixed z-[1100] top-0 left-0 w-full flex text-gray-200 flex-col md:flex-row items-center font-semibold bg-gray-700/80">
-		<nav class="grow basis-1/2">
-			<ul class="flex gap-4 justify-end">
-				<li>
-					<a href="{{ path('profile') }}">
-						Profil
-					</a>
-				</li>
-				<li>
-					<a href="{{ path('fleet_headquarters') }}">
-						Quartier Général
-					</a>
-				</li>
-				<li>
-					<a href="{{ path('map') }}">
-						Carte de la galaxie
-					</a>
-				</li>
-				<li>
-					<a href="{{ path('financial_investments') }}">
-						Finances
-					</a>
-				</li>
-				<li>
-					<a href="{{ path('university') }}">
-						Université
-					</a>
-				</li>
-				<li>
-					<a href="{{ path('faction_overview') }}">
-						Faction
-					</a>
-				</li>
-			</ul>
-		</nav>
-		<div class="hidden md:block px-10 py-1">
-			<a href="{{ path('faction_overview') }}" class="">
-				<twig:FactionBanner :faction="current_player.faction" class="w-16 h-16" />
+	<header class="fixed z-[1100] top-0 left-0 w-full flex text-gray-200 flex-col md:flex-row font-semibold bg-gray-700/80">
+		<div>
+
+		</div>
+
+		<div class="grow flex-col md:flex-row flex items-center">
+			<nav class="grow basis-1/2">
+				<ul class="flex gap-4 justify-end">
+					<li>
+						<a href="{{ path('fleet_headquarters') }}">
+							Quartier Général
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('map') }}">
+							Carte de la galaxie
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('financial_investments') }}">
+							Finances
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('university') }}">
+							Université
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('faction_overview') }}">
+							Faction
+						</a>
+					</li>
+				</ul>
+			</nav>
+			<div class="hidden md:block px-10 py-1">
+				<a href="{{ path('faction_overview') }}" class="">
+					<twig:FactionBanner :faction="current_player.faction" class="w-16 h-16" />
+				</a>
+			</div>
+			<nav class="grow basis-1/2">
+				<ul class="flex gap-4 justify-start">
+					<li>
+						<a href="{{ path('player_rankings') }}">
+							Classement
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('embassy') }}">
+							Ambassade
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('communication_center') }}">
+							Messagerie
+							{% if conversations_count > 0 %}
+								{{ include('atoms/header/badge.html.twig', { count: conversations_count}) }}
+							{% endif %}
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+
+		<div>
+			<a href="{{ path('profile') }}" class="relative">
+				<twig:Avatar :player="current_player" class="absolute right-2 top-2 max-w-24 max-h-24" />
 			</a>
 		</div>
-		<nav class="grow basis-1/2">
-			<ul class="flex gap-4 justify-start">
-				<li>
-					<a href="{{ path('player_rankings') }}">
-						Classement
-					</a>
-				</li>
-				<li>
-					<a href="{{ path('embassy') }}">
-						Ambassade
-					</a>
-				</li>
-				<li>
-					<a href="{{ path('communication_center') }}">
-						Messagerie
-						{% if conversations_count > 0 %}
-							{{ include('atoms/header/badge.html.twig', { count: conversations_count}) }}
-						{% endif %}
-					</a>
-				</li>
-			</ul>
-		</nav>
 	</header>
 	<!--
 	<header class="">

@@ -25,12 +25,13 @@
 	</head>
 	<body class="bg-black text-white overflow-hidden">
 			{{ include('components/common/navbar.html.twig', { absolute: true }) }}
+			<div class="absolute top-[70px] z-[1100] left-0">
+				{{ include('components/common/toolbar.html.twig') }}
+			</div>
 
 			{% block body %}{% endblock body %}
 
-			{{ include('components/common/toolbar.html.twig') }}
-
-			<div class="hidden md:block fixed left-0 top-20 z-[1000]">
+			<div class="hidden md:block fixed left-0 top-32 z-[1000]">
 				{% block left_sidebar %}{% endblock left_sidebar %}
 			</div>
 			<div class="hidden md:block fixed right-0 top-0 z-[1000]">
