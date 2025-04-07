@@ -33,20 +33,18 @@
 					</twig:NumberBox>
 
 					<twig:NumberBox label="investissements universitaires" size="small">
-						<span class="buttons">
-							<a href="#" class="sh" data-target="invest-uni">↓</a>
-						</span>
-						<span class="label"></span>
-						<span class="value">
-							{{- investments_data.totalInvestUni|number -}}
-						</span>
+						<details class="marker:content-['']">
+							<summary class="cursor-pointer">
+								↓ {{ investments_data.totalInvestUni|number }}
+							</summary>
 
-						<form action="{{ path('update_university_investments') }}" method="POST" id="invest-uni" class="flex">
-							<input type="text" name="credit" value="{{ investments_data.totalInvestUni }}" class="w-48" />
-							<button type="submit">
-								ok
-							</button>
-						</form>
+							<form action="{{ path('update_university_investments') }}" method="POST" id="invest-uni" class="flex">
+								<twig:Input type="text" name="credit" value="{{ investments_data.totalInvestUni }}" class="w-48" />
+								<twig:Button type="submit" :faction="current_player.faction">
+									ok
+								</twig:Button>
+							</form>
+						</details>
 					</twig:NumberBox>
 
 					<twig:NumberBox label="salaire des commandants" size="small">

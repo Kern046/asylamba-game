@@ -28,11 +28,10 @@ final class Character
 	public function mount(Player $player): void
 	{
 		$this->player = $player;
-		$this->playerMissingExperience = $this->baseLevelPlayer * (2 ** ($player->level - 1));
+		$this->playerMissingExperience = intval($this->baseLevelPlayer * (2 ** ($player->level - 1)));
 		// @TODO Not quite sure that this is the next experience level. To check and rename accordingly
-		$this->playerNextLevelExperience = $this->baseLevelPlayer * (2 ** ($player->level - 2));
+		$this->playerNextLevelExperience = intval($this->baseLevelPlayer * (2 ** ($player->level - 2)));
 		$this->playerExperienceProgress = ((($player->experience - $this->playerNextLevelExperience) * 200) / $this->playerMissingExperience);
 
-		dump($this);
 	}
 }

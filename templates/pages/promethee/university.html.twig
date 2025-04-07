@@ -10,9 +10,9 @@
 <!--		<em>recherche & développement</em>-->
 	</twig:PageTitle>
 
-	<twig:ContentContainer class="flex gap-x-4">
+	<twig:ContentContainer class="flex gap-x-4" data-controller="university" data-university-investment-value="{{ current_player.iUniversity }}">
 		<twig:LayoutBox class="min-w-80">
-			<section>
+			<section class="flex flex-col gap-y-2">
 				<twig:NumberBox label="investissements alloués à l'université" id="uni-total-invest" data-invest="{{ current_player.iUniversity }}" data-baseid="{{ current_player.id }}">
 					{{ current_player.iUniversity|number }}
 
@@ -25,41 +25,41 @@
 					{{ university_investment_bonus }} %
 				</twig:NumberBox>
 
-				<hr class="my-2" />
+				<hr />
 
 				<twig:NumberBox label="sciences naturelles" id="uni-percent-natural" :percent="current_player.partNaturalSciences">
-					{{ current_player.partNaturalSciences }} %
+					<span data-university-target="part" data-type="natural">{{ current_player.partNaturalSciences }}</span> %
 
 					<twig:block name="upper_links">
-						<a href="#" class="uni-invest-button decrease" data-type="natural">-</a>
-						<a href="#" class="uni-invest-button increase" data-type="natural">+</a>
+						<div data-action="click->university#decrease" data-type="natural">-</div>
+						<div data-action="click->university#increase" data-type="natural">+</div>
 					</twig:block>
 				</twig:NumberBox>
 
 				<twig:NumberBox label="ingénierie informatique" id="uni-percent-informatic" :percent="current_player.partInformaticEngineering">
-					{{ current_player.partInformaticEngineering }} %
+					<span data-university-target="part" data-type="informatic">{{ current_player.partInformaticEngineering }}</span> %
 
 					<twig:block name="upper_links">
-						<a href="#" class="uni-invest-button decrease" data-type="informatic">-</a>
-						<a href="#" class="uni-invest-button increase" data-type="informatic">+</a>
+						<div data-action="click->university#decrease" data-type="informatic">-</div>
+						<div data-action="click->university#increase" data-type="informatic">+</div>
 					</twig:block>
 				</twig:NumberBox>
 
 				<twig:NumberBox label="sciences politiques" :percent="current_player.partLifeSciences">
-					{{ current_player.partLifeSciences }} %
+					<span data-university-target="part" data-type="life">{{ current_player.partLifeSciences }}</span> %
 
 					<twig:block name="upper_links">
-						<a href="#" class="uni-invest-button decrease" data-type="life">-</a>
-						<a href="#" class="uni-invest-button increase" data-type="life">+</a>
+						<div data-action="click->university#decrease" data-type="life">-</div>
+						<div data-action="click->university#increase" data-type="life">+</div>
 					</twig:block>
 				</twig:NumberBox>
 
 				<twig:NumberBox label="sciences économiques & sociales" :percent="current_player.partSocialPoliticalSciences">
-					{{ current_player.partSocialPoliticalSciences }} %
+					<span data-university-target="part" data-type="social">{{ current_player.partSocialPoliticalSciences }}</span> %
 
 					<twig:block name="upper_links">
-						<a href="#" class="uni-invest-button decrease" data-type="social">-</a>
-						<a href="#" class="uni-invest-button increase" data-type="social">+</a>
+						<div data-action="click->university#decrease" data-type="social">-</div>
+						<div data-action="click->university#increase" data-type="social">+</div>
 					</twig:block>
 				</twig:NumberBox>
 
@@ -70,8 +70,8 @@
 					current_player.partSocialPoliticalSciences,
 				]|reduce((sum, v) => sum + v, 0) %}
 
-				<twig:NumberBox label="non attribué" :percent="rest" :class="rest is same as(0) ? 'hidden' : ''">
-					{{ rest }} %
+				<twig:NumberBox label="non attribué" :percent="rest" :class="rest is same as(0) ? 'hidden' : ''" data-university-target="rest">
+					<span id="rest">{{ rest }}</span> %
 				</twig:NumberBox>
 
 				<p class="text-xs mt-4">Augmente ou baisse tes investissements par 10% avec "CTRL + clic" ou "CMD + clic".</p>
@@ -79,8 +79,10 @@
 		</twig:LayoutBox>
 
 		<div class="min-w-80">
-			<twig:NumberBox label="part pour les sciences naturelles" id="uni-invest-natural" data-invest="{{ current_player.partNaturalSciences }}">
-				{{ (current_player.iUniversity * current_player.partNaturalSciences / 100)|round|number }}
+			<twig:NumberBox label="part pour les sciences naturelles" id="uni-invest-natural">
+				<span data-university-target="investment" data-type="natural">
+					{{ (current_player.iUniversity * current_player.partNaturalSciences / 100)|round|number }}
+				</span>
 			</twig:NumberBox>
 
 			<twig:UniversityResearchItem type="MATH" :level="research.mathLevel" />
@@ -89,8 +91,10 @@
 
 			<hr class="my-2" />
 
-			<twig:NumberBox label="part pour les sciences politiques" id="uni-invest-life" data-invest="{{ current_player.partLifeSciences }}">
-				{{ (current_player.iUniversity * current_player.partLifeSciences / 100)|round|number }}
+			<twig:NumberBox label="part pour les sciences politiques" id="uni-invest-life">
+				<span data-university-target="investment" data-type="life">
+					{{ (current_player.iUniversity * current_player.partLifeSciences / 100)|round|number }}
+				</span>
 			</twig:NumberBox>
 
 			<twig:UniversityResearchItem type="LAW" :level="research.bioLevel" />
@@ -98,8 +102,10 @@
 		</div>
 
 		<div class="min-w-80">
-			<twig:NumberBox label="part pour l'ingénierie informatique" id="uni-invest-informatic" data-invest="{{ current_player.partInformaticEngineering }}">
-				{{ (current_player.iUniversity * current_player.partInformaticEngineering / 100)|round|number }}
+			<twig:NumberBox label="part pour l'ingénierie informatique" id="uni-invest-informatic">
+				<span data-university-target="investment" data-type="informatic">
+					{{ (current_player.iUniversity * current_player.partInformaticEngineering / 100)|round|number }}
+				</span>
 			</twig:NumberBox>
 
 			<twig:UniversityResearchItem type="NETWORK" :level="research.networkLevel" />
@@ -108,8 +114,10 @@
 
 			<hr class="my-2" />
 
-			<twig:NumberBox label="part pour les sciences économiques & sociales" id="uni-invest-social" data-invest="'{{ current_player.partSocialPoliticalSciences }}">
-				{{ (current_player.iUniversity * current_player.partSocialPoliticalSciences / 100)|round|number }}
+			<twig:NumberBox label="part pour les sciences économiques & sociales" id="uni-invest-social">
+				<span data-university-target="investment" data-type="social">
+					{{ (current_player.iUniversity * current_player.partSocialPoliticalSciences / 100)|round|number }}
+				</span>
 			</twig:NumberBox>
 
 			<twig:UniversityResearchItem type="ECONO" :level="research.econoLevel" />

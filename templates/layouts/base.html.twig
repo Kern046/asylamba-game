@@ -25,7 +25,7 @@
 			{% block importmap %}{{ importmap('app') }}{% endblock %}
 		{% endblock %}
 	</head>
-	<body class="color{{ faction_id }} {% block bodyClasses %}no-scrolling{% endblock bodyClasses %} {% if 'registration' in app.request.get('_route') %}inscription{% endif %}" data-init-sftr="2">
+	<body class="color{{ faction_id }} {% block bodyClasses %}no-scrolling{% endblock bodyClasses %} {% if 'registration' in app.request.get('_route') %}inscription{% endif %} bg-stone-400" data-init-sftr="2">
 		{% block body %}{% endblock body %}
 	</body>
 </html>

@@ -2,7 +2,7 @@
 {% set technology_queues_count = current_technology_queues|length %}
 
 {% apply spaceless %}
-	<div id="tools" class="flex items-center">
+	<div id="tools" class="fixed top-[70px] z-[1100] flex items-center">
 		<twig:BaseSelector />
 
 		<twig:ResourceStorage />
@@ -17,14 +17,14 @@
 		<details class="relative marker:content-['']">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if building_queues_count > 0 %}
-					{{ include('atoms/header/badge.html.twig', { count: building_queues_count}) }}
+					{{ include('atoms/header/badge.html.twig', { count: building_queues_count, faction: current_player.faction}) }}
 				{% endif %}
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
 					<path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
 				</svg>
 			</summary>
 
-			<div class="absolute top-14 p-2 bg-gray-800 rounded-md w-64">
+			<div class="absolute top-14 p-2 bg-gray-800 rounded-md w-64 z-[1000] border border-gray-600">
 				<twig:H2 class="">Générateur</twig:H2>
 				{% if building_queues_count > 0 %}
 					{% set queue = current_building_queues[0] %}
@@ -68,7 +68,7 @@
 		<details class="relative marker:content-['']">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if technology_queues_count > 0 %}
-					{{ include('atoms/header/badge.html.twig', { count: technology_queues_count }) }}
+					{{ include('atoms/header/badge.html.twig', { count: technology_queues_count, faction: current_player.faction }) }}
 				{% endif %}
 
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
@@ -76,7 +76,7 @@
 				</svg>
 			</summary>
 
-			<div class="absolute top-14 p-2 w-64 bg-gray-800 rounded-md">
+			<div class="absolute top-14 p-2 w-64 bg-gray-800 rounded-md z-[1000] border border-gray-600">
 				<twig:H2 class="">Technosphère</twig:H2>
 				{% if technology_queues_count > 0 %}
 					{% set queue = current_technology_queues[0] %}
@@ -117,7 +117,7 @@
 		<details class="relative marker:content-['']">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if current_dock1_ship_queues|length > 0 %}
-					{{ include('atoms/header/badge.html.twig', { count: current_dock1_ship_queues|length}) }}
+					{{ include('atoms/header/badge.html.twig', { count: current_dock1_ship_queues|length, faction: current_player.faction}) }}
 				{% endif %}
 
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
@@ -125,7 +125,7 @@
 				</svg>
 			</summary>
 
-			<div class="absolute top-14 p-2 bg-gray-800 w-64 rounded-md">
+			<div class="absolute top-14 p-2 bg-gray-800 w-64 rounded-md z-[1000] border border-gray-600">
 				<twig:H2 class="">Chantier Alpha</twig:H2>
 
 				{% if current_dock1_ship_queues|length > 0 %}
@@ -165,7 +165,7 @@
 		<details class="relative marker:content-['']">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if current_dock2_ship_queues|length > 0 %}
-					{{ include('atoms/header/badge.html.twig', { count: current_dock2_ship_queues|length}) }}
+					{{ include('atoms/header/badge.html.twig', { count: current_dock2_ship_queues|length, faction: current_player.faction}) }}
 				{% endif %}
 
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
@@ -173,7 +173,7 @@
 				</svg>
 			</summary>
 
-			<div class="absolute top-14 p-2 bg-gray-800 rounded-md w-64">
+			<div class="absolute top-14 p-2 bg-gray-800 rounded-md w-64 z-[1000] border border-gray-600">
 				<twig:H2 class="">Chantier de ligne</twig:H2>
 
 				{% if current_dock2_ship_queues|length > 0 %}
@@ -226,7 +226,7 @@
 					{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial, faction: current_player.faction}) }}
 				</summary>
 
-				<div class="absolute top-14 left-0 bg-gray-800 p-2 rounded-md w-96">
+				<div class="absolute top-14 left-0 bg-gray-800 p-2 rounded-md w-96 z-[1000] border border-gray-600">
 					<div class="">
 						<twig:H3 class="">
 							<span class="">
@@ -291,7 +291,7 @@
 					{% endif %}
 				</summary>
 
-				<div class="absolute top-14 left-0 bg-gray-800 p-2 rounded-md w-96">
+				<div class="absolute top-14 left-0 bg-gray-800 p-2 rounded-md w-96 z-[1000] border border-gray-600">
 					<twig:H2>Notifications</twig:H2>
 					{% if current_player_notifications|length > 1 %}
 						<a href="{{ path('read_all_notifications') }}">tout marquer comme lu</a>

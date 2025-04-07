@@ -97,11 +97,11 @@ final class BuildingCard extends Card
 
 	public function getResourceCost(): int|null
 	{
-		return $this->buildingDataHandler->getBuildingResourceCost($this->buildingIdentifier, $this->level);
+		return $this->buildingDataHandler->getBuildingResourceCost($this->buildingIdentifier, $this->realLevel + 1);
 	}
 
 	public function getTimeCost(): int|null
 	{
-		return ($this->getTimeCost)($this->buildingIdentifier, $this->level);
+		return ($this->getTimeCost)($this->buildingIdentifier, $this->realLevel + 1);
 	}
 }
