@@ -1,10 +1,15 @@
-<a href="{{ path(route, params) }}" class="item {% if app.request.get('_route') == route %}active{% endif %}">
+<a href="{{ path(route, params) }}" class="block my-4 {% if app.request.get('_route') == route %}active{% endif %}">
 	<span class="picto">
 		{% if picto is not null %}
 <!--				<img src="{{ asset(picto) }}" alt="" />-->
 		{% endif %}
 	</span>
-	<span class="content skin-1">
+	<span class="relative">
 		<span>{{ label }}</span>
+		{% if badgeNumber is not null %}
+			<div class="absolute -top-4 -right-4 w-6 h-6 rounded-full bg-medium{{ current_player.faction.identifier }} flex justify-center items-center">
+				{{ badgeNumber }}
+			</div>
+		{% endif %}
 	</span>
 </a>

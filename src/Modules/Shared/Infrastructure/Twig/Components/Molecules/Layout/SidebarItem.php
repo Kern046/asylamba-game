@@ -16,4 +16,5 @@ class SidebarItem
 	public array $params = [];
 	public string|null $picto = null;
 	public string $label;
+	public int|null $badgeNumber = null;
 }

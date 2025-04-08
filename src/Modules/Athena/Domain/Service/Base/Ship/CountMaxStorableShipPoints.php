@@ -21,6 +21,6 @@ readonly class CountMaxStorableShipPoints
 			'level',
 			$dockType->getLevel($orbitalBase),
 			'storageSpace'
-		);
+		) ?? 0;
 	}
 }
