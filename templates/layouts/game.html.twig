@@ -8,6 +8,7 @@
 		</title>
 
 		<meta charset="utf-8" />
+		<meta name="turbo-prefetch" content="false">
 		<meta name="description" content="Kalaxia, jeu de stratégie multijoueurs" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -22,6 +23,8 @@
 		{% block javascripts %}
 			{% block importmap %}{{ importmap('app') }}{% endblock %}
 		{% endblock %}
+
+		<link rel="icon" href="{{ asset('images/logo.png') }}" />
 	</head>
 	<body class="h-screen bg-gray-900 text-white">
 		<div id="container" class="flex flex-col h-full w-fit min-w-full py-[120px]">
