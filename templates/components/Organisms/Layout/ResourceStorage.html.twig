@@ -11,7 +11,7 @@
 
 			{% set production = get_base_production(current_base) %}
 			{% set refining_bonus = get_player_bonus(constant('App\\Modules\\Zeus\\Model\\PlayerBonusId::REFINERY_REFINING')) %}
-			<twig:NumberBox label="production par relève" :bonus="refining_bonus > 0 ? ((production * refining_bonus) / 100)|number : null">
+			<twig:NumberBox label="production par relève" :bonus="refining_bonus > 0 ? ((production * refining_bonus) / 100) : null">
 				{{ production|number }}
 			</twig:NumberBox>
 
