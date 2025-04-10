@@ -13,8 +13,7 @@
 			<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" class="w-6 h-6" alt="" />
 		</div>
 
-
-		<details class="relative marker:content-['']">
+		<details class="relative marker:content-['']" name="toolbar">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if building_queues_count > 0 %}
 					{{ include('atoms/header/badge.html.twig', { count: building_queues_count, faction: current_player.faction}) }}
@@ -64,8 +63,7 @@
 			</div>
 		</details>
 
-
-		<details class="relative marker:content-['']">
+		<details class="relative marker:content-['']" name="toolbar">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if technology_queues_count > 0 %}
 					{{ include('atoms/header/badge.html.twig', { count: technology_queues_count, faction: current_player.faction }) }}
@@ -113,8 +111,7 @@
 			</div>
 		</details>
 
-
-		<details class="relative marker:content-['']">
+		<details class="relative marker:content-['']" name="toolbar">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if current_dock1_ship_queues|length > 0 %}
 					{{ include('atoms/header/badge.html.twig', { count: current_dock1_ship_queues|length, faction: current_player.faction}) }}
@@ -161,8 +158,7 @@
 			</div>
 		</details>
 
-
-		<details class="relative marker:content-['']">
+		<details class="relative marker:content-['']" name="toolbar">
 			<summary class="h-12 py-2 px-4 bg-gray-800 border border-gray-700 flex items-center cursor-pointer">
 				{% if current_dock2_ship_queues|length > 0 %}
 					{{ include('atoms/header/badge.html.twig', { count: current_dock2_ship_queues|length, faction: current_player.faction}) }}
@@ -217,7 +213,7 @@
 			</a>
 		{% else %}
 			{% set tutorial_step = current_player.stepTutorial %}
-			<details class="relative marker:content-['']">
+			<details class="relative marker:content-['']" name="toolbar">
 				<summary class="h-12 py-2 px-4 flex items-center bg-gray-800 border border-gray-700 cursor-pointer">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="white">
 						<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
@@ -277,57 +273,55 @@
 					</form>
 				</div>
 			</details>
-
-
-			<details class="relative marker:content-['']">
-				<summary class="h-12 py-2 px-4 flex items-center bg-gray-800 border border-gray-700 cursor-pointer">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="white">
-						<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-						<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-					</svg>
-
-					{% if current_player_notifications|length > 0 %}
-						{{ include('atoms/header/badge.html.twig', { count: current_player_notifications|length, faction: current_player.faction }) }}
-					{% endif %}
-				</summary>
-
-				<div class="absolute top-14 left-0 bg-gray-800 p-2 rounded-md w-96 z-[1000] border border-gray-600">
-					<twig:H2>Notifications</twig:H2>
-					{% if current_player_notifications|length > 1 %}
-						<a href="{{ path('read_all_notifications') }}">tout marquer comme lu</a>
-					{% endif %}
-
-					<div class="flex flex-col divide-y divide-gray-500">
-						{% if current_player_notifications|length > 0 %}
-							{% for notification in current_player_notifications %}
-								<details class="" data-notif-id="{{ notification.id }}">
-									<summary class="p-2 {% if notification.read is not same as(true) %}bg-gray-700{% else %}bg-gray-900{% endif %} cursor-pointer">
-										<twig:H3>
-											{{ notification.title }}
-										</twig:H3>
-									</summary>
-
-									<div>
-										<div class="text-sm p-2">{{ notification.content|raw }}</div>
-										<div class="text-xs float-right p-2">
-											<a class="italic" data-ajax-target="{{ path('archive_notification', {'id': notification.id }) }}">archiver</a> ou
-											<a class="italic" data-ajax-target="{{ path('delete_notification', {'id': notification.id }) }}">supprimer</a><br />
-											— {{ notification.sentAt|game_date|raw }}
-										</div>
-									</div>
-								</details>
-							{% endfor %}
-						{% else %}
-							<p class="text-sm">Aucune nouvelle notification.</p>
-						{% endif %}
-					</div>
-					<a href="{{ path('communication_center') }}" class="">
-						<twig:Button :faction="current_player.faction">
-							toutes vos notifications
-						</twig:Button>
-					</a>
-				</div>
-			</details>
 		{% endif %}
+		<details class="relative marker:content-['']" name="toolbar">
+			<summary class="h-12 py-2 px-4 flex items-center bg-gray-800 border border-gray-700 cursor-pointer">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="white">
+					<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+					<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+				</svg>
+
+				{% if current_player_notifications|length > 0 %}
+					{{ include('atoms/header/badge.html.twig', { count: current_player_notifications|length, faction: current_player.faction }) }}
+				{% endif %}
+			</summary>
+
+			<div class="absolute top-14 left-0 bg-gray-800 p-2 rounded-md w-96 z-[1000] border border-gray-600">
+				<twig:H2>Notifications</twig:H2>
+				{% if current_player_notifications|length > 1 %}
+					<a href="{{ path('read_all_notifications') }}">tout marquer comme lu</a>
+				{% endif %}
+
+				<div class="flex flex-col divide-y divide-gray-500">
+					{% if current_player_notifications|length > 0 %}
+						{% for notification in current_player_notifications %}
+							<details class="" data-notif-id="{{ notification.id }}">
+								<summary class="p-2 {% if notification.read is not same as(true) %}bg-gray-700{% else %}bg-gray-900{% endif %} cursor-pointer">
+									<twig:H3>
+										{{ notification.title }}
+									</twig:H3>
+								</summary>
+
+								<div>
+									<div class="text-sm p-2">{{ notification.content|raw }}</div>
+									<div class="text-xs float-right p-2">
+										<a class="italic" data-ajax-target="{{ path('archive_notification', {'id': notification.id }) }}">archiver</a> ou
+										<a class="italic" data-ajax-target="{{ path('delete_notification', {'id': notification.id }) }}">supprimer</a><br />
+										— {{ notification.sentAt|game_date|raw }}
+									</div>
+								</div>
+							</details>
+						{% endfor %}
+					{% else %}
+						<p class="text-sm">Aucune nouvelle notification.</p>
+					{% endif %}
+				</div>
+				<a href="{{ path('communication_center') }}" class="">
+					<twig:Button :faction="current_player.faction">
+						toutes vos notifications
+					</twig:Button>
+				</a>
+			</div>
+		</details>
 	</div>
 {% endapply %}
