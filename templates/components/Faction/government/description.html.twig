@@ -17,7 +17,11 @@
 	<div class="fix-body">
 		<div class="body">
 			<h4>Aperçu</h4>
-			<p class="long-info text-bloc">{{ parsed_description }}</p>
+			<p class="long-info text-bloc">
+				{% if faction.description %}
+					{{ faction.description|parse }}
+				{% endif %}
+			</p>
 		</div>
 	</div>
 </div>

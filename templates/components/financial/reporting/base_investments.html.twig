@@ -14,59 +14,62 @@
 		</header>
 
 		<section class="mt-4">
-			<ul class="list-type-1">
+			<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
 				{% for base in player_bases %}
 					{% set base_invest = base.iSchool + base.iAntiSpy %}
 
-					<li>
-						<span class="buttons">
-							<a href="#" class="sh" data-target="invest-base-{{ base.id }}">↓</a>
-						</span>
-
-						<span class="label">{{ base.name }}</span>
-
-						<span class="value">
-							{{- base_invest|number -}}
-						</span>
-
-						<ul class="sub-list-type-1" id="invest-base-{{ base.id }}">
-							<li>
-								<span class="label">école de cmd.</span>
-
-								<span class="value">
-									{{- base.iSchool|number -}}
-									 <a href="#" class="button sh" data-target="school-form-base-{{ base.id }}">‹</a>
+					<li class="">
+						<details class="marker:content-['']" name="base-investments">
+							<summary class="cursor-pointer flex items-center justify-between py-2">
+								<span>
+									<span class="px-2">↓</span>
+									<span style="font-variant: all-small-caps" class="label">{{ base.name }}</span><br>
 								</span>
 
-								<form action="{{ path('update_base_investments', {'baseId': base.id, 'category': 'school'}) }}" method="POST" id="school-form-base-{{ base.id }}">
-									<p>
-										<input type="text" name="credit" value="{{ base.iSchool }}" />
-										<input type="submit" value="ok" />
-									</p>
-								</form>
-							</li>
-							<li>
-								<span class="label">contre-espionnage</span>
+								<span class="text-sm">{{- base_invest|number -}}</span>
+							</summary>
 
-								<span class="value">
-									{{- base.iAntiSpy|number -}}
-									<a href="#" class="button sh" data-target="spying-form-base-{{ base.id }}">‹</a>
-								</span>
+							<div>
+								<ul class="sub-list-type-1" id="invest-base-{{ base.id }}">
+									<li>
+										<label for="school-form-base-{{ base.id }}" class="flex justify-between items-center">
+											<span>école de cmd.</span>
+											<span class="value">
+												{{- base.iSchool|number -}}
+											</span>
+										</label>
 
-								<form action="{{ path('update_base_investments', {'baseId': base.id, 'category': 'antispy'}) }}" method="POST" id="spying-form-base-{{ base.id }}">
-									<p>
-										<input type="text" name="credit" value="{{ base.iAntiSpy }}" />
-										<input type="submit" value="ok" />
-									</p>
-								</form>
-							</li>
-						</ul>
+										<form action="{{ path('update_base_investments', {'baseId': base.id, 'category': 'school'}) }}" method="POST" id="school-form-base-{{ base.id }}" class="flex py-2">
+											<twig:Input type="text" name="credit" value="{{ base.iSchool }}" class="w-48" />
+											<twig:Button type="submit" :faction="current_player.faction">
+												ok
+											</twig:Button>
+										</form>
+									</li>
+									<li>
+										<label for="spying-form-base-{{ base.id }}" class="flex items-center justify-between">
+											<span class="label">contre-espionnage</span>
+											<span class="value">
+												{{- base.iAntiSpy|number -}}
+											</span>
+										</label>
+
+										<form action="{{ path('update_base_investments', {'baseId': base.id, 'category': 'antispy'}) }}" method="POST" id="spying-form-base-{{ base.id }}" class="flex py-2">
+											<twig:Input type="text" name="credit" value="{{ base.iAntiSpy }}" class="w-48" />
+											<twig:Button type="submit" :faction="current_player.faction">
+												ok
+											</twig:Button>
+										</form>
+									</li>
+								</ul>
+							</div>
+						</details>
 					</li>
 				{% endfor %}
 
-				<li class="strong">
-					<span class="label">total des investissements</span>
-					<span class="value">
+				<li class="flex justify-between items-center py-2">
+					<strong>total des investissements</strong>
+					<span>
 						{{- investments_data.totalInvest|number -}}
 					</span>
 				</li>

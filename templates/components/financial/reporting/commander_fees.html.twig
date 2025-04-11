@@ -14,7 +14,7 @@
 		</header>
 
 		<section class="mt-4">
-			<ul class="list-type-1">
+			<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
 				{% for base_id in commanders_by_base|keys %}
 					{% set commanders = commanders_by_base[base_id] %}
 					{% set commander_fees = commanders|reduce(
@@ -22,34 +22,38 @@
 					) %}
 
 					<li>
-						<span class="buttons">
-							<a href="#" class="sh" data-target="commander-base-{{ base_id }}">↓</a>
-						</span>
-
-						{% for base in player_bases|filter(b => b.id == base_id) %}
-							<span class="label">{{ base.name }} [{{ commanders|length }} officier{{ commanders|length }}]</span>
-						{% endfor %}
-
-						<span class="value">
-							{{ commander_fees|number }}
-						</span>
-
-						<ul class="sub-list-type-1" id="commander-base-{{ base_id }}">
-							{% for commander in commanders %}
-								<li>
-									<span class="label">{{ commander|commander_rank }} {{ commander.name }}</span>
-									<span class="value">
-										{{- (commander.level * constant('App\\Modules\\Ares\\Model\\Commander::LVLINCOMECOMMANDER')) -}}
+						<details class="marker:content-['']" name="commander-fees">
+							<summary class="cursor-pointer flex items-center justify-between py-2">
+								{% for base in player_bases|filter(b => b.id == base_id) %}
+									<span class="label">
+										<span style="font-variant: all-small-caps">{{ base.name }}</span>
+										[{{ commanders|length }} officier{{ commanders|length|plural }}]
 									</span>
-								</li>
-							{% endfor %}
-						</ul>
+								{% endfor %}
+								<span class="value">
+									{{ commander_fees|number }}
+								</span>
+							</summary>
+
+							<div>
+								<ul class="sub-list-type-1" id="commander-base-{{ base_id }}">
+									{% for commander in commanders %}
+										<li class="flex justify-between items-center text-sm">
+											<span>{{ commander|commander_rank }} {{ commander.name }}</span>
+											<span>
+												{{- (commander.level * constant('App\\Modules\\Ares\\Model\\Commander::LVLINCOMECOMMANDER')) -}}
+											</span>
+										</li>
+									{% endfor %}
+								</ul>
+							</div>
+						</details>
 					</li>
 				{% endfor %}
 
-				<li class="strong">
-					<span class="label">total des salaires</span>
-					<span class="value">
+				<li class="py-2">
+					<strong>total des salaires</strong>
+					<span>
 						{{- investments_data.totalFleetFees -}}
 					</span>
 				</li>

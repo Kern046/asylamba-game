@@ -14,26 +14,29 @@
 		</header>
 
 		<section class="mt-4">
-			<ul class="list-type-1">
+			<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
 				{% for base in player_bases %}
 					{% set base_tax = get_base_tax(base, tax_coeff) %}
 					{# @TODO move that logic somewhere legit #}
 					{% set base_tax_out = base_tax.total * base.place.system.sector.tax / 100 %}
 
-					<li>
-						<span class="label">{{ base.name }} [{{ base.place.system.sector.tax }}% de taxe]</span>
-						<span class="value">
+					<li class="py-2">
+						<span class="label">
+							<span style="font-variant: all-small-caps">{{ base.name }}</span>
+							[{{ base.place.system.sector.tax }}% de taxe]
+						</span><br>
+						<span class="text-sm flex items-center gap-x-2 py-1">
 							{{- base_tax_out|number -}}
-							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
+							<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" class="inline w-4 h-4" />
 						</span>
 					</li>
 				{% endfor %}
 
-				<li class="strong">
-					<span class="label">total de la redevance</span>
-					<span class="value">
+				<li class="flex justify-between items-center py-2">
+					<strong class="label">total de la redevance</strong>
+					<span class="value flex items-center gap-x-2">
 						{{- investments_data.totalTaxOut|number -}}
-						<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
+						<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" class="inline w-4 h-4" />
 					</span>
 				</li>
 			</ul>

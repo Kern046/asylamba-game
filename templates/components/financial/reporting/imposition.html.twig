@@ -14,19 +14,22 @@
 		</header>
 
 		<section class="mt-4">
-			<ul class="list-type-1">
+			<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
 				{% for base in player_bases %}
 					{% set base_data = bases_data[base.id.toRfc4122()] %}
 					{% set base_tax_income = base_data.tax_income %}
 					{% set base_tax_income_bonus = base_data.tax_income_bonus %}
-					<li>
-						<span class="label">{{ base.name }} [{{ base.place.population|number }} Mio hab.]</span>
-						<span class="value">
-							{{- base_tax_income|number -}}
+					<li class="py-2">
+						<span class="label">
+							<span style="font-variant: all-small-caps">{{ base.name }}</span>
+							<span class="text-sm">[{{ base.place.population|number }} Mio hab.]</span>
+						</span><br>
+						<span class="flex gap-x-2 items-center mt-2">
+							<span class="text-sm">{{- base_tax_income|number -}}</span>
 							{% if base_tax_income_bonus > 0 %}
-								<span class="bonus">+{{ base_tax_income_bonus|number }}</span>
+								<sup class="bonus bg-medium{{ current_player.faction.identifier }} px-1 rounded-md text-xs">+{{ base_tax_income_bonus|number }}</sup>
 							{% endif %}
-							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
+							<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
 						</span>
 					</li>
 				{% endfor %}
@@ -38,7 +41,7 @@
 						{% if investments_data.totalTaxInBonus > 0 %}
 							<span class="bonus">+{{ investments_data.totalTaxInBonus|number }}</span>
 						{% endif %}
-						<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
+						<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
 					</span>
 				</li>
 			</ul>

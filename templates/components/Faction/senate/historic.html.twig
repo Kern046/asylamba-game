@@ -1,17 +1,18 @@
-<div class="component">
-	<div class="head"></div>
-	<div class="fix-body">
-		<div class="body">
-			<h4>Historique des votations</h4>
-
-			{% for law in voted_laws %}
-			<div class="build-item base-type">
+<twig:LayoutBox>
+	<header>
+		<twig:H2>
+			Historique des votations
+		</twig:H2>
+	</header>
+	<section class="flex flex-col divide-y divide-gray-500 gap-y-4 border-y border-gray-500 mt-4">
+		{% for law in voted_laws %}
+			<div class="py-2">
 				<div class="name">
 					<img src="{{ asset('build/media/faction/law/common.png') }}" alt="">
 					<strong>{{ get_law_info(law.type, 'name') }}</strong>
 				</div>
 
-				<p class="desc">
+				<p class="desc text-sm">
 					{% if get_law_info(law.type, 'department') == 6 %}
 						<strong>Statut</strong> : appliquée<br>
 					{% else %}
@@ -34,11 +35,10 @@
 					{{ law.createdAt|game_date|raw }}<br>
 				</p>
 			</div>
-			{% endfor %}
+		{% endfor %}
 
-			{% if voted_laws|length == 0 %}
-				<p><em>Aucune loi n'a été votée pour le moment.</em></p>
-			{% endif %}
-		</div>
-	</div>
-</div>
+		{% if voted_laws|length == 0 %}
+			<p><em>Aucune loi n'a été votée pour le moment.</em></p>
+		{% endif %}
+	</section>
+</twig:LayoutBox>
