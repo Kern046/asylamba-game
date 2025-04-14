@@ -179,53 +179,51 @@
 						{% set income = get_route_income(current_base, place.base) %}
 
 						<div class="rc">
-							<img src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" alt="" class="planet" />
+							{#<img src="{{ asset('build/media/map/place/place' ~ place.typeOfPlace ~ '-' ~ get_place_demography(place) ~ '.png') }}" alt="" class="planet" />#}
 
-							<span class="label-box">
-								<span class="key">
-									Revenu par relève
-								</span>
-								<span class="val">
+							<div class="flex justify-between mb-2">
+								<twig:NumberBox label="Revenu par relève">
 									{{ income|number }}
-									<img src="{{ asset('build/media/resources/credit.png') }}" alt="" class="icon-color" />
-								</span>
-							</span>
+									<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="" class="inline w-4 h-4" />
+								</twig:NumberBox>
 
-							<span class="label-box">
-								<span class="key">
-									Coût de construction
-								</span>
-								<span class="val">
+								<twig:NumberBox label="Coût de construction">
 									{{ price|number }}
-									<img src="{{ asset('build/media/resources/credit.png') }}" alt="" class="icon-color" />
-								</span>
-							</span>
+									<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="" class="inline w-4 h-4" />
+								</twig:NumberBox>
+							</div>
 
 							{% if commercial_route_data.proposed == true %}
 								<a href="{{ path('spatioport') }}" class="button">
-									Annuler la proposition
+									<twig:Button :faction="current_player.faction">
+										Annuler la proposition
+									</twig:Button>
 								</a>
 							{% elseif commercial_route_data.not_accepted == true %}
 								<a href="{{ path('spatioport') }}" class="button">
-									Accepter la proposition
+									<twig:Button :faction="current_player.faction">
+										Accepter la proposition
+									</twig:Button>
 								</a>
 							{% elseif commercial_route_data.stand_by == true %}
-								<span class="button">
+								<twig:Button :faction="current_player.faction" disabled>
 									C'est la guerre.
-								</span>
+								</twig:Button>
 							{% else %}
 								{% if price > current_player.credit %}
-									<span class="button">
+									<twig:Button :faction="current_player.faction" disabled>
 										Vous n'avez pas assez de crédits.
-									</span>
+									</twig:Button>
 								{% elseif commercial_route_data.slots < get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'), 'level', current_base.levelSpatioport, 'nbRoutesMax') %}
 									<a href="{{ path('propose_route', {'sourceBase': current_base.id, 'destinationBase': place.base.id }) }}" class="button">
-										Proposer une route commerciale
+										<twig:Button :faction="current_player.faction">
+											Proposer une route commerciale
+										</twig:Button>
 									</a>
 								{% else %}
-									<span class="button">
+									<twig:Button :faction="current_player.faction" disabled>
 										Pas assez de slots.
-									</span>
+									</twig:Button>
 								{% endif %}
 							{% endif %}
 						</div>

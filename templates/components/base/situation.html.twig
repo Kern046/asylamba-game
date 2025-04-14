@@ -46,7 +46,7 @@
 				{% set current_rear_position = 0 %}
 
 				{% for commander in commanders %}
-					<div class="commander position-{{ commander.line }}-{{ commander.line == 1 ? vanguard_positions[current_vanguard_position] : rear_positions[current_rear_position] }}">
+					<div class="commander">
 						<a href="{{ path('fleet_headquarters', {'commander': commander.id}) }}" class="commander full">
 							{#<img src="{{ asset('build/media/map/fleet/' ~ (commander.isAffected ? 'army' : 'army-away') ~ '.png') }}" alt="plein" />#}
 							<span class="info">

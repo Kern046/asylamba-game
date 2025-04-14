@@ -13,5 +13,13 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 )]
 class Avatar
 {
-	public Player $player;
+	public Player|null $player = null;
+	public string|null $avatar = null;
+
+	public function getAvatar(): string
+	{
+		return null !== $this->player
+			? $this->player->avatar
+			: $this->avatar ?? throw new \LogicException('Neither player or avatar property has a value set.');
+	}
 }
