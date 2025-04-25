@@ -33,7 +33,7 @@ accept_offer:
 cancel_offer:
     path: /offers/{id}/cancel
     controller: App\Modules\Athena\Infrastructure\Controller\Trade\Offer\Cancel
-    methods: 'GET'
+    methods: 'POST'
 
 give_ships:
     path: /give-ships

@@ -49,12 +49,14 @@ class CommercialShippingRepository extends DoctrineRepository implements Commerc
 		$qb = $this->createQueryBuilder('cs');
 
 		return $qb
+			->innerJoin('cs.transaction', 't')
 			->where(
 				$qb->expr()->orX(
 					$qb->expr()->eq('cs.originBase', ':base'),
 					$qb->expr()->eq('cs.destinationBase', ':base'),
 				),
 			)
+			->addOrderBy('t.publishedAt', 'DESC')
 			->setParameter('base', $orbitalBase->id, UuidType::NAME)
 			->getQuery()
 			->getResult();

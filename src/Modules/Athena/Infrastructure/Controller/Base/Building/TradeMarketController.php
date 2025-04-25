@@ -2,14 +2,10 @@
 
 namespace App\Modules\Athena\Infrastructure\Controller\Base\Building;
 
-use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
-use App\Modules\Ares\Manager\CommanderManager;
-use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Base\Trade\GetBaseCommercialShippingData;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
-use App\Modules\Athena\Manager\TransactionManager;
-use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
 use App\Modules\Athena\Resource\OrbitalBaseResource;
@@ -25,7 +21,7 @@ class TradeMarketController extends AbstractController
 	}
 
 	public function __invoke(
-		CommanderRepositoryInterface   $commanderRepository,
+		GetBaseCommercialShippingData  $getBaseCommercialShippingsData,
 		OrbitalBase                    $currentBase,
 		OrbitalBaseHelper              $orbitalBaseHelper,
 		TransactionRepositoryInterface $transactionRepository,
@@ -49,45 +45,7 @@ class TradeMarketController extends AbstractController
 			'commander_transactions' => $transactionRepository->getProposedTransactions(Transaction::TYP_COMMANDER),
 			'ship_current_rate' => $transactionRepository->getLastCompletedTransaction(Transaction::TYP_SHIP)->currentRate,
 			'ship_transactions' => $transactionRepository->getProposedTransactions(Transaction::TYP_SHIP),
-			'commercial_shippings' => $this->getCommercialShippingsData($currentBase),
-			'base_commanders' => $commanderRepository->getBaseCommanders(
-				$currentBase,
-				[Commander::INSCHOOL, Commander::RESERVE],
-				['experience' => 'DESC'],
-			),
+			'commercial_shippings' => $getBaseCommercialShippingsData($currentBase),
 		]);
-	}
-
-	/**
-	 * @return array<string, mixed>
-	 */
-	protected function getCommercialShippingsData(OrbitalBase $currentBase): array
-	{
-		$commercialShippingsData = [
-			'used_ships' => 0,
-			'incoming' => [
-				CommercialShipping::ST_WAITING => [],
-				CommercialShipping::ST_GOING => [],
-				CommercialShipping::ST_MOVING_BACK => [],
-			],
-			'outgoing' => [
-				CommercialShipping::ST_WAITING => [],
-				CommercialShipping::ST_GOING => [],
-				CommercialShipping::ST_MOVING_BACK => [],
-			],
-		];
-		$commercialShippings = $this->commercialShippingRepository->getByBase($currentBase);
-
-		foreach ($commercialShippings as $commercialShipping) {
-			if ($commercialShipping->originBase->id->equals($currentBase->id)) {
-				$commercialShippingsData['used_ships'] += $commercialShipping->shipQuantity;
-				$commercialShippingsData['outgoing'][$commercialShipping->statement][] = $commercialShipping;
-			}
-			if ($commercialShipping->destinationBase?->id->equals($currentBase->id)) {
-				$commercialShippingsData['incoming'][$commercialShipping->statement][] = $commercialShipping;
-			}
-		}
-
-		return $commercialShippingsData;
 	}
 }

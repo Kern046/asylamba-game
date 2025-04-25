@@ -54,9 +54,7 @@ class OrbitalBase implements SystemUpdatable, \JsonSerializable
 
 	public function getShipStorage(): array
 	{
-		static $storage = null;
-
-		return $storage ??= $this->shipStorage + array_fill(0, 12, 0);
+		return $this->shipStorage + array_fill(0, 12, 0);
 	}
 
 	public function isCapital(): bool

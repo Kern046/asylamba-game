@@ -67,7 +67,7 @@ class QueueableExtension extends AbstractExtension
 				'nbQueues'
 			)),
 			new TwigFilter('ship_queue_time', fn (ShipQueue $shipQueue) => $shipQueue->quantity * ShipResource::getInfo($shipQueue->shipNumber, 'time')),
-			new TwigFilter('ship_queue_picture', fn (ShipQueue $shipQueue) => ShipResource::getInfo($shipQueue->shipNumber, 'imageLink')),
+			new TwigFilter('ship_queue_picture', fn (ShipQueue $shipQueue) => ShipResource::getInfo($shipQueue->shipNumber, 'picto')),
 			new TwigFilter('ship_queue_name', fn (ShipQueue $shipQueue) => ShipResource::getInfo($shipQueue->shipNumber, 'codeName')),
 			new TwigFilter('base_max_building_queues', fn (OrbitalBase $orbitalBase) => $this->orbitalBaseHelper->getBuildingInfo(
 				OrbitalBaseResource::GENERATOR,

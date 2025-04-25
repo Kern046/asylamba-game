@@ -1,0 +1,6 @@
+<twig:NumberBox id="commercial-shipping-available-ships-count" label="Vaisseaux de commerce disponibles" :percent="(maxShips - usedShips)|percent(maxShips)">
+	{{ (maxShips - usedShips)|number }}
+	{#<img class="icon-color" alt="vaisseaux" src="{{ asset('build/media/resources/transport.png') }}">#} /
+	{{ maxShips|number }}
+	{#<img class="icon-color" alt="vaisseaux" src="{{ asset('build/media/resources/transport.png') }}">#}
+</twig:NumberBox>

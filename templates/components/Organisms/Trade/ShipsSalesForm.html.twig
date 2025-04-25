@@ -1,0 +1,59 @@
+<div id="sell-ships-{{ shipIdentifier }}" class="bg-gray-800 p-2 rounded-md border border-medium{{ current_player.faction.identifier }}" {{ attributes }}>
+	<details name="ships-sales-form">
+		<summary class="cursor-pointer">
+			<strong>{{ get_ship_info(shipIdentifier, 'name') }}</strong><br>
+			<em class="text-sm">{{ get_ship_info(shipIdentifier, 'pev') }} pev</em>
+		</summary>
+
+		<form id="sell-ships-{{ shipIdentifier }}"
+			  class="sell-form"
+			  action="{{ path('propose_offer', { 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_SHIP'), 'identifier': shipIdentifier }) }}"
+			  method="post"
+		>
+			<div class="label-box text-sm">
+				<span class="label">Quantité max.</span>
+				<span class="value">{{ shipQuantity }}</span>
+			</div>
+
+			<div class="label-box sf-quantity">
+				<label for="sell-market-quantity-ship" class="label">Quantité</label><br>
+				<twig:Input id="sell-market-quantity-ship" class="value w-full" type="number" name="quantity" autocomplete="off" min="1" :max="shipQuantity" data-model="quantity" />
+			</div>
+
+			<hr />
+
+			{% set min_price = this.getMinPrice(get_min_price(
+				constant('App\\Modules\\Athena\\Model\\Transaction::TYP_SHIP'),
+				1,
+				shipIdentifier
+			)) %}
+
+			<div class="label-box sf-min-price">
+				<span class="label">Prix minimum</span>
+				<div class="flex items-center gap-x-1">
+					<span class="value">{{ min_price }}</span>
+					<img class="inline w-4 h-4" alt="crédits" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}">
+				</div>
+			</div>
+
+			<div class="label-box sf-price">
+				<label for="sell-market-price-ship" class="label">Prix</label>
+				<twig:Input id="sell-market-price-ship" class="value" type="text" name="price" autocomplete="off" :min="min_price" />
+			</div>
+
+			<hr class="my-2" />
+
+			<div class="label-box sf-comship">
+				<span class="label">Vaisseaux</span>
+				<span class="value">{{ this.getRequiredShipsCount(get_ship_info(shipIdentifier, 'pev') * 1000) }}</span>
+				{#<img class="icon-color" alt="vaisseaux transports" src="{{ asset('build/media/resources/transport.png') }}">#}
+			</div>
+
+			<hr class="my-2" />
+
+			<twig:Button :faction="current_player.faction" type="submit" class="w-full">
+				Vendre
+			</twig:Button>
+		</form>
+	</details>
+</div>

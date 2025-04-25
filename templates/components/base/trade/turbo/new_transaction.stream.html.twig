@@ -1,5 +1,30 @@
-<turbo-stream action="append" targets="#{{ transaction.getTypeString() }}-transactions">
+{% set transaction = commercial_shipping.transaction %}
+
+{% if transaction.hasResources %}
+	<turbo-stream action="replace" target="resource-sell-form">
+		<template>
+			<twig:ResourceSalesForm :previousSuccess="true" />
+		</template>
+	</turbo-stream>
+{% elseif transaction.hasCommander %}
+	<turbo-stream action="remove" target="sell-commander-{{ transaction.commander.id }}">
+	</turbo-stream>
+{% elseif transaction.hasShips %}
+	<turbo-stream action="replace" target="sell-ships-{{ transaction.identifier }}">
+		<template>
+			<twig:ShipsSalesForm :shipIdentifier="transaction.identifier" :shipQuantity="current_base.getShipStorage()[transaction.identifier]" :currentRate="transaction.currentRate" />
+		</template>
+	</turbo-stream>
+{% endif %}
+
+<turbo-stream action="prepend" target="waiting-commercial-shippings">
 	<template>
-		{{ include('components/base/trade/transaction.html.twig', { transaction, 'current_rate': transaction.currentRate }) }}
+		{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
+	</template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="commercial-shipping-available-ships-count">
+	<template>
+		<twig:CommercialShippingAvailableShipsCount :maxShips="max_ships" :usedShips="used_ships" />
 	</template>
 </turbo-stream>

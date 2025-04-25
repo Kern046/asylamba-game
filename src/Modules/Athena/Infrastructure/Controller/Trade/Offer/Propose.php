@@ -8,6 +8,7 @@ use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
+use App\Modules\Athena\Domain\Service\Base\Trade\GetBaseCommercialShippingData;
 use App\Modules\Athena\Domain\Service\CountAvailableCommercialShips;
 use App\Modules\Athena\Domain\Service\CountNeededCommercialShips;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
@@ -15,6 +16,7 @@ use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\CommercialShipping;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\Transaction;
+use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Athena\Resource\ShipResource;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,6 +29,7 @@ use Symfony\Component\Mercure\Update;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\UX\Turbo\TurboBundle;
 
 class Propose extends AbstractController
 {
@@ -36,6 +39,7 @@ class Propose extends AbstractController
 		OrbitalBase $currentBase,
 		OrbitalBaseManager $orbitalBaseManager,
 		OrbitalBaseHelper $orbitalBaseHelper,
+		GetBaseCommercialShippingData $getBaseCommercialShippingData,
 		CommanderManager $commanderManager,
 		CommanderRepositoryInterface $commanderRepository,
 		TransactionRepositoryInterface $transactionRepository,
@@ -162,12 +166,27 @@ class Propose extends AbstractController
 
 		$mercureHub->publish(new Update(
 			'/trade-offers',
-			$this->renderView('components/base/trade/turbo/new_transaction.stream.html.twig', [
+			$this->renderView('components/base/trade/turbo/broadcast/new_transaction.stream.html.twig', [
 				'transaction' => $tr,
 			]),
 		));
 
 		$this->addFlash('market_success', 'Votre proposition a été envoyée sur le marché.');
+
+		if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+			$request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+			return $this->render('components/base/trade/turbo/new_transaction.stream.html.twig', [
+				'commercial_shipping' => $cs,
+				'used_ships' => $getBaseCommercialShippingData($currentBase)['used_ships'],
+				'max_ships' => $orbitalBaseHelper->getInfo(
+					OrbitalBaseResource::COMMERCIAL_PLATEFORME,
+					'level',
+					$currentBase->levelCommercialPlateforme,
+					'nbCommercialShip',
+				),
+			]);
+		}
 
 		return $this->redirect($request->headers->get('referer'));
 	}

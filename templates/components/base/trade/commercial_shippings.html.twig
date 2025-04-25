@@ -1,37 +1,38 @@
-<div class="component transaction">
-	<div class="head skin-2">
-		<h2>Transactions</h2>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="number-box">
-				<span class="label">Vaisseaux de commerce disponibles</span>
-				<span class="value">
-					{{ (max_ships - commercial_shippings.used_ships)|number }}
-					<img class="icon-color" alt="vaisseaux" src="{{ asset('build/media/resources/transport.png') }}"> /
-					{{ max_ships|number }}
-					<img class="icon-color" alt="vaisseaux" src="{{ asset('build/media/resources/transport.png') }}">
-				</span>
+<twig:LayoutBox class="col-span-1 row-start-2">
+	<header>
+		<twig:H2>Transactions</twig:H2>
+	</header>
 
-				<span class="progress-bar">
-					<span style="width: {{ (max_ships - commercial_shippings.used_ships)|percent(max_ships) }}%;" class="content"></span>
-				</span>
-			</div>
+	<section class="mt-4">
+		<twig:CommercialShippingAvailableShipsCount :maxShips="max_ships" :usedShips="commercial_shippings.used_ships"/>
 
-			<h4>Convoi en route</h4>
+		<twig:H4 class="mt-4">Convoi en route</twig:H4>
+
+		<div class="flex flex-col gap-y-2 mt-2">
 			{% for commercial_shipping in commercial_shippings['outgoing'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_GOING')] %}
 				{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
 			{% endfor %}
-			<hr />
-			<h4>Retour de convoi</h4>
+		</div>
+
+		<hr class="my-2" />
+
+		<twig:H4>Retour de convoi</twig:H4>
+
+		<div class="flex flex-col gap-y-2 mt-2">
 			{% for commercial_shipping in commercial_shippings['outgoing'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_MOVING_BACK')] %}
 				{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
 			{% endfor %}
-			<hr />
-			<h4>Convoi à quai</h4>
+		</div>
+
+		<hr class="my-2" />
+
+		<twig:H4>Convoi à quai</twig:H4>
+
+		<div id="waiting-commercial-shippings" class="flex flex-col gap-y-2 mt-2">
 			{% for commercial_shipping in commercial_shippings['outgoing'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_WAITING')] %}
 				{{ include('molecules/base/trade/commercial_shipping.html.twig', { commercial_shipping }) }}
 			{% endfor %}
 		</div>
-	</div>
-</div>
+
+	</section>
+</twig:LayoutBox>
