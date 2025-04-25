@@ -1,20 +1,21 @@
 (game) {
-	root * /srv/app/public
-	php_fastcgi /* kalaxia_app:9000
-	file_server
+	log {
+		output file /var/log/caddy/access.log
+	}
 
-    # Enable HTTP request logging
-    log {
-        output file /var/log/caddy/access.log
-    }
+	handle /.well-known/mercure* {
+		reverse_proxy * http://kalaxia_mercure
+	}
+
+	handle {
+		root * /srv/app/public
+		php_fastcgi /* kalaxia_app:9000
+		file_server
+	}
 }
 
 kalaxia.local {
 	import game
-}
-
-mercure.kalaxia.local {
-	reverse_proxy * http://kalaxia_mercure
 }
 
 api.kalaxia.com {
