@@ -1,6 +1,6 @@
 {% set has_incoming = commercial_shippings['incoming'][constant('App\\Modules\\Athena\\Model\\CommercialShipping::ST_GOING')]|length > 0 %}
 
-<div {{ turbo_stream_listen('/trade-offers') }} class="grid {% if has_incoming %}grid-cols-4 col-span-4{% else %}grid-cols-3 col-span-3{% endif %} gap-x-4">
+<div {{ turbo_stream_listen('/trade-offers', null, { withCredentials: true, subscribe: '/trade-offers' }) }} class="grid {% if has_incoming %}grid-cols-4 col-span-4{% else %}grid-cols-3 col-span-3{% endif %} gap-x-4">
 	{% if has_incoming %}
 		<div class="">
 			<header>

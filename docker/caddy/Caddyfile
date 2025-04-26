@@ -4,7 +4,9 @@
 	}
 
 	handle /.well-known/mercure* {
-		reverse_proxy * http://kalaxia_mercure
+		reverse_proxy * http://kalaxia_mercure {
+			header_up -Authorization
+		}
 	}
 
 	handle {

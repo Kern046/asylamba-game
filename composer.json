@@ -40,7 +40,7 @@
         "symfony/twig-bundle": "^7.2",
         "symfony/uid": "^7.2",
         "symfony/ux-live-component": "^2.24",
-        "symfony/ux-turbo": "^2.23",
+        "symfony/ux-turbo": "^2.24",
         "symfony/ux-twig-component": "^2.23",
         "symfony/validator": "^7.2",
         "symfony/var-dumper": "^7.2",
