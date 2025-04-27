@@ -242,7 +242,7 @@
 					{% for label in prices|keys %}
 						{% set price = prices[label] %}
 						<a href="{{ path('spy', {'baseId': place.id, price}) }}" class="spy-button">
-							<span class="label">{{ label }}</span>
+							<span class="label text-sm">{{ label }}</span>
 							<span class="price">
 								{{ price|number }}
 								<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" alt="" />
@@ -250,14 +250,16 @@
 						</a>
 					{% endfor %}
 
-					<form class="spy-form" method="post" action="{{ path('spy', {'baseId': place.id}) }}">
-						<input type="text" value="10000" name="price" />
-						<button type="submit">Espionner</button>
+					<form class="spy-form flex " method="post" action="{{ path('spy', {'baseId': place.id}) }}">
+						<twig:Input type="text" value="10000" name="price" min="1" max="1000000" />
+						<twig:Button type="submit" :faction="current_player.faction">
+							Espionner
+						</twig:Button>
 					</form>
 				</div>
 			</twig:PlaceActionPanel>
 		{% else %}
-			<twig:PlaceActionPanel title="Envoyer des recycleurs" id="1">
+			<twig:PlaceActionPanel title="Envoyer des recycleurs" id="6">
 				<div class="box-content">
 					{% set total_ships = get_building_info(
 						constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING'),
@@ -269,19 +271,19 @@
 					{% set active_ships = recycling_missions|reduce((carry, rm) => carry + rm.recyclerQuantity + rm.addToNextMission) %}
 					{% set available_recyclers = total_ships - active_ships %}
 
-					<span class="label-box">
-						<span class="key">Recycleurs libres</span>
-						<span class="val">{{ available_recyclers|number }}</span>
-					</span>
+					<twig:NumberBox label="Recycleurs libres">
+						{{ available_recyclers|number }}
+					</twig:NumberBox>
 
-					<span class="label-box">
-						<span class="key">Temps de cycle</span>
-						<span class="val">{{ get_recycling_mission_time(current_base, place)|lite_seconds }}</span>
-					</span>
+					<twig:NumberBox label="Temps de cycle">
+						{{ get_recycling_mission_time(current_base, place)|lite_seconds }}
+					</twig:NumberBox>
 
 					<form class="spy-form" method="post" action="{{ path('create_recycling_mission', {'targetId': place.id}) }}">
-						<input type="text" name="quantity" value="{{ available_recyclers }}" />
-						<button type="submit">Envoyer</button>
+						<twig:Input type="number" name="quantity" value="{{ available_recyclers }}" min="1" max="{{ available_recyclers }}" class="w-full" />
+						<twig:Button type="submit" :faction="current_player.faction" class="mt-2 mx-auto">
+							Envoyer
+						</twig:Button>
 					</form>
 				</div>
 			</twig:PlaceActionPanel>

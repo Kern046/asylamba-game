@@ -8,7 +8,7 @@
 		   class="last-spy-link hb"
 		   title="voir le rapport d'espionnage le plus récent"
 		>
-			spy-picto
+			<img src="{{ asset('images/map/spy.svg') }}" alt="Voir le dernier rapport d'espionnage" class="w-4 h-4" />
 		</a>
 	{% endif %}
 
@@ -100,7 +100,7 @@
 		{% if reports|length > 0 %}
 			{% set report = reports|first %}
 			<div>
-				<em>
+				<em class="text-xs">
 					Dernier pillage {{ report.foughtAt|game_date|raw }}.
 				</em>
 			</div>
