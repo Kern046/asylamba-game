@@ -4,8 +4,9 @@
 	<div class="flex flex-wrap items-baseline justify-between">
 		<dt class="hidden md:block text-sm/6 font-medium text-gray-300">{{ label }}</dt>
 		{% if bonus is not null and bonus != 0 %}
-			<dd class="text-xs font-medium text-gray-200">
-				{{ bonus }}
+			<dd class="text-xs font-medium text-gray-200 bg-medium{{ current_player.faction.identifier }} px-1 rounded-md">
+				{{ bonus > 0 ? '+' : '-' }}
+				{{ bonus|round|number }}
 			</dd>
 		{% endif %}
 		<dd class="w-full flex-none text-sm {{ this.numberSize }} font-medium tracking-tight text-gray-100">
