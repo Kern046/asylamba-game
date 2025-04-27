@@ -13,6 +13,7 @@ use App\Modules\Athena\Model\ShipQueue;
 use App\Modules\Athena\Repository\BuildingQueueRepository;
 use App\Modules\Promethee\Domain\Repository\TechnologyQueueRepositoryInterface;
 use App\Modules\Promethee\Model\TechnologyQueue;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 #[AsTwigComponent(
@@ -40,6 +41,8 @@ class FastView
 		private readonly TechnologyQueueRepositoryInterface $technologyQueueRepository,
 		private readonly ShipQueueRepositoryInterface $shipQueueRepository,
 		private readonly CommercialRouteManager $commercialRouteManager,
+		#[Autowire('%athena.building.building_queue_resource_refund%')]
+		public float $buildingQueueResourceRefund,
 	) {
 	}
 

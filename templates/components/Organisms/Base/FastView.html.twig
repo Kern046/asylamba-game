@@ -44,7 +44,7 @@
 				{% set nextTotalTime = nextTotalTime + building_queue|building_queue_time %}
 
 				<div class="item {% if realSizeQueue > 1 %}active{% endif %} progress" data-progress-output="lite" data-progress-no-reload="true" data-progress-current-time="{{ nextTime }}" data-progress-total-time="{{ nextTotalTime }}">
-					<a class="button hb lt" title="annuler la construction (attention, vous ne récupérerez que {{ building_resource_refund * 100 }}% du montant investi)">×</a>
+					<a class="button hb lt" title="annuler la construction (attention, vous ne récupérerez que {{ buildingQueueResourceRefund * 100 }}% du montant investi)">×</a>
 					<img class="picto" src="{{ asset('build/media/orbitalbase/' ~  building_queue|queue_picture ~ '.png') }}" alt="" />
 					<strong>
 						{{ building_queue|queue_name }}
