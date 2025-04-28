@@ -292,11 +292,15 @@
 					<a href="{{ path('read_all_notifications') }}">tout marquer comme lu</a>
 				{% endif %}
 
-				<div class="flex flex-col divide-y divide-gray-500">
+				<div class="flex flex-col divide-y divide-gray-500" data-controller="notification">
 					{% if current_player_notifications_count > 0 %}
 						{% for notification in current_player_notifications %}
-							<details class="" data-notif-id="{{ notification.id }}">
-								<summary class="p-2 {% if notification.read is not same as(true) %}bg-gray-700{% else %}bg-gray-900{% endif %} cursor-pointer">
+							<details name="toolbar-notification">
+								<summary class="p-2 bg-gray-700 data-[read]:bg-gray-900 transition-[background-color] duration-200 ease-in cursor-pointer"
+										 data-id="{{ notification.id }}"
+										 data-action="click->notification#markAsRead"
+									 {% if notification.read is same as(true) %}data-read{% endif %}
+								>
 									<twig:H3>
 										{{ notification.title }}
 									</twig:H3>
