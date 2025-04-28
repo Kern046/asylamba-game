@@ -17,7 +17,9 @@ interface NotificationRepositoryInterface extends EntityRepositoryInterface
 	/**
 	 * @return list<Notification>
 	 */
-	public function getUnreadNotifications(Player $player): array;
+	public function getUnreadNotifications(Player $player, int|null $limit = null): array;
+
+	public function countUnreadNotifications(Player $player): int;
 
 	/**
 	 * @return list<Notification>

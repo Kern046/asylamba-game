@@ -126,7 +126,7 @@
 					{% if mission_logs|length > 0 %}
 						<twig:H3>Dernières livraisons</twig:H3>
 					{% endif %}
-					
+
 					{% for log in mission_logs|filter(log => log.mission.id == mission.id) %}
 						{% set wedge = {
 							'ressource': log.resources,

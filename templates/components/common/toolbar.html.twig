@@ -281,19 +281,19 @@
 					<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
 				</svg>
 
-				{% if current_player_notifications|length > 0 %}
-					{{ include('atoms/header/badge.html.twig', { count: current_player_notifications|length, faction: current_player.faction }) }}
+				{% if current_player_notifications_count > 0 %}
+					{{ include('atoms/header/badge.html.twig', { count: current_player_notifications_count, faction: current_player.faction }) }}
 				{% endif %}
 			</summary>
 
 			<div class="absolute top-14 left-0 bg-gray-800 p-2 rounded-md w-96 z-[1000] border border-gray-600">
 				<twig:H2>Notifications</twig:H2>
-				{% if current_player_notifications|length > 1 %}
+				{% if current_player_notifications_count > 1 %}
 					<a href="{{ path('read_all_notifications') }}">tout marquer comme lu</a>
 				{% endif %}
 
 				<div class="flex flex-col divide-y divide-gray-500">
-					{% if current_player_notifications|length > 0 %}
+					{% if current_player_notifications_count > 0 %}
 						{% for notification in current_player_notifications %}
 							<details class="" data-notif-id="{{ notification.id }}">
 								<summary class="p-2 {% if notification.read is not same as(true) %}bg-gray-700{% else %}bg-gray-900{% endif %} cursor-pointer">
