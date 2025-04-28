@@ -8,45 +8,38 @@
 		</title>
 
 		<meta charset="utf-8" />
+		<meta name="turbo-prefetch" content="false">
 		<meta name="description" content="Kalaxia, jeu de stratégie multijoueurs" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<link href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic" rel="stylesheet" type="text/css">
 		{% block stylesheets %}
-			{{ encore_entry_link_tags('css/main.faction' ~ current_player_faction_id) }}
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/all.css') }}" />
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/color' ~ current_player_faction_id ~ '.css') }}" />
 		{% endblock %}
 
-		<link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ current_player_faction_id ~ '.png') }}" />
-	</head>
-	<body class="color{{ current_player_faction_id }} no-scrolling" data-init-sftr="2">
-
-		<div id="app">
-			{{ include('components/common/navbar.html.twig') }}
-
-			<div id="container" class="z-0">
-				{% block body %}{% endblock body %}
-			</div>
-
-			{{ include('components/common/toolbar.html.twig') }}
-			{{ include('components/common/alerts.html.twig') }}
-		</div>
+		{# <link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ current_player_faction_id ~ '.png') }}" /> #}
 
 		{% block javascripts %}
-			<script type="text/javascript" src="{{ asset('build/js/jquery1.8.2.min.js') }}"></script>
-			<script type="text/javascript">
-				jQuery(document).ready(function($) {
-					game = {
-						path: '{{ get_api_endpoint() }}/',
-						shipsName: [{{ get_ship_names()|join(',')|raw }}],
-						shipsPev: [{{ get_ship_pevs()|join(',') }}]
-					};
-				});
-			</script>
-			<script type="text/javascript" src="{{ asset('build/js/main.js') }}"></script>
-			<script type="text/javascript" src="{{ asset('build/js/main.desktop.js') }}"></script>
-			<script type="text/javascript" src="{{ asset('build/js/autocomplete.module.js') }}"></script>
-
-			{{ encore_entry_script_tags('app') }}
+			{% block importmap %}{{ importmap('app') }}{% endblock %}
 		{% endblock %}
+
+		<link rel="icon" href="{{ asset('images/logo.png') }}" />
+	</head>
+	<body class="h-screen bg-gray-900 text-white">
+		<div id="container" class="flex flex-col h-full w-fit min-w-full py-[120px]">
+			{{ include('components/common/navbar.html.twig') }}
+			{{ include('components/common/toolbar.html.twig') }}
+
+			{% block body %}{% endblock body %}
+
+			<div class="hidden md:block fixed left-0 top-32">
+				{% block left_sidebar %}{% endblock left_sidebar %}
+			</div>
+			<div class="hidden md:block fixed right-0 top-0">
+				{% block right_sidebar %}{% endblock right_sidebar %}
+			</div>
+			{{ include('components/common/alerts.html.twig') }}
+		</div>
 	</body>
 </html>

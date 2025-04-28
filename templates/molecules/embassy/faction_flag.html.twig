@@ -1,15 +1,17 @@
-<div class="component profil">
-	<div class="head skin-2">
-		<h2>A propos</h2>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="center-box">
-				<span class="value">{{ get_faction_info(faction.identifier, 'officialName') }}</span>
-				<span class="label">{{ get_faction_info(faction.identifier, 'devise')|raw }}</span>
-			</div>
-
-			<div class="profil-flag color-{{ faction.identifier }}"><img src="{{ asset('build/media/ally/big/color' ~ faction.identifier ~ '.png') }}" alt=""></div>
+<twig:LayoutBox class="w-[500px]">
+	<header class="text-center">
+		<twig:H2>{{ get_faction_info(faction.identifier, 'officialName') }}</twig:H2>
+	</header>
+	<section class="flex flex-col items-center mt-2">
+		<div class="text-center">
+			<span class="italic">"{{ get_faction_info(faction.identifier, 'devise')|raw }}"</span>
 		</div>
-	</div>
-</div>
+
+		<twig:FactionBanner :faction="faction" class="mt-4 w-32 h-32" />
+
+		<p class="mt-4 long-info text-sm">{{ get_faction_info(faction.identifier, 'desc1')|raw }}</p>
+		<p class="mt-2 long-info text-sm">{{ get_faction_info(faction.identifier, 'desc2')|raw }}</p>
+		<p class="mt-2 long-info text-sm">{{ get_faction_info(faction.identifier, 'desc3')|raw }}</p>
+		<p class="mt-2 long-info text-sm">{{ get_faction_info(faction.identifier, 'desc4')|raw }}</p>
+	</section>
+</twig:LayoutBox>

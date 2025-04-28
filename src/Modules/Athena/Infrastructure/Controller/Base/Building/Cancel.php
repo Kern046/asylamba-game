@@ -21,6 +21,8 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class Cancel extends AbstractController
 {
+	public const ROUTE_NAME = 'cancel_building_queue';
+
 	public function __invoke(
 		Request $request,
 		Player $currentPlayer,

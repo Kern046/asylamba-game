@@ -1,35 +1,43 @@
 {% extends 'layouts/demeter/faction.html.twig' %}
 
-{% block content %}
+{% block page_title %}
 	{% if faction.isInCampaign %}
-		{{ include('components/faction/election/campaign.html.twig') }}
-		{{ include('components/faction/election/list.html.twig') }}
+		Campagne
+	{% endif %}
+{% endblock page_title %}
 
-		{% if app.request.query.get('action') == 'postulate' %}
-			{{ include('components/faction/election/postulate.html.twig') }}
-		{% elseif candidate is not null %}
-			{{ include('components/faction/election/candidate.html.twig') }}
-		{% else %}
-			{{ include('molecules/common/default.html.twig') }}
-		{% endif %}
-	{% elseif faction.isInElection %}
-		{% if faction.isDemocratic %}
-			{{ include('components/faction/election/election.html.twig') }}
-			{{ include('components/faction/election/list.html.twig') }}
+{% block content %}
+	<div class="flex gap-x-4">
+		{% if faction.isInCampaign %}
+			{{ include('components/Faction/election/campaign.html.twig') }}
+			{{ include('components/Faction/election/list.html.twig') }}
 
-			{% if candidate is not null %}
-				{{ include('components/faction/election/candidate.html.twig') }}
-				{% if topic is defined %}
-					{# {{ include('components/faction/forum/topic.html.twig') }} #}
-				{% endif %}
+			{% if app.request.query.get('action') == 'postulate' %}
+				{{ include('components/Faction/election/postulate.html.twig') }}
+			{% elseif candidate is not null %}
+				{{ include('components/Faction/election/candidate.html.twig') }}
 			{% else %}
 				{{ include('molecules/common/default.html.twig') }}
 			{% endif %}
-		{% elseif faction.isRoyalistic %}
-			{{ include('components/faction/election/putsch.html.twig') }}
-			{{ include('components/faction/election/candidate.html.twig') }}
-		{% else %}
-			{{ include('molecules/common/default.html.twig') }}
+		{% elseif faction.isInElection %}
+			{% if faction.isDemocratic %}
+				{{ include('components/Faction/election/election.html.twig') }}
+				{{ include('components/Faction/election/list.html.twig') }}
+
+				{% if candidate is not null %}
+					{{ include('components/Faction/election/candidate.html.twig') }}
+					{% if topic is defined %}
+						{# {{ include('components/Faction/forum/topic.html.twig') }} #}
+					{% endif %}
+				{% else %}
+					{{ include('molecules/common/default.html.twig') }}
+				{% endif %}
+			{% elseif faction.isRoyalistic %}
+				{{ include('components/Faction/election/putsch.html.twig') }}
+				{{ include('components/Faction/election/candidate.html.twig') }}
+			{% else %}
+				{{ include('molecules/common/default.html.twig') }}
+			{% endif %}
 		{% endif %}
-	{% endif %}
+	</div>
 {% endblock %}

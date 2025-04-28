@@ -18,7 +18,7 @@ if (false == $session->get('playerInfo')->get('admin')) {
 	$response->redirect('profil');
 } else {
 	if (false !== $content) {
-		if (strlen($content) < 10000) {
+		if (strlen((string) $content) < 10000) {
 			$S_CVM = $conversationManager->getCurrentSession();
 			$conversationManager->newSession();
 			$conversationManager->load(

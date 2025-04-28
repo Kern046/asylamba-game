@@ -33,8 +33,7 @@ readonly class SystemListener
 			$scores[$factionIdentifier] = ($scores[$factionIdentifier] ?? 0) + $this->scores[$base->typeOfBase];
 		}
 		arsort($scores);
-		reset($scores);
-		$newColor = key($scores);
+		$newColor = array_key_first($scores);
 		$currentFactionIdentifier = $system->faction?->identifier;
 
 		if (null === $currentFactionIdentifier || (

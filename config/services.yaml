@@ -55,7 +55,6 @@ parameters:
     antispy_display_mode: 0
     antispy_game_mode: 1
 
-    nb_avatar: 80
     pam_coeftax: 1
     rsm_researchquantity: 10
 
@@ -114,7 +113,6 @@ services:
         exclude:
             - '../src/Modules/Shared/Application/PercentageApplier'
             - '../src/Modules/Shared/Domain/{!Service}'
-            - '../src/Modules/Shared/Infrastructure/'
 
     Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
 

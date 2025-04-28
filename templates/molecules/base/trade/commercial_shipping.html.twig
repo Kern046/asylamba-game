@@ -1,58 +1,62 @@
-<div class="transaction {{ get_transaction_class(commercial_shipping) }}">
+<div id="commercial-shipping-{{ commercial_shipping.id }}" class="transaction {{ get_transaction_class(commercial_shipping) }} py-1 px-2 bg-gray-700 rounded-md">
 	{% if not commercial_shipping.isMovingBack %}
-		<div class="product">
-			{% if commercial_shipping.isWaiting %}
-				<a href="{{ path('cancel_offer', {'id': commercial_shipping.transaction.id }) }}"
-				   class="hb lt right-link"
-				   title="supprimer cette offre coûtera {{ get_cancellation_price(commercial_shipping) }} crédits"
-				>×</a>
-			{% endif %}
-			{% if commercial_shipping.hasResources %}
-				<img src="{{ asset('build/media/market/resources-pack-' ~ commercial_shipping|commercial_shipping_picto ~ '.png') }}" alt="" class="picto" />
-				<div class="offer">
-					{# @TODO seems that resources selling isn't sure about the used property #}
-					{# resourceTransported is used when giving resources, quantity is used when selling. @TODO use only one field #}
-					{{ (commercial_shipping.resourceTransported == 0 ? commercial_shipping.transaction.quantity : commercial_shipping.resourceTransported)|number }}
-					<img src="{{ asset('build/media/resources/resource.png') }}" alt="" class="icon-color" />
-				</div>
-			{% elseif commercial_shipping.hasCommander %}
-				<img src="{{ asset('build/media/commander/small/' ~ commercial_shipping.transaction.commander.avatar ~ '.png') }}" alt="" class="picto" />
-				<div class="offer">
-					<strong>{{ commercial_shipping.transaction.commander|commander_rank }} {{ commercial_shipping.transaction.commander.name }}</strong>
-					<em>{{ commercial_shipping.transaction.commander.experience|number }} xp | '{{ commercial_shipping.transaction.commander.palmares }} victoire{{ commercial_shipping.transaction.commander.palmares|plural }}</em>
-				</div>
-			{% elseif commercial_shipping.hasShips %}
-				<img src="{{ asset('build/media/ship/picto/ship' ~ commercial_shipping.transaction.identifier ~ '.png') }}" alt="" class="picto" />
-				<div class="offer">
-					<strong>
-						{{ commercial_shipping.transaction.quantity }}
-						{{ get_ship_info(commercial_shipping.transaction.identifier, 'codeName') }}{{ commercial_shipping.transaction.quantity|plural }}
-					</strong>
-					<em>{{ get_ship_info(commercial_shipping.transaction.identifier, 'name') }} / {{ get_ship_info(commercial_shipping.transaction.identifier, 'pev') }} pev</em>
-				</div>
-			{% endif %}
+		<div class="product flex justify-between items-start">
+			<div class="flex items-start gap-x-1">
+				{% if commercial_shipping.hasResources %}
+					{#<img src="{{ asset('build/media/market/resources-pack-' ~ commercial_shipping|commercial_shipping_picto ~ '.png') }}" alt="" class="picto" />#}
+					<div class="offer">
+						{# @TODO seems that resources selling isn't sure about the used property #}
+						{# resourceTransported is used when giving resources, quantity is used when selling. @TODO use only one field #}
+						{{ (commercial_shipping.resourceTransported == 0 ? commercial_shipping.transaction.quantity : commercial_shipping.resourceTransported)|number }}
+						<img src="{{ asset('images/legacy/picto/trade/Lot.svg') }}" alt="" class="inline w-4 h-4" />
+					</div>
+				{% elseif commercial_shipping.hasCommander %}
+					{#<img src="{{ asset('build/media/commander/small/' ~ commercial_shipping.transaction.commander.avatar ~ '.png') }}" alt="" class="picto" />#}
+					<div class="offer">
+						<strong class="text-sm">{{ commercial_shipping.transaction.commander|commander_rank }} {{ commercial_shipping.transaction.commander.name }}</strong><br>
+						<em class="text-sm">{{ commercial_shipping.transaction.commander.experience|number }} xp | '{{ commercial_shipping.transaction.commander.palmares }} victoire{{ commercial_shipping.transaction.commander.palmares|plural }}</em>
+					</div>
+				{% elseif commercial_shipping.hasShips %}
+					{#<img src="{{ asset('build/media/ship/picto/ship' ~ commercial_shipping.transaction.identifier ~ '.png') }}" alt="" class="picto" />#}
+					<div class="offer">
+						<strong>
+							{{ commercial_shipping.transaction.quantity }}
+							{{ get_ship_info(commercial_shipping.transaction.identifier, 'codeName') }}{{ commercial_shipping.transaction.quantity|plural }}
+						</strong>
+						<em>{{ get_ship_info(commercial_shipping.transaction.identifier, 'name') }} / {{ get_ship_info(commercial_shipping.transaction.identifier, 'pev') }} pev</em>
+					</div>
+				{% endif %}
 
-			{% if commercial_shipping.resourceTransported is null %}
-				{# transaction #}
-				<div class="for">
-					<span>pour</span>
-				</div>
-				<div class="price">
-					{{ commercial_shipping.transaction.price|number }}
-					<img src="{{ asset('build/media/resources/credit.png') }}" alt="" class="icon-color" />
-				</div>
-			{% elseif commercial_shipping.resourceTransported == 0 %}
-				{# ships sending #}
-				<div class="for"><span></span></div>
-				<div class="price">
-					envoi de vaisseaux
-				</div>
-			{% else %}
-				{# resources sending #}
-				<div class="for"><span></span></div>
-				<div class="price">
-					envoi de ressources
-				</div>
+				{% if commercial_shipping.resourceTransported is null %}
+					{# transaction #}
+					<div class="for">
+						<span class="text-sm">pour</span>
+					</div>
+					<div class="price flex items-center gap-x-1">
+						{{ commercial_shipping.transaction.price|number }}
+						<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="" class="inline w-4 h-4" />
+					</div>
+				{% elseif commercial_shipping.resourceTransported == 0 %}
+					{# ships sending #}
+					<div class="for"><span></span></div>
+					<div class="price">
+						envoi de vaisseaux
+					</div>
+				{% else %}
+					{# resources sending #}
+					<div class="for"><span></span></div>
+					<div class="price">
+						envoi de ressources
+					</div>
+				{% endif %}
+			</div>
+
+			{% if commercial_shipping.isWaiting %}
+				<form action="{{ path('cancel_offer', {'id': commercial_shipping.transaction.id }) }}" method="post">
+					<button title="supprimer cette offre coûtera {{ get_cancellation_price(commercial_shipping) }} crédits">
+						×
+					</button>
+				</form>
 			{% endif %}
 		</div>
 	{% endif %}
@@ -67,12 +71,12 @@
 				<span style="width: {{ commercial_shipping|travel_remaining_time|percent(commercial_shipping|travel_total_time) }}%;" class="progress-bar"></span>
 			</span>
 	{% else %}
-		<div class="shipping">
+		<div class="shipping flex items-center gap-x-1">
 	{% endif %}
 
 	<div class="ships">
 		{{ commercial_shipping.shipQuantity }}
-		<img src="{{ asset('build/media/resources/transport.png') }}" alt="" class="icon-color" />
+		{#<img src="{{ asset('build/media/resources/transport.png') }}" alt="" class="icon-color" />#}
 	</div>
 
 	{% if commercial_shipping.isWaiting %}

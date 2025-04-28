@@ -1,0 +1,49 @@
+{% set displayed = 0 %}
+
+<div class="min-w-80">
+	<header>
+		<twig:H2>Territoires</twig:H2>
+	</header>
+	<section class="mt-4">
+		{% for type in map_data_types|keys %}
+			{% set sectors = map_data_types[type] %}
+
+			<twig:H3>{{ type }}</twig:H3>
+			<ul class="list-type-1">
+				{% for sector in sectors %}
+					<li class="flex items-center gap-x-2 py-2">
+						<a href="#" class="block w-10 h-10 flex justify-center items-center bg-dark{{ sector.faction.identifier }} rounded-full">{{ sector.identifier }}</a>
+
+						<div>
+							<span class="label text-sm">
+								{{ sector.name }}
+								({{ sector.points }} point{{ sector.points|plural }})
+							</span><br>
+							{% for faction_id in map_data_scores|filter((v, k) => v > 0)|keys %}
+								{% set points = map_data_scores[faction_id] %}
+								<span class="label color{{ faction_id }} text-xs">
+									{{ get_faction_info(faction_id, 'popularName') }} : {{ points }} point{{ points|plural }} de contrôle
+								 </span>
+							{% endfor %}
+						</div>
+
+						<div>
+							<span class="value">{{ map_data_percents['color' ~ faction.identifier] }} %</span>
+							<span class="progress-bar hb bl" title="partage des systèmes entre les factions">
+								{% for faction_id in map_data_percents|keys %}
+									{% set percent = map_data_percents[faction_id] %}
+									<span style="width:{{ percent }}%;" class="content {{ faction_id }}"></span>
+								{% endfor %}
+							</span>
+						</div>
+					</li>
+					{% set displayed = displayed + 1 %}
+				{% endfor %}
+			</ul>
+		{% endfor %}
+
+		{% if displayed == 0 %}
+			<p>Aucun secteur</p>
+		{% endif %}
+	</section>
+</div>

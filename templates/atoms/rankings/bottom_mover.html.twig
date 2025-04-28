@@ -1,5 +1,7 @@
 {% if loop.last %}
-	<a class="more-item" href="{{ path('view_more_rankings', {'direction': 'prev', type, 'current': current_position }) }}">
-		afficher les joueurs suivants
+	<a class="more-item w-full" href="{{ path('view_more_rankings', {'direction': 'prev', type, 'current': current_position }) }}">
+		<twig:Button :faction="current_player.faction" class="w-full text-center">
+			afficher les joueurs suivants
+		</twig:Button>
 	</a>
 {% endif %}

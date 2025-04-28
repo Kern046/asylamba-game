@@ -39,7 +39,7 @@ class Parser
 
 	public function parse(string $string): string
 	{
-		$string = $this->protect($string);
+		$string = static::protect($string);
 
 		if ($this->parseLink) {
 			$string = $this->parseLink($string);
@@ -75,9 +75,10 @@ class Parser
 		return $string;
 	}
 
+	/** @TODO Refactor this inferno */
 	public function getToolbar(): string
 	{
-		$tl = '<span class="toolbar">';
+		$tl = '<div class="toolbar">';
 		if ($this->parseTag) {
 			$tl .= '<button data-tag="bl">Gras</button>';
 			$tl .= '<button data-tag="it">Italique</button>';
@@ -91,7 +92,7 @@ class Parser
 		if ($this->parsePlace) {
 			$tl .= '<button data-tag="pl">Planète</button>';
 		}
-		$tl .= '</span>';
+		$tl .= '</div>';
 
 		return $tl;
 	}
@@ -99,15 +100,15 @@ class Parser
 	protected function parseIcon(string $string): string
 	{
 		$string = \preg_replace('#\[pa\]#', '<img src="'.$this->mediaPath.'resources/pa.png" alt="pa" class="hb lt icon-color" title="point d\'action" />', $string);
-		$string = \preg_replace('#\[pev\]#', '<img src="'.$this->mediaPath.'resources/pev.png" alt="pev" class="hb lt icon-color" title="point équivalent vaisseaux" />', $string);
-		$string = \preg_replace('#\[credit\]#', '<img src="'.$this->mediaPath.'resources/credit.png" alt="credit" class="hb lt icon-color" title="crédit" />', $string);
-		$string = \preg_replace('#\[ressource\]#', '<img src="'.$this->mediaPath.'resources/resource.png" alt="resource" class="hb lt icon-color" title="ressource" />', $string);
-		$string = \preg_replace('#\[releve\]#', '<img src="'.$this->mediaPath.'resources/time.png" alt="time" class="hb lt icon-color" title="relève" />', $string);
+		$string = \preg_replace('#\[pev\]#', '<img src="'.$this->mediaPath.'resources/pev.png" alt="pev" class="hb lt icon-color" title="point équivalent vaisseaux" />', (string) $string);
+		$string = \preg_replace('#\[credit\]#', '<img src="'.$this->mediaPath.'resources/credit.png" alt="credit" class="hb lt icon-color" title="crédit" />', (string) $string);
+		$string = \preg_replace('#\[ressource\]#', '<img src="'.$this->mediaPath.'resources/resource.png" alt="resource" class="hb lt icon-color" title="ressource" />', (string) $string);
+		$string = \preg_replace('#\[releve\]#', '<img src="'.$this->mediaPath.'resources/time.png" alt="time" class="hb lt icon-color" title="relève" />', (string) $string);
 
-		$string = \preg_replace('#\[attaque\]#', '<img src="'.$this->mediaPath.'resources/attack.png" alt="attack" class="hb lt icon-color" title="point d\'attaque" />', $string);
-		$string = \preg_replace('#\[vie\]#', '<img src="'.$this->mediaPath.'resources/life.png" alt="life" class="hb lt icon-color" title="point de vie" />', $string);
-		$string = \preg_replace('#\[defense\]#', '<img src="'.$this->mediaPath.'resources/defense.png" alt="defense" class="hb lt icon-color" title="point de défense" />', $string);
-		$string = \preg_replace('#\[vitesse\]#', '<img src="'.$this->mediaPath.'resources/speed.png" alt="speed" class="hb lt icon-color" title="point de vitesse" />', $string);
+		$string = \preg_replace('#\[attaque\]#', '<img src="'.$this->mediaPath.'resources/attack.png" alt="attack" class="hb lt icon-color" title="point d\'attaque" />', (string) $string);
+		$string = \preg_replace('#\[vie\]#', '<img src="'.$this->mediaPath.'resources/life.png" alt="life" class="hb lt icon-color" title="point de vie" />', (string) $string);
+		$string = \preg_replace('#\[defense\]#', '<img src="'.$this->mediaPath.'resources/defense.png" alt="defense" class="hb lt icon-color" title="point de défense" />', (string) $string);
+		$string = \preg_replace('#\[vitesse\]#', '<img src="'.$this->mediaPath.'resources/speed.png" alt="speed" class="hb lt icon-color" title="point de vitesse" />', (string) $string);
 
 		return $string;
 	}
@@ -137,13 +138,9 @@ class Parser
 	{
 		return preg_replace_callback(
 			'#\[\@(.+)\]#isU',
-			function ($m) {
-				return
-					(($player = $this->playerRepository->getByName($m[1])) !== null)
+			fn($m) => (($player = $this->playerRepository->getByName($m[1])) !== null)
 					? '<a href="' . $this->urlGenerator->generate('embassy', ['player' => $player->id]) . '" class="color' . $player->faction->identifier . ' hb lt" title="voir le profil">' . $player->name . '</a>'
-					: $m[0]
-				;
-			},
+					: $m[0],
 			$string
 		);
 	}
@@ -163,14 +160,14 @@ class Parser
 
 				return $m[0];
 			},
-			$string
+			(string) $string
 		);
 	}
 
 	protected function parseTag(string $string): string
 	{
 		$string = \preg_replace('#\[b\](.+)\[/b\]#isU', '<strong>$1</strong>', $string);
-		$string = \preg_replace('#\[i\](.+)\[/i\]#isU', '<em>$1</em>', $string);
+		$string = \preg_replace('#\[i\](.+)\[/i\]#isU', '<em>$1</em>', (string) $string);
 
 		return $string;
 	}

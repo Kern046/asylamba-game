@@ -46,7 +46,7 @@ class Chronos
 	public static function getDate($type)
 	{
 		$now = time();
-		$date = strtotime($_ENV['SERVER_START_TIME']);
+		$date = strtotime((string) $_ENV['SERVER_START_TIME']);
 		$intr = $now - $date;
 		$rel = (floor($intr / 3600)) + ($_ENV['SEGMENT_SHIFT'] * Chronos::CO_SEG);
 
@@ -64,8 +64,8 @@ class Chronos
 
 	private static function getRel($date)
 	{
-		$origin = strtotime($_ENV['SERVER_START_TIME']);
-		$date = strtotime($date);
+		$origin = strtotime((string) $_ENV['SERVER_START_TIME']);
+		$date = strtotime((string) $date);
 		$intr = $date - $origin;
 
 		return (floor($intr / 3600)) + ($_ENV['SEGMENT_SHIFT'] * Chronos::CO_SEG);

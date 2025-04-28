@@ -1,24 +1,22 @@
-<div class="component player rank">
-	<div class="head skin-4">
-		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">
-		<h2>Classement de victoire</h2>
-		<em>Classement cumulatif. La victoire est remportée à {{ points_to_win }} points.</em>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			{% for faction_ranking in points_rankings %}
-				{% set value = faction_ranking.points|number(-1) ~ ' points' %}
-				{% if faction_ranking.newPoints > 0 %}
-					{% set value = value ~ ' (+' ~ faction_ranking.newPoints|number(-1) ~ ' points)' %}
-				{% endif %}
-				
-				{{ include('molecules/rankings/faction_ranking_card.html.twig', {
-					faction_ranking,
-					value,
-					'position': faction_ranking.pointsPosition,
-					'variation': faction_ranking.pointsVariation,
-				}) }}
-			{% endfor %}
-		</div>
-	</div>
-</div>
+<twig:LayoutBox>
+	<header>
+<!--		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">-->
+		<twig:H2>Classement de victoire</twig:H2>
+		<twig:H5>Classement cumulatif. La victoire est remportée à {{ points_to_win }} points.</twig:H5>
+	</header>
+	<section>
+		{% for faction_ranking in points_rankings %}
+			{% set value = faction_ranking.points|number(-1) ~ ' points' %}
+			{% if faction_ranking.newPoints > 0 %}
+				{% set value = value ~ ' (+' ~ faction_ranking.newPoints|number(-1) ~ ' points)' %}
+			{% endif %}
+
+			{{ include('molecules/rankings/faction_ranking_card.html.twig', {
+				faction_ranking,
+				value,
+				'position': faction_ranking.pointsPosition,
+				'variation': faction_ranking.pointsVariation,
+			}) }}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

@@ -54,7 +54,7 @@ readonly class CommanderExperienceHandler
 		$oLevel = $level;
 		$nLevel = $level;
 		while (1) {
-			if ($newExperience >= (pow(2, $nLevel) * $this->commanderBaseLevel)) {
+			if ($newExperience >= (2 ** $nLevel * $this->commanderBaseLevel)) {
 				++$nLevel;
 			} else {
 				break;
@@ -66,6 +66,6 @@ readonly class CommanderExperienceHandler
 
 	public function experienceToLevelUp(Commander $commander): int
 	{
-		return intval(pow(2, $commander->level) * $this->commanderBaseLevel);
+		return intval(2 ** $commander->level * $this->commanderBaseLevel);
 	}
 }

@@ -25,7 +25,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsMessageHandler]
 readonly class BaseUpdateHandler
 {
-	private const MAX_UPDATES = 10;
+	private const int MAX_UPDATES = 10;
 	
 	public function __construct(
 		private GameTimeConverter $gameTimeConverter,

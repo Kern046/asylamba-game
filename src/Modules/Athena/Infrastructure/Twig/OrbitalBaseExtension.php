@@ -10,7 +10,7 @@ use App\Modules\Athena\Application\Handler\Tax\PopulationTaxHandler;
 use App\Modules\Athena\Domain\Service\Base\Building\BuildingDataHandler;
 use App\Modules\Athena\Domain\Service\Base\Building\GetTimeCost;
 use App\Modules\Athena\Domain\Service\Base\GetCoolDownBeforeLeavingBase;
-use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
+use App\Modules\Athena\Domain\Service\Base\GetMaxResourceStorage;
 use App\Modules\Athena\Domain\Specification\CanLeaveOrbitalBase;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Model\OrbitalBase;
@@ -26,17 +26,18 @@ use Twig\TwigFunction;
 class OrbitalBaseExtension extends AbstractExtension
 {
 	public function __construct(
-		private readonly BuildingDataHandler $buildingDataHandler,
-		private readonly GetTimeCost $getTimeCost,
+		private readonly BuildingDataHandler          $buildingDataHandler,
+		private readonly GetTimeCost                  $getTimeCost,
 		private readonly GetCoolDownBeforeLeavingBase $getCoolDownBeforeLeavingBase,
-		private readonly DurationHandler $durationHandler,
-		private readonly OrbitalBaseHelper $orbitalBaseHelper,
-		private readonly PopulationTaxHandler $populationTaxHandler,
-		private readonly GetMaxStorage $getMaxStorage,
+		private readonly DurationHandler              $durationHandler,
+		private readonly OrbitalBaseHelper            $orbitalBaseHelper,
+		private readonly PopulationTaxHandler         $populationTaxHandler,
+		private readonly GetMaxResourceStorage        $getMaxStorage,
 	) {
 	}
 
-	public function getFilters(): array
+	#[\Override]
+    public function getFilters(): array
 	{
 		return [
 			new TwigFilter('base_demography', fn (OrbitalBase $orbitalBase) => Game::getSizeOfPlanet($orbitalBase->place->population)),
@@ -54,7 +55,8 @@ class OrbitalBaseExtension extends AbstractExtension
 		];
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_planet_size', fn (int|float $population) => Game::getSizeOfPlanet($population)),
@@ -63,7 +65,7 @@ class OrbitalBaseExtension extends AbstractExtension
 			new TwigFunction('can_leave_base', fn (OrbitalBase $orbitalBase) => $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt) < ($this->getCoolDownBeforeLeavingBase)()),
 			new TwigFunction('get_time_until_cooldown_end', fn (OrbitalBase $orbitalBase) => ($this->getCoolDownBeforeLeavingBase)() - $this->durationHandler->getHoursDiff(new \DateTimeImmutable(), $orbitalBase->createdAt)),
 			new TwigFunction('get_cooldown_before_leaving_base', fn () => ($this->getCoolDownBeforeLeavingBase)()),
-			new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, int $level = null) => Game::resourceProduction(
+			new TwigFunction('get_base_production', fn (OrbitalBase $orbitalBase, ?int $level = null) => Game::resourceProduction(
 				$this->orbitalBaseHelper->getBuildingInfo(
 					OrbitalBaseResource::REFINERY,
 					'level',

@@ -1,0 +1,26 @@
+<div {{ attributes.defaults({
+	class: 'relative text-white rounded-xs' ~ this.boxSize,
+}) }}>
+	<div class="flex flex-wrap items-baseline justify-between">
+		<dt class="hidden md:block text-sm/6 font-medium text-gray-300">{{ label }}</dt>
+		{% if bonus is not null and bonus != 0 %}
+			<dd class="text-xs font-medium text-gray-200 bg-medium{{ current_player.faction.identifier }} px-1 rounded-md">
+				{{ bonus > 0 ? '+' : '-' }}
+				{{ bonus|round|number }}
+			</dd>
+		{% endif %}
+		<dd class="w-full flex-none text-sm {{ this.numberSize }} font-medium tracking-tight text-gray-100">
+			{% block content %}{% endblock content %}
+		</dd>
+	</div>
+
+	{% if percent is not null %}
+		<twig:ProgressBar :current="percent" :faction="faction ?? current_player.faction" class="mt-2" />
+	{% endif %}
+
+	{% if block('upper_links') is not empty %}
+		<div class="absolute top-1 right-2 flex gap-x-1 [&_*]:w-5 [&_*]:text-center [&_*]:bg-gray-700 [&_*]:rounded-md [&_*]:cursor-pointer">
+			{% block upper_links %}{% endblock upper_links %}
+		</div>
+	{% endif %}
+</div>

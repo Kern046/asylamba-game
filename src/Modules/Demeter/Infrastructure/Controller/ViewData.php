@@ -54,7 +54,8 @@ class ViewData extends AbstractController
 		SectorRepositoryInterface            $sectorRepository,
 		SquadronRepositoryInterface $squadronRepository,
 	): Response {
-		$faction = $currentPlayer->faction;
+		$faction = $currentPlayer->faction
+			?? throw new \LogicException('Player must have a faction');
 
 		$rankings = $factionRankingRepository->getFactionRankings($faction);
 
@@ -82,7 +83,7 @@ class ViewData extends AbstractController
 
 		$totalPEV = 0;
 		for ($i = 0; $i < 12; ++$i) {
-			$totalPEV += ($fleetStats['nbs'.$i] ?? 0) * ShipResource::getInfo($i, 'pev');
+			$totalPEV += ($fleetStats['nbs'.$i]) * ShipResource::getInfo($i, 'pev');
 		}
 
 		$factions = $this->colorRepository->getAll();
@@ -129,7 +130,11 @@ class ViewData extends AbstractController
 	/**
 	 * @param list<Color> $factions
 	 * @param list<Sector> $sectors
-	 * @return array<string, array>
+	 * @return array{
+	 *     types: array<string, list<Sector>>,
+	 *     scores: array<int, int>,
+	 *     percents: array<string, float>,
+	 * }
 	 * @throws \RedisException
 	 */
 	private function getTacticalMapData(Color $faction, array $factions, array $sectors): array
@@ -144,7 +149,13 @@ class ViewData extends AbstractController
 		foreach (array_keys($types) as $type) {
 			foreach ($sectors as $key => $sector) {
 				$percents = ['color'.$faction->identifier => 0];
-				$scores = unserialize($this->redisManager->getConnection()->get('sector:'.$sector->identifier));
+				$sectorOwnershipScores = $this->redisManager->getConnection()->get('sector:' . $sector->id);
+				if (!is_string($sectorOwnershipScores)) {
+					throw new \LogicException(sprintf('Missing ownership data for sector %s', $sector->id));
+				}
+
+				/** @var array<int, int> $scores */
+				$scores = unserialize($sectorOwnershipScores);
 
 				if (!isset($scores[$faction->identifier]) && !$sector->faction?->id->equals($faction->id)) {
 					unset($sectors[$key]);
@@ -155,16 +166,20 @@ class ViewData extends AbstractController
 				}
 
 				foreach ($factions as $f) {
-					if (0 === $f->id || !isset($scores[$f->identifier])) {
+					if (0 === $f->identifier || !isset($scores[$f->identifier])) {
 						continue;
 					}
-					$percents['color'.$f->id] = round(Format::percent($scores[$f->identifier], array_sum($scores), false));
+					$percents['color'.$f->identifier] = round(Format::percent($scores[$f->identifier], array_sum($scores), false));
 				}
 
 				arsort($percents);
 
-				if ($sector?->faction->id->equals($faction->id) || ($scores[$faction->identifier] > 0)) {
-					$types[$type] = $sector;
+				if (null === $sector->faction) {
+					continue;
+				}
+
+				if ($sector->faction->id->equals($faction->id) || ($scores[$faction->identifier] > 0)) {
+					$types[$type][] = $sector;
 				}
 			}
 		}

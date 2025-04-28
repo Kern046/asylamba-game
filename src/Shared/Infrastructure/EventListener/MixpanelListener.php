@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class MixpanelListener
 {
-	public function __construct(private \Mixpanel $mixpanel, string $environment)
+	public function __construct(private readonly \Mixpanel $mixpanel, string $environment)
 	{
 		$this->mixpanel->register('environment', $environment);
 	}

@@ -61,7 +61,7 @@ class GalaxyGenerator
 			$xB = $this->galaxyConfiguration->galaxy['lineSystemPosition'][$w][1][0];
 			$yB = $this->galaxyConfiguration->galaxy['lineSystemPosition'][$w][1][1];
 
-			$l = sqrt(pow($xB - $xA, 2) + pow($yB - $yA, 2));
+			$l = sqrt(($xB - $xA) ** 2 + ($yB - $yA) ** 2);
 
 			for ($i = 1; $i <= $this->galaxyConfiguration->galaxy['size']; ++$i) {
 				for ($j = 1; $j <= $this->galaxyConfiguration->galaxy['size']; ++$j) {
@@ -76,7 +76,7 @@ class GalaxyGenerator
 
 					if ($d < $this->galaxyConfiguration->galaxy['lineSystemPosition'][$w][2]) {
 						// $prob = rand(0, $this->galaxyConfiguration->galaxy['lineSystemPosition'][$w][3]);
-						$prob = rand(0, 100);
+						$prob = random_int(0, 100);
 
 						// if ($this->galaxyConfiguration->galaxy['lineSystemPosition'][$w][2] - $d > $prob) {
 						if (round($intensity - ($d * $intensity / $thickness)) >= $prob) {
@@ -120,13 +120,13 @@ class GalaxyGenerator
 
 					// calcul de la distance entre la case et le centre
 					$d = sqrt(
-						pow(abs($xC - $xPosition), 2) +
-						pow(abs($yC - $yPosition), 2)
+						abs($xC - $xPosition) ** 2 +
+						abs($yC - $yPosition) ** 2
 					);
 
 					if ($d >= ($radius - $thickness) && $d <= ($radius + $thickness)) {
 						$dtoseg = abs($d - $radius);
-						$prob = rand(0, 100);
+						$prob = random_int(0, 100);
 
 						if (round($intensity - ($dtoseg * $intensity / $thickness)) >= $prob) {
 							$type = $this->getSystem();
@@ -160,8 +160,8 @@ class GalaxyGenerator
 
 					// calcul de la distance entre la case et le centre
 					$d2o = sqrt(
-						pow(abs(($this->galaxyConfiguration->galaxy['size'] / 2) - $xPosition), 2) +
-						pow(abs(($this->galaxyConfiguration->galaxy['size'] / 2) - $yPosition), 2)
+						abs(($this->galaxyConfiguration->galaxy['size'] / 2) - $xPosition) ** 2 +
+						abs(($this->galaxyConfiguration->galaxy['size'] / 2) - $yPosition) ** 2
 					);
 
 					if ($this->isPointInMap($d2o)) {
@@ -204,7 +204,7 @@ class GalaxyGenerator
 				$type = $this->getTypeOfPlace($system->typeOfSystem);
 
 				if (1 == $type) {
-					$pointsRep = rand(1, 10);
+					$pointsRep = random_int(1, 10);
 					$abilities = [
 						'population' => 0,
 						'history' => 0,
@@ -213,11 +213,11 @@ class GalaxyGenerator
 
 					// nombre de point a distribuer
 					if ($pointsRep < 2) {
-						$pointsTot = rand(90, 100);
+						$pointsTot = random_int(90, 100);
 					} elseif ($pointsRep < 10) {
 						$pointsTot = 100;
 					} else {
-						$pointsTot = rand(100, 120);
+						$pointsTot = random_int(100, 120);
 					}
 
 					// brassage du tableau
@@ -230,7 +230,7 @@ class GalaxyGenerator
 							$max = $pointsTot - ($z * 10);
 							$max = $max < 10 ? 10 : $max;
 
-							$points = rand(10, $max);
+							$points = random_int(10, $max);
 							$abilities[$l] = $points;
 							$pointsTot -= $points;
 						} else {
@@ -253,16 +253,16 @@ class GalaxyGenerator
 					$population = $this->galaxyConfiguration->places[$type - 1]['credits'];
 					$resources = $this->galaxyConfiguration->places[$type - 1]['resources'];
 					$history = $this->galaxyConfiguration->places[$type - 1]['history'];
-					$stRES = rand(2000000, 20000000);
+					$stRES = random_int(2000000, 20000000);
 				}
 
 				// TODO DANGER
 				$danger = match ($sectorDanger) {
-					GalaxyConfiguration::DNG_CASUAL => rand(0, Place::DNG_CASUAL),
-					GalaxyConfiguration::DNG_EASY => rand(3, Place::DNG_EASY),
-					GalaxyConfiguration::DNG_MEDIUM => rand(6, Place::DNG_MEDIUM),
-					GalaxyConfiguration::DNG_HARD => rand(9, Place::DNG_HARD),
-					GalaxyConfiguration::DNG_VERY_HARD => rand(12, Place::DNG_VERY_HARD),
+					GalaxyConfiguration::DNG_CASUAL => random_int(0, Place::DNG_CASUAL),
+					GalaxyConfiguration::DNG_EASY => random_int(3, Place::DNG_EASY),
+					GalaxyConfiguration::DNG_MEDIUM => random_int(6, Place::DNG_MEDIUM),
+					GalaxyConfiguration::DNG_HARD => random_int(9, Place::DNG_HARD),
+					GalaxyConfiguration::DNG_VERY_HARD => random_int(12, Place::DNG_VERY_HARD),
 					default => 0,
 				};
 
@@ -375,7 +375,7 @@ class GalaxyGenerator
 
 	protected function isPointInMap($d2o): bool
 	{
-		$mask = rand(1, $this->galaxyConfiguration->galaxy['mask']);
+		$mask = random_int(1, $this->galaxyConfiguration->galaxy['mask']);
 
 		if ($mask >= 3) {
 			return false;
@@ -384,14 +384,14 @@ class GalaxyGenerator
 		$step = $this->galaxyConfiguration->galaxy['diag'] / count($this->galaxyConfiguration->galaxy['systemPosition']);
 		$currentStep = floor($realPosition / $step);
 
-		$random = rand(0, 100);
+		$random = random_int(0, 100);
 
 		return $this->galaxyConfiguration->galaxy['systemPosition'][$currentStep] > $random;
 	}
 
 	protected function l2p($x1, $x2, $y1, $y2)
 	{
-		return pow($x1 - $y1, 2) + pow($x2 - $y2, 2);
+		return ($x1 - $y1) ** 2 + ($x2 - $y2) ** 2;
 	}
 
 	protected function distToSegment($p1, $p2, $v1, $v2, $w1, $w2)
@@ -448,21 +448,21 @@ class GalaxyGenerator
 
 	protected function getSystem(): int
 	{
-		return $this->getProportion($this->galaxyConfiguration->galaxy['systemProportion'], rand(1, 100));
+		return $this->getProportion($this->galaxyConfiguration->galaxy['systemProportion'], random_int(1, 100));
 	}
 
 	protected function getNbOfPlace(int $systemType): int
 	{
 		$nbrPlaces = $this->galaxyConfiguration->systems[$systemType - 1]['nbrPlaces'];
 
-		return rand($nbrPlaces[0], $nbrPlaces[1]);
+		return random_int($nbrPlaces[0], $nbrPlaces[1]);
 	}
 
 	protected function getTypeOfPlace(int $systemType): int
 	{
 		return $this->getProportion(
 			$this->galaxyConfiguration->systems[$systemType - 1]['placesPropotion'],
-			rand(1, 100),
+			random_int(1, 100),
 		);
 	}
 }

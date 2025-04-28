@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class CommanderArmyHandlerTest extends TestCase
 {
-	public function testInitializeShips()
+	public function testInitializeShips(): never
 	{
 		static::markTestIncomplete('Not implemented');
 

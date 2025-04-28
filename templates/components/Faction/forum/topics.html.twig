@@ -1,0 +1,80 @@
+<twig:LayoutBox class="min-w-80">
+	<header class="min-h-20 border-b border-gray-500">
+<!--		<img src="{{ asset('build/media/orbitalbase/situation.png') }}" alt="" />-->
+		<div>
+			<twig:H3>
+				{{- get_forum_info(forumId, 'name') -}}
+			</twig:H3>
+			<twig:H5>
+				{{- get_forum_info(forumId, 'shortDescription') -}}
+			</twig:H5>
+		</div>
+	</header>
+	<section class="fix-body mt-4">
+		{% if display_standard_topics is same as(false) %}
+			<a href="{{ path('faction_forum', { forumId }) }}" class="nav-element">
+
+			</a>
+		{% endif %}
+
+		{% if is_archived is same as (true) %}
+			<a class="more-button" href="{{ path('faction_forum', { forumId }) }}">Revenir aux sujets</a>
+		{% endif %}
+
+		<div class="flex flex-col divide-y divide-gray-900">
+			{% for topic_with_last_view in topics_with_last_views %}
+				{% set topic = topic_with_last_view.topic %}
+				{% set last_view = topic_with_last_view.last_view %}
+
+				{% if topic.id.equals(app.request.attributes.get('topicId')) %}
+					{% set is_new = '' %}
+				{% elseif last_view is null or last_view.viewedAt < topic.lastContributedAt %}
+					{% set is_new = 'round-color' ~ current_player.faction.identifier %}
+				{% else %}
+					{% set is_new = '' %}
+				{% endif %}
+
+				<div class="flex items-center gap-x-4 bg-gray-700 hover:bg-gray-900 p-2">
+					<div class="w-8 h-8 flex justify-center items-center bg-gray-500 rounded-full">
+						<span class="{{ is_new }}">{{ topic.messagesCount }}</span>
+					</div>
+
+					<div class="center grow">
+						{% if topic.isClosed %}
+							&#128274;
+						{% elseif topic.isUp %}
+							&#9733;
+						{% endif %}
+						{{ topic.title }}
+					</div>
+
+					<div class="right">
+						<a class="{{ topic.id == app.request.attributes.get('topicId') ? 'active' : null }}"
+						   href="{{ path('view_forum_topic', { forumId: topic.forum, topicId: topic.id, mode: is_archived ? 'archived' : null}) }}">
+							<img src="{{ asset('images/legacy/picto/arrow_right.svg') }}" class="w-6 h-6" alt=">" />
+						</a>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+
+		{% if topics_with_last_views|length == 0 %}
+			<p class="text-sm">Aucun sujet n'a encore été créé dans cette section du forum.</p>
+		{% endif %}
+
+		{#
+		{% if display_standard_topics is same as(true) and is_archived is same as (false) and current_player.isGovernmentMember is same as(true) %}
+			<a class="more-button" href="'.$appRoot.'faction/view-forum/forum-'.$forum_topics.'/mode-archived">Voir les messages archivés</a>
+		{% endif %} #}
+	</section>
+
+	<footer class="mt-4 flex justify-center">
+		{% if is_archived is same as (false) %}
+			<a class="item" href="{{ path('faction_forum', { forumId, 'mode': 'create'}) }}">
+				<twig:Button :faction="faction">
+					Créer un nouveau sujet
+				</twig:Button>
+			</a>
+		{% endif %}
+	</footer>
+</twig:LayoutBox>

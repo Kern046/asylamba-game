@@ -1,13 +1,14 @@
 {% extends 'layouts/demeter/faction.html.twig' %}
 
-{% block content %}
-	{{ include('components/faction/senate/stats.html.twig') }}
-	{% for law in voting_laws %}
-		{{ include('molecules/faction/senate/law.html.twig', { law }) }}
-	{% endfor %}
-	{% if voting_laws|length == 0 %}
-		{{ include('molecules/common/default.html.twig') }}
-	{% endif %}
+{% block page_title 'Sénat' %}
 
-	{{ include('components/faction/senate/historic.html.twig') }}
+{% block content %}
+	<div class="flex gap-x-4">
+		{{ include('components/Faction/senate/stats.html.twig') }}
+		{% for law in voting_laws %}
+			{{ include('molecules/faction/senate/law.html.twig', { law }) }}
+		{% endfor %}
+
+		{{ include('components/Faction/senate/historic.html.twig') }}
+	</div>
 {% endblock %}

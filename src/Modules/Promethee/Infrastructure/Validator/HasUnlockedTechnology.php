@@ -8,7 +8,7 @@ class HasUnlockedTechnology extends Constraint
 {
 	public function __construct(
 		public int $technologyId,
-		array $groups = null,
+		array|null $groups = null,
 		mixed $payload = null
 	) {
 		parent::__construct([], $groups, $payload);

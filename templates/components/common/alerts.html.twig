@@ -1,12 +1,22 @@
-<ul id="alert"></ul>
-
-<ul id="alert-content">
+<div id="alert-content" class="absolute left-4 bottom-4 z-[1200] flex items-center gap-x-4">
 	{% set flashMessages = app.session.flashBag.all() %}
 	{% for type in flashMessages|keys %}
 		{% for message in flashMessages[type] %}
-			<li data-type='{{ type }}'>
-				{{ message }}
-			</li>
+			<details data-type='{{ type }}' class="relative rounded-full bg-gray-800 border-2 border-gray-700 marker:content-['']">
+				<summary class="flex justify-center items-center w-14 h-14 cursor-pointer" onmouseenter="this.parentElement.setAttribute('open', true)" onmouseleave="this.parentElement.removeAttribute('open')">
+					<img src="{{ asset('images/legacy/picto/Warning.svg') }}" class="h-6" alt="!" />
+				</summary>
+
+				<div class="absolute bottom-20 w-64 p-2 rounded-md bg-gray-800 border border-gray-700">
+					<twig:H5>{{ type }}</twig:H5>
+
+					<hr class="my-2" />
+
+					<p class="text-sm">
+						{{ message }}
+					</p>
+				</div>
+			</details>
 		{% endfor %}
 	{% endfor %}
-</ul>
+</div>

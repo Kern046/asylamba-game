@@ -1,0 +1,27 @@
+<twig:LayoutBox class="w-96">
+	<header>
+		<twig:H2>Statut diplomatique</twig:H2>
+	</header>
+	<section class="mt-4">
+		{% for statement in diplomacy_statements|keys %}
+			{% set faction_identifiers = faction.relations|filter((v, k) => k != 0 and k != faction.identifier and v == statement) %}
+			<twig:H3 class="mt-2">{{ diplomacy_statements[statement] }}</twig:H3>
+
+			{% for faction_identifier in faction_identifiers|keys %}
+				<div class="flex items-center gap-x-2 mt-2">
+					<a href="{{ path('embassy', {'faction': faction_identifier}) }}">
+						<twig:FactionBanner :faction="factions|find(f => f.identifier == faction_identifier)" class="w-10 h-10"/>
+					</a>
+					<div>
+						<div class="text-xs">{{ get_faction_info(faction_identifier, 'government') }}</div>
+						<div class="font-semibold">{{ get_faction_info(faction_identifier, 'officialName') }}</div>
+					</div>
+				</div>
+			{% endfor %}
+
+			{% if faction_identifiers|length == 0 %}
+				<p class="text-sm">Aucune faction</p>
+			{% endif %}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

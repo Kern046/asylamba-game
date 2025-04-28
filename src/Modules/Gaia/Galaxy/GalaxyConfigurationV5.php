@@ -434,17 +434,6 @@ class GalaxyConfigurationV5 extends GalaxyConfiguration
 		],
 	];
 
-	public function getSectorCoord($i, $scale = 1, $xTranslate = 0)
-	{
-		$sector = $this->sectors[$i - 1]['vertices'];
-		foreach ($sector as $k => $v) {
-			$sector[$k] = (($v * $scale) + $xTranslate);
-		}
-		$sector = implode(', ', $sector);
-
-		return $sector;
-	}
-
 	public function fillSectorsData()
 	{
 		$k = 1;
@@ -458,7 +447,7 @@ class GalaxyConfigurationV5 extends GalaxyConfiguration
 			$vx = 0;
 			$vy = 0;
 			$lenght = count($array) / 2;
-			for ($j = 0; $j < count($array); $j = $j + 2) {
+			for ($j = 0; $j < count($array); $j += 2) {
 				$vx += $array[$j];
 				$vy += $array[$j + 1];
 			}

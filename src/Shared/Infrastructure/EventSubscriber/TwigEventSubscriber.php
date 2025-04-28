@@ -17,7 +17,7 @@ use Twig\Environment;
 
 class TwigEventSubscriber implements EventSubscriberInterface
 {
-	protected SessionInterface|null $session;
+	protected SessionInterface|null $session = null;
 
 	public function __construct(
 		private readonly Environment $twig,
@@ -73,6 +73,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
 		$this->twig->addGlobal('current_player', $currentPlayer);
 		$this->twig->addGlobal('current_player_faction_id', $currentPlayer->faction->identifier);
 		$this->twig->addGlobal('conversations_count', $this->conversationRepository->countPlayerUnreadConversations($currentPlayer));
-		$this->twig->addGlobal('current_player_notifications', $this->notificationRepository->getUnreadNotifications($currentPlayer));
+		$this->twig->addGlobal('current_player_notifications', $this->notificationRepository->getUnreadNotifications($currentPlayer, 15));
+		$this->twig->addGlobal('current_player_notifications_count', $this->notificationRepository->countUnreadNotifications($currentPlayer));
 	}
 }

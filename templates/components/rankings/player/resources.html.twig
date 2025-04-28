@@ -1,31 +1,29 @@
-<div class="component player rank">
-	<div class="head skin-4">
-		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">
-		<h2>Mineur</h2>
-		<em>Production totale par relève</em>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			{% for player_ranking in resources_rankings %}
-				{{ include('atoms/rankings/top_mover.html.twig', {
-					'type': 'resources',
-					'current_position': player_ranking.resourcesPosition,
-					loop,
-				}) }}
+<twig:LayoutBox>
+	<header>
+<!--		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">-->
+		<twig:H2>Mineur</twig:H2>
+		<twig:H5>Production totale par relève</twig:H5>
+	</header>
+	<section>
+		{% for player_ranking in resources_rankings %}
+			{{ include('atoms/rankings/top_mover.html.twig', {
+				'type': 'resources',
+				'current_position': player_ranking.resourcesPosition,
+				loop,
+			}) }}
 
-				{{ include('molecules/rankings/player_ranking_card.html.twig', {
-					player_ranking,
-					'position': player_ranking.resourcesPosition,
-					'variation': player_ranking.resourcesVariation,
-					'value': player_ranking.resources|number ~  ' <img src="' ~ asset('build/media/resources/resource.png') ~ '" class="icon-color" alt="ressources" />',
-				})}}
+			{{ include('molecules/rankings/player_ranking_card.html.twig', {
+				player_ranking,
+				'position': player_ranking.resourcesPosition,
+				'variation': player_ranking.resourcesVariation,
+				'value': player_ranking.resources|number ~  ' <img src="' ~ asset('images/legacy/picto/G_P_Lot_64px.png') ~ '" class="w-4 h-4" alt="ressources" />',
+			})}}
 
-				{{ include('atoms/rankings/bottom_mover.html.twig', {
-					'type': 'resources',
-					'current_position': player_ranking.resourcesPosition,
-					loop,
-				}) }}
-			{% endfor %}
-		</div>
-	</div>
-</div>
+			{{ include('atoms/rankings/bottom_mover.html.twig', {
+				'type': 'resources',
+				'current_position': player_ranking.resourcesPosition,
+				loop,
+			}) }}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

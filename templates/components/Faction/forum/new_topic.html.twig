@@ -1,0 +1,24 @@
+<twig:LayoutBox class="component topic size2">
+	<header>
+		<twig:H2>Création d'un nouveau sujet</twig:H2>
+	</header>
+	<section class="mt-4">
+		<div class="flex items-start gap-x-4">
+			<twig:Avatar :player="current_player" class="max-w-16 max-h-16"/>
+
+			<div class="content">
+				<form action="{{ path('create_forum_topic', { forumId }) }}" method="POST">
+					<twig:Input class="title" type="text" name="title" placeholder="sujet" class="w-full" />
+
+					<div class="wysiwyg mt-2" data-id="new-topic-wysiwyg">
+						<twig:Textarea name="content" id="new-topic-wysiwyg" placeholder="Votre message"></twig:Textarea>
+
+						{{ get_parser_toolbar()|raw }}
+					</div>
+
+					<twig:Button type="submit" :faction="faction">Créer le sujet</twig:Button>
+				</form>
+			</div>
+		</div>
+	</section>
+</twig:LayoutBox>

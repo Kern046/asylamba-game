@@ -18,11 +18,11 @@ readonly class CommercialRouteConstructionReportHandler
 	) {
 	}
 
-	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport $lastPlayerFinancialReport): void
+	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport|null $lastPlayerFinancialReport): void
 	{
 		$commercialRoutes = $this->commercialRouteRepository->getPlayerConstructedRoutesSince(
 			$playerFinancialReport->player,
-			$lastPlayerFinancialReport->createdAt,
+			$lastPlayerFinancialReport->createdAt ?? $playerFinancialReport->player->dInscription,
 		);
 
 		foreach ($commercialRoutes as $commercialRoute) {

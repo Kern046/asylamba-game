@@ -18,6 +18,8 @@ use Symfony\Component\Uid\Uuid;
 
 class CancelQueue extends AbstractController
 {
+	public const ROUTE_NAME = 'cancel_ship_queue';
+
 	public function __invoke(
 		Request $request,
 		DurationHandler $durationHandler,

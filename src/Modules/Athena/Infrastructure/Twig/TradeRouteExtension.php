@@ -21,7 +21,8 @@ class TradeRouteExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_route_price', fn (float $distance) => ($this->getCommercialRoutePrice)($distance, $this->currentPlayerRegistry->get())),

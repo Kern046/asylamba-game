@@ -26,14 +26,16 @@ class QueueableExtension extends AbstractExtension
 	) {
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_technology_info', fn (int $technology, string $info, int $level = 0) => $this->technologyHelper->getInfo($technology, $info, $level)),
 		];
 	}
 
-	public function getFilters(): array
+	#[\Override]
+    public function getFilters(): array
 	{
 		return [
 			// @TODO migrate to a technology twig extension
@@ -65,7 +67,7 @@ class QueueableExtension extends AbstractExtension
 				'nbQueues'
 			)),
 			new TwigFilter('ship_queue_time', fn (ShipQueue $shipQueue) => $shipQueue->quantity * ShipResource::getInfo($shipQueue->shipNumber, 'time')),
-			new TwigFilter('ship_queue_picture', fn (ShipQueue $shipQueue) => ShipResource::getInfo($shipQueue->shipNumber, 'imageLink')),
+			new TwigFilter('ship_queue_picture', fn (ShipQueue $shipQueue) => ShipResource::getInfo($shipQueue->shipNumber, 'picto')),
 			new TwigFilter('ship_queue_name', fn (ShipQueue $shipQueue) => ShipResource::getInfo($shipQueue->shipNumber, 'codeName')),
 			new TwigFilter('base_max_building_queues', fn (OrbitalBase $orbitalBase) => $this->orbitalBaseHelper->getBuildingInfo(
 				OrbitalBaseResource::GENERATOR,
@@ -85,7 +87,7 @@ class QueueableExtension extends AbstractExtension
 
 	protected function getQueueHelper(QueueableInterface $queueable): OrbitalBaseHelper|TechnologyHelper
 	{
-		return match (get_class($queueable)) {
+		return match ($queueable::class) {
 			BuildingQueue::class => $this->orbitalBaseHelper,
 			TechnologyQueue::class => $this->technologyHelper,
 		};
@@ -93,7 +95,7 @@ class QueueableExtension extends AbstractExtension
 
 	protected function getQueueNameKey(QueueableInterface $queueable): string
 	{
-		return match (get_class($queueable)) {
+		return match ($queueable::class) {
 			BuildingQueue::class => 'frenchName',
 			TechnologyQueue::class => 'name',
 		};

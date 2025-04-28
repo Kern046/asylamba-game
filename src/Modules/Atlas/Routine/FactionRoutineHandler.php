@@ -245,40 +245,24 @@ class FactionRoutineHandler
 	}
 
 	protected function cmpFactionGeneral(array $a, array $b): int
-	{
-		if ($a['general'] == $b['general']) {
-			return 0;
-		}
-
-		return ($a['general'] > $b['general']) ? -1 : 1;
-	}
+    {
+        return $b['general'] <=> $a['general'];
+    }
 
 	protected function cmpWealth(array $a, array $b): int
-	{
-		if ($a['wealth'] == $b['wealth']) {
-			return 0;
-		}
-
-		return ($a['wealth'] > $b['wealth']) ? -1 : 1;
-	}
+    {
+        return $b['wealth'] <=> $a['wealth'];
+    }
 
 	protected function cmpTerritorial(array $a, array $b): int
-	{
-		if ($a['territorial'] == $b['territorial']) {
-			return 0;
-		}
-
-		return ($a['territorial'] > $b['territorial']) ? -1 : 1;
-	}
+    {
+        return $b['territorial'] <=> $a['territorial'];
+    }
 
 	protected function cmpPoints(array $a, array $b): int
-	{
-		if ($a['points'] == $b['points']) {
-			return 0;
-		}
-
-		return ($a['points'] > $b['points']) ? -1 : 1;
-	}
+    {
+        return $b['points'] <=> $a['points'];
+    }
 
 	protected function setPositions(array $list, $attribute): array
 	{

@@ -11,12 +11,12 @@ class LiveReport
 	public static int $halfRound = 0;
 	public static int $littleRound = 0;
 
-	public static Player|null $rPlayerAttacker;
+	public static Player|null $rPlayerAttacker = null;
 	public static Player|null $rPlayerDefender = null;
 	public static Player|null $rPlayerWinner = null;
-	public static Commander|null $attackerCommander;
+	public static Commander|null $attackerCommander = null;
 	public static Commander|null $defenderCommander = null;
-	public static Place|null $rPlace;
+	public static Place|null $rPlace = null;
 	public static int $levelA = 0;
 	public static int $levelD = 0;
 	public static int $experienceA = 0;

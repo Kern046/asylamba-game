@@ -73,13 +73,7 @@ readonly class BallotHandler
 			++$ballot[$candidateId]['votes_count'];
 		}
 
-		uasort($ballot, function ($a, $b) {
-			if ($a['votes_count'] == $b['votes_count']) {
-				return 0;
-			}
-
-			return $a['votes_count'] > $b['votes_count'] ? -1 : 1;
-		});
+		uasort($ballot, fn($a, $b) => $b['votes_count'] <=> $a['votes_count']);
 
 		$convPlayer = $this->playerRepository->getFactionAccount($faction);
 
@@ -120,13 +114,13 @@ readonly class BallotHandler
 		} else {
 			if (($leader = $this->playerRepository->getFactionLeader($faction)) !== null) {
 				if (($candidate = $this->candidateRepository->getByElectionAndPlayer($election, $leader)) !== null) {
-					if (0 == rand(0, 1)) {
+					if (0 == random_int(0, 1)) {
 						$ballot = [];
 					}
 				}
 			}
 			if (count($ballot) > 0) {
-				$aleaNbr = rand(0, count($ballot) - 1);
+				$aleaNbr = random_int(0, count($ballot) - 1);
 
 				for ($i = 0; $i < $aleaNbr; ++$i) {
 					next($ballot);

@@ -30,7 +30,8 @@ class IsGovernmentMember extends SelectorCompositeSpecification
 		];
 	}
 
-	public function addMatchingCriteria(QueryBuilder $queryBuilder): void
+	#[\Override]
+    public function addMatchingCriteria(QueryBuilder $queryBuilder): void
 	{
 		parent::addMatchingCriteria($queryBuilder);
 

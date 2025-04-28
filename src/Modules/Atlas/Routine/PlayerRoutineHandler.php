@@ -352,89 +352,61 @@ class PlayerRoutineHandler
 	 * @param array<string, mixed> $b
 	 */
 	protected function cmpGeneral(array $a, array $b): int
-	{
-		if ($a['general'] == $b['general']) {
-			return 0;
-		}
-
-		return ($a['general'] > $b['general']) ? -1 : 1;
-	}
+    {
+        return $b['general'] <=> $a['general'];
+    }
 
 	/**
 	 * @param array<string, mixed> $a
 	 * @param array<string, mixed> $b
 	 */
 	protected function cmpResources(array $a, array $b): int
-	{
-		if ($a['resources'] == $b['resources']) {
-			return 0;
-		}
-
-		return ($a['resources'] > $b['resources']) ? -1 : 1;
-	}
+    {
+        return $b['resources'] <=> $a['resources'];
+    }
 
 	/**
 	 * @param array<string, mixed> $a
 	 * @param array<string, mixed> $b
 	 */
 	protected function cmpExperience(array $a, array $b): int
-	{
-		if ($a['experience'] == $b['experience']) {
-			return 0;
-		}
-
-		return ($a['experience'] > $b['experience']) ? -1 : 1;
-	}
+    {
+        return $b['experience'] <=> $a['experience'];
+    }
 
 	/**
 	 * @param array<string, mixed> $a
 	 * @param array<string, mixed> $b
 	 */
 	protected function cmpFight(array $a, array $b): int
-	{
-		if ($a['fight'] == $b['fight']) {
-			return 0;
-		}
-
-		return ($a['fight'] > $b['fight']) ? -1 : 1;
-	}
+    {
+        return $b['fight'] <=> $a['fight'];
+    }
 
 	/**
 	 * @param array<string, mixed> $a
 	 * @param array<string, mixed> $b
 	 */
 	protected function cmpArmies(array $a, array $b): int
-	{
-		if ($a['armies'] == $b['armies']) {
-			return 0;
-		}
-
-		return ($a['armies'] > $b['armies']) ? -1 : 1;
-	}
+    {
+        return $b['armies'] <=> $a['armies'];
+    }
 
 	/**
 	 * @param array<string, mixed> $a
 	 * @param array<string, mixed> $b
 	 */
 	protected function cmpButcher(array $a, array $b): int
-	{
-		if ($a['butcher'] == $b['butcher']) {
-			return 0;
-		}
-
-		return ($a['butcher'] > $b['butcher']) ? -1 : 1;
-	}
+    {
+        return $b['butcher'] <=> $a['butcher'];
+    }
 
 	/**
 	 * @param array<string, mixed> $a
 	 * @param array<string, mixed> $b
 	 */
 	protected function cmpTrader(array $a, array $b): int
-	{
-		if ($a['trader'] == $b['trader']) {
-			return 0;
-		}
-
-		return ($a['trader'] > $b['trader']) ? -1 : 1;
-	}
+    {
+        return $b['trader'] <=> $a['trader'];
+    }
 }

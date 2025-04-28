@@ -18,8 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ViewSpatioport extends AbstractController
 {
-	private const MIN_DISTANCE = 75;
-	private const MAX_DISTANCE = 125;
+	private const int MIN_DISTANCE = 75;
+	private const int MAX_DISTANCE = 125;
 
 	public function __invoke(
 		Request $request,

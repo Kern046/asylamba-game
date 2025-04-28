@@ -34,7 +34,7 @@ readonly class TransactionManager
 	 *  rate: float|null,
 	 * }
 	 */
-	public function getTransactionData(Transaction $transaction, OrbitalBase $ob, float $currentRate = null): array
+	public function getTransactionData(Transaction $transaction, OrbitalBase $ob, ?float $currentRate = null): array
 	{
 		//	$rv = '1:' . Format::numberFormat(Game::calculateRate($transaction->type, $transaction->quantity, $transaction->identifier, $transaction->price), 3);
 		if (null !== $currentRate) {

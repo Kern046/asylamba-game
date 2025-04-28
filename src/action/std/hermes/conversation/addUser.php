@@ -36,10 +36,8 @@ if (false !== $recipients and false !== $conversation) {
 		}
 
 		// traitement des utilisateurs multiples
-		$recipients = explode(',', $recipients);
-		$recipients = array_filter($recipients, function ($e) use ($session) {
-			return $e == $session->get('playerId') ? false : true;
-		});
+		$recipients = explode(',', (string) $recipients);
+		$recipients = array_filter($recipients, fn($e) => $e == $session->get('playerId') ? false : true);
 		$recipients[] = 0;
 
 		if ((count($recipients) + count($players)) <= ConversationUser::MAX_USERS) {

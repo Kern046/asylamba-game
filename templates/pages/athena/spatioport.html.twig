@@ -1,86 +1,71 @@
 {% extends 'layouts/athena/current_base.html.twig' %}
 
 {% block content %}
-	<div class="component building rc">
-		<div class="head skin-1">
-			<img src="{{ asset('build/media/orbitalbase/spatioport.png') }}" alt="" />
-			<h2>
-				{{- get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'), 'frenchName') -}}
-			</h2>
-			<em>Niveau {{ current_base.levelSpatioport }}</em>
-		</div>
-		<div class="fix-body">
-			<div class="body">
+	<div class="flex gap-x-4">
+		<twig:LayoutBox class="min-w-80">
+			<header>
+				{#<img src="{{ asset('build/media/orbitalbase/spatioport.png') }}" alt="" />#}
+				<twig:H2>
+					{{- get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'), 'frenchName') -}}
+				</twig:H2>
+				<twig:H5>Niveau {{ current_base.levelSpatioport }}</twig:H5>
+			</header>
+
+			<section class="mt-4">
 				<a href="{{ path('spatioport') }}" class="nav-element {% if mode == 'list' %}active{% endif %}">
-					<img src="{{ asset('build/media/map/option/market.png') }}" alt="" />
-					<strong>Routes commerciales</strong>
-					<em>Gérez vos routes commerciales</em>
-				</a>
+					{#<img src="{{ asset('build/media/map/option/market.png') }}" alt="" />#}
+					<strong>Routes commerciales</strong><br>
+					<em class="text-sm">Gérez vos routes commerciales</em>
+				</a><br>
 
 				<a href="{{ path('spatioport', {'mode': 'search'}) }}" class="nav-element {% if mode == 'search' %}active{% endif %}">
-					<img src="{{ asset('build/media/map/option/radio.png') }}" alt="" />
-					<strong>Recherche</strong>
-					<em>Trouvez des partenaires commerciaux</em>
+					{#<img src="{{ asset('build/media/map/option/radio.png') }}" alt="" />#}
+					<strong>Recherche</strong><br>
+					<em class="text-sm">Trouvez des partenaires commerciaux</em>
 				</a>
 
-				<hr />
+				<hr class="my-2" />
 
-				<div class="number-box">
-					<span class="label">routes commerciales</span>
-					<span class="value">{{ routes_data.total }} / {{ routes_data.max }}</span>
+				<twig:NumberBox label="routes commerciales" :percent="routes_data.total|percent(routes_data.max)">
+					{{ routes_data.total }} / {{ routes_data.max }}
+				</twig:NumberBox>
 
-					<span class="progress-bar">
-						<span style="width: {{ routes_data.total|percent(routes_data.max) }}%;" class="content"></span>
-					</span>
-				</div>
+				<twig:NumberBox label="routes commerciales actives">
+					{{ routes_data.operational }}
+				</twig:NumberBox>
 
-				<div class="number-box {% if routes_data.operational == 0 %}grey{% endif %}">
-					<span class="label">routes commerciales actives</span>
-					<span class="value">{{ routes_data.operational }}</span>
-				</div>
+				<twig:NumberBox label="routes commerciales en attente">
+					{{ routes_data.waiting_for_other }}
+				</twig:NumberBox>
 
-				<div class="number-box {% if routes_data.waiting_for_other == 0 %}grey{% endif %}">
-					<span class="label">routes commerciales en attente</span>
-					<span class="value">{{ routes_data.waiting_for_other }}</span>
-				</div>
-
-				<div class="number-box {% if routes_data.waiting_for_me == 0 %}grey{% endif %}">
-					<span class="label">propositions commerciales</span>
-					<span class="value">{{ routes_data.waiting_for_me }}</span>
-				</div>
+				<twig:NumberBox label="propositions commerciales">
+					{{ routes_data.waiting_for_me }}
+				</twig:NumberBox>
 
 				{% if routes_data.stand_by > 0 %}
-					<div class="number-box">
-						<span class="label">routes commerciales bloquées</span>
-						<span class="value">{{ routes_data.stand_by }}</span>
-					</div>
+					<twig:NumerBox label="routes commerciales bloquées">
+						{{ routes_data.stand_by }}
+					</twig:NumerBox>
 				{% endif %}
 
-				<hr />
+				<hr class="my-2" />
 
-				<div class="number-box">
-					<span class="label">revenu total de cette base</span>
-					<span class="value">
-						{{ routes_data.total_income|number }}
-						{% if player_commercial_income_bonus > 0 %}
-							<span class="bonus">+ {{ (player_commercial_income_bonus * routes_data.total_income / 100)|number }}</span>
-						{% endif %}
-						<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
-					</span>
-				</div>
-			</div>
-		</div>
-	</div>
+				<twig:NumberBox label="revenu total de cette base" :bonus="(player_commercial_income_bonus * routes_data.total_income / 100)">
+					{{ routes_data.total_income|number }}
+					<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" class="inline w-4 h-4" alt="" />
+				</twig:NumberBox>
+			</section>
+		</twig:LayoutBox>
 
-	{% if mode == 'search' %}
-		<div class="component new-message">
-			<div class="head skin-2">
-				<h2>Recherche</h2>
-				</div>
-			<div class="fix-body">
-				<div class="body">
-					<form action="{{ path('spatioport', {'mode': 'search'}) }}" method="POST">
-						<h4>Chercher des partenaires commerciaux...</h4>
+		{% if mode == 'search' %}
+			<twig:LayoutBox>
+				<header>
+					<twig:H2>Recherche</twig:H2>
+				</header>
+
+				<section class="mt-4">
+					<form action="{{ path('spatioport', {'mode': 'search'}) }}" method="POST" data-turbo="false">
+						<twig:H4>Chercher des partenaires commerciaux...</twig:H4>
 						{% for faction in in_game_factions %}
 							<p>
 								<label for="ckb-faction-{{ faction.identifier }}">
@@ -92,83 +77,102 @@
 								</label>
 							</p>
 						{% endfor %}
-						<h4>A une distance...</h4>
+						<twig:H4>A une distance...</twig:H4>
 
 						<p><label for="search-rc-min-dist">Minimum</label></p>
-						<p class="input input-text"><input type="number" id="search-rc-min-dist" name="min-dist" value="{{ app.request.request.get('min-dist', 75) }}" /></p>
+						<p class="input input-text">
+							<twig:Input type="number" id="search-rc-min-dist" name="min-dist" value="{{ app.request.request.get('min-dist', 75) }}" />
+						</p>
 
 						<p><label for="search-rc-max-dist">Maximum</label></p>
-						<p class="input input-text"><input type="number" id="search-rc-max-dist" name="max-dist" value="{{ app.request.request.get('max-dist', 125) }}" /></p>
+						<p class="input input-text">
+							<twig:Input type="number" id="search-rc-max-dist" name="max-dist" value="{{ app.request.request.get('max-dist', 125) }}" />
+						</p>
 
-						<p><button>Rechercher</button></p>
+						<twig:Button :faction="current_player.faction" class="mt-2 w-full text-center" type="submit">
+							Rechercher
+						</twig:Button>
 					</form>
-				</div>
-			</div>
-		</div>
+				</section>
+			</twig:LayoutBox>
 
-		{% if search_results is not null %}
-			<div class="component player rank">
-			<div class="head skin-2">
-				<h2>Résultats</h2>
-				</div>
-			<div class="fix-body">
-				<div class="body">
-					{% for base in search_results %}
-						<a href="{{ path('map', {'place': base.placeId }) }}" class="player color{{ base.factionIdentifier }}">
-							<img src="{{ asset('build/media/avatar/small/' ~ base.playerAvatar ~ '.png') }}" alt="" class="picto">
-							<span class="title">{{ base.playerName }}</span>
-							<strong class="name">{{ base.baseName }}</strong>
-							<span class="experience">{{ base.distance}} al.</span>
-						</a>
-					{% endfor %}
+			{% if search_results is not null %}
+				<div>
+					<header>
+						<twig:H2>Résultats</twig:H2>
+					</header>
 
-					{% if search_results|length == 0 %}
-						<p><em>Aucun partenaire commercial trouvé selon les critères de recherche fournis.</em></p>
-					{% endif %}
-					</div>
-				</div>
-			</div>
-		{% endif %}
-	{% else %}
-		{% for route in routes %}
-			{% if route.isProposed and route.destinationBase.player.id == current_player.id %}
-				{% set route_distance = get_route_distance(route) %}
-				{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base': route.originBase,
-				}) %}
-				{% set destination_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base': route.destinationBase,
-				}) %}
-				<div class="component rc">
-					<div class="head skin-5">
-						{% if loop.index == 1 %}
-							<h2>Propositions</h2>
+					<section class="mt-4 flex flex-col divide-gray-500 divide-y">
+						{% for base in search_results %}
+							<a href="{{ path('map', {'place': base.placeId }) }}" class="flex p-2 gap-x-2 color{{ base.factionIdentifier }}">
+								<twig:Avatar :avatar="base.playerAvatar" class="max-w-12 max-h-12" />
+
+								<div class="grow">
+									<span class="text-sm text-light{{ base.factionIdentifier }}">{{ base.playerName }}</span><br>
+									<span class="name" style="font-variant: all-small-caps">{{ base.baseName }}</span>
+								</div>
+
+								<div>
+									<span class="text-xs">{{ base.distance}} al.</span>
+								</div>
+							</a>
+						{% endfor %}
+
+						{% if search_results|length == 0 %}
+							<p><em>Aucun partenaire commercial trouvé selon les critères de recherche fournis.</em></p>
 						{% endif %}
-					</div>
-					<div class="fix-body">
-						<div class="body">
-							<div class="tool">
+					</section>
+				</div>
+			{% endif %}
+		{% else %}
+			{% for route in routes %}
+				{% if route.isProposed and route.destinationBase.player.id == current_player.id %}
+					{% set route_distance = get_route_distance(route) %}
+					{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
+						'base': route.originBase,
+					}) %}
+					{% set destination_base = include('molecules/base/trade/commercial_route_base.html.twig', {
+						'base': route.destinationBase,
+					}) %}
+					<div>
+						<header>
+							{% if loop.index == 1 %}
+								<twig:H2>Propositions</twig:H2>
+							{% endif %}
+						</header>
+
+						<section class="fix-body">
+							<div class="flex items-center gap-x-1">
 								{% set price = get_route_price(route_distance) %}
 								{% if price > current_player.credit %}
-									<span><a href="#">pas assez de crédits pour accepter</a></span>
+									<twig:Button :faction="current_player.faction" disabled>
+										pas assez de crédits pour accepter
+									</twig:Button>
 								{% elseif routes_data.total >= routes_data.max %}
-									<span><a href="#">pas d'emplacement libre pour accepter</a></span>
+									<twig:Button :faction="current_player.faction" disabled>
+										pas d'emplacement libre pour accepter
+									</twig:Button>
 								{% else %}
 									{# @TODO move this calculation in a dedicated service #}
 									{% if is_player_from_negora %}
 										{% set price = price - (price * negora_commercial_bonus / 100)|round %}
 									{% endif %}
-									<span><a href="{{ path('accept_commercial_route', {'baseId': route.destinationBase.id, 'id': route.id}) }}">accepter pour {{ price|number }} crédits</a></span>
+									<a href="{{ path('accept_commercial_route', {'baseId': route.destinationBase.id, 'id': route.id}) }}">
+										<twig:Button :faction="current_player.faction">
+											accepter pour {{ price|number }} crédits
+										</twig:Button>
+									</a>
 								{% endif %}
-								<span><a href="{{ path('refuse_commercial_route', {'baseId': route.destinationBase.id, 'id': route.id }) }}" class="hb lt" title="refuser l'offre">x</a></span>
+								<a href="{{ path('refuse_commercial_route', {'baseId': route.destinationBase.id, 'id': route.id }) }}" class="hb lt" title="refuser l'offre">
+									<twig:Button :faction="current_player.faction">
+										x
+									</twig:Button>
+								</a>
 							</div>
 
-							<div class="number-box grey">
-								<span class="label">Etat de la route commerciale</span>
-								<span class="value">
-									En attente
-								</span>
-							</div>
+							<twig:NumberBox label="Etat de la route commerciale">
+								En attente
+							</twig:NumberBox>
 
 							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route_distance) }}px;">
 								{% if route.originBase.player.id == current_player.id %}
@@ -178,37 +182,28 @@
 								{% endif %}
 
 								<ul class="general">
-									<li>Distance <strong>{{ route_distance }} al.</strong></li>
-									<li>
-										Prix
-										<strong>
-											{{ price|number }}
-											{% if is_player_from_negora %}
-												<span class="bonus">- {{ (negora_commercial_bonus * price / 100)|number }}</span>
-											{% endif %}
-											 <img src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" class="icon-color" />
-										</strong>
-									</li>
-									<li>
-										Estimation du revenu par relève
-										<strong>
-											{{ route.income|number }}
-											{% if player_commercial_income_bonus > 0 %}
-												<span class="bonus">+ {{ (player_commercial_income_bonus * route.income / 100)|number }}</span>
-											{% endif %}
-											<img src="{{ asset('build/media/resources/credit.png') }}" class="icon-color" />
-										</strong>
-									</li>
-									<li>
-										Population touchée
-										<strong>{{ (route.originBase.place.population + route.destinationBase.place.population)|number }} millions</strong>
-									</li>
+									<twig:NumberBox label="Distance">
+										{{ route_distance }} al.
+									</twig:NumberBox>
+
+									<twig:NumberBox label="Prix" :bonus="is_player_from_negora ? -(negora_commercial_bonus * price / 100) : null">
+										{{ price|number }}
+										<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" class="inline w-4 h-4" />
+									</twig:NumberBox>
+
+									<twig:NumberBox label="Estimation du revenu par relève" :bonus="player_commercial_income_bonus > 0 ? (player_commercial_income_bonus * route.income / 100) : null">
+										{{ route.income|number }}
+										<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" class="inline w-4 h-4" />
+									</twig:NumberBox>
+
+									<twig:NumberBox label="Population touchée">
+										{{ (route.originBase.place.population + route.destinationBase.place.population)|number }} millions
+									</twig:NumberBox>
 
 									{% if not route.isProposed %}
-										<li>
-											En service depuis<br />
+										<twig:NumberBox label="En service depuis">
 											{{ route.acceptedAt|game_date|raw }}
-										</li>
+										</twig:NumberBox>
 									{% endif %}
 								</ul>
 
@@ -218,49 +213,53 @@
 									{{ destination_base|raw }}
 								{% endif %}
 							</div>
-						</div>
+						</section>
 					</div>
-				</div>
-			{% endif %}
-		{% endfor %}
+				{% endif %}
+			{% endfor %}
 
-		{% for route in routes %}
-			{% if not route.isProposed or route.destinationBase.player.id != current_player.id %}
-				{% set route_distance = get_route_distance(route) %}
-				{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base': route.originBase,
-				}) %}
-				{% set destination_base = include('molecules/base/trade/commercial_route_base.html.twig', {
-					'base': route.destinationBase,
-				}) %}
-				<div class="component rc">
-					<div class="head skin-5">
-						{% if loop.index == 1 %}
-							<h2>Routes commerciales</h2>
-						{% endif %}
-					</div>
-					<div class="fix-body">
-						<div class="body">
+			{% for route in routes %}
+				{% if not route.isProposed or route.destinationBase.player.id != current_player.id %}
+					{% set route_distance = get_route_distance(route) %}
+					{% set origin_base = include('molecules/base/trade/commercial_route_base.html.twig', {
+						'base': route.originBase,
+					}) %}
+					{% set destination_base = include('molecules/base/trade/commercial_route_base.html.twig', {
+						'base': route.destinationBase,
+					}) %}
+					<div class="component rc">
+						<header>
+							{% if loop.index == 1 %}
+								<twig:H2>Routes commerciales</twig:H2>
+							{% endif %}
+						</header>
+
+						<section class="mt-4">
 							<div class="tool">
 								{% if route.isProposed %}
-									<span><a href="{{ path('cancel_route', {'baseId': current_base.id, 'id': route.id}) }}">annuler la proposition commerciale</a></span>
+									<a href="{{ path('cancel_route', {'baseId': current_base.id, 'id': route.id}) }}">
+										<twig:Button :faction="current_player.faction">
+											annuler la proposition commerciale
+										</twig:Button>
+									</a>
 								{% else %}
-									<span><a href="{{ path('delete_route', {'baseId': current_base.id, 'id': route.id}) }}">démanteler la route commerciale</a></span>
+									<a href="{{ path('delete_route', {'baseId': current_base.id, 'id': route.id}) }}">
+										<twig:Button :faction="current_player.faction">
+											démanteler la route commerciale
+										</twig:Button>
+									</a>
 								{% endif %}
 							</div>
 
-							<div class="number-box {% if not route.isActive %}grey{% endif %}">
-								<span class="label">Etat de la route commerciale</span>
-								<span class="value">
-									{%- if route.isProposed -%}
-										En attente
-									{%- elseif route.isActive -%}
-										En activité
-									{%- elseif route.isInStandBy -%}
-										Gelée
-									{%- endif -%}
-								</span>
-							</div>
+							<twig:NumberBox label="Etat de la route commerciale">
+								{%- if route.isProposed -%}
+									En attente
+								{%- elseif route.isActive -%}
+									En activité
+								{%- elseif route.isInStandBy -%}
+									Gelée
+								{%- endif -%}
+							</twig:NumberBox>
 
 							<div class="rc {% if not route.isActive %}no-tax{% endif %}" style="height: {{ (370 + route_distance) }}px;">
 								{% if route.originBase.player.id == current_player.id %}
@@ -270,31 +269,23 @@
 								{% endif %}
 
 								<ul class="general">
-									<li>
-										Distance
-										<strong>{{ route_distance }} al.</strong>
-									</li>
-									<li>
-										Revenu par relève
-										{% if not route.isActive %}[non effectif]{% endif %}
-										<strong>
-											{{ route.income|number }}
-											{% if player_commercial_income_bonus > 0 %}
-											<span class="bonus">+ {{ (player_commercial_income_bonus * route.income / 100)|number }}</span>
-											{% endif %}
-											<img src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" class="icon-color" />
-										</strong>
-									</li>
-									<li>
-										Population touchée
-										<strong>{{ (route.originBase.place.population + route.destinationBase.place.population)|number }} millions</strong>
-									</li>
+									<twig:NumberBox label="Distance">
+										{{ route_distance }} al.
+									</twig:NumberBox>
+
+									<twig:NumberBox :label="('Revenu par relève ' ~ (not route.isActive ? '[non effectif]' : ''))" :bonus="(player_commercial_income_bonus * route.income / 100)">
+										{{ route.income|number }}
+										<img src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" class="inline w-4 h-4" />
+									</twig:NumberBox>
+
+									<twig:NumberBox label="Population touchée">
+										{{ (route.originBase.place.population + route.destinationBase.place.population)|number }} millions
+									</twig:NumberBox>
 
 									{% if not route.isProposed %}
-										<li>
-											En service depuis <br />
+										<twig:NumberBox label="En service depuis">
 											{{ route.acceptedAt|game_date|raw }}
-										</li>
+										</twig:NumberBox>
 									{% endif %}
 								</ul>
 								{% if route.originBase.player.id == current_player.id %}
@@ -303,25 +294,19 @@
 									{{ destination_base|raw }}
 								{% endif %}
 							</div>
-						</div>
+						</section>
 					</div>
-				</div>
-			{% endif %}
-		{% endfor %}
-	{% endif %}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
 
-	<div class="component">
-		<div class="head skin-2">
-			<h2>À propos</h2>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				<p class="long-info">{{ get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'), 'description')|raw }}</p>
-			</div>
+		<div class="w-80">
+			<header>
+				<twig:H2>À propos</twig:H2>
+			</header>
+			<section class="mt-4">
+				<p class="text-sm">{{ get_building_info(constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'), 'description')|raw }}</p>
+			</section>
 		</div>
 	</div>
-
-	{% if routes|length == 0 %}
-		{{ include('molecules/common/default.html.twig') }}
-	{% endif %}
 {% endblock content %}

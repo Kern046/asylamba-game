@@ -12,7 +12,7 @@
 		<field name="resourcesSales" type="integer" />
 		<field name="shipsSales" type="integer" />
 		<field name="commandersSales" type="integer" />
-		<field name="recycledCredits" type="integer" />
+		<field name="recycledCredits" type="bigint" />
 		<field name="receivedPlayersCreditTransactions" type="integer" />
 		<field name="receivedFactionsCreditTransactions" type="integer" />
 

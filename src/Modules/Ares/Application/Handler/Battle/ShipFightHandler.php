@@ -45,7 +45,7 @@ readonly class ShipFightHandler
 
 	private function chooseEnemy(Squadron $enemySquadron): int
 	{
-		return rand(0, $enemySquadron->getShipsCount() - 1);
+		return random_int(0, $enemySquadron->getShipsCount() - 1);
 	}
 
 	private function attack(Ship $ship, int $key, int $attackNumber, Squadron $enemySquadron, PlayerBonus|null $playerBonus = null): void
@@ -79,7 +79,7 @@ readonly class ShipFightHandler
 
 	private function doesDodge(Ship $ship, PlayerBonus|null $playerBonus = null): bool
 	{
-		$avoidance = rand(0, intval(round($this->shipStatsHandler->getStats($ship, ShipStat::Speed, $playerBonus))));
+		$avoidance = random_int(0, intval(round($this->shipStatsHandler->getStats($ship, ShipStat::Speed, $playerBonus))));
 
 		return $avoidance > 80;
 	}

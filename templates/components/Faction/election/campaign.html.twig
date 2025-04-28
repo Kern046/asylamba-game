@@ -1,0 +1,9 @@
+<div class="w-64">
+	<twig:NumberBox label="nombre de candidats">
+		{{ candidates|length }}
+	</twig:NumberBox>
+
+	<p class="mt-8 text-sm">
+		{{ get_faction_info(current_player.faction.identifier, 'campaignDesc')|raw }}
+	</p>
+</div>

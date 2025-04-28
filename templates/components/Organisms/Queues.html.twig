@@ -1,0 +1,25 @@
+<twig:LayoutBox class="rounded-l-xl">
+	<header class="flex md:flex-col justify-between">
+		<h3 class="font-bold text-sm md:text-lg text-gray-300">
+			File de construction
+		</h3>
+
+		<twig:NumberBox label="bonus de vitesse de construction" class="md:bg-gray-700 md:mt-2">
+			{{ speedBonus|number }} %
+		</twig:NumberBox>
+	</header>
+
+	<section class="flex md:flex-col gap-2 mt-2">
+		{% for queue in queues %}
+			{{ component(queueComponent, { queue, refund }) }}
+		{% endfor %}
+
+		{% if queuesCount < availableQueuesCount %}
+			{% for i in range(queuesCount, availableQueuesCount - 1) %}
+				{{ component(queueComponent, {
+					class: 'bg-gray-900',
+				}) }}
+			{% endfor %}
+		{% endif %}
+	</section>
+</twig:LayoutBox>

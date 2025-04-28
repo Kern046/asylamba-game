@@ -1,0 +1,72 @@
+{% extends 'components/common/card.html.twig' %}
+
+{% block title %}
+	<div class="flex justify-between items-center">
+		<h5 class="text-sm md:text-base">{{ get_ship_info(shipIdentifier, 'codeName')  }}</h5>
+		<em class="text-xs md:text-sm font-normal">{{ get_ship_info(shipIdentifier, 'name') }}</em>
+	</div>
+{% endblock %}
+
+{% block picto %}
+	<img src="{{ asset('images/legacy/shipyard/frame/' ~ get_ship_info(shipIdentifier, 'thumbnail') ~ '.svg') }}" class="w-36" alt="Building"/>
+{% endblock picto %}
+
+{% block footer %}
+	{% set cost %}
+		<em class="text-xs md:text-sm">
+			{{ this.resourceCost|number(-1) }} Res
+			et
+			{{ this.timeCost|lite_seconds }}
+		</em>
+	{% endset %}
+
+	{# @TODO replace this and the JS management of the links update with a proper form #}
+	{% if not hasShipQueueRequirements %}
+		<twig:Button type="button" :disabled="true">
+			file de construction pleine<br />
+			{{ cost }}
+		</twig:Button>
+	{% elseif hasTechnologyRequirements is not same as(true) %}
+		<twig:Button type="button" :disabled="true">
+			{{ missingTechnology }}
+		</twig:Button>
+	{% elseif hasShipTreeRequirements is not same as(true) %}
+		<twig:Button type="button" :disabled="true">
+			il vous faut augmenter votre chantier {% if isHeavyShipyard %}de ligne{% else %}alpha{% endif %} au niveau {{ dockNeededLevel }}
+		</twig:Button>
+	{% elseif maxShips < 1 %}
+		<twig:Button type="button" :disabled="true">
+			{# TODO Differentiate these two cases #}
+			pas assez de ressources / hangar plein<br />
+			{{ cost }}
+		</twig:Button>
+	{% else %}
+		<div class="flex gap-x-1 items-start justify-between w-full">
+			{% if not isHeavyShipyard %}
+				<twig:InsetLabelInput
+					label="Quantité"
+					for="quantity"
+					:faction="current_player.faction"
+					input:name="quantity"
+					input:type="number"
+					:input:max="min(99, maxShips)"
+					:input:value="maxShips"
+					:input:data-max-ships="maxShips"
+				/>
+			{% endif %}
+
+			<a class="basis-1/2" href="{{ absolute_url(path('build_ships', { 'ship': shipIdentifier, 'quantity': maxShips })) }}">
+				<twig:Button :faction="current_player.faction" type="button">
+					<p class="text-sm md:font-semibold">
+						Commander
+					</p>
+					<span class="flex justify-end items-center text-xs">
+						{{ (resourceCost * (isHeavyShipyard ? 1 : maxShips))|number }}
+						et
+						{{ (timeCost * (isHeavyShipyard ? 1 : maxShips))|lite_seconds }}
+					</span>
+				</twig:Button>
+			</a>
+		</div>
+	{% endif %}
+{% endblock footer %}

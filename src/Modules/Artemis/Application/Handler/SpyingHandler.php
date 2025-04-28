@@ -72,7 +72,7 @@ abstract readonly class SpyingHandler
 			return SpyReport::TYP_NOT_CAUGHT;
 		}
 
-		$percent = rand(0, 100);
+		$percent = random_int(0, 100);
 		if ($success < 40) {
 			if ($percent < 5) {
 				return SpyReport::TYP_NOT_CAUGHT;			// 5%

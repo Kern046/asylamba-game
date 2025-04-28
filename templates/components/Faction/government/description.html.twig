@@ -1,0 +1,27 @@
+<div class="component new-message">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<form action="{{ path('update_faction_description') }}" method="POST">
+				<h4>Editer la description</h4>
+
+				<p class="input input-area"><textarea name="description" required style="height: 400px;">{{ faction.description }}</textarea></p>
+				<p class="button"><button type="submit">Modifier</button></p>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="component">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Aperçu</h4>
+			<p class="long-info text-bloc">
+				{% if faction.description %}
+					{{ faction.description|parse }}
+				{% endif %}
+			</p>
+		</div>
+	</div>
+</div>

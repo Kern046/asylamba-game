@@ -19,22 +19,7 @@ readonly class OrbitalBaseHelper
 
 	public function isABuilding(int $building): bool
 	{
-		return \in_array($building, OrbitalBaseResource::$orbitalBaseBuildings);
-	}
-
-	public function isAShipFromDock1(int $ship): bool
-	{
-		return \in_array($ship, OrbitalBaseResource::$dock1Ships);
-	}
-
-	public function isAShipFromDock2(int $ship): bool
-	{
-		return \in_array($ship, OrbitalBaseResource::$dock2Ships);
-	}
-
-	public function isAShipFromDock3(int $ship): bool
-	{
-		return \in_array($ship, OrbitalBaseResource::$dock3Ships);
+		return \in_array($building, OrbitalBaseResource::BUILDINGS);
 	}
 
 	public function fleetQuantity(int $typeOfBase): int

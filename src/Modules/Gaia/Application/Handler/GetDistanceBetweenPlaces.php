@@ -20,7 +20,7 @@ readonly class GetDistanceBetweenPlaces
 
 	private function getDistance(int $xa, int $xb, int $ya, int $yb): int
 	{
-		$distance = intval(floor(sqrt(pow($xa - $xb, 2) + pow($ya - $yb, 2))));
+		$distance = intval(floor(sqrt(($xa - $xb) ** 2 + ($ya - $yb) ** 2)));
 
 		return max(1, $distance);
 	}

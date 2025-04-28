@@ -1,117 +1,61 @@
 {% extends 'layouts/athena/current_base.html.twig' %}
 
 {% block content %}
-	<div class="component">
-		<div class="head skin-1">
-			<img src="{{ asset('build/media/orbitalbase/dock' ~ dock_type ~ '.png') }}" alt="" />
-			<h2>{{ get_building_info(building_number, 'frenchName') }}</h2>
-			<em>niveau {{ dock_level }}</em>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				<div class="number-box {% if dock_speed_bonus == 0 %}grey{% endif %}">
-					<span class="label">bonus de vitesse de production</span>
-					<span class="value">
-						{{ dock_speed_bonus|number }} %
-					</span>
-				</div>
+	<twig:Headline :title="get_building_info(building_number, 'frenchName')" subTitle="niveau {{ dock_level }}">
+		{{ get_building_info(building_number, 'description')|raw }}
+	</twig:Headline>
 
-				<h4>File de construction</h4>
-				<div class="queue">
-					{% set real_size_queue = 0 %}
+	<div class="flex flex-col md:flex-row gap-4 md:items-start mt-2">
+		<div>
+			<twig:Queues
+				queueComponent="ShipQueue"
+				:queues="ship_queues"
+				:queuesCount="nb_ship_queues"
+				:buildingIdentifier="building_number"
+				:buildingLevel="dock_type.getLevel(current_base)"
+				:speedBonus="dock_speed_bonus"
+				:refund="ship_resource_refund" />
 
-					{% apply spaceless %}
-						{% for i in range(0, nb_dock_queues - 1) %}
-							{% if ship_queues[i] is defined %}
-								{% set queue = ship_queues[i] %}
-								{% set real_size_queue = real_size_queue + 1 %}
-								{% set total_time_ships = queue.quantity * get_ship_info(queue.shipNumber, 'time') %}
-								{% set remaining_time = queue|queue_duration %}
+			<twig:LayoutBox class="mt-4 rounded-bl-xl">
+				<h3 class="font-bold text-sm md:text-lg text-gray-300">
+					Hangar
+				</h3>
 
-								<div class="item {% if real_size_queue <= 1 %}active progress" data-progress-output="lite" data-progress-current-time="{{ remaining_time }}" data-progress-total-time="{{ total_time_ships }}{% endif %}">
-									<a href="{{ path('cancel_ship_queue', { 'id': queue.id, 'dock': dock_type }) }}"
-									   class="button hb lt"
-									   title="annuler la commande (attention, vous ne récupérerez que {{ ship_resource_refund * 100 }}% du montant investi)">×</a>
-									<img class="picto" src="{{ asset('build/media/ship/picto/' ~ get_ship_info(queue.shipNumber, 'imageLink') ~ '.png') }}" alt="" />
-									<strong>{{ queue.quantity }} {{ get_ship_info(queue.shipNumber, 'codeName') ~ queue.quantity|plural }}</strong>
+				<twig:NumberBox label="capacité du hangar" class="md:bg-gray-700">
+					<p>{{ in_storage }} / {{ total_space}}</p>
 
-									<em><span class="progress-text">{{ remaining_time|lite_seconds }}</span></em>
-									<span class="progress-container">
-										{% if real_size_queue <= 1 %}
-											<span style="width: {{ (total_time_ships - remaining_time)|percent(total_time_ships) }}%;" class="progress-bar">
-											</span>
-										{% endif %}
-									</span>
-								</div>
-							{% else %}
-								<div class="item empty">
-									<span class="picto"></span>
-									<strong>Emplacement libre</strong>
-									<span class="progress-container"></span>
-								</div>
-							{% endif %}
-						{% endfor %}
-					{% endapply %}
-				</div>
-			</div>
-		</div>
-	</div>
+					{% set percent = in_storage|percent(total_space) %}
 
-	{% set batches = ships_range|batch(3, 0) %}
+					<twig:ProgressBar :current="percent" :faction="current_player.faction" />
+				</twig:NumberBox>
 
-	<div class="component dock{{ dock_type }}">
-		<div class="head skin-5">
-			<h2>{{ dock_type == 1 ? 'Chasseurs' : 'Frégates' }}</h2>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				{% for ship_number in batches[0] %}
-					{{ include('components/base/ship_card.html.twig', { ship_number, 'ship_data': ships_data[ship_number] }) }}
-				{% endfor %}
-			</div>
-		</div>
-	</div>
+				<div>
+					<nav>
+						{# TODO check the original destination of this link #}
+						<a href="{{ path('fleet_overview') }}">
+							intégrer à vos armées
+						</a>
+						<a href="#" class="sh hb lt" title="information" data-target="info-dock{{ dock_type.identifier }}">
+							?
+						</a>
+					</nav>
 
-	{# @TODO Fix Dock type length in heavy shipyard #}
-	<div class="component dock{{ dock_type }}">
-		<div class="head skin-5">
-			<h2>{{ dock_type == 1 ? 'Corvettes' : 'Destroyers / Croiseurs' }}</h2>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				{% for ship_number in batches[1] %}
-					{{ include('components/base/ship_card.html.twig', { ship_number, 'ship_data': ships_data[ship_number] }) }}
-				{% endfor %}
-			</div>
-		</div>
-	</div>
-
-	<div class="component">
-			<div class="head skin-2">
-				<h2>Hangars</h2>
-			</div>
-			<div class="fix-body">
-				<div class="body">
-					<div class="tool">
-						{# @TODO check the original destination of this link #}
-						<span><a href="{{ path('fleet_overview') }}">intégrer à vos armées</a></span>
-						<span><a href="#" class="sh hb lt" title="information" data-target="info-dock{{ dock_type }}">?</a></span>
-					</div>
-
-					<p class="info" id="info-dock{{ dock_type }}" style="display:none;">Le hangar de votre chantier vous sert à stocker des vaisseaux. Les vaisseaux
+					{# TODO enable this dialog with Stimulus #}
+					<dialog class="info" id="info-dock{{ dock_type.identifier }}">
+						Le hangar de votre chantier vous sert à stocker des vaisseaux. Les vaisseaux
 						sont stockés directement après leur construction. Si vous ne disposez pas suffisamment de place, vous ne pourrez plus en construire. Faites
 						donc bien attention de vider votre hangar régulièrement.<br />
 						Chaque vaisseau prend une place différente dans votre hangar. Cette place correspond au point équivalent vaisseau (PEV). Le hangar dispose
 						d’un certain nombre de PEV qui augmente en fonction du niveau de votre chantier.<br />
 						Le bouton intégration vous renverra à l’amirauté, ce qui vous permettra de vider votre hangar et de répartir vos vaisseaux dans vos flottes
-						en orbite autour de la planète sur laquelle vous avez construit votre chantier.</p>
+						en orbite autour de la planète sur laquelle vous avez construit votre chantier.
+					</dialog>
 
 					<div class="component market-sell">
 						{% for i in ships_range %}
-							{% set ships_count = storage[i] ?? 0 %}
+							{% set ships_count = current_base.shipStorage[i] ?? 0 %}
 							<div class="queue sh" data-target="sell-ships-{{ i }}">
 								<div class="item">
-									<img class="picto" src="{{ asset('build/media/ship/picto/' ~ get_ship_info(i, 'imageLink') ~ '.png') }}" alt="" />
 									<strong>
 										<span class="big">{{ ships_count }}</span>
 										{{ get_ship_info(i, 'codeName') ~ ships_count|plural }}
@@ -120,6 +64,7 @@
 								</div>
 							</div>
 
+							{# TODO Enable this dialog #}
 							{% if ships_count != 0 %}
 								<form id="sell-ships-{{ i }}"
 									  class="sell-form"
@@ -129,51 +74,40 @@
 									  method="post"
 									  style="display:none;">
 
-								<h4>recycler des vaisseaux</h4>
-								<hr />
-								<div class="label-box sf-quantity">
-									<label for="sell-market-quantity-ship" class="label">Quantité</label>
-									<input id="sell-market-quantity-ship" class="value" type="text" name="quantity" autocomplete="off" />
-								</div>
+									<h4>recycler des vaisseaux</h4>
+									<hr />
+									<div class="label-box sf-quantity">
+										<label for="sell-market-quantity-ship" class="label">Quantité</label>
+										<input id="sell-market-quantity-ship" class="value" type="text" name="quantity" autocomplete="off" />
+									</div>
 
-								<div class="label-box sf-min-price">
-									<span class="label">Ressources</span>
-									<span class="value"></span>
-									<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/resource.png') }}">
-								</div>
+									<div class="label-box sf-min-price">
+										<span class="label">Ressources</span>
+										<span class="value"></span>
+										<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/resource.png') }}">
+									</div>
 
-								<hr />
-								<p><input type="submit" value="Recycler" /></p>
+									<hr />
+									<p><input type="submit" value="Recycler" /></p>
 								</form>
 							{% endif %}
 						{% endfor %}
-						<div class="number-box">
-							<span class="label">capacité du hangar</span>
-							<span class="value">
-								{{ in_storage }} <img class="icon-color" alt="" src="{{ asset('build/media/resources/pev.png') }}">
-								/
-								{{ total_space}} <img class="icon-color" alt="" src="{{ asset('build/media/resources/pev.png') }}">
-							</span>
-							{% set percent = in_storage|percent(total_space) %}
-							<span class="progress-bar hb bl" title="remplissage : {{ percent|number }}%">
-							<span style="width:{{ percent }}%;" class="content"></span>
-						</span>
 					</div>
 				</div>
-			</div>
+			</twig:LayoutBox>
 		</div>
-	</div>
 
-	<div class="component">
-		<div class="head skin-2">
-			<h2>À propos</h2>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				<p class="long-info">
-					{{ get_building_info(building_number, 'description')|raw }}
-				</p>
-			</div>
-		</div>
+
+		<twig:LayoutBox class="grow grid grid-cols-1 md:grid-cols-3 gap-x-2 gap-y-3 md:gap-y-2 lg:gap-4 rounded-r-xl">
+			{% for ship_identifier in ships_range %}
+				<twig:ShipCard
+					:base="current_base"
+					:shipIdentifier="ship_identifier"
+					:technology="technology"
+					:dockType="dock_type"
+					:shipQueues="ship_queues"
+					:queuesCount="nb_ship_queues"/>
+			{% endfor %}
+		</twig:LayoutBox>
 	</div>
 {% endblock content %}

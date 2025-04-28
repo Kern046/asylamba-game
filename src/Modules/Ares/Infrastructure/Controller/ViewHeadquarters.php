@@ -5,11 +5,8 @@ namespace App\Modules\Ares\Infrastructure\Controller;
 use App\Classes\Container\Params;
 use App\Classes\Library\Game;
 use App\Modules\Ares\Domain\Repository\CommanderRepositoryInterface;
-use App\Modules\Ares\Manager\CommanderManager;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Application\Registry\CurrentPlayerBasesRegistry;
-use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
-use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,8 +17,8 @@ use Symfony\Component\Uid\Uuid;
 class ViewHeadquarters extends AbstractController
 {
 	public function __construct(
-		private CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
-		private CommanderRepositoryInterface $commanderRepository,
+		private readonly CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
+		private readonly CommanderRepositoryInterface $commanderRepository,
 	) {
 
 	}

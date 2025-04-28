@@ -47,7 +47,7 @@ class RecycleShips
 						if ($nbmax < 1) {
 							$shipsArray[$key]['canBuild'] = false;
 						} else {
-							$qty = rand(1, $nbmax);
+							$qty = random_int(1, $nbmax);
 							$pointsToRecycle -= $qty * $line['price'];
 							$buyShip[$line['ship']] += $qty;
 						}
@@ -56,7 +56,7 @@ class RecycleShips
 
 				$canBuild = false;
 				// verify if we can build one more ship
-				foreach ($shipsArray as $key => $line) {
+				foreach ($shipsArray as $line) {
 					if ($line['canBuild']) {
 						$canBuild = true;
 						break;

@@ -45,7 +45,7 @@ echo '<div><h3>Schedulers</h3><h4> Real Time Action Scheduler (unavailable, see 
 echo '</ul></div>';
 
 echo '<div><h3>Clients</h3><ul id="clients">';
-foreach ($clientManager->getClients() as $id => $client) {
+foreach ($clientManager->getClients() as $client) {
 	echo '<li><pre>';
 	var_dump($client);
 	echo '</pre></li>';

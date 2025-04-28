@@ -1,8 +1,8 @@
 {% extends 'layouts/atlas/ranking.html.twig' %}
 
-{% block content %}
-	{{ include('molecules/common/advertising.html.twig') }}
+{% block page_title 'Classement joueur' %}
 
+{% block content %}
 	{% if has_ranking %}
 		{{ include('components/rankings/player/best_player.html.twig', { best_player }) }}
 		{{ include('components/rankings/player/general.html.twig', { general_rankings }) }}

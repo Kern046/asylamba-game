@@ -1,35 +1,38 @@
 {% extends 'layouts/demeter/faction.html.twig' %}
 
+{% block page_title 'Registres' %}
+
 {% block content %}
 	{% set mode = app.request.query.get('mode', 'financial') %}
 
-	{{ include('components/faction/data/nav.html.twig') }}
+	<div class="flex gap-x-4">
+		{{ include('components/Faction/data/nav.html.twig') }}
 
-	{% if 'financial' == mode %}
-		{{ include('components/faction/data/financial/stats.html.twig') }}
-		{{ include('components/faction/data/financial/sector_taxes.html.twig') }}
-		{{ include('components/faction/data/financial/donations.html.twig') }}
-	{% elseif 'trade' == mode %}
-		{{ include('components/faction/data/trade/rc_stats.html.twig') }}
-		{{ include('components/faction/data/trade/taxes.html.twig', {'label': "Taxes à l'achat", 'taxes': import_taxes}) }}
-		{{ include('components/faction/data/trade/taxes.html.twig', {'label': 'Taxes à la vente', 'taxes': export_taxes}) }}
-	{% elseif 'war' == mode %}
-		{{ include('components/faction/data/war/stats.html.twig') }}
-		{{ include('components/faction/data/war/reports.html.twig', {'is_attack': true, 'reports': attack_reports}) }}
-		{{ include('components/faction/data/war/reports.html.twig', {'is_attack': false, 'reports': defense_reports}) }}
-		{{ include('components/faction/data/war/levels.html.twig') }}
-	{% elseif 'tactical' == mode %}
-		{{ include('components/faction/data/tactical/map.html.twig') }}
-		{{ include('components/faction/data/tactical/sectors.html.twig') }}
-		{{ include('components/faction/data/tactical/targets.html.twig') }}
-	{% elseif 'diplomacy' == mode %}
-		{{ include('components/faction/data/diplomacy/relations.html.twig') }}
-		{{ include('components/faction/data/diplomacy/about.html.twig') }}
-		{{ include('molecules/common/default.html.twig') }}
-	{% elseif 'law' == mode %}
-		{{ include('components/faction/data/law/list.html.twig', {'law_status': 6}) }}
-		{{ include('components/faction/data/law/list.html.twig', {'law_status': 3}) }}
-		{{ include('components/faction/data/law/list.html.twig', {'law_status': 4}) }}
-		{{ include('components/faction/data/law/list.html.twig', {'law_status': 5}) }}
-	{% endif %}
+		{% if 'financial' == mode %}
+			{{ include('components/Faction/data/financial/stats.html.twig') }}
+			{{ include('components/Faction/data/financial/sector_taxes.html.twig') }}
+			{{ include('components/Faction/data/financial/donations.html.twig') }}
+		{% elseif 'trade' == mode %}
+			{{ include('components/Faction/data/trade/rc_stats.html.twig') }}
+			{{ include('components/Faction/data/trade/taxes.html.twig', {'label': "Taxes à l'achat", 'taxes': import_taxes}) }}
+			{{ include('components/Faction/data/trade/taxes.html.twig', {'label': 'Taxes à la vente', 'taxes': export_taxes}) }}
+		{% elseif 'war' == mode %}
+			{{ include('components/Faction/data/war/stats.html.twig') }}
+			{{ include('components/Faction/data/war/reports.html.twig', {'is_attack': true, 'reports': attack_reports}) }}
+			{{ include('components/Faction/data/war/reports.html.twig', {'is_attack': false, 'reports': defense_reports}) }}
+			{{ include('components/Faction/data/war/levels.html.twig') }}
+		{% elseif 'tactical' == mode %}
+			{{ include('components/Faction/data/tactical/map.html.twig') }}
+			{{ include('components/Faction/data/tactical/sectors.html.twig') }}
+			{{ include('components/Faction/data/tactical/targets.html.twig') }}
+		{% elseif 'diplomacy' == mode %}
+			{{ include('components/Faction/data/diplomacy/relations.html.twig') }}
+			{{ include('components/Faction/data/diplomacy/about.html.twig') }}
+		{% elseif 'law' == mode %}
+			{{ include('components/Faction/data/law/list.html.twig', {'law_status': 6}) }}
+			{{ include('components/Faction/data/law/list.html.twig', {'law_status': 3}) }}
+			{{ include('components/Faction/data/law/list.html.twig', {'law_status': 4}) }}
+			{{ include('components/Faction/data/law/list.html.twig', {'law_status': 5}) }}
+		{% endif %}
+	</div>
 {% endblock %}

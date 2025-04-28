@@ -1,41 +1,40 @@
 {% extends 'layouts/demeter/faction.html.twig' %}
 
 {% block content %}
-	{% include 'components/faction/forum/navbar.html.twig' %}
+	<div class="grid grid-cols-4 gap-x-4">
+		{% include 'components/Faction/forum/navbar.html.twig' %}
 
-	{% include 'components/faction/forum/topics.html.twig' with { forumId: topic.forum, topics_with_last_views, display_standard_topics: true, is_archived: false } %}
+		{% include 'components/Faction/forum/topics.html.twig' with { forumId: topic.forum, topics_with_last_views, display_standard_topics: true, is_archived: false } %}
 
-	<div class="component topic size2">
-		<div class="head skin-2">
-			<h2>{{ topic.title }}</h2>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				{% if topic.isClosed %}
-					<div class="message write">
-						<img src="{{ asset('build/media/avatar/medium/' ~ current_player.avatar ~ '.png') }}" alt="{{ current_player.name }}" class="avatar" />
-						<div class="content">
-							<form action="#" method="POST">
-								<textarea name="content" placeholder="Ce sujet est fermé" disabled></textarea>
-							</form>
-						</div>
+		<twig:LayoutBox class="col-span-2">
+			<header>
+				<twig:H2>{{ topic.title }}</twig:H2>
+			</header>
+
+			<section class="flex flex-col divide-y divide-gray-500 gap-y-4">
+				<div class="flex items-start gap-x-4">
+					<div>
+						<twig:Avatar :player="current_player" class="max-w-16 max-h-16" />
 					</div>
-				{% else %}
-					<div class="message write">
-						<img src="{{ asset('build/media/avatar/medium/' ~ current_player.avatar ~ '.png') }}" alt="{{ current_player.name }}" class="avatar" />
-						<div class="content">
+
+					<div class="content">
+						{% if topic.isClosed %}
+							<form action="#" method="POST">
+								<twig:Textarea name="content" placeholder="Ce sujet est fermé" disabled></twig:Textarea>
+							</form>
+						{% else %}
 							<form action="{{ path('write_forum_message', {forumId: topic.forum, topicId: topic.id }) }}" method="POST">
 								<div class="wysiwyg" data-id="new-topic-wysiwyg">
-									{{ get_parser_toolbar()|raw }}
+									<twig:Textarea name="content" id="new-topic-wysiwyg" placeholder="Répondez"></twig:Textarea>
 
-									<textarea name="content" id="new-topic-wysiwyg" placeholder="Répondez"></textarea>
+									{{ get_parser_toolbar()|raw }}
 								</div>
 
-								<button>Envoyer le message</button>
+								<twig:Button :faction="faction" type="submit">Envoyer le message</twig:Button>
 							</form>
-						</div>
+						{% endif %}
 					</div>
-				{% endif %}
+				</div>
 
 				{% for message in messages %}
 					{% if message.player.faction.identifier > 0 %}
@@ -47,9 +46,9 @@
 
 					{% set can_edit = current_player.id == message.player.id or current_player.isGovernmentMember is same as(true) and topic.forum != 20 %}
 
-					<div class="message write">
+					<div class="flex items-start gap-x-4 pt-4">
 						<a href="{{ path('embassy', {player: message.player.id}) }}">
-							<img src="{{ asset('build/media/avatar/medium/' ~ message.player.avatar ~ '.png') }}" alt="{{ message.player.name }}" class="avatar" />
+							<twig:Avatar :player="message.player" class="max-w-16 max-h-16" />
 						</a>
 						<div class="content">
 							<p class="text">
@@ -79,8 +78,7 @@
 						</div>
 					</div>
 				{% endfor %}
-			</div>
-		</div>
+			</section>
+		</twig:LayoutBox>
 	</div>
-
 {% endblock content %}

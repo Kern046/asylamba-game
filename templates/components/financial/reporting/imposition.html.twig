@@ -1,47 +1,50 @@
 {% apply spaceless %}
-	<div class="component financial">
-		<div class="head skin-1">
-			<img src="{{ asset('build/media/financial/taxin.png') }}" alt="" />
-			<h2>Impôts</h2>
-			<em>Imposition par planète</em>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				<ul class="list-type-1">
-					{% for base in player_bases %}
-						{% set base_data = bases_data[base.id.toRfc4122()] %}
-						{% set base_tax_income = base_data.tax_income %}
-						{% set base_tax_income_bonus = base_data.tax_income_bonus %}
-						<li>
-							<span class="label">{{ base.name }} [{{ base.place.population|number }} Mio hab.]</span>
-							<span class="value">
-								{{- base_tax_income|number -}}
-								{% if base_tax_income_bonus > 0 %}
-									<span class="bonus">+{{ base_tax_income_bonus|number }}</span>
-								{% endif %}
-								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
-							</span>
-						</li>
-					{% endfor %}
+	<twig:LayoutBox>
+		<header class="flex items-start justify-between">
+			<div>
+				<twig:H2>Impôts</twig:H2>
+				<twig:H5>Imposition par planète</twig:H5>
+			</div>
 
-					<li class="strong">
-						<span class="label">total de l'imposition</span>
-						<span class="value">
-							{{- investments_data.totalTaxIn|number -}}
-							{% if investments_data.totalTaxInBonus > 0 %}
-								<span class="bonus">+{{ investments_data.totalTaxInBonus|number }}</span>
+			<twig:Tooltip>
+				Les impôts sont les crédits que vous récoltez auprès de la population de vos planètes. Plus vos planètes sont
+				grosses en terme de population, plus vous collecterez d’impôts. Ils peuvent être augmentés grâce à la technologie « Economie Sociale de
+				Marché », ce qui vous permettra d’améliorer vos recettes.
+			</twig:Tooltip>
+		</header>
+
+		<section class="mt-4">
+			<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
+				{% for base in player_bases %}
+					{% set base_data = bases_data[base.id.toRfc4122()] %}
+					{% set base_tax_income = base_data.tax_income %}
+					{% set base_tax_income_bonus = base_data.tax_income_bonus %}
+					<li class="py-2">
+						<span class="label">
+							<span style="font-variant: all-small-caps">{{ base.name }}</span>
+							<span class="text-sm">[{{ base.place.population|number }} Mio hab.]</span>
+						</span><br>
+						<span class="flex gap-x-2 items-center mt-2">
+							<span class="text-sm">{{- base_tax_income|number -}}</span>
+							{% if base_tax_income_bonus > 0 %}
+								<sup class="bonus bg-medium{{ current_player.faction.identifier }} px-1 rounded-md text-xs">+{{ base_tax_income_bonus|number }}</sup>
 							{% endif %}
-							<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
+							<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
 						</span>
 					</li>
-				</ul>
+				{% endfor %}
 
-				<p class="info">
-					Les impôts sont les crédits que vous récoltez auprès de la population de vos planètes. Plus vos planètes sont
-					grosses en terme de population, plus vous collecterez d’impôts. Ils peuvent être augmentés grâce à la technologie « Economie Sociale de
-					Marché », ce qui vous permettra d’améliorer vos recettes.
-				</p>
-			</div>
-		</div>
-	</div>
+				<li class="strong">
+					<span class="label">total de l'imposition</span>
+					<span class="value">
+						{{- investments_data.totalTaxIn|number -}}
+						{% if investments_data.totalTaxInBonus > 0 %}
+							<span class="bonus">+{{ investments_data.totalTaxInBonus|number }}</span>
+						{% endif %}
+						<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
+					</span>
+				</li>
+			</ul>
+		</section>
+	</twig:LayoutBox>
 {% endapply %}

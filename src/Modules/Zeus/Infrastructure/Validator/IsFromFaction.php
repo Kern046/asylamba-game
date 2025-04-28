@@ -14,7 +14,7 @@ class IsFromFaction extends Constraint implements SelectorSpecification
 {
 	public function __construct(
 		private readonly Color $faction,
-		array $groups = null,
+		?array $groups = null,
 		mixed $payload = null
 	) {
 		parent::__construct([], $groups, $payload);

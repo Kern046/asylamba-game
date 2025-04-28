@@ -4,14 +4,14 @@ namespace App\Modules\Athena\Infrastructure\Controller\Ship;
 
 use App\Classes\Library\Format;
 use App\Modules\Athena\Application\Factory\ShipQueueFactory;
+use App\Modules\Athena\Domain\Enum\DockType;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
-use App\Modules\Athena\Domain\Service\Ship\GetResourceCost;
+use App\Modules\Athena\Domain\Service\Base\Ship\CountShipResourceCost;
 use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Helper\ShipHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Resource\ShipResource;
-use App\Modules\Demeter\Resource\ColorResource;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,15 +28,17 @@ class BuildShips extends AbstractController
 		OrbitalBase                   $currentBase,
 		OrbitalBaseManager            $orbitalBaseManager,
 		OrbitalBaseHelper             $orbitalBaseHelper,
-		GetResourceCost               $getResourceCost,
+		CountShipResourceCost         $countShipResourceCost,
 		ShipHelper                    $shipHelper,
 		ShipQueueRepositoryInterface  $shipQueueRepository,
 		ShipQueueFactory              $shipQueueFactory,
 		TechnologyRepositoryInterface $technologyRepository,
 	): Response {
 		$session = $request->getSession();
-		$shipIdentifier = $request->query->getInt('ship') ?? throw new BadRequestHttpException('Missing ship identifier');
-		$quantity = $request->query->getInt('quantity') ?? throw new BadRequestHttpException('Missing quantity');
+		$shipIdentifier = $request->query->getInt('ship')
+			?? throw new BadRequestHttpException('Missing ship identifier');
+		$quantity = $request->query->getInt('quantity')
+			?? throw new BadRequestHttpException('Missing quantity');
 
 		if (0 === $quantity) {
 			throw new BadRequestHttpException('Quantity must be higher than 0');
@@ -44,20 +46,16 @@ class BuildShips extends AbstractController
 		if (!ShipResource::isAShip($shipIdentifier)) {
 			throw new BadRequestHttpException('Invalid ship identifier');
 		}
-		if ($orbitalBaseHelper->isAShipFromDock1($shipIdentifier)) {
-			$dockType = 1;
-		} elseif ($orbitalBaseHelper->isAShipFromDock2($shipIdentifier)) {
-			$dockType = 2;
-			$quantity = 1;
-		} else {
-			$dockType = 3;
+		$dockType = DockType::fromShipIdentifier($shipIdentifier);
+		if (DockType::Shipyard === $dockType) {
 			$quantity = 1;
 		}
-		$shipQueues = $shipQueueRepository->getByBaseAndDockType($currentBase, $dockType);
+		$shipQueues = $shipQueueRepository->getByBaseAndDockType($currentBase, $dockType->getIdentifier());
 		$shipQueuesCount = count($shipQueues);
 		$technos = $technologyRepository->getPlayerTechnology($currentPlayer);
 		// TODO Replace with Specification pattern
-		if (!$shipHelper->haveRights($shipIdentifier, 'resource', $currentBase->resourcesStorage, $quantity)
+		if (
+			!$shipHelper->haveRights($shipIdentifier, 'resource', $currentBase->resourcesStorage, $quantity)
 			|| !$shipHelper->haveRights($shipIdentifier, 'queue', $currentBase, $shipQueuesCount)
 			|| !$shipHelper->haveRights($shipIdentifier, 'shipTree', $currentBase)
 			|| !$shipHelper->haveRights($shipIdentifier, 'pev', $currentBase, $quantity)
@@ -79,7 +77,7 @@ class BuildShips extends AbstractController
 		);
 
 		// débit des ressources au joueur
-		$resourcePrice = ($getResourceCost)($shipIdentifier, $quantity, $currentPlayer);
+		$resourcePrice = ($countShipResourceCost)($shipIdentifier, $quantity, $currentPlayer);
 		$orbitalBaseManager->decreaseResources($currentBase, $resourcePrice);
 
 		// ajout de l'event dans le contrôleur

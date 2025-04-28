@@ -1,21 +1,24 @@
 {% set faction_statuses = get_faction_info(player.faction.identifier, 'status') %}
 
-<div class="component search-player size2 color{{ player.faction.identifier }}">
-	<div class="box">
+<twig:LayoutBox>
+	<header>
+		<twig:H2>Recherchez un joueur</twig:H2>
+	</header>
+	<div class="mt-2">
 		<div class="top">
 			<form action="{{ path('search_player') }}" method="post">
 				<label>
-					Recherchez un joueur
-					<input type="hidden" name="playerid" class="autocomplete-hidden" />
-					<input type="text" name="name" class="autocomplete-player ac_input" autocomplete="off" />
-					</label>
-				</form>
-			</div>
-		<div class="center">
-			<img src="{{ asset('build/media/avatar/big/' ~ player.avatar ~ '.png') }}" alt="avatar de {{ player.name }}" class="avatar" />
 
-			<div class="right">
-				<h1>{{ player.name }}</h1>
+					<input type="hidden" name="playerid" class="autocomplete-hidden" />
+					<twig:Input type="text" name="name" class="autocomplete-player ac_input" autocomplete="off" />
+				</label>
+			</form>
+		</div>
+		<div class="mt-4 flex">
+			<twig:Avatar :player="player" class="w-24 h-24" />
+
+			<div class="ml-4">
+				<twig:H3>{{ player.name }}</twig:H3>
 				<p>{{ faction_statuses[player.status - 1] }} de {{ get_faction_info(player.faction.identifier, 'popularName') }}</p>
 				<p>niveau {{ player.level }}</p>
 
@@ -26,4 +29,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</twig:LayoutBox>

@@ -10,14 +10,14 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 readonly class GameTimeConverter
 {
-	private const GAME_CYCLE_SECONDS_FAST_MODE = 600;
-	private const GAME_CYCLE_SECONDS_STANDARD_MODE = 3600;
+	private const int GAME_CYCLE_SECONDS_FAST_MODE = 600;
+	private const int GAME_CYCLE_SECONDS_STANDARD_MODE = 3600;
 
 	public const STRATUM_CYCLES_COUNT = 2400;
 	public const SEGMENT_CYCLES_COUNT = 24;
 
 
-	private const GAME_CYCLE_SECONDS = [
+	private const array GAME_CYCLE_SECONDS = [
 		TimeMode::Standard->name => self::GAME_CYCLE_SECONDS_STANDARD_MODE,
 		TimeMode::Fast->name => self::GAME_CYCLE_SECONDS_FAST_MODE,
 	];

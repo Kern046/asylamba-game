@@ -29,6 +29,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -45,6 +47,7 @@ class Accept extends AbstractController
 		OrbitalBaseManager                    $orbitalBaseManager,
 		CommercialShippingManager             $commercialShippingManager,
 		CommercialShippingRepositoryInterface $commercialShippingRepository,
+		HubInterface $mercure,
 		MessageBusInterface                   $messageBus,
 		NotificationRepositoryInterface       $notificationRepository,
 		PlaceManager                          $placeManager,
@@ -162,6 +165,13 @@ class Accept extends AbstractController
 		);
 
 		$this->addFlash('market_success', 'Proposition acceptée. Les vaisseaux commerciaux sont en route vers votre base orbitale.');
+
+		$mercure->publish(new Update(
+			'/trade-offers',
+			$this->renderView('components/base/trade/turbo/broadcast/remove_transaction.stream.html.twig', [
+				'transaction' => $transaction,
+			]),
+		));
 
 		return $this->redirect($request->headers->get('referer'));
 	}

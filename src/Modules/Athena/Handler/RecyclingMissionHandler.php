@@ -167,7 +167,7 @@ readonly class RecyclingMissionHandler
 		}
 
 		// diversify a little (resource and credit)
-		$balancingPercent = rand(-5, 5);
+		$balancingPercent = random_int(-5, 5);
 
 		$buyShip = ($this->recycleShips)($mission, $totalRecycled);
 		$resourceRecycled = ($this->recycleResources)($mission, $totalRecycled, $balancingPercent);

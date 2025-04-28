@@ -10,7 +10,8 @@ use Twig\TwigFunction;
 
 class RankingExtension extends AbstractExtension
 {
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
 			new TwigFunction('get_player_ranking_data_by_type', fn (PlayerRanking $playerRanking, string $type) => match ($type) {

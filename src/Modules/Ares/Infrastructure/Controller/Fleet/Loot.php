@@ -116,6 +116,6 @@ class Loot extends AbstractController
 			return $this->redirectToRoute('map', ['place' => $request->query->get('redirect')]);
 		}
 
-		return $this->redirect($request->headers->get('referer'));
+		return new Response(status: Response::HTTP_NO_CONTENT);
 	}
 }

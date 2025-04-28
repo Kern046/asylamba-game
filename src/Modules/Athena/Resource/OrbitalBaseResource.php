@@ -20,19 +20,19 @@ class OrbitalBaseResource
 	public const BUILDING_QUANTITY = 10;
 
 	/**
-	 * 0 - generator
-	 * 1 - refinery
-	 * 2 - dock1
-	 * 3 - dock2
-	 * 4 - dock3
-	 * 5 - technosphere
-	 * 6 - commercialPlateforme
-	 * 7 - storage
-	 * 8 - recycling
-	 * 9 - spatioport.
-	 * @var list<int> $orbitalBaseBuildings
+	 * @var list<int>
 	 **/
-	public static array $orbitalBaseBuildings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+	public const BUILDINGS = [
+		self::GENERATOR,
+		self::REFINERY,
+		self::DOCK1,
+		self::DOCK2,
+		self::TECHNOSPHERE,
+		self::COMMERCIAL_PLATEFORME,
+		self::STORAGE,
+		self::RECYCLING,
+		self::SPATIOPORT,
+	];
 
 	/**
 	 * pegase = 0, satyre = 1, chimere = 2, sirene = 3, dryade = 4 and meduse = 5.

@@ -14,11 +14,11 @@ readonly class CreditTransactionReportHandler
 	) {
 	}
 
-	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport $lastPlayerFinancialReport): void
+	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport|null $lastPlayerFinancialReport): void
 	{
 		$creditTransactions = $this->creditTransactionRepository->matchAllByPlayerSince(
 			$playerFinancialReport->player,
-			$lastPlayerFinancialReport->createdAt,
+			$lastPlayerFinancialReport->createdAt ?? $playerFinancialReport->player->dInscription,
 		);
 
 		foreach ($creditTransactions as $creditTransaction) {

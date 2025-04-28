@@ -15,7 +15,8 @@ class TravellerExtension extends AbstractExtension
 
 	}
 
-	public function getFilters(): array
+	#[\Override]
+    public function getFilters(): array
 	{
 		return [
 			new TwigFilter(

@@ -61,7 +61,7 @@ if ('dev' === $this->getContainer()->getParameter('environment') || $request->qu
 		foreach ($scripts as $type => $typeScripts) {
 			echo '<h2>'.$type.'</h2>';
 
-			foreach ($typeScripts as $i => $script) {
+			foreach ($typeScripts as $script) {
 				echo '<a href="'.$appRoot.'script/key-'.$scriptKey.'/a-'.$script[0].'">';
 				echo '<strong>'.$script[0].'</strong>';
 				echo $script[1];
@@ -73,7 +73,7 @@ if ('dev' === $this->getContainer()->getParameter('environment') || $request->qu
 	} else {
 		$requestedScript = $request->query->get('a');
 		foreach ($scripts as $typeScripts) {
-			foreach ($typeScripts as $i => $script) {
+			foreach ($typeScripts as $script) {
 				if ($requestedScript === $script[0]) {
 					$scrp = $scriptPath.'scripts'.$script[1];
 					$name = $script[1];

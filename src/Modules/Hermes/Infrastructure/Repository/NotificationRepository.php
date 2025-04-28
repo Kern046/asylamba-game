@@ -23,7 +23,7 @@ class NotificationRepository extends DoctrineRepository implements NotificationR
 		return $this->find($id);
 	}
 
-	public function getUnreadNotifications(Player $player): array
+	public function getUnreadNotifications(Player $player, int|null $limit = null): array
 	{
 		$qb = $this->createQueryBuilder('n');
 
@@ -33,7 +33,24 @@ class NotificationRepository extends DoctrineRepository implements NotificationR
 			->addOrderBy('n.sentAt', 'DESC')
 			->setParameter('player', $player);
 
+		if (null !== $limit) {
+			$qb->setMaxResults($limit);
+		}
+
 		return $qb->getQuery()->getResult();
+	}
+
+	public function countUnreadNotifications(Player $player): int
+	{
+		$qb = $this->createQueryBuilder('n');
+
+		$qb
+			->select('COUNT(n.id)')
+			->where('n.player = :player')
+			->andWhere('n.read = false')
+			->setParameter('player', $player);
+
+		return (int) $qb->getQuery()->getSingleScalarResult();
 	}
 
 	public function getPlayerNotificationsByArchive(Player $player, bool $isArchived): array

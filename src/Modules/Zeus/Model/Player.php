@@ -7,7 +7,7 @@ use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class Player implements CreditHolderInterface, SystemUpdatable, UserInterface
+class Player implements CreditHolderInterface, SystemUpdatable, UserInterface, \JsonSerializable
 {
 	public int|null $id = 0;
 	public Color|null $faction = null;
@@ -31,10 +31,10 @@ class Player implements CreditHolderInterface, SystemUpdatable, UserInterface
 	public int $partLifeSciences = 25;
 	public int $partSocialPoliticalSciences = 25;
 	public int $partInformaticEngineering = 25;
-	public \DateTimeImmutable|null $uPlayer;
-	public \DateTimeImmutable|null $dInscription;
-	public \DateTimeImmutable|null $dLastConnection;
-	public \DateTimeImmutable|null $dLastActivity;
+	public \DateTimeImmutable|null $uPlayer = null;
+	public \DateTimeImmutable|null $dInscription = null;
+	public \DateTimeImmutable|null $dLastConnection = null;
+	public \DateTimeImmutable|null $dLastActivity = null;
 	public bool $premium = false;
 	public int $statement = 0;
 
@@ -136,7 +136,7 @@ class Player implements CreditHolderInterface, SystemUpdatable, UserInterface
 		return ['ROLE_USER'];
 	}
 
-	public function eraseCredentials()
+	public function eraseCredentials(): void
 	{
 		// TODO: Implement eraseCredentials() method.
 	}
@@ -144,5 +144,14 @@ class Player implements CreditHolderInterface, SystemUpdatable, UserInterface
 	public function getUserIdentifier(): string
 	{
 		return $this->name;
+	}
+
+	public function jsonSerialize(): array
+	{
+		return [
+			'id' => $this->id,
+			'name' => $this->name,
+			'avatar' => $this->avatar,
+		];
 	}
 }

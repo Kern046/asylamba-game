@@ -49,7 +49,7 @@ class CreateCommander extends AbstractController
 		if (count($reserveCommanders) >= OrbitalBase::MAXCOMMANDERINMESS) {
 			throw new ConflictHttpException('Vous ne pouvez pas créer de nouveaux officiers si vous en avez déjà '.Orbitalbase::MAXCOMMANDERINMESS.' ou plus.');
 		}
-		$nbrCommandersToCreate = rand(SchoolClassResource::getInfo($school, 'minSize'), SchoolClassResource::getInfo($school, 'maxSize'));
+		$nbrCommandersToCreate = random_int(SchoolClassResource::getInfo($school, 'minSize'), SchoolClassResource::getInfo($school, 'maxSize'));
 
 		// TODO Replace with validator component
 		if (!$cn->checkLength($name) || !$cn->checkChar($name)) {
@@ -66,17 +66,17 @@ class CreateCommander extends AbstractController
 			$newCommander = new Commander(
 				id: Uuid::v4(),
 				name: $name,
-				avatar: 't'.rand(1, 21).'-c'.$currentPlayer->faction->identifier,
+				avatar: 't'.random_int(1, 21).'-c'.$currentPlayer->faction->identifier,
 				player: $currentPlayer,
 				base: $currentBase,
 				enlistedAt: new \DateTimeImmutable(),
 				sexe: 1,
-				age: rand(40, 70),
+				age: random_int(40, 70),
 				updatedAt: new \DateTimeImmutable(),
 			);
 			$commanderExperienceHandler->upExperience(
 				$newCommander,
-				rand(
+				random_int(
 					SchoolClassResource::getInfo($school, 'minExp'),
 					SchoolClassResource::getInfo($school, 'maxExp'),
 				),

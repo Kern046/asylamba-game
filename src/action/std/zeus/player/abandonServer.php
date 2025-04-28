@@ -12,7 +12,7 @@ if (($player = $playerManager->get($session->get('playerId'))) !== null) {
 	$success = $this->getContainer()->get('api')->abandonServer($player->bind);
 
 	if ($success) {
-		$player->bind = $player->bind.'ABANDON';
+		$player->bind .= 'ABANDON';
 		$player->statement = Player::DELETED;
 
 		$this->getContainer()->get(\App\Classes\Entity\EntityManager::class)->flush($player);

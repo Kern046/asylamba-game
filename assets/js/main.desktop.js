@@ -643,46 +643,6 @@ jQuery(document).ready(function($) {
 		obj: $('#action-box'),
 		opened: true,
 
-		applyCommander: function() {
-			if (actionbox.opened) {
-				if (mapController.commanders.active) {
-					actionbox.obj.find('.commander-tile .item').hide();
-
-					if (actionbox.obj.find('.header').data('distance') > mapController.commanders.maxJump && actionbox.obj.find('.header').data('sector-color') != mapController.commanders.color) {
-						actionbox.obj.find('.commander-tile .item.too-far').show();
-					} else {
-						var items = actionbox.obj.find('.commander-tile .item.move');
-
-						items.find('a').each(function() {
-							var url = $(this).data('url');
-							$(this).attr('href', url.replace(encodeURI('{id}'), mapController.commanders.id));
-						});
-
-						items.show();
-						items.find('.name').text(mapController.commanders.name);
-						items.find('.wedge').text(mapController.commanders.wedge);
-					}
-				} else {
-					actionbox.obj.find('.commander-tile .item').hide();
-					actionbox.obj.find('.commander-tile .item.no-commander').show();
-				}
-			}
-		},
-
-		// affiche la box
-		open: function() {
-			actionbox.opened = true;
-			actionbox.obj.addClass('active');
-		},
-
-		// masque la box
-		close: function() {
-			actionbox.opened = false;
-			actionbox.obj.removeClass('active');
-
-			$('.loadSystem.active').removeClass('active');
-		},
-
 		// masque la box, charge le contenu et affiche la box
 		load: function(systemid) {
 			actionbox.close();

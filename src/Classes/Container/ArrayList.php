@@ -22,11 +22,7 @@ class ArrayList implements \Stringable
 	 */
 	public function get($key)
 	{
-		if (isset($this->elements[$key])) {
-			return $this->elements[$key];
-		}
-
-		return null;
+		return $this->elements[$key] ?? null;
 	}
 
 	/**

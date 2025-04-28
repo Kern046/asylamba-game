@@ -16,11 +16,11 @@ readonly class TechnologyInvestmentReportHandler
 	) {
 	}
 
-	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport $lastPlayerFinancialReport): void
+	public function __invoke(PlayerFinancialReport $playerFinancialReport, PlayerFinancialReport|null $lastPlayerFinancialReport): void
 	{
 		$queues = $this->technologyQueueRepository->matchPlayerQueuesSince(
 			$playerFinancialReport->player,
-			$lastPlayerFinancialReport->createdAt,
+			$lastPlayerFinancialReport->createdAt ?? $playerFinancialReport->player->dInscription,
 		);
 
 		foreach ($queues as $queue) {

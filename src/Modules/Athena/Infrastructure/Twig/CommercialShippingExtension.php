@@ -18,7 +18,8 @@ class CommercialShippingExtension extends AbstractExtension
 	{
 	}
 
-	public function getFilters(): array
+	#[\Override]
+    public function getFilters(): array
 	{
 		return [
 			new TwigFilter('commercial_shipping_picto', fn (CommercialShipping $commercialShipping) => Transaction::getResourcesIcon($commercialShipping->transaction?->quantity ?? $commercialShipping->resourceTransported)),
@@ -26,10 +27,11 @@ class CommercialShippingExtension extends AbstractExtension
 		];
 	}
 
-	public function getFunctions(): array
+	#[\Override]
+    public function getFunctions(): array
 	{
 		return [
-			new TwigFunction('get_min_price', fn (string $transactionType, int $quantity, int $identifier = null) => Game::getMinPriceRelativeToRate($transactionType, 1, $identifier)),
+			new TwigFunction('get_min_price', fn (string $transactionType, int $quantity, ?int $identifier = null) => Game::getMinPriceRelativeToRate($transactionType, 1, $identifier)),
 			new TwigFunction('get_transaction_class', fn (CommercialShipping $commercialShipping) => match ($commercialShipping->transaction?->type) {
 				Transaction::TYP_RESOURCE => 'resources',
 				Transaction::TYP_COMMANDER => 'commander',

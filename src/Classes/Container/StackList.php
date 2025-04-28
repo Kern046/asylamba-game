@@ -22,11 +22,7 @@ class StackList implements \Stringable
 	 */
 	public function get($index = 0)
 	{
-		if (isset($this->elements[$index])) {
-			return $this->elements[$index];
-		}
-
-		return null;
+		return $this->elements[$index] ?? null;
 	}
 
 	public function all(): array

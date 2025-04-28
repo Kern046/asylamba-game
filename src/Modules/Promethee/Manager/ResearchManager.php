@@ -75,23 +75,16 @@ readonly class ResearchManager
 					->for($player);
 				$this->notificationRepository->save($n);
 				do {
-					$research->naturalTech = rand(0, 2); // 0, 1 ou 2
+					$research->naturalTech = random_int(0, 2); // 0, 1 ou 2
 					$tech1 = $research->mathLevel;
 					$tech2 = $research->physLevel;
 					$tech3 = $research->chemLevel;
-					switch ($research->naturalTech) {
-						case 0:
-							$tech1++;
-							break;
-						case 1:
-							$tech2++;
-							break;
-						case 2:
-							$tech3++;
-							break;
-						default:
-							throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies');
-					}
+					match ($research->naturalTech) {
+                        0 => $tech1++,
+                        1 => $tech2++,
+                        2 => $tech3++,
+                        default => throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies'),
+                    };
 				} while (!$this->researchHelper->isResearchPermit($tech1, $tech2, $tech3));
 
 				$research->naturalToPay = $this->researchHelper->getInfo(
@@ -142,19 +135,14 @@ readonly class ResearchManager
 				$this->notificationRepository->save($n);
 
 				do {
-					$research->lifeTech = rand(3, 4);
+					$research->lifeTech = random_int(3, 4);
 					$tech1 = $research->bioLevel;
 					$tech2 = $research->mediLevel;
-					switch ($research->lifeTech) {
-						case 3:
-							$tech1++;
-							break;
-						case 4:
-							$tech2++;
-							break;
-						default:
-							throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies');
-					}
+					match ($research->lifeTech) {
+                        3 => $tech1++,
+                        4 => $tech2++,
+                        default => throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies'),
+                    };
 				} while (!$this->researchHelper->isResearchPermit($tech1, $tech2));
 				$research->lifeToPay = $this->researchHelper->getInfo(
 					$research->lifeTech,
@@ -202,17 +190,14 @@ readonly class ResearchManager
 					->for($player);
 				$this->notificationRepository->save($n);
 				do {
-					$research->socialTech = rand(5, 6);
+					$research->socialTech = random_int(5, 6);
 					$tech1 = $research->econoLevel;
 					$tech2 = $research->psychoLevel;
-					switch ($research->socialTech) {
-						case 5: $tech1++;
-							break;
-						case 6: $tech2++;
-							break;
-						default:
-							throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies');
-					}
+					match ($research->socialTech) {
+                        5 => $tech1++,
+                        6 => $tech2++,
+                        default => throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies'),
+                    };
 				} while (!$this->researchHelper->isResearchPermit($tech1, $tech2));
 				$research->socialToPay = $this->researchHelper->getInfo(
 					$research->socialTech,
@@ -266,23 +251,16 @@ readonly class ResearchManager
 				$this->notificationRepository->save($n);
 
 				do {
-					$research->informaticTech = rand(7, 9);
+					$research->informaticTech = random_int(7, 9);
 					$tech1 = $research->networkLevel;
 					$tech2 = $research->algoLevel;
 					$tech3 = $research->statLevel;
-					switch ($research->informaticTech) {
-						case 7:
-							$tech1++;
-							break;
-						case 8:
-							$tech2++;
-							break;
-						case 9:
-							$tech3++;
-							break;
-						default:
-							throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies');
-					}
+					match ($research->informaticTech) {
+                        7 => $tech1++,
+                        8 => $tech2++,
+                        9 => $tech3++,
+                        default => throw new \LogicException('une erreur est survenue lors de la mise à jour des technologies'),
+                    };
 				} while (!$this->researchHelper->isResearchPermit($tech1, $tech2, $tech3));
 				$research->informaticToPay = $this->researchHelper->getInfo(
 					$research->informaticTech,

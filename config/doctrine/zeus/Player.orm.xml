@@ -20,7 +20,7 @@
 		</many-to-one>
 
 		<field name="name" type="string" column="name" length="25" unique="true" />
-		<field name="avatar" type="string" column="avatar" length="12" />
+		<field name="avatar" type="string" column="avatar" length="80dock" />
 		<field name="sex" type="smallint">
 			<options>
 				<option name="default">1</option>

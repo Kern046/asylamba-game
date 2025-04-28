@@ -1,13 +1,34 @@
 {% extends 'layouts/game.html.twig' %}
 
+{% block left_sidebar %}
+	<twig:Sidebar>
+		<twig:SidebarItem route="faction_overview" :isActive="app.request.get('_route') == 'faction_overview'" label="Vue générale" />
+
+		{% if faction.hasOngoingElectionCampaign %}
+			<twig:SidebarItem route="view_faction_election" :isActive="app.request.get('_route') == 'faction_election'" label="Election" />
+		{% endif %}
+
+		<twig:SidebarItem route="faction_forum" :isActive="app.request.get('_route') == 'faction_forum'" label="Forum" />
+
+		{% if current_player.isGovernmentMember %}
+			<twig:SidebarItem route="faction_government" :isActive="app.request.get('_route') == 'faction_government'" label="Gouvernement" />
+		{% endif %}
+
+		{% if current_player.isParliamentMember %}
+			<twig:SidebarItem route="faction_senate" :isActive="app.request.get('_route') == 'faction_senate'" label="Sénat" />
+		{% endif %}
+
+		<twig:SidebarItem route="faction_data" :isActive="app.request.get('_route') == 'faction_data'" label="Registres" />
+		<twig:SidebarItem route="faction_members" :isActive="app.request.get('_route') == 'faction_members'" label="Membres" />
+	</twig:Sidebar>
+{% endblock left_sidebar %}
+
 {% block body %}
-	<div id="background-paralax" class="profil"></div>
+	{% if block('page_title') is defined and block('page_title') is not empty %}
+		<twig:PageTitle>{{ block(outerBlocks.page_title) }}</twig:PageTitle>
+	{% endif %}
 
-	{{ include('molecules/faction/sidebar.html.twig') }}
-	{{ include('molecules/common/movers.html.twig') }}
-	<div id="content">
-		{{ include('molecules/common/advertising.html.twig') }}
-
-		{% block content %}{% endblock content %}
-	</div>
+	<twig:ContentContainer>
+		{{ block(outerBlocks.content) }}
+	</twig:ContentContainer>
 {% endblock body %}

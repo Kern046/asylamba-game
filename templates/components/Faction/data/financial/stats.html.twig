@@ -1,0 +1,25 @@
+<div class="w-96">
+	<twig:H2>Finance</twig:H2>
+
+	<twig:H4 class="mt-2">Richesse</twig:H4>
+
+	<twig:NumberBox label="Fortune de la faction" :faction="faction">
+		{{ faction.credits|number }}
+	</twig:NumberBox>
+
+	<div class="evolution">
+		<twig:H3 class="mt-4">
+			Evolution de la puissance commerciale de la faction sur les 20 derniers segments
+		</twig:H3>
+		{# @TODO fix that class name #}
+		<div class="flex flex-col">
+			{% for ranking in faction_rankings %}
+				<div class="w-full group">
+					<div style="width:{{ ranking.wealth|percent(credit_base) }}%;" class="min-w-4 group-odd:bg-medium{{ faction.identifier }} group-even:bg-light{{ faction.identifier }} text-xs p-1">
+						{{ ranking.wealth|number(-2) }}
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>

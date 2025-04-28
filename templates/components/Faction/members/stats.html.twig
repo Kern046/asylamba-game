@@ -1,0 +1,30 @@
+{% set statuses = get_faction_info(faction.identifier, 'status') %}
+
+<twig:LayoutBox>
+	<twig:NumberBox label="Joueurs actifs dans la faction">
+		{{ players_count }}
+	</twig:NumberBox>
+	<twig:NumberBox label="Joueurs en ligne actuellement">
+		{{ online_players_count }}
+	</twig:NumberBox>
+
+	<twig:H3 class="my-4">Nouveaux membres</twig:H3>
+
+	{% for player in last_faction_players %}
+		<div class="player">
+			<a href="{{ path('embassy', {'player': player.id}) }}">
+				<img src="{{ asset('build/media/avatar/small/' ~ player.avatar ~ '.png') }}" class="picto" alt="{{ player.name }}" />
+			</a>
+			<span class="title">{{ statuses[player.status - 1] }}</span>
+			<strong class="name">{{ player.name }}</strong>
+
+			{% if player.id != current_player.id %}
+				<span class="experience"><a href="{{ path('new_message', {'to': player.id}) }}">Souhaiter la bienvenue</a></span>
+			{% endif %}
+		</div>
+	{% endfor %}
+
+	{% if last_faction_players|length == 0 %}
+		<p class="text-sm">Aucun nouveau membre ces 3 derniers jours</p>
+	{% endif %}
+</twig:LayoutBox>

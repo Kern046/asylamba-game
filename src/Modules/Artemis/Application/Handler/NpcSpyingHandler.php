@@ -41,7 +41,8 @@ readonly class NpcSpyingHandler extends SpyingHandler
 		return $place->maxDanger * 40;
 	}
 
-	protected function getTypeOfSpy(int $success, int $antiSpy): int
+	#[\Override]
+    protected function getTypeOfSpy(int $success, int $antiSpy): int
 	{
 		return SpyReport::TYP_NOT_CAUGHT;
 	}

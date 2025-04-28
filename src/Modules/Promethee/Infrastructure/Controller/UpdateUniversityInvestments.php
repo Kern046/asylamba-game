@@ -53,16 +53,16 @@ class UpdateUniversityInvestments extends AbstractController
 
 			switch ($category) {
 				case 'natural':
-					$player->partNaturalSciences = $player->partNaturalSciences + $quantity;
+					$player->partNaturalSciences += $quantity;
 					break;
 				case 'life':
-					$player->partLifeSciences = $player->partLifeSciences + $quantity;
+					$player->partLifeSciences += $quantity;
 					break;
 				case 'social':
-					$player->partSocialPoliticalSciences = $player->partSocialPoliticalSciences + $quantity;
+					$player->partSocialPoliticalSciences += $quantity;
 					break;
 				case 'informatic':
-					$player->partInformaticEngineering = $player->partInformaticEngineering + $quantity;
+					$player->partInformaticEngineering += $quantity;
 					break;
 			}
 		}
@@ -87,16 +87,16 @@ class UpdateUniversityInvestments extends AbstractController
 			}
 			switch ($category) {
 				case 'natural':
-					$player->partNaturalSciences = $player->partNaturalSciences - $quantity;
+					$player->partNaturalSciences -= $quantity;
 					break;
 				case 'life':
-					$player->partLifeSciences = $player->partLifeSciences - $quantity;
+					$player->partLifeSciences -= $quantity;
 					break;
 				case 'social':
-					$player->partSocialPoliticalSciences = $player->partSocialPoliticalSciences - $quantity;
+					$player->partSocialPoliticalSciences -= $quantity;
 					break;
 				case 'informatic':
-					$player->partInformaticEngineering = $player->partInformaticEngineering - $quantity;
+					$player->partInformaticEngineering -= $quantity;
 					break;
 			}
 		}

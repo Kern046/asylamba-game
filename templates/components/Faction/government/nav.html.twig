@@ -1,0 +1,65 @@
+{% set mode = app.request.query.get('mode', 'law') %}
+{% set statuses = get_faction_info(faction.identifier, 'status') %}
+
+<twig:LayoutBox class="min-w-80 flex flex-col divide-y divide-gray-900 [&>a]:p-2 [&>a]:bg-gray-700 [&>a:hover]:bg-gray-900">
+	<a href="{{ path('faction_government', {'mode': 'law'}) }}" class="nav-element {% if 'law' == mode %}bg-gray-900{% endif %}">
+		<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
+		<strong>Lois</strong><br>
+		<em class="text-sm">Promulger de nouvelles lois</em>
+	</a>
+
+	<a href="{{ path('faction_government', {'mode': 'news'}) }}" class="nav-element {% if 'news' == mode %}bg-gray-900{% endif %}">
+		<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
+		<strong>Annonces</strong><br>
+		<em class="text-sm">Gestion des annonces</em>
+	</a>
+
+	<a href="{{ path('faction_government', {'mode': 'message'}) }}" class="nav-element {% if 'message' == mode %}bg-gray-900{% endif %}">
+		<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
+		<strong>Messages groupés</strong><br>
+		<em class="text-sm">Envoi de messages aux membres de la faction</em>
+	</a>
+
+	<a href="{{ path('faction_government', {'mode': 'description'}) }}" class="nav-element {% if 'description' == mode %}bg-gray-900{% endif %}">
+		<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
+		<strong>Description</strong><br>
+		<em class="text-sm">Edition de la description publique</em>
+	</a>
+
+	<a href="{{ path('faction_government', {'mode': 'credit'}) }}" class="nav-element {% if 'credit' == mode %}bg-gray-900{% endif %}">
+		<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
+		<strong>Gestion des finances</strong><br>
+		<em class="text-sm">Envoi de crédits aux membres de la faction</em>
+	</a>
+
+	{% if current_player.isRuler %}
+		<a href="{{ path('faction_government', {'mode': 'manage'}) }}" class="nav-element {% if 'manage' == mode %}bg-gray-900{% endif %}">
+			<img src="{{ asset('build/media/faction/law/common.png') }}" alt="" />
+			<strong>Gouvernement</strong><br>
+			<em class="text-sm">Gestion de votre gouvernement</em>
+		</a>
+	{% endif %}
+
+	<hr />
+	<h4>Abandonner ses fonctions</h4>
+
+	{% if current_player.isRuler %}
+		{% if faction.isDemocratic %}
+			<a href="{{ path('abdicate') }}" class="more-button confirm" data-confirm-label="Cette action est définitive.">
+				Organiser des élections anticipées
+			</a>
+		{% else %}
+			<form action="{{ path('abdicate') }}" method="post" class="choose-government">
+				<select name="rplayer">
+					<option value="-1">Choisissez un joueur</option>
+					{% for senator in senators %}
+						<option value="{{ senator.id }}">{{ statuses[senator.status - 1] }} {{ senator.name }}</option>
+					{% endfor %}
+					</select>
+				<button type="submit">Désigner comme successeur</button>
+			</form>
+		{% endif %}
+	{% else %}
+		<a href="{{ path('resign') }}" class="more-button confirm" data-confirm-label="Cette action est définitive.">Démissioner du gouvernement</a>
+	{% endif %}
+</twig:LayoutBox>

@@ -3,98 +3,29 @@
 {% set generator_building_number = constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::GENERATOR') %}
 
 {% block content %}
-	<div class="component">
-		<div class="head skin-1">
-			<img src="{{ asset('build/media/orbitalbase/generator.png') }}" alt="" />
-			<h2>{{ get_building_info(0, 'frenchName') }}</h2>
-			<em>niveau {{ current_base.levelGenerator }}</em>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				<div class="number-box {% if generator_speed_bonus == 0 %}grey{% endif %}">
-					<span class="label">bonus de vitesse de construction</span>
-					<span class="value">
-						{{ generator_speed_bonus|number }} %
-					</span>
-				</div>
+	<twig:Headline :title="get_building_info(0, 'frenchName')" subTitle="niveau {{ current_base.levelGenerator }}">
+		{{ get_building_info(generator_building_number, 'description')|raw }}
+	</twig:Headline>
 
-				<h4>File de construction</h4>
-				{{ include('components/base/building_queues.html.twig') }}
-			</div>
-		</div>
-	</div>
+	<div class="flex flex-col md:flex-row gap-4 md:items-start mt-2">
+		<twig:Queues
+			queueComponent="BuildingQueue"
+			:queues="building_queues"
+			:queuesCount="building_queues_count"
+			:buildingIdentifier="generator_building_number"
+			:buildingLevel="current_base.levelGenerator"
+			:speedBonus="generator_speed_bonus"
+			:refund="building_resource_refund" />
 
-	<div class="component generator">
-		<div class="head"></div>
-		<div class="fix-body">
-			<div class="body">
-				<h4>Bâtiments neutres</h4>
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::GENERATOR'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::GENERATOR')],
-				}) }}
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::TECHNOSPHERE'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::TECHNOSPHERE')],
-				}) }}
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::STORAGE'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::STORAGE')],
-				}) }}
-				</div>
-			</div>
-		</div>
-
-	<div class="component generator">
-		<div class="head"></div>
-		<div class="fix-body">
-			<div class="body">
-				<h4>Bâtiments commerciaux</h4>
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::REFINERY'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::REFINERY')],
-				}) }}
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::COMMERCIAL_PLATEFORME'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::COMMERCIAL_PLATEFORME')],
-				}) }}
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::SPATIOPORT')],
-				}) }}
-			</div>
-		</div>
-	</div>
-
-	<div class="component generator">
-		<div class="head"></div>
-		<div class="fix-body">
-			<div class="body">
-				<h4>Bâtiments militaires</h4>
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK1'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK1')],
-				}) }}
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING')],
-				}) }}
-				{{ include('molecules/base/building_card.html.twig', {
-					'building_number': constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK2'),
-					'building_data': buildings_data[constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::DOCK2')],
-				}) }}
-			</div>
-		</div>
-	</div>
-
-	<div class="component">
-		<div class="head skin-2">
-			<h2>À propos</h2>
-		</div>
-		<div class="fix-body">
-			<div class="body">
-				<p class="long-info">{{ get_building_info(generator_building_number, 'description')|raw }}</p>
-			</div>
-		</div>
+		<twig:LayoutBox class="grow grid grid-cols-1 md:grid-cols-3 gap-x-2 gap-y-3 md:gap-y-2 lg:gap-4 rounded-r-xl">
+			{% for building_identifier in constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::BUILDINGS') %}
+				<twig:BuildingCard
+					:base="current_base"
+					:buildingIdentifier="building_identifier"
+					:technology="technology"
+					:buildingQueues="building_queues"
+					:buildingQueuesCount="building_queues_count" />
+			{% endfor %}
+		</twig:LayoutBox>
 	</div>
 {% endblock %}

@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install SUPERVISOR and dependencies
 RUN apk add --update rabbitmq-c-dev icu-dev nodejs npm

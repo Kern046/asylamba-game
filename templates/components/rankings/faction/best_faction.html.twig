@@ -1,21 +1,18 @@
-<div class="component profil">
-	<div class="head">
-		<h1>Faction</h1>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			<div class="center-box">
-				<span class="value">Meilleure faction</span>
-				<span class="label">{{ get_faction_info(best_faction.faction.identifier, 'popularName') }}</span>
-			</div>
-
-			<div class="profil-flag color-{{ best_faction.faction.identifier }}">
-				<img src="{{ asset('build/media/ally/big/color' ~ best_faction.faction.identifier ~ '.png') }}" alt="" />
-			</div>
-
-			<div class="center-box">
-				<span class="label">{{ get_faction_info(best_faction.faction.identifier, 'devise') }}</span>
-			</div>
+<twig:LayoutBox class="min-w-64">
+	<header>
+		<twig:H2>Meilleure faction</twig:H2>
+	</header>
+	<section class="mt-4">
+		<div class="text-center">
+			<span class="">{{ get_faction_info(best_faction.faction.identifier, 'popularName') }}</span>
 		</div>
-	</div>
-</div>
+
+		<div class="flex justify-center mt-2">
+			<twig:FactionBanner :faction="best_faction.faction" class="w-16 h-16" />
+		</div>
+
+		<div class="mt-4">
+			<span class="italic">"{{ get_faction_info(best_faction.faction.identifier, 'devise') }}"</span>
+		</div>
+	</section>
+</twig:LayoutBox>

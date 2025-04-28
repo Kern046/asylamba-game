@@ -3,701 +3,507 @@
 {% set tutorial_step = current_player.stepTutorial %}
 
 {% apply spaceless %}
-	<header class="absolute bg-stone-800 z-10 w-full">
-		<div class="w-full h-4 faction-bg-md"></div>
-		<div class="w-full h-0.5 faction-bg-dark"></div>
-		<div class="w-full px-2 sm:px-4 lg:px-8 lg:flex lg:justify-between border-b border-stone-600">
-			<div id="base-selector" class="relative w-32 h-16">
-				<a href="{{ path('base_overview') }}" class="absolute -left-12 -top-10 flex justify-center items-center p-4 rounded-full bg-black border-2 border-gray-200 {% if app.request.get('_route') == 'bases' %}active{% endif %}">
-					<img src="{{ asset('build/media/map/place/place' ~ get_base_image(current_base) ~ '.png') }}" alt="{{ current_base.name }}" />
+	<header class="fixed z-[1100] top-0 left-0 w-full flex text-gray-200 flex-col md:flex-row font-semibold bg-gray-700/80">
+		<div>
+
+		</div>
+
+		<div class="grow flex-col md:flex-row flex items-center">
+			<nav class="grow basis-1/2">
+				<ul class="flex gap-4 justify-end">
+					<li>
+						<a href="{{ path('fleet_headquarters') }}">
+							Quartier Général
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('map') }}">
+							Carte de la galaxie
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('financial_investments') }}">
+							Finances
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('university') }}">
+							Université
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('faction_overview') }}">
+							Faction
+						</a>
+					</li>
+				</ul>
+			</nav>
+			<div class="hidden md:block px-10 py-1">
+				<a href="{{ path('faction_overview') }}" class="">
+					<twig:FactionBanner :faction="current_player.faction" class="w-16 h-16" />
 				</a>
-				<div class="absolute -bottom-8 -left-8 flex items-center bg-stone-800 rounded-md border border-stone-600">
-					<toolbar-toggler-left>
-						<template v-slot:picto>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-								<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-							</svg>
-						</template>
-						<template v-slot:dropdown>
-							<div class="p-3">
-								<h2 class="text-lg faction-text-color mb-2">Changer de bases</h2>
-								<ul class="list-disc list-inside text-[16px]">
-									{% for orbital_base in current_player_bases %}
-										<li>
-											<a href="{{ path('switchbase', {'baseId': orbital_base.id}) }}"
-											   {% if orbital_base.id == current_base.id %}class="active"{% endif %}>
-												<span class="italic mr-2 inline-block">{{ orbital_base.typeOfBase|scalar_base_type }}</span>
-												<strong class="faction-text-color">{{ orbital_base.name }}</strong>
-											</a>
-										</li>
-									{% endfor %}
-								</ul>
-							</div>
-						</template>
-					</toolbar-toggler-left>
-					<span class="font-semibold text-sm text-white w-20 px-1 border-x border-stone-600">
+			</div>
+			<nav class="grow basis-1/2">
+				<ul class="flex gap-4 justify-start">
+					<li>
+						<a href="{{ path('player_rankings') }}">
+							Classement
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('embassy') }}">
+							Ambassade
+						</a>
+					</li>
+					<li>
+						<a href="{{ path('communication_center') }}">
+							Messagerie
+							{% if conversations_count > 0 %}
+								{{ include('atoms/header/badge.html.twig', { count: conversations_count}) }}
+							{% endif %}
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+
+		<div>
+			<a href="{{ path('profile') }}" class="relative">
+				<twig:Avatar :player="current_player" class="absolute right-2 top-2 max-w-24 max-h-24" />
+			</a>
+		</div>
+	</header>
+	<!--
+	<header class="">
+		<div class="">
+			<div id="base-selector">
+				<a href="{{ path('base_overview') }}" class="{% if app.request.get('_route') == 'bases' %}active{% endif %}">
+					{{ current_base.name }}
+				</a>
+				<div class="">
+					<div class="">
+						<h2 class="">Changer de bases</h2>
+						<ul class="">
+							{% for orbital_base in current_player_bases %}
+								<li>
+									<a href="{{ path('switchbase', {'baseId': orbital_base.id}) }}"
+									   {% if orbital_base.id == current_base.id %}class="active"{% endif %}>
+										<span class="">{{ orbital_base.typeOfBase|scalar_base_type }}</span>
+										<strong class="">{{ orbital_base.name }}</strong>
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</div>
+					<span class="">
 						{{ current_base.name }}
 					</span>
 					<a href="{{ path('switchbase', {'baseId': next_base is not null ? next_base.id : first_base.id }) }}" class="bg-black p-1">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-							<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-						</svg>
+						>
 					</a>
 				</div>
 			</div>
-			<div class="lg:divide-y lg:divide-gray-400 grow">
-				<div id="global-toolbar"  class="relative flex justify-between">
-					<div class="relative z-10 px-2 flex grow lg:px-0">
-						<div class="flex-shrink-0 flex justify-left items-center bg-stone-900">
-							<toolbar-picto href="{{ path('profile') }}" route="profile">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
-							<toolbar-picto href="{{ path('fleet_headquarters') }}" route="fleet_headquarters" alt="amirauté">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414l5-5a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414 0zm0-6a1 1 0 010-1.414l5-5a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L10 5.414 5.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
-							<toolbar-picto href="{{ path('map') }}" route="map" alt="galaxie">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
-							<toolbar-picto href="{{ path('financial_investments') }}" route="financial_investments" :routes="['financial_investments', 'financial_transfers']" alt="finances">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7.858 5.485a1 1 0 00-1.715 1.03L7.633 9H7a1 1 0 100 2h1.834l.166.277V12H7a1 1 0 100 2h2v1a1 1 0 102 0v-1h2a1 1 0 100-2h-2v-.723l.166-.277H13a1 1 0 100-2h-.634l1.492-2.486a1 1 0 10-1.716-1.029L10.034 9h-.068L7.858 5.485z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
-							<toolbar-picto href="{{ path('university') }}" route="university" alt="université">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-								</svg>
-							</toolbar-picto>
-							<toolbar-picto href="{{ path('faction_overview') }}" route="faction_overview" alt="faction">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
-						</div>
-						<div class="w-10 h-full bg-stone-800"></div>
-						<div class="flex flex-shrink-0 justify-right items-center justify-self-end bg-stone-900">
-							<toolbar-picto href="{{ path('player_rankings') }}" route="player_rankings" alt="classements">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
-							<toolbar-picto href="{{ path('embassy') }}" route="embassy" alt="ambassades">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M10.496 2.132a1 1 0 00-.992 0l-7 4A1 1 0 003 8v7a1 1 0 100 2h14a1 1 0 100-2V8a1 1 0 00.496-1.868l-7-4zM6 9a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1zm3 1a1 1 0 012 0v3a1 1 0 11-2 0v-3zm5-1a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
-							<toolbar-picto href="{{ path('communication_center') }}" route="communication_center" alt="messagerie">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-									<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-								</svg>
-								{% if conversations_count > 0 %}
-									{{ include('atoms/header/badge.html.twig', { count: conversations_count}) }}
-								{% endif %}
-							</toolbar-picto>
-							<toolbar-toggler>
-								<template v-slot:picto>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-									</svg>
+			<div>
+				<div>
+					<div class="">
+						<div class="">
 
+							<div>
+								<h2>Notifications</h2>
+								{% if current_player_notifications|length > 0 %}
+									{{ include('atoms/header/badge.html.twig', { count: current_player_notifications|length}) }}
+								{% endif %}
+								{% if current_player_notifications|length > 1 %}
+									<a href="{{ path('read_all_notifications') }}">tout marquer comme lu</a>
+								{% endif %}
+								<div class="">
 									{% if current_player_notifications|length > 0 %}
-										{{ include('atoms/header/badge.html.twig', { count: current_player_notifications|length}) }}
-									{% endif %}
-								</template>
-								<template v-slot:dropdown>
-									<h2>Notifications</h2>
-									{% if current_player_notifications|length > 1 %}
-										<a class="link-title" href="{{ path('read_all_notifications') }}">tout marquer comme lu</a>
-									{% endif %}
-									<div class="overflow">
-										{% if current_player_notifications|length > 0 %}
-											{% for notification in current_player_notifications %}
-												<div class="notif unreaded" data-notif-id="{{ notification.id }}">
-													<h4 class="read-notif switch-class-parent" data-class="open">{{ notification.title }}</h4>
-													<div class="content">{{ notification.content|raw }}</div>
-													<div class="footer">
-														<a class="ajax-action" data-ajax-target="{{ path('archive_notification', {'id': notification.id }) }}">archiver</a> ou
-														<a class="ajax-action" data-ajax-target="{{ path('delete_notification', {'id': notification.id }) }}">supprimer</a><br />
-														— {{ notification.sentAt|game_date|raw }}
-													</div>
+										{% for notification in current_player_notifications %}
+											<div class="" data-notif-id="{{ notification.id }}">
+												<h4 class="">{{ notification.title }}</h4>
+												<div class="">{{ notification.content|raw }}</div>
+												<div class="">
+													<a class="" data-ajax-target="{{ path('archive_notification', {'id': notification.id }) }}">archiver</a> ou
+													<a class="" data-ajax-target="{{ path('delete_notification', {'id': notification.id }) }}">supprimer</a><br />
+													— {{ notification.sentAt|game_date|raw }}
 												</div>
-											{% endfor %}
-										{% else %}
-											<p class="info">Aucune nouvelle notification.</p>
-										{% endif %}
-									</div>
-									<a href="{{ path('communication_center') }}" class="more-link">toutes vos notifications</a>
-								</template>
-							</toolbar-toggler>
+											</div>
+										{% endfor %}
+									{% else %}
+										<p class="">Aucune nouvelle notification.</p>
+									{% endif %}
+								</div>
+								<a href="{{ path('communication_center') }}" class="">toutes vos notifications</a>
+							</div>
 						</div>
 					</div>
 
-					<div class="flex items-center">
-						<div class="flex items-center bg-stone-900">
-							{% if true == app.session.get('admin') %}
-								<toolbar-picto href="{{ path('admin') }}" route="admin">
-									<img src="{{ asset('build/media/common/tool-admin.png') }}" alt="" />
-								</toolbar-picto>
-							{% endif %}
-
-							{# old logic : ((bool)$request->cookies->get('p' . Params::REDIRECT_CHAT, Params::$params[Params::REDIRECT_CHAT]) #}
-							<toolbar-picto href="https://discordapp.com/channels/132106417703354378/132106417703354378">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd" />
-								</svg>
-							</toolbar-picto>
+					<div class="">
+						<div class="">
+							<a href="https://discordapp.com/channels/132106417703354378/132106417703354378">
+								Discord
+							</a>
 
 							{% if current_player.hasCompletedTutorial %}
-								<toolbar-picto href="#" alt="tutoriel">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-									</svg>
-								</toolbar-picto>
+								<a href="#">
+									Tutoriel
+								</a>
 							{% else %}
-								<toolbar-toggler>
-									<template v-slot:picto>
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-											<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-										</svg>
-										{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial}) }}
-									</template>
-									<template v-slot:dropdown>
-										<h5 class="text-xl font-semibold faction-text-color mb-4">Tutoriel</h5>
+								<div>
+									<h5 class="">Tutoriel</h5>
 
-										<div class="overflow text-[16px]">
-											<h6 class="faction-text-color font-bold underline">
-												<span class="number">
+									{{ include('atoms/header/badge.html.twig', { count: current_player.stepTutorial}) }}
+
+										<div class="">
+											<h6 class="">
+												<span class="">
 													{{ tutorial_step }} -
 												</span>
 												{{ tutorial_info(tutorial_step, 'title') }}
 											</h6>
 											<p>{{ tutorial_info(tutorial_step, 'description')|raw }}</p>
 
-											<div class="mt-2">
-												<hr class="my-4 faction-bd-md">
-												<p class="faction-text-color">Récompense :</p>
+											<div class="">
+												<hr class="">
+												<p class="">Récompense :</p>
 												{% set credit_reward = tutorial_info(tutorial_step, 'creditReward') %}
 												{% set resource_reward = tutorial_info(tutorial_step, 'resourceReward') %}
 												{% set ship_reward = tutorial_info(tutorial_step, 'shipReward') %}
 												<ul>
 													{% if credit_reward > 0 %}
-														<li>- <span class="faction-text-color">{{ credit_reward }}</span> crédits</li>
+														<li>- <span class="">{{ credit_reward }}</span> crédits</li>
 													{% endif %}
 
 													{% if resource_reward > 0 %}
-														<li>- <span class="faction-text-color">{{ resource_reward }}</span> ressources</li>
+														<li>- <span class="">{{ resource_reward }}</span> ressources</li>
 													{% endif %}
 
 													{% for key in ship_reward|keys %}
 														{% set value = ship_reward[key] %}
 														{% if value > 0 %}
-															<li>- <span class="faction-text-color">{{ value }}</span> {{ ship_name(key) }}{{ value|plural }}</li>
+															<li>- <span class="">{{ value }}</span> {{ ship_name(key) }}{{ value|plural }}</li>
 														{% endif %}
 													{% endfor %}
 												</ul>
 											</div>
 										</div>
 
-										<form action="{{ path('tutorial_validatestep') }}" method="post" class="mt-4 relative text-[16px]">
+										<form action="{{ path('tutorial_validatestep') }}" method="post" class="">
 											{% if current_player.stepDone is same as(true) %}
-												<button class="faction-bg-lt p-2 text-black faction-text-color-over-bg" type="submit">valider l'étape {{ tutorial_step }}</button>
+												<button class="" type="submit">valider l'étape {{ tutorial_step }}</button>
 											{% else %}
-												<button class="disabled faction-bg-lt p-2 faction-text-color-disabled" type="submit" disabled>étape en cours</button>
+												<button class="" type="submit" disabled>étape en cours</button>
 											{% endif %}
 										</form>
-									</template>
-								</toolbar-toggler>
+									</div>
+								</div>
 							{% endif %}
 
-							<toolbar-toggler>
-								<template v-slot:picto>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd" />
-									</svg>
-								</template>
-								<template v-slot:dropdown>
-									<h2>Bug tracker</h2>
-									<p>Si vous trouvez des bugs ou avez des idées d\'améliorations, nous vous invitons à les poster sur le forum principal.</p>
-									<a class="outside-button" href="#" target="_blank">Reporter un bug</a>
-									<a class="outside-button" href="#" target="_blank">Proposer une amélioration</a>
-									<p>Pour les bugs que vous pensez critiques, vous pouvez envoyer un email directement à support@asylamba.com.</p>
-									<a class="outside-button" href="mailto:support@asylamba.com">Envoyer un email</a>
-								</template>
-							</toolbar-toggler>
+							<div>
+								<h2>Bug tracker</h2>
+								<p>Si vous trouvez des bugs ou avez des idées d\'améliorations, nous vous invitons à les poster sur le forum principal.</p>
+								<a class="outside-button" href="#" target="_blank">Reporter un bug</a>
+								<a class="outside-button" href="#" target="_blank">Proposer une amélioration</a>
+								<p>Pour les bugs que vous pensez critiques, vous pouvez envoyer un email directement à support@asylamba.com.</p>
+								<a class="outside-button" href="mailto:support@asylamba.com">Envoyer un email</a>
+							</div>
 
-							<toolbar-picto href="{{ path('params') }}" route="params" alt="paramètres">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
-								</svg>
-							</toolbar-picto>
+							<a href="{{ path('params') }}">
+								Paramètres
+							</a>
 
-							{# @TODO transform into MenuList #}
-							<toolbar-toggler>
-								<template v-slot:picto>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
-									</svg>
-								</template>
-								<template v-slot:dropdown>
-									<a href="{{ path('logout') }}">Se déconnecter</a>
-									<hr />
-									<a href="#" class="sh" data-target="roadmap">Dernières mises à jour</a>
-									<a href="{{ path('sponsorship') }}">Parrainage</a>
-									<hr />
-									<a target="_blank" href="#">Discuter sur le forum</a>
-									<a target="_blank" href="#">Consulter le wiki</a>
-									<hr />
-									<a target="_blank" href="#">Rejoindre la page Facebook</a>
-									<a target="_blank" href="#">Nous suivre sur Google+</a>
-									<a target="_blank" href="#">Nous suivre sur Twitter</a>
-								</template>
-							</toolbar-toggler>
+							<div>
+								<a href="{{ path('logout') }}">Se déconnecter</a>
+								<a href="{{ path('sponsorship') }}">Parrainage</a>
+							</div>
 						</div>
-						<div class="flex items-center bg-black rounded-full mx-2 w-24">
-							<span class="releve-timer sh text-stone-100 font-semibold mx-auto" data-target="tools-calendar">
+						<div class="">
+							<span class="" data-target="tools-calendar">
 								{{ get_game_timer('i') }}:{{ get_game_timer('s') }}
 							</span>
 						</div>
 					</div>
-
-					<div class="relative z-10 flex items-center lg:hidden">
-						<!-- Mobile menu button -->
-						<button type="button" class="rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-controls="mobile-menu" aria-expanded="false">
-							<span class="sr-only">Open menu</span>
-							<!--
-							  Icon when menu is closed.
-
-							  Heroicon name: outline/menu
-
-							  Menu open: "hidden", Menu closed: "block"
-							-->
-							<svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-							</svg>
-							<!--
-							  Icon when menu is open.
-
-							  Heroicon name: outline/x
-
-							  Menu open: "block", Menu closed: "hidden"
-							-->
-							<svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-							</svg>
-						</button>
-					</div>
 				</div>
-				<nav class="hidden lg:flex lg:space-x-8" aria-label="Global">
-					<div class="flex items-center">
-						<toolbar-toggler-left>
-							<template v-slot:picto>
-								<div class="p-0 bg-black rounded-full hover:bg-black flex items-center">
-									<span class="bg-stone-900 p-1 border-2 faction-bd-lt rounded-full">
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-											<path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
-										</svg>
-									</span>
-									<span class="px-2 text-stone-100 font-semibold">
-										{{ current_base.resourcesStorage|number }}
+				<nav class="" aria-label="Global">
+					<div class="">
+						<div>
+							<div class="">
+								<span class="">
+									{{ current_base.resourcesStorage|number }}
+								</span>
+							</div>
+							<h2 class="">Raffinerie</h2>
+							<div class="">
+								<div class="">
+									<span class="">production par relève</span>
+									<span class="">
+										{% set production = get_base_production(current_base) %}
+										{% set refining_bonus = get_player_bonus(constant('App\\Modules\\Zeus\\Model\\PlayerBonusId::REFINERY_REFINING')) %}
+										{{ production|number }}
+										{% if refining_bonus > 0 %}
+											<span class="">+{{ ((production * refining_bonus) / 100)|number }}</span>
+										{% endif %}
 									</span>
 								</div>
-							</template>
-							<template v-slot:dropdown>
-								<h2 class="font-bold text-lg">Raffinerie</h2>
-								<div class="overflow">
-									<div class="number-box">
-										<span class="label">production par relève</span>
-										<span class="value">
-											{% set production = get_base_production(current_base) %}
-											{% set refining_bonus = get_player_bonus(constant('App\\Modules\\Zeus\\Model\\PlayerBonusId::REFINERY_REFINING')) %}
-											{{ production|number }}
-											{% if refining_bonus > 0 %}
-												<span class="bonus">+{{ ((production * refining_bonus) / 100)|number }}</span>
-											{% endif %}
-											 <img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">
-										</span>
-									</div>
 
-									{{ include('molecules/base/production/storage_gauge.html.twig', {
-										'stored_resources': current_base.resourcesStorage,
-										'percent': current_base|base_storage_percent,
-										'faction_color': false,
-									}) }}
+								{{ include('molecules/base/production/storage_gauge.html.twig', {
+									'stored_resources': current_base.resourcesStorage,
+									'percent': current_base|base_storage_percent,
+									'faction_color': false,
+								}) }}
 
-									<a href="{{ path('refinery') }}"
-									   class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block"
-									>
-										vers la raffinerie
-									</a>
-								</div>
-							</template>
-						</toolbar-toggler-left>
+								<a href="{{ path('refinery') }}" class="">
+									vers la raffinerie
+								</a>
+							</div>
+						</div>
 
-						<span class="flex items-center bg-black rounded-full mx-2" style="width: 120px;">
-						 	<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits" />
-							<span class="px-2 text-stone-100 font-semibold">
+						<span class="">
+							<span class="">
 								{{ current_player.credit|number }}
 							</span>
 						</span>
 
-						<div class="flex items-center bg-stone-900">
-
-							<toolbar-toggler-left>
-								<template v-slot:picto>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
-									</svg>
+						<div class="">
+							<div>
+								{% if building_queues_count > 0 %}
+									{{ include('atoms/header/badge.html.twig', { count: building_queues_count}) }}
+								{% endif %}
+								<h2 class="">Générateur</h2>
+								<div class="">
 									{% if building_queues_count > 0 %}
-										{{ include('atoms/header/badge.html.twig', { count: building_queues_count}) }}
-									{% endif %}
-								</template>
-								<template v-slot:dropdown>
-									<h2 class="font-bold text-lg">Générateur</h2>
-									<div class="overflow">
-										{% if building_queues_count > 0 %}
-											{% set queue = current_building_queues[0] %}
-											{% set queue_time = queue|building_queue_time %}
-											{% set queue_duration = queue|queue_duration %}
-											<div class="queue">
-												<div class="item active progress"
-													 data-progress-no-reload="true"
-													 data-progress-output="lite"
-													 data-progress-current-time="{{ queue_duration }}"
-													 data-progress-total-time="{{ queue_time }}"
-												>
-													<img class="picto" src="{{ asset('build/media/orbitalbase/' ~ queue|queue_picture ~ '.png') }}" alt="" />
-													<strong>
-														{{ queue|queue_name }}
-														<span class="level">niv. {{ queue.targetLevel }}</span>
-													</strong>
+										{% set queue = current_building_queues[0] %}
+										{% set queue_time = queue|building_queue_time %}
+										{% set queue_duration = queue|queue_duration %}
+										<div class="">
+											<div class=""
+												 data-progress-no-reload="true"
+												 data-progress-output="lite"
+												 data-progress-current-time="{{ queue_duration }}"
+												 data-progress-total-time="{{ queue_time }}"
+											>
+												<strong>
+													{{ queue|queue_name }}
+													<span class="">niv. {{ queue.targetLevel }}</span>
+												</strong>
 
-													<em>
-														<span class="progress-text">{{ queue_duration|lite_seconds }}</span>
-													</em>
+												<em>
+													<span class="">{{ queue_duration|lite_seconds }}</span>
+												</em>
 
-													<span class="progress-container">
-														<span style="width: {{ (queue_time - queue_duration)|percent(queue_time) }}%;" class="progress-bar">
-														</span>
+												<span class="">
+													<span style="width: {{ (queue_time - queue_duration)|percent(queue_time) }}%;" class="">
 													</span>
-												</div>
+												</span>
 											</div>
-										{% else %}
-											<p class="info">Aucun bâtiment en construction pour le moment.</p>
-										{% endif %}
+										</div>
+									{% else %}
+										<p class="">Aucun bâtiment en construction pour le moment.</p>
+									{% endif %}
 
-										<a href="{{ path('generator') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers le générateur</a>
-									</div>
-								</template>
-							</toolbar-toggler-left>
+									<a href="{{ path('generator') }}" class="">vers le générateur</a>
+								</div>
+							</div>
 
 
-							<toolbar-toggler-left>
-								<template v-slot:picto>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M7 2a1 1 0 00-.707 1.707L7 4.414v3.758a1 1 0 01-.293.707l-4 4C.817 14.769 2.156 18 4.828 18h10.343c2.673 0 4.012-3.231 2.122-5.121l-4-4A1 1 0 0113 8.172V4.414l.707-.707A1 1 0 0013 2H7zm2 6.172V4h2v4.172a3 3 0 00.879 2.12l1.027 1.028a4 4 0 00-2.171.102l-.47.156a4 4 0 01-2.53 0l-.563-.187a1.993 1.993 0 00-.114-.035l1.063-1.063A3 3 0 009 8.172z" clip-rule="evenodd" />
-									</svg>
+							<div>
+								{% if technology_queues_count > 0 %}
+									{{ include('atoms/header/badge.html.twig', { count: technology_queues_count }) }}
+								{% endif %}
+								<h2 class="">Technosphère</h2>
+								<div class="">
 									{% if technology_queues_count > 0 %}
-										{{ include('atoms/header/badge.html.twig', { count: technology_queues_count }) }}
-									{% endif %}
-								</template>
-								<template v-slot:dropdown>
-									<h2 class="font-bold text-lg">Technosphère</h2>
-									<div class="overflow">
-										{% if technology_queues_count > 0 %}
-											{% set queue = current_technology_queues[0] %}
-											<div class="queue">
-												<div class="item active progress"
-													 data-progress-no-reload="true"
-													 data-progress-output="lite"
-													 data-progress-current-time="{{ queue|queue_duration }}"
-													 data-progress-total-time="{{ queue|technology_queue_time }}"
-												>
-													<img class="picto" src="{{ asset('build/media/technology/picto/' ~ queue|queue_picture ~ '.png') }}" alt="" />
-													<strong>
-														{{ queue|queue_name }}
-														{% if queue|is_unblocking_technology %}
-															<span class="level">niv. {{ queue.targetLevel }}</span>
-														{% endif %}
-													</strong>
+										{% set queue = current_technology_queues[0] %}
+										<div class="">
+											<div class=""
+												 data-progress-no-reload="true"
+												 data-progress-output="lite"
+												 data-progress-current-time="{{ queue|queue_duration }}"
+												 data-progress-total-time="{{ queue|technology_queue_time }}"
+											>
+												<strong>
+													{{ queue|queue_name }}
+													{% if queue|is_unblocking_technology %}
+														<span class="level">niv. {{ queue.targetLevel }}</span>
+													{% endif %}
+												</strong>
 
-													<em><span class="progress-text">{{ queue|queue_duration|lite_seconds }}</span></em>
-													<span class="progress-container">
-														<span style="width: {{ (queue|technology_queue_time - queue|queue_duration)|percent(queue|technology_queue_time) }}%;" class="progress-bar">
-														</span>
+												<em><span class="">{{ queue|queue_duration|lite_seconds }}</span></em>
+												<span class="">
+													<span style="width: {{ (queue|technology_queue_time - queue|queue_duration)|percent(queue|technology_queue_time) }}%;" class="">
 													</span>
-												</div>
+												</span>
 											</div>
-										{% else %}
-											<p class="info">Aucune recherche en cours pour le moment.</p>
-										{% endif %}
+										</div>
+									{% else %}
+										<p class="">Aucune recherche en cours pour le moment.</p>
+									{% endif %}
 
-										<a href="{{ path('technosphere') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers la technosphère</a>
-									</div>
-								</template>
-							</toolbar-toggler-left>
+									<a href="{{ path('technosphere') }}" class="">
+										vers la technosphère
+									</a>
+								</div>
+							</div>
 
 
-							<toolbar-toggler-left>
-								<template v-slot:picto>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-									</svg>
+							<div>
+								{% if current_dock1_ship_queues|length > 0 %}
+									{{ include('atoms/header/badge.html.twig', { count: current_dock1_ship_queues|length}) }}
+								{% endif %}
+								<h2 class="">Chantier Alpha</h2>
+								<div class="">
 									{% if current_dock1_ship_queues|length > 0 %}
-										{{ include('atoms/header/badge.html.twig', { count: current_dock1_ship_queues|length}) }}
-									{% endif %}
-								</template>
-								<template v-slot:dropdown>
-									<h2 class="font-bold text-lg">Chantier Alpha</h2>
-									<div class="overflow">
-										{% if current_dock1_ship_queues|length > 0 %}
-											{% set queue = current_dock1_ship_queues[0] %}
-											<div class="queue">
-												<div class="item active progress"
-													 data-progress-no-reload="true"
-													 data-progress-output="lite"
-													 data-progress-current-time="{{ queue|queue_duration }}"
-													 data-progress-total-time="{{ queue.quantity * queue|ship_queue_time }}"
-												>
-													<img class="picto" src="{{ asset('build/media/ship/picto/' ~ queue|ship_queue_picture ~ '.png') }}" alt="" />
-													<strong>
-														{{ queue.quantity }} {{ queue|ship_queue_name ~ queue.quantity|plural }}
-													</strong>
+										{% set queue = current_dock1_ship_queues[0] %}
+										<div class="">
+											<div class=""
+												 data-progress-no-reload="true"
+												 data-progress-output="lite"
+												 data-progress-current-time="{{ queue|queue_duration }}"
+												 data-progress-total-time="{{ queue.quantity * queue|ship_queue_time }}"
+											>
+												<strong>
+													{{ queue.quantity }} {{ queue|ship_queue_name ~ queue.quantity|plural }}
+												</strong>
 
-													<em><span class="progress-text">{{ queue|queue_duration|lite_seconds }}</span></em>
+												<em><span class="">{{ queue|queue_duration|lite_seconds }}</span></em>
 
-													<span class="progress-container">
-														<span style="width: {{ (queue.quantity * queue|ship_queue_time - queue|queue_duration)|percent(queue.quantity * queue|ship_queue_time) }}%;" class="progress-bar">
-														</span>
+												<span class="">
+													<span style="width: {{ (queue.quantity * queue|ship_queue_time - queue|queue_duration)|percent(queue.quantity * queue|ship_queue_time) }}%;" class="">
 													</span>
-												</div>
+												</span>
 											</div>
-										{% else %}
-											<p class="info">Aucun vaisseau en construction pour le moment.</p>
-										{% endif %}
+										</div>
+									{% else %}
+										<p class="">Aucun vaisseau en construction pour le moment.</p>
+									{% endif %}
 
-										<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers le chantier alpha</a>
-									</div>
-								</template>
-							</toolbar-toggler-left>
+									<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_MANUFACTURE')}) }}" class="">
+										vers le chantier alpha
+									</a>
+								</div>
+							</div>
 
 
-							<toolbar-toggler-left>
-								<template v-slot:picto>
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-										<path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-									</svg>
+							<div>
+								{% if current_dock2_ship_queues|length > 0 %}
+									{{ include('atoms/header/badge.html.twig', { count: current_dock2_ship_queues|length}) }}
+								{% endif %}
+								<h2 class="">Chantier de ligne</h2>
+								<div class="">
 									{% if current_dock2_ship_queues|length > 0 %}
-										{{ include('atoms/header/badge.html.twig', { count: current_dock2_ship_queues|length}) }}
-									{% endif %}
-								</template>
-								<template v-slot:dropdown>
-									<h2 class="font-bold text-lg">Chantier de ligne</h2>
-									<div class="overflow">
-										{% if current_dock2_ship_queues|length > 0 %}
-											{% set queue = current_dock2_ship_queues[0] %}
-											<div class="queue">
-												<div class="item active progress"
-													 data-progress-no-reload="true"
-													 data-progress-output="lite"
-													 data-progress-current-time="{{ queue|queue_duration }}"
-													 data-progress-total-time="{{ queue.quantity * queue|ship_queue_time }}"
-												>
-													<img class="picto" src="{{ asset('build/media/ship/picto/' ~ queue|ship_queue_picture ~ '.png') }}" alt="" />
-													<strong>
-														{{ queue.quantity }} {{ queue|ship_queue_name ~ queue.quantity|plural }}
-													</strong>
+										{% set queue = current_dock2_ship_queues[0] %}
+										<div class="">
+											<div class=""
+												 data-progress-no-reload="true"
+												 data-progress-output="lite"
+												 data-progress-current-time="{{ queue|queue_duration }}"
+												 data-progress-total-time="{{ queue.quantity * queue|ship_queue_time }}"
+											>
+												<strong>
+													{{ queue.quantity }} {{ queue|ship_queue_name ~ queue.quantity|plural }}
+												</strong>
 
-													<em><span class="progress-text">{{ queue|queue_duration|lite_seconds }}</span></em>
+												<em><span class="">{{ queue|queue_duration|lite_seconds }}</span></em>
 
-													<span class="progress-container">
-														<span style="width: {{ (queue.quantity * queue|ship_queue_time - queue|queue_duration)|percent(queue.quantity * queue|ship_queue_time) }}%;" class="progress-bar">
-														</span>
+												<span class="">
+													<span style="width: {{ (queue.quantity * queue|ship_queue_time - queue|queue_duration)|percent(queue.quantity * queue|ship_queue_time) }}%;" class="">
 													</span>
-												</div>
+												</span>
 											</div>
-										{% else %}
-											<p class="info">Aucun vaisseau en construction pour le moment.</p>
-										{% endif %}
+										</div>
+									{% else %}
+										<p class="">Aucun vaisseau en construction pour le moment.</p>
+									{% endif %}
 
-										<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers le chantier de ligne</a>
-									</div>
-								</template>
-							</toolbar-toggler-left>
+									<a href="{{ path('docks', {'dockType': constant('App\\Modules\\Athena\\Model\\OrbitalBase::DOCK_TYPE_SHIPYARD')}) }}" class="">
+										vers le chantier de ligne
+									</a>
+								</div>
+							</div>
 						</div>
 					</div>
 
-					<div class="flex items-center bg-stone-900">
+					<div class="">
 						{% set incoming_commanders_count = incoming_commanders|length %}
 
-
-						<toolbar-toggler-left>
-							<template v-slot:picto>
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
-								</svg>
+						<div>
+							{% if incoming_commanders_count > 0 %}
+								{{ include('atoms/header/badge.html.twig', { count: incoming_commanders_count}) }}
+							{% endif %}
+							<h2 class="">Attaques entrantes</h2>
+							<div class="">
 								{% if incoming_commanders_count > 0 %}
-									{{ include('atoms/header/badge.html.twig', { count: incoming_commanders_count}) }}
-								{% endif %}
-							</template>
-							<template v-slot:dropdown>
-								<h2 class="font-bold text-lg">Attaques entrantes</h2>
-								<div class="overflow">
-									{% if incoming_commanders_count > 0 %}
-										<div class="queue">
-											{% for commander in incoming_commanders %}
-												<div class="item active progress"
-													 data-progress-no-reload="true"
-													 data-progress-output="lite"
-													 data-progress-current-time="{{ commander|travel_remaining_time }}"
-													 data-progress-total-time="{{ commander|travel_total_time }}"
-												>
-													<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
-													<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
-													<em>
-														{{ commander|mission_label }}
-													</em>
-													<em><span class="progress-text"></span></em>
-													<span class="progress-container">
-														<span class="progress-bar">
-														</span>
+									<div class="">
+										{% for commander in incoming_commanders %}
+											<div class=""
+												 data-progress-no-reload="true"
+												 data-progress-output="lite"
+												 data-progress-current-time="{{ commander|travel_remaining_time }}"
+												 data-progress-total-time="{{ commander|travel_total_time }}"
+											>
+												<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
+												<em>
+													{{ commander|mission_label }}
+												</em>
+												<em><span class=""></span></em>
+												<span class="">
+													<span class="">
 													</span>
-												</div>
-											{% endfor %}
-										</div>
-									{% else %}
-										<p class="info">Aucune attaques entrantes.</p>
-									{% endif %}
-								</div>
-								<a href="{{ path('fleet_headquarters') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers l'amirauté</a>
-							</template>
-						</toolbar-toggler-left>
+												</span>
+											</div>
+										{% endfor %}
+									</div>
+								{% else %}
+									<p class="">Aucune attaques entrantes.</p>
+								{% endif %}
+							</div>
+							<a href="{{ path('fleet_headquarters') }}" class="">vers l'amirauté</a>
+						</div>
 
 						{% set outgoing_commanders_count = outgoing_commanders|length %}
 
-						<toolbar-toggler-left>
-							<template v-slot:picto>
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
-									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
-								</svg>
+						<div>
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="white">
+								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+							</svg>
+							{% if outgoing_commanders_count > 0 %}
+								{{ include('atoms/header/badge.html.twig', { count: outgoing_commanders_count}) }}
+							{% endif %}
+							<h2 class="font-bold text-lg">Déplacement de vos flottes</h2>
+							<div class="overflow">
 								{% if outgoing_commanders_count > 0 %}
-									{{ include('atoms/header/badge.html.twig', { count: outgoing_commanders_count}) }}
-								{% endif %}
-							</template>
-							<template v-slot:dropdown>
-								<h2 class="font-bold text-lg">Déplacement de vos flottes</h2>
-								<div class="overflow">
-									{% if outgoing_commanders_count > 0 %}
-										<div class="queue">
-											{% for commander in outgoing_commanders %}
-												<div class="item active progress"
-													 data-progress-no-reload="true"
-													 data-progress-output="lite"
-													 data-progress-current-time="{{ commander|travel_remaining_time }}"
-													 data-progress-total-time="{{ commander|travel_total_time }}"
-												>
-													<img class="picto" src="{{ asset('build/media/commander/small/' ~ commander.avatar ~ '.png') }}" alt="" />
-													<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
-													<em>
-														{{ commander|mission_label }}
-													</em>
-													<em><span class="progress-text"></span></em>
-													<span class="progress-container">
-														<span class="progress-bar">
-														</span>
+									<div class="queue">
+										{% for commander in outgoing_commanders %}
+											<div class="item active progress"
+												 data-progress-no-reload="true"
+												 data-progress-output="lite"
+												 data-progress-current-time="{{ commander|travel_remaining_time }}"
+												 data-progress-total-time="{{ commander|travel_total_time }}"
+											>
+												<strong>{{ commander|commander_rank }} {{ commander.name }}</strong>
+												<em>
+													{{ commander|mission_label }}
+												</em>
+												<em><span class="progress-text"></span></em>
+												<span class="progress-container">
+													<span class="progress-bar">
 													</span>
-												</div>
-											{% endfor %}
-										</div>
-									{% else %}
-										<p class="info">Aucune flotte en route.</p>
-									{% endif %}
-								</div>
-								<a href="{{ path('fleet_headquarters') }}" class="faction-bg-dark hover:faction-bg-medium text-white text-base py-2 px-3 my-2 inline-block">vers l'amirauté</a>
-							</template>
-						</toolbar-toggler-left>
+												</span>
+											</div>
+										{% endfor %}
+									</div>
+								{% else %}
+									<p class="">Aucune flotte en route.</p>
+								{% endif %}
+							</div>
+							<a href="{{ path('fleet_headquarters') }}" class="">vers l'amirauté</a>
+						</div>
 					</div>
 				</nav>
 			</div>
-			<div class="hidden lg:relative lg:z-10 lg:ml-4 lg:flex lg:items-center">
-				<!-- Profile dropdown -->
-				<div class="flex-shrink-0 relative ml-4 self-start">
-					<div class="relative w-24">
-						<button type="button" class=" absolute w-24 bg-white rounded-full flex focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
-							<span class="sr-only">Open user menu</span>
-							<img class="h-24 w-24 rounded-full" src="{{ asset('build/media/avatar/big/' ~ current_player.avatar ~ '.png') }}" alt="{{ current_player.name }}">
-						</button>
-					</div>
-
-					<!--
-					  Dropdown menu, show/hide based on menu state.
-
-					  Entering: "transition ease-out duration-100"
-						From: "transform opacity-0 scale-95"
-						To: "transform opacity-100 scale-100"
-					  Leaving: "transition ease-in duration-75"
-						From: "transform opacity-100 scale-100"
-						To: "transform opacity-0 scale-95"
-					-->
-					<div class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-						<!-- Active: "bg-gray-100", Not Active: "" -->
-						<a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
-
-						<a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
-
-						<a href="#" class="block py-2 px-4 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Mobile menu, show/hide based on menu state. -->
-		<nav class="lg:hidden" aria-label="Global" id="mobile-menu">
-			<div class="pt-2 pb-3 px-2 space-y-1">
-				<!-- Current: "bg-gray-100 text-gray-900", Default: "text-gray-900 hover:bg-gray-50 hover:text-gray-900" -->
-				<a href="#" class="bg-gray-100 text-gray-900 block rounded-md py-2 px-3 text-base font-medium" aria-current="page">Dashboard</a>
-
-				<a href="#" class="text-gray-900 hover:bg-gray-50 hover:text-gray-900 block rounded-md py-2 px-3 text-base font-medium">Team</a>
-
-				<a href="#" class="text-gray-900 hover:bg-gray-50 hover:text-gray-900 block rounded-md py-2 px-3 text-base font-medium">Projects</a>
-
-				<a href="#" class="text-gray-900 hover:bg-gray-50 hover:text-gray-900 block rounded-md py-2 px-3 text-base font-medium">Calendar</a>
-			</div>
-			<div class="border-t border-gray-200 pt-4 pb-3">
-				<div class="px-4 flex items-center">
-					<div class="flex-shrink-0">
-						<img class="h-10 w-10 rounded-full" src="{{ asset('build/media/avatar/small/' ~ current_player.avatar ~ '.png') }}" alt="{{ current_player.name }}">
-					</div>
-					<div class="ml-3">
-						<div class="text-base font-medium text-gray-800">Tom Cook</div>
-						<div class="text-sm font-medium text-gray-500">tom@example.com</div>
-					</div>
-					<button type="button" class="ml-auto flex-shrink-0 bg-white rounded-full p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-						<span class="sr-only">View notifications</span>
-						<!-- Heroicon name: outline/bell -->
-						<svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-						</svg>
-					</button>
-				</div>
-				<div class="mt-3 px-2 space-y-1">
-					<a href="#" class="block rounded-md py-2 px-3 text-base font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900">Your Profile</a>
-
-					<a href="#" class="block rounded-md py-2 px-3 text-base font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900">Settings</a>
-
-					<a href="#" class="block rounded-md py-2 px-3 text-base font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900">Sign out</a>
-				</div>
-			</div>
-		</nav>
 
 		{# overboxes #}
-		<div class="hidden left-pic" id="tools-calendar">
+		<div class="" id="tools-calendar">
 			<h2>
 				SEG{{ get_game_date('seg')}} REL{{ get_game_date('rel')}},
 				{{ get_game_date('seg')|ordinal_number }} strate
@@ -723,4 +529,6 @@
 			</div>
 		</div>
 	#}
+	-->
 {% endapply %}
+

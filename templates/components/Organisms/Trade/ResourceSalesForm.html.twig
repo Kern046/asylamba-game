@@ -1,0 +1,61 @@
+<div id="resource-sell-form" class="component market-sell" {{ attributes }}>
+	<header>
+		{#<img src="{{ asset('build/media/resources/resource.png') }}" alt="ressource" class="main" />#}
+		<twig:H2>Ressources</twig:H2>
+		<twig:H5>mettre en vente</twig:H5>
+	</header>
+
+	<section class="mt-4">
+		<form class="sell-form"
+			  action="{{ path('propose_offer', { 'type': constant('App\\Modules\\Athena\\Model\\Transaction::TYP_RESOURCE')  }) }}"
+			  method="post">
+			<div class="label-box">
+				<span class="label">Ressources</span>
+				<span class="value">{{ current_base.resourcesStorage|number }}</span>
+				{#<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}">#}
+			</div>
+
+			<div class="label-box sf-quantity">
+				<label for="sell-market-quantity-resources" class="label">Quantité</label><br>
+				<twig:Input id="sell-market-quantity-resources" class="value" type="number" name="quantity" autocomplete="off" data-model="quantity" :max="current_base.resourcesStorage" />
+				{#<img class="icon-color" alt="ressources" src="{{ asset('build/media/resources/resource.png') }}">#}
+			</div>
+
+			<hr class="my-2" />
+
+			<div class="label-box sf-min-price">
+				<span class="label">Prix minimum</span>
+				<span class="value">{{ this.minPrice }}</span>
+				{#<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">#}
+			</div>
+
+			<div class="label-box sf-price">
+				<label for="sell-market-price-resources" class="label">Prix</label><br>
+				<twig:Input id="sell-market-price-resources" class="value" type="number" name="price" autocomplete="off" :min="this.minPrice"/>
+				{#<img class="icon-color" alt="crédits" src="{{ asset('build/media/resources/credit.png') }}">#}
+			</div>
+
+			<hr class="my-2" />
+
+			<div class="label-box sf-comship">
+				<span class="label">Vaisseaux</span>
+				<span class="value">{{ this.requiredShipsCount }}</span>
+				{#<img class="icon-color" alt="vaisseaux transports" src="{{ asset('build/media/resources/transport.png') }}">#}
+			</div>
+
+			<hr class="my-2" />
+
+			{% if previousSuccess %}
+				<div class="my-2 py-1 px-2 bg-gray-700 rounded-md">
+					<p class="text-sm">
+						Votre offre a été créée avec succès !
+					</p>
+				</div>
+			{% endif %}
+
+			<twig:Button :faction="current_player.faction" type="submit" class="w-full text-center">
+				Vendre
+			</twig:Button>
+		</form>
+	</section>
+</div>

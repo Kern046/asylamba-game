@@ -80,7 +80,7 @@ readonly class PlayerManager
 			$placeIds = $this->placeRepository->findPlacesIdsForANewBase($sector);
 			if ([] !== $placeIds) {
 				$placeFound = true;
-				$placeId = $placeIds[rand(0, count($placeIds) - 1)];
+				$placeId = $placeIds[random_int(0, count($placeIds) - 1)];
 				break;
 			}
 		}
@@ -161,7 +161,7 @@ readonly class PlayerManager
 	{
 		$exp = intval(round($exp));
 		$player->experience += $exp;
-		$nextLevel = $this->playerBaseLevel * pow(2, $player->level - 1);
+		$nextLevel = $this->playerBaseLevel * 2 ** ($player->level - 1);
 		if ($player->experience < $nextLevel) {
 			$this->entityManager->flush();
 

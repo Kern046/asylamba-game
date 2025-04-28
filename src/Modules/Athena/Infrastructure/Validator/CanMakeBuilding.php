@@ -20,7 +20,8 @@ class CanMakeBuilding extends Sequentially
 		]);
 	}
 
-	public function validatedBy(): string
+	#[\Override]
+    public function validatedBy(): string
 	{
 		return SequentiallyValidator::class;
 	}

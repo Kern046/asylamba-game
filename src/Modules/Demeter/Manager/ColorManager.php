@@ -37,14 +37,6 @@ readonly class ColorManager implements SchedulerInterface
 	) {
 	}
 
-	public function getParsedDescription(Color $color): string
-	{
-		// @TODO refactor usage of stateful service
-		$this->parser->parseBigTag = true;
-
-		return null !== $color->description ? $this->parser->parse($color->description) : '';
-	}
-
 	public function schedule(): void
 	{
 		$this->scheduleSenateUpdate();

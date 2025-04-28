@@ -1,0 +1,55 @@
+<div class="relative p-4 bg-stone-800 text-white rounded-md">
+	<header class="flex flex-col items-center">
+		<img src="{{ asset('images/banners/Dores_Blason_500px.png') }}"
+			 class="absolute -top-4 -left-4 w-24 h-24"
+			 alt="" />
+		<h2 class="text-xl font-mono text-light{{ faction.identifier }}">{{ get_faction_info(faction.identifier, 'officialName') }}</h2>
+		<em class="text-lg">{{ get_faction_info(faction.identifier, 'government') }}</em>
+	</header>
+	<section class="h-44">
+		<twig:FactionMotto :faction="faction" />
+	</section>
+	<section class="">
+		<div class="">
+			<h4 class="text-lg font-bold">A propos</h4>
+			<p>{{ get_faction_info(faction.identifier, 'desc1') }}</p>
+			<h4 class="text-lg font-bold">Moeurs & autres</h4>
+			<p>{{ get_faction_info(faction.identifier, 'desc2') }}</p>
+			<h4 class="text-lg font-bold">Guerre</h4>
+			<p>{{ get_faction_info(faction.identifier, 'desc3') }}</p>
+			<h4 class="text-lg font-bold">Culture</h4>
+			<p>{{ get_faction_info(faction.identifier, 'desc4') }}</p>
+		</div>
+	</section>
+	<section class="">
+		{% if not faction.isClosed %}
+			<a href="{{ path('registration_create_character', {'factionIdentifier': faction.identifier}) }}" class="block w-full">
+				<twig:Button :faction="faction" class="w-full">
+					<strong>Choisir cette faction</strong><br>
+					{% if index == 0 %}
+						<em>recommandée pour les joueurs débutants</em>
+					{% else %}
+						<em>et passer à l'étape suivante</em>
+					{% endif %}
+				</twig:Button>
+			</a>
+		{% else %}
+			<span class="">
+				<strong>Cette faction est actuellement fermée</strong>
+				<em>De manière à équilibrer le jeu</em>
+			</span>
+		{% endif %}
+
+		<h4 class="text-lg font-bold">Bonus & Malus de faction</h4>
+		{% for bonus_identifier in get_faction_bonuses(faction.identifier) %}
+			{% set bonus = get_bonus_text(bonus_identifier) %}
+			<div class="">
+				<div class="">
+					{# <img src="{{ asset('build/media/' ~ bonus.path) }}" alt="" />#}
+					<strong>{{ bonus.title }}</strong>
+					<em>{{ bonus.desc }}</em>
+				</div>
+			</div>
+		{% endfor %}
+	</section>
+</div>

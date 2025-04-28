@@ -1,7 +1,7 @@
-<div class="component report">
-	<div class="head skin-2">
-		<h2>Archives Militaires</h2>
-	</div>
+<twig:LayoutBox class="col-span-1">
+	<header>
+		<h2 class="font-bold text-lg">Archives Militaires</h2>
+	</header>
 	<div class="fix-body">
 		<div class="body">
 			<div class="tool">
@@ -32,27 +32,13 @@
 					{% for report in combat_reports %}
 						{% set report_data = get_report_data(report) %}
 
-						<div class="item">
-							<div class="left">
-								{# @TODO Seems that previously a report could also use colorA #}
-								<img class="color{{ report.defender.faction.identifier ?? '0' }}" src="{{ asset('build/media/map/action/' ~ report_data.img) }}" alt="" />
-							</div>
-
-							<div class="center">
-								<strong>
-									{{ report_data.title }}
-									de <a href="{{ path('map', {'place': report.place.id}) }}" >
-										{{  place.base.name ?? 'planète rebelle' }}
-									</a>
-								</strong>
-								{{- report.foughtAt|game_date|raw -}}
-							</div>
-
-							<div class="right">
-								<a {% if app.request.query.get('report') == report.id %}class="active"{% endif %}
-								   href="{{ path('fleet_archives', {'report': report.id}) }}"></a>
-							</div>
-						</div>
+						<twig:ReportListItem
+							:href="path('fleet_archives', {'report': report.id})"
+							picto="images/legacy/picto/Combat.svg"
+							:isActive="app.request.query.get('report') == report.id"
+							:placeName="report_data.title ~ ' de ' ~ (place.base.name ?? 'planète rebelle')"
+							:createdAt="report.foughtAt"
+							/>
 					{% endfor %}
 				</div>
 			{% else %}
@@ -66,4 +52,4 @@
 			{% endif %}
 		</div>
 	</div>
-</div>
+</twig:LayoutBox>

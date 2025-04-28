@@ -1,0 +1,23 @@
+<a href="{{ href }}"
+   class="flex items-center {% if isActive %}bg-gray-700{% else %}bg-gray-950{% endif %} hover:bg-gray-700 p-1 pb-2 transition-[background-color] duration-100 ease-in">
+	<div class="">
+		<img src="{{ asset(picto) }}" alt="" class="w-8 h-8 p-2 rounded-full bg-gray-900" />
+	</div>
+
+	<div class="grow px-4">
+		<div>
+			<span style="font-variant: all-small-caps">
+				{{ placeName }}
+			</span>
+		</div>
+		<div class="text-xs">
+			<time datetime="{{ createdAt|date('C') }}">
+				{{- createdAt|game_date|raw -}}
+			</time>
+		</div>
+	</div>
+
+	<div>
+		<img src="{{ asset('images/legacy/picto/arrow_right.svg') }}" class="w-6 h-6" alt="See"/>
+	</div>
+</a>

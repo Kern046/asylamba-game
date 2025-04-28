@@ -5,29 +5,39 @@ namespace App\Modules\Athena\Infrastructure\Controller\Trade\Offer;
 use App\Modules\Ares\Model\Commander;
 use App\Modules\Athena\Domain\Repository\CommercialShippingRepositoryInterface;
 use App\Modules\Athena\Domain\Repository\TransactionRepositoryInterface;
-use App\Modules\Athena\Domain\Service\Base\GetMaxStorage;
+use App\Modules\Athena\Domain\Service\Base\GetMaxResourceStorage;
+use App\Modules\Athena\Domain\Service\Base\Trade\GetBaseCommercialShippingData;
+use App\Modules\Athena\Helper\OrbitalBaseHelper;
 use App\Modules\Athena\Manager\OrbitalBaseManager;
 use App\Modules\Athena\Model\Transaction;
+use App\Modules\Athena\Resource\OrbitalBaseResource;
 use App\Modules\Zeus\Manager\PlayerManager;
 use App\Modules\Zeus\Model\Player;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Uid\Uuid;
+use Symfony\UX\Turbo\TurboBundle;
 
 class Cancel extends AbstractController
 {
 	public function __invoke(
-		Request $request,
-		Player $currentPlayer,
-		GetMaxStorage $getMaxStorage,
-		OrbitalBaseManager $orbitalBaseManager,
-		PlayerManager $playerManager,
-		CommercialShippingRepositoryInterface $commercialShippingRepository,
-		TransactionRepositoryInterface $transactionRepository,
-		Uuid $id,
+        Request                               $request,
+        Player                                $currentPlayer,
+        GetMaxResourceStorage                 $getMaxStorage,
+		GetBaseCommercialShippingData		  $getBaseCommercialShippingData,
+		OrbitalBaseHelper                     $orbitalBaseHelper,
+        OrbitalBaseManager                    $orbitalBaseManager,
+        PlayerManager                         $playerManager,
+        HubInterface                          $mercure,
+        CommercialShippingRepositoryInterface $commercialShippingRepository,
+        TransactionRepositoryInterface        $transactionRepository,
+        Uuid                                  $id,
 	): Response {
+
 		$transaction = $transactionRepository->get($id)
 			?? throw $this->createNotFoundException('Transaction not found');
 
@@ -84,6 +94,28 @@ class Cancel extends AbstractController
 
 		$transactionRepository->save($transaction);
 
-		return $this->redirect($request->headers->get('referer'));
+		$mercure->publish(new Update(
+			'/trade-offers',
+			$this->renderView('components/base/trade/turbo/broadcast/remove_transaction.stream.html.twig', [
+				'transaction' => $transaction,
+			]),
+		));
+
+		if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+			$request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+			return $this->render('components/base/trade/turbo/remove_transaction.stream.html.twig', [
+				'commercial_shipping' => $commercialShipping,
+				'used_ships' => $getBaseCommercialShippingData($base)['used_ships'],
+				'max_ships' => $orbitalBaseHelper->getInfo(
+					OrbitalBaseResource::COMMERCIAL_PLATEFORME,
+					'level',
+					$base->levelCommercialPlateforme,
+					'nbCommercialShip',
+				),
+			]);
+		}
+
+		return $this->redirectToRoute('trade_market');
 	}
 }

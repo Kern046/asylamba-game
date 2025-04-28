@@ -1,31 +1,29 @@
-<div class="component player rank">
-	<div class="head skin-4">
-		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">
-		<h2>Combattant</h2>
-		<em>Total des victoires moins les défaites</em>
-	</div>
-	<div class="fix-body">
-		<div class="body">
-			{% for player_ranking in fight_rankings %}
-				{{ include('atoms/rankings/top_mover.html.twig', {
-					'type': 'armies',
-					'current_position': player_ranking.fightPosition,
-					loop,
-				}) }}
+<twig:LayoutBox>
+	<header>
+<!--		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">-->
+		<twig:H2>Combattant</twig:H2>
+		<twig:H5>Total des victoires moins les défaites</twig:H5>
+	</header>
+	<section>
+		{% for player_ranking in fight_rankings %}
+			{{ include('atoms/rankings/top_mover.html.twig', {
+				'type': 'armies',
+				'current_position': player_ranking.fightPosition,
+				loop,
+			}) }}
 
-				{{include('molecules/rankings/player_ranking_card.html.twig', {
-					player_ranking,
-					'position': player_ranking.fightPosition,
-					'variation': player_ranking.fightVariation,
-					'value': player_ranking.fight|number ~ ' point' ~ player_ranking.fight|plural,
-				})}}
+			{{include('molecules/rankings/player_ranking_card.html.twig', {
+				player_ranking,
+				'position': player_ranking.fightPosition,
+				'variation': player_ranking.fightVariation,
+				'value': player_ranking.fight|number ~ ' point' ~ player_ranking.fight|plural,
+			})}}
 
-				{{ include('atoms/rankings/bottom_mover.html.twig', {
-					'type': 'armies',
-					'current_position': player_ranking.fightPosition,
-					loop,
-				}) }}
-			{% endfor %}
-		</div>
-	</div>
-</div>
+			{{ include('atoms/rankings/bottom_mover.html.twig', {
+				'type': 'armies',
+				'current_position': player_ranking.fightPosition,
+				loop,
+			}) }}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Athena\Application\Factory;
 
 use App\Classes\Library\DateTimeConverter;
+use App\Modules\Athena\Domain\Enum\DockType;
 use App\Modules\Athena\Domain\Event\NewShipQueueEvent;
 use App\Modules\Athena\Domain\Repository\ShipQueueRepositoryInterface;
-use App\Modules\Athena\Domain\Service\Ship\GetTimeCost;
+use App\Modules\Athena\Domain\Service\Base\Ship\CountShipTimeCost;
 use App\Modules\Athena\Message\Ship\ShipQueueMessage;
 use App\Modules\Athena\Model\OrbitalBase;
 use App\Modules\Athena\Model\ShipQueue;
@@ -19,10 +20,10 @@ use Symfony\Component\Uid\Uuid;
 readonly class ShipQueueFactory
 {
 	public function __construct(
-		private DurationHandler $durationHandler,
-		private EventDispatcherInterface $eventDispatcher,
-		private GetTimeCost $getTimeCost,
-		private MessageBusInterface $messageBus,
+		private DurationHandler              $durationHandler,
+		private EventDispatcherInterface     $eventDispatcher,
+		private CountShipTimeCost            $countShipTimeCost,
+		private MessageBusInterface          $messageBus,
 		private ShipQueueRepositoryInterface $shipQueueRepository,
 	) {
 	}
@@ -30,7 +31,7 @@ readonly class ShipQueueFactory
 	public function create(
 		OrbitalBase $orbitalBase,
 		int $shipIdentifier,
-		int $dockType,
+		DockType $dockType,
 		int $quantity,
 		\DateTimeImmutable $startedAt,
 	): ShipQueue {
@@ -39,12 +40,12 @@ readonly class ShipQueueFactory
 			id: Uuid::v4(),
 			base: $orbitalBase,
 			startedAt: $startedAt,
-			endedAt: $this->durationHandler->getDurationEnd($startedAt, ($this->getTimeCost)(
+			endedAt: $this->durationHandler->getDurationEnd($startedAt, ($this->countShipTimeCost)(
 				identifier: $shipIdentifier,
 				dockType: $dockType,
 				quantity: $quantity,
 			)),
-			dockType: $dockType,
+			dockType: $dockType->getIdentifier(),
 			shipNumber: $shipIdentifier,
 			quantity: $quantity,
 		);

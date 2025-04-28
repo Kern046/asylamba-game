@@ -31,7 +31,7 @@ security:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         - { route: 'homepage', roles: PUBLIC_ACCESS }
         - { route: 'connect', roles: PUBLIC_ACCESS }
-        - { route: 'create_character', roles: PUBLIC_ACCESS }
+        - { path: ^/registration/*, roles: PUBLIC_ACCESS }
         - { path: ^/*, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

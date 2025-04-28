@@ -11,45 +11,14 @@
 		</div>
 	{% endif %}
 
-	<div id="background-paralax" class="profil"></div>
-
-	{{ include('components/profile/subnav.html.twig') }}
-
 	{{ include('molecules/common/movers.html.twig') }}
 
-	<div id="content">
-		{{ include('molecules/common/advertising.html.twig') }}
-
-		{{ include('components/profile/character.html.twig', {
-			'player': current_player,
-			player_experience,
-			player_missing_experience,
-			player_experience_progress,
-		}) }}
+	<twig:ContentContainer class="flex gap-x-4">
+		<twig:Character :player="current_player" />
 
 		{# obFastView component #}
 		{% for orbital_base in player_bases %}
-			{% set base_id = orbital_base.id.toRfc4122() %}
-
-			{{ include('components/base/fast_view.html.twig', {
-				orbital_base,
-				building_queues: bases_data[base_id]['building_queues'],
-				technology_queues: bases_data[base_id]['technology_queues'],
-				dock1_ship_queues: bases_data[base_id]['dock1_ship_queues'],
-				dock2_ship_queues: bases_data[base_id]['dock2_ship_queues'],
-				commercial_routes_data: bases_data[base_id]['commercial_routes'] ?? null,
-				'index': loop.index,
-				'fast_view_profile': true
-			}) }}
+			<twig:FastView :orbitalBase="orbital_base" :index="loop.index" :isProfileView="true" />
 		{% endfor %}
-
-		{% if 1 == player_bases|length %}
-			<div class="component">
-				<div class="head"></div>
-				<div class="fix-body">
-					<div class="body"></div>
-				</div>
-			</div>
-		{% endif %}
-	</div>
+	</twig:ContentContainer>
 {% endblock body %}

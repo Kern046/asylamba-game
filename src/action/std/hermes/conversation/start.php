@@ -24,13 +24,11 @@ $content = $request->request->get('content');
 $content = $parser->parse($content);
 
 if (!empty($recipients) && !empty($content)) {
-	if (strlen($content) < 10000) {
+	if (strlen((string) $content) < 10000) {
 		// traitement des utilisateurs multiples
-		$recipients = explode(',', $recipients);
+		$recipients = explode(',', (string) $recipients);
 		$plId = $session->get('playerId');
-		$recipients = array_filter($recipients, function ($e) use ($plId) {
-			return $e == $plId ? false : true;
-		});
+		$recipients = array_filter($recipients, fn($e) => $e == $plId ? false : true);
 		$recipients[] = 0;
 
 		if (count($recipients) <= ConversationUser::MAX_USERS) {

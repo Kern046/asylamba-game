@@ -1,0 +1,49 @@
+<twig:LayoutBox>
+	<header>
+		<twig:H3>Lois actives</twig:H3>
+	</header>
+
+	<section>
+		{% for law in effective_laws %}
+			<div class="build-item">
+				<div class="name">
+<!--					<img src="{{ asset('build/media/faction/law/common.png') }}" alt="">-->
+					<strong>{{ get_law_info(law.type, 'name') }}</strong>
+				</div>
+			</div>
+		{% endfor %}
+
+		{% if effective_laws|length == 0 %}
+			<p><em>Aucune loi active</em></p>
+		{% endif %}
+
+		<twig:H3 class="mt-4">Lois en cours de votation</twig:H3>
+
+		{% for law in voting_laws %}
+			<div class="build-item">
+				<div class="name">
+<!--					<img src="{{ asset('build/media/faction/law/common.png') }}" alt="">-->
+					<strong>{{ get_law_info(law.type, 'name') }}</strong>
+				</div>
+			</div>
+		{% endfor %}
+
+		{% if voting_laws|length == 0 %}
+			<p><em>Aucune loi en cours de votation</em></p>
+		{% endif %}
+
+		<twig:H3 class="mt-4">Bonus de faction</twig:H3>
+
+		{# @TODO factorize with faction_choices #}
+		{% for bonus_identifier in get_faction_bonuses(faction.identifier) %}
+			{% set bonus = get_bonus_text(bonus_identifier) %}
+			<div class="build-item">
+				<div class="name">
+<!--					<img src="{{ asset('build/media/' ~ bonus.path) }}" alt="" />-->
+					<strong>{{ bonus.title }}</strong><br>
+					<em class="text-sm">{{ bonus.desc|raw }}</em>
+				</div>
+			</div>
+		{% endfor %}
+	</section>
+</twig:LayoutBox>
