@@ -123,6 +123,10 @@ services:
         resource: '../src/Shared/Infrastructure/Controller/'
         tags: ['controller.service_arguments']
 
+    App\Modules\Portal\Infrastructure\Controller\:
+        resource: '../src/Modules/Portal/Infrastructure/Controller/'
+        tags: ['controller.service_arguments']
+
     App\Classes\Library\Parser:
         arguments:
             $mediaPath: '%media%'

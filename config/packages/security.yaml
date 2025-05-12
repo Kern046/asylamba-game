@@ -8,14 +8,22 @@ security:
             entity:
                 class: App\Modules\Zeus\Model\Player
                 property: name
+        portal_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
         users_in_memory: { memory: null }
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
+        game:
             lazy: true
             provider: game_player_provider
+
+        main:
+            lazy: true
+            provider: portal_user_provider
             form_login:
                 login_path: /
 

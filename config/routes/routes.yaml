@@ -8,9 +8,9 @@ zeus:
     resource: '../../src/Modules/Zeus/Infrastructure/Controller/'
     type: attribute
 
-homepage:
-    path: /
-    controller: App\Shared\Infrastructure\Controller\HomepageController
+portal:
+    resource: '../../src/Modules/Portal/Infrastructure/Controller/'
+    type: attribute
 
 connect:
     path: /connect/{playerId}

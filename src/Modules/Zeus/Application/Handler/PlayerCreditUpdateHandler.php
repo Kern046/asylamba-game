@@ -28,7 +28,8 @@ use Symfony\Component\Uid\Uuid;
 #[AsMessageHandler]
 readonly class PlayerCreditUpdateHandler
 {
-	private const int MAX_UPDATES = 5;
+	private const int MAX_UPDATES_TO_HANDLE = 5;
+	private const int MAX_MISSING_UPDATES = 24;
 
 	public function __construct(
 		private EntityManagerInterface $entityManager,
@@ -101,20 +102,25 @@ readonly class PlayerCreditUpdateHandler
 			]);
 		}
 
+		// The first time, we make a report for all missing game cycle updates above the limit
+		$secondsToAdd = ($missingUpdatesCount > self::MAX_MISSING_UPDATES)
+			? $secondsPerGameCycle * ($missingUpdatesCount - self::MAX_MISSING_UPDATES)
+			: $secondsPerGameCycle;
+
 		$this->entityManager->beginTransaction();
 
 		try {
 			$launchNewMessage = false;
 
 			for ($i = 0; $i < $missingUpdatesCount; ++$i) {
-				if ($i === self::MAX_UPDATES) {
+				if ($i === self::MAX_UPDATES_TO_HANDLE) {
 					$launchNewMessage = true;
 
 					break;
 				}
 
 				$createdAt = (null !== $lastFinancialReport)
-					? (clone $lastFinancialReport->createdAt)->modify(sprintf('+%d seconds', $secondsPerGameCycle))
+					? (clone $lastFinancialReport->createdAt)->modify(sprintf('+%d seconds', $secondsToAdd))
 					: new \DateTimeImmutable();
 
 				$playerFinancialReport = new PlayerFinancialReport(
@@ -143,6 +149,8 @@ readonly class PlayerCreditUpdateHandler
 				$this->entityManager->persist($playerFinancialReport);
 
 				$lastFinancialReport = $playerFinancialReport;
+				// For the next iteration, we do back to one game cycle per report
+				$secondsToAdd = $secondsPerGameCycle;
 			}
 
 			$player->uPlayer = $lastFinancialReport->createdAt;
