@@ -52,6 +52,11 @@ doctrine:
                 type: 'xml'
                 dir: '%kernel.project_dir%/config/doctrine/hermes'
                 prefix: 'App\Modules\Hermes\Model'
+            Portal:
+                is_bundle: false
+                type: 'attribute'
+                dir: '%kernel.project_dir%/src/Modules/Portal/Domain/Entity'
+                prefix: 'App\Modules\Portal\Domain\Entity'
             Promethee:
                 is_bundle: false
                 type: 'xml'

@@ -25,6 +25,7 @@
         "symfony/event-dispatcher": "^7.2",
         "symfony/expression-language": "^7.2",
         "symfony/flex": "^2.5",
+        "symfony/form": "^7.2",
         "symfony/framework-bundle": "^7.2",
         "symfony/http-kernel": "^7.2",
         "symfony/mercure-bundle": "^0.3.9",

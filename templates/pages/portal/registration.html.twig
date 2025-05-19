@@ -8,27 +8,49 @@
 			<div class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
 				<div class="mx-auto w-full max-w-sm lg:w-96">
 					<div>
-						<h2 class="mt-8 text-2xl/9 font-bold tracking-tight text-gray-200">Se connecter</h2>
+						<h2 class="mt-8 text-2xl/9 font-bold tracking-tight text-gray-200">Créez votre compte</h2>
 						<p class="mt-2 text-sm/6 text-gray-400">
-							Pas encore inscrit ?
-							<a href="{{ path('registration') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">Créer un compte</a>
+							Vous avez déjà un compte ?
+							<a href="{{ path('login') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">Connectez-vous</a>
 						</p>
 					</div>
 
 					<div class="mt-10">
 						<div>
-							<form action="{{ path('login') }}" method="POST" class="space-y-6">
+							{{ form_start(registrationForm, {'attr': {'class': 'space-y-6'}}) }}
 								<div>
-									<label for="username" class="block text-sm/6 font-medium text-gray-200">Adresse e-mail</label>
+									<label for="username" class="block text-sm/6 font-medium text-gray-400">
+										{{ form_label(registrationForm.username) }}
+									</label>
 									<div class="mt-2">
-										<input type="email" name="_username" id="username" autocomplete="email" value="{{ last_username }}" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+										{{ form_widget(registrationForm.username, { 'attr': { 'class': 'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' }}) }}
 									</div>
 								</div>
 
 								<div>
-									<label for="password" class="block text-sm/6 font-medium text-gray-200">Mot de passe</label>
+									<label for="email" class="block text-sm/6 font-medium text-gray-400">
+										{{ form_label(registrationForm.email) }}
+									</label>
 									<div class="mt-2">
-										<input type="password" name="_password" id="password" autocomplete="current-password" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+										{{ form_widget(registrationForm.email, { 'attr': { 'class': 'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' }}) }}
+									</div>
+								</div>
+
+								<div>
+									<label for="password" class="block text-sm/6 font-medium text-gray-400">
+										{{ form_label(registrationForm.password.first) }}
+									</label>
+									<div class="mt-2">
+										{{ form_widget(registrationForm.password.first, { 'attr': { 'class': 'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' }}) }}
+									</div>
+								</div>
+
+								<div>
+									<label for="confirm-password" class="block text-sm/6 font-medium text-gray-400">
+										{{ form_label(registrationForm.password.second) }}
+									</label>
+									<div class="mt-2">
+										{{ form_widget(registrationForm.password.second, { 'attr': { 'class': 'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6' }}) }}
 									</div>
 								</div>
 
@@ -43,7 +65,7 @@
 												</svg>
 											</div>
 										</div>
-										<label for="remember-me" class="block text-sm/6 text-gray-200">Se souvenir de moi</label>
+										<label for="remember-me" class="block text-sm/6 text-gray-400">Se souvenir de moi</label>
 									</div>
 
 									<div class="text-sm/6">
@@ -51,18 +73,14 @@
 									</div>
 								</div>
 
-								{% if error is not null %}
-									<div class="text-white">
-										{{ error.messageKey }}
-									</div>
-								{% endif %}
-
-								<input type="hidden" name="_target_path" value="{{ path('player_choice') }}">
+								<div>
+									{{ form_errors(registrationForm) }}
+								</div>
 
 								<div>
-									<button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign in</button>
+									<button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">S'inscrire</button>
 								</div>
-							</form>
+							{{ form_end(registrationForm) }}
 						</div>
 
 						<div class="mt-10">
@@ -71,7 +89,7 @@
 									<div class="w-full border-t border-gray-200"></div>
 								</div>
 								<div class="relative flex justify-center text-sm/6 font-medium">
-									<span class="bg-white px-6 text-gray-900">Or continue with</span>
+									<span class="bg-black px-6 text-gray-400">Ou continuer avec</span>
 								</div>
 							</div>
 

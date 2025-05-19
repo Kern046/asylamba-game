@@ -21,7 +21,7 @@ class ChoosePlayer extends AbstractController
 	{
 		$players = $playerRepository->getBySpecification(new IsActivePlayer());
 
-		return $this->render('pages/player_choice.html.twig', [
+		return $this->render('pages/portal/player_choice.html.twig', [
 			'active_players' => $players,
 			'high_mode' => $this->getParameter('highmode'),
 		]);
