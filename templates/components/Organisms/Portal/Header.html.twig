@@ -21,7 +21,17 @@
 				<a href="#" class="text-sm/6 font-semibold text-white">Company</a>#}
 		</div>
 		<div class="hidden lg:flex lg:flex-1 lg:justify-end">
-			<a href="{{ path('login') }}" class="text-sm/6 font-semibold text-white">Connexion <span aria-hidden="true">&rarr;</span></a>
+			{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+				<a href="{{ path('player_choice') }}" class="text-sm/6 font-semibold text-white">
+					{{ app.user.username }}
+					<span aria-hidden="true">&rarr;</span>
+				</a>
+			{% else %}
+				<a href="{{ path('login') }}" class="text-sm/6 font-semibold text-white">
+					Connexion
+					<span aria-hidden="true">&rarr;</span>
+				</a>
+			{% endif %}
 		</div>
 	</nav>
 	<!-- Mobile menu, show/hide based on menu open state. -->

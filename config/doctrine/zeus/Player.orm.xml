@@ -11,6 +11,10 @@
 			</options>
 		</id>
 
+		<many-to-one field="user" target-entity="App\Modules\Portal\Domain\Entity\User">
+			<join-column nullable="true" />
+		</many-to-one>
+
 		<many-to-one field="faction" target-entity="App\Modules\Demeter\Model\Color">
 			<join-column nullable="true" />
 		</many-to-one>

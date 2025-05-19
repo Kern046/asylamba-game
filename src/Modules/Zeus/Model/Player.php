@@ -3,13 +3,15 @@
 namespace App\Modules\Zeus\Model;
 
 use App\Modules\Demeter\Model\Color;
+use App\Modules\Portal\Domain\Entity\User;
 use App\Modules\Shared\Domain\Model\SystemUpdatable;
 use App\Modules\Zeus\Resource\TutorialResource;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class Player implements CreditHolderInterface, SystemUpdatable, UserInterface, \JsonSerializable
+class Player implements CreditHolderInterface, SystemUpdatable, \JsonSerializable
 {
 	public int|null $id = 0;
+	public User|null $user = null;
 	public Color|null $faction = null;
 	public Player|null $godFather = null;
 	public string $name = '';
@@ -134,16 +136,6 @@ class Player implements CreditHolderInterface, SystemUpdatable, UserInterface, \
 	public function getRoles(): array
 	{
 		return ['ROLE_USER'];
-	}
-
-	public function eraseCredentials(): void
-	{
-		// TODO: Implement eraseCredentials() method.
-	}
-
-	public function getUserIdentifier(): string
-	{
-		return $this->name;
 	}
 
 	public function jsonSerialize(): array
