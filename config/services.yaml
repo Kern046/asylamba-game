@@ -108,6 +108,11 @@ services:
             - '../src/views/'
             - '../src/Modules/'
 
+    App\Modules\Portal\:
+        resource: '../src/Modules/Portal/'
+        exclude:
+            - '../src/Modules/Shared/Domain/{!Service}'
+
     App\Modules\Shared\:
         resource: '../src/Modules/Shared/'
         exclude:
@@ -121,6 +126,10 @@ services:
 
     App\Shared\Infrastructure\Controller\:
         resource: '../src/Shared/Infrastructure/Controller/'
+        tags: ['controller.service_arguments']
+
+    App\Modules\Portal\Infrastructure\Controller\:
+        resource: '../src/Modules/Portal/Infrastructure/Controller/'
         tags: ['controller.service_arguments']
 
     App\Classes\Library\Parser:

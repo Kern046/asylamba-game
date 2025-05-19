@@ -16,6 +16,7 @@ use App\Modules\Hermes\Domain\Repository\ConversationRepositoryInterface;
 use App\Modules\Hermes\Domain\Repository\ConversationUserRepositoryInterface;
 use App\Modules\Hermes\Domain\Repository\NotificationRepositoryInterface;
 use App\Modules\Hermes\Model\ConversationUser;
+use App\Modules\Portal\Domain\Entity\User;
 use App\Modules\Promethee\Domain\Repository\ResearchRepositoryInterface;
 use App\Modules\Promethee\Domain\Repository\TechnologyRepositoryInterface;
 use App\Modules\Promethee\Helper\ResearchHelper;
@@ -55,6 +56,7 @@ readonly class PlayerFactory
 
 	public function create(
 		Color $faction,
+		User|null $user,
 		string $name,
 		string $avatar,
 		Sector $sector,
@@ -68,6 +70,7 @@ readonly class PlayerFactory
 		$player = new Player();
 
 		// ajout des variables inchangées
+		$player->user = $user;
 		$player->faction = $faction;
 		$player->name = $name;
 		$player->avatar = $avatar;

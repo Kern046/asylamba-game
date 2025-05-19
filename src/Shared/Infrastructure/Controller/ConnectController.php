@@ -6,6 +6,7 @@ use App\Classes\Container\ArrayList;
 use App\Classes\Container\EventList;
 use App\Classes\Library\Utils;
 use App\Modules\Athena\Domain\Repository\OrbitalBaseRepositoryInterface;
+use App\Modules\Portal\Domain\Entity\User;
 use App\Modules\Zeus\Domain\Event\PlayerConnectionEvent;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Model\Player;
@@ -33,20 +34,27 @@ class ConnectController extends AbstractController
 		LoggerInterface $logger,
 		int $playerId
 	): Response {
+		$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
 		$session = $request->getSession();
 
 		if (null === ($player = $playerRepository->get($playerId)) || !$player->canAccess()) {
 			$logger->debug('Player not found or cannot access game');
 
-			return $this->redirectToRoute('homepage');
+			return $this->redirectToRoute('player_choice');
 		}
+
+		/** @var User $user */
+		$user = $this->getUser();
+		if ($player->user->getId() !== $user->getId()) {
+			throw $this->createAccessDeniedException('This player account does not belong to you');
+		}
+
 		$player->statement = Player::ACTIVE;
 
 		$session->set('token', Utils::generateString(5));
 
 		$this->createSession($session, $player);
-
-		$security->login($player);
 
 		// mise de dLastConnection + dLastActivity
 		$player->dLastConnection = new \DateTimeImmutable();

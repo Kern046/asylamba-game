@@ -353,7 +353,7 @@ class OrbitalBaseResource
 				[118120,	810000,	358,	3700],
 			],
 			'maxLevel' => [20, 30, 20, 30],
-			'description' => 'La <strong>Plateforme Commerciale</strong> est véritablement la <strong>place de commerce</strong> entre les joueurs d’Asylamba. En effet, cette plateforme vous permettra de <strong>vendre</strong> ou d’<strong>acheter</strong> des vaisseaux, des commandants ou encore des ressources.<br /><br />Vous devrez fixer vous-même le prix des marchandises que vous souhaitez vendre, il faudra donc faire attention aux tendances du marché, de manière à être sûr de vendre vos produits. De plus, toute vente ou achat est soumis à deux taxes, une d\'achat et une de vente. Prenez donc ces taxes en compte en fixant vos prix. Le montant des taxes revient aux factions concernées.',
+			'description' => 'La <strong>Plateforme Commerciale</strong> est véritablement la <strong>place de commerce</strong> entre les joueurs. En effet, cette plateforme vous permettra de <strong>vendre</strong> ou d’<strong>acheter</strong> des vaisseaux, des commandants ou encore des ressources.<br /><br />Vous devrez fixer vous-même le prix des marchandises que vous souhaitez vendre, il faudra donc faire attention aux tendances du marché, de manière à être sûr de vendre vos produits. De plus, toute vente ou achat est soumis à deux taxes, une d\'achat et une de vente. Prenez donc ces taxes en compte en fixant vos prix. Le montant des taxes revient aux factions concernées.',
 			'techno' => TechnologyId::COM_PLAT_UNBLOCK,
 		],
 		[

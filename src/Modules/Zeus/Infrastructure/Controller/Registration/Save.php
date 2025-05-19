@@ -6,6 +6,7 @@ namespace App\Modules\Zeus\Infrastructure\Controller\Registration;
 
 use App\Modules\Demeter\Domain\Repository\ColorRepositoryInterface;
 use App\Modules\Gaia\Domain\Repository\SectorRepositoryInterface;
+use App\Modules\Portal\Domain\Entity\User;
 use App\Modules\Zeus\Application\Factory\PlayerFactory;
 use App\Modules\Zeus\Domain\Repository\PlayerRepositoryInterface;
 use App\Modules\Zeus\Helper\CheckName;
@@ -30,6 +31,8 @@ class Save extends AbstractController
 		PlayerFactory $playerFactory,
 		SectorRepositoryInterface $sectorRepository,
 	): Response {
+		$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
 		$session = $request->getSession();
 		if ($session->has('inscription')) {
 			$check = new CheckName();
@@ -79,8 +82,12 @@ class Save extends AbstractController
 			// remove godFather from session
 			$session->remove('rgodfather');
 
+			/** @var User $user */
+			$user = $this->getUser();
+
 			$player = $playerFactory->create(
 				faction: $faction,
+				user: $user,
 				name: trim((string) $session->get('inscription')->get('pseudo')),
 				avatar: $session->get('inscription')->get('avatar'),
 				sector: $sector,
