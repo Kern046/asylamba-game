@@ -20,7 +20,7 @@ kalaxia.local {
 	import game
 }
 
-api.kalaxia.com {
+kalaxia.com, api.kalaxia.com {
 	import game
 
 	basicauth /* {
