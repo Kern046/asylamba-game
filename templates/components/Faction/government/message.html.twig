@@ -1,0 +1,22 @@
+<div class="component new-message size2">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<form action="{{ path('write_faction_conversation') }}" method="POST">
+				<h4>Envoyer un message à la faction</h4>
+
+				<p>
+					Votre message
+				</p>
+				<p class="input input-area">
+					<span class="wysiwyg" data-id="new-message-wysiwyg">
+						{{ get_parser_toolbar()|raw }}
+						<textarea name="message" id="new-message-wysiwyg"></textarea>
+					</span>
+				</p>
+
+				<p><button>Démarrer la conversation</button></p>
+			</form>
+		</div>
+	</div>
+</div>

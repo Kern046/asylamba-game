@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Asylamba\Classes\Library;
+namespace App\Tests\Classes\Library;
 
-use Asylamba\Classes\Library\DateTimeConverter;
+use App\Classes\Library\DateTimeConverter;
 use PHPUnit\Framework\TestCase;
 
 class DateTimeConverterTest extends TestCase
@@ -12,10 +12,10 @@ class DateTimeConverterTest extends TestCase
 	 */
 	public function testConversionToMs(string $dateTime, int $expectedMs): void
 	{
-		$this->assertEquals($expectedMs, DateTimeConverter::to_ms($dateTime));
+		$this->assertEquals($expectedMs, DateTimeConverter::to_ms(new \DateTimeImmutable($dateTime)));
 	}
 
-	public function provideMsData(): \Generator
+	public static function provideMsData(): \Generator
 	{
 		yield [
 			'+1 minute',

@@ -1,0 +1,19 @@
+<div class="flex items-center bg-gray-700 min-w-full my-2 {% block extra_classes %}{% endblock extra_classes %} px-2 py-2">
+	{% block picture %}{% endblock picture %}
+
+	<div class="w-48 px-2">
+		{% block name %}{% endblock name %}
+
+		<div class="text-lg rounded-full text-xs flex gap-x-2">
+			{% block value %}{% endblock value %}
+		</div>
+	</div>
+
+	<div class="relative">
+		<div class="flex justify-center items-center w-10 h-10 rounded-full {% block position_class %}{% endblock position_class %}">
+			{{ position }}
+		</div>
+
+		{{ include('atoms/rankings/variation.html.twig', { variation }) }}
+	</div>
+</div>

@@ -1,0 +1,12 @@
+{% extends 'layouts/ares/fleet.html.twig' %}
+
+{% block content %}
+	<div class="grid grid-cols-4 gap-x-4">
+		{{ include('components/fleet/combat_reports.html.twig') }}
+
+		{% if report is not null %}
+			{{ include('components/fleet/combat_report.html.twig', { report, report_attacker, report_defender }) }}
+			{{ include('components/fleet/manage_combat_report.html.twig', { report }) }}
+		{% endif %}
+	</div>
+{% endblock content %}

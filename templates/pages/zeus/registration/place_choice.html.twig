@@ -1,0 +1,75 @@
+{% extends 'layouts/zeus/registration.html.twig' %}
+
+{% block content %}
+	<form action="{{ path('registration_save') }}" method="post">
+		<header class="flex justify-between flex-col md:flex-row">
+			<div class="">
+				<h1>Localisation</h1>
+				<h4>Choisissez le nom de votre première planète</h4>
+				<p><input type="text" name="base" id="base" maxlength="20" required placeholder="nom de votre planète" /></p>
+				<p>Vous pourrez changer ce nom plus tard.</p>
+			</div>
+			<div>
+				<twig:Button type="submit" :faction="chosenFaction">
+					<strong>Choisir ce secteur</strong><br />
+					<em>et commencer le jeu</em>
+				</twig:Button>
+			</div>
+		</header>
+
+		<section class="">
+			<h2>
+				Choisissez l'emplacement dans la galaxie
+			</h2>
+
+			<div class="" data-controller="map--sector-choice">
+				{% set rate = 750 / galaxy_configuration.galaxy.size %}
+
+				<div class="relative bg-black flex flex-col items-center">
+					<input type="hidden" id="input-sector-id" name="sector" data-map--sector-choice-target="input" />
+					<svg class="stroke-zinc-600 bg-black max-w-3xl" viewBox="0, 0, 750, 750" xmlns="http://www.w3.org/2000/svg">
+						{% for sector in sectors %}
+							{% set faction_identifier = sector.faction|default({identifier: 0}).identifier %}
+							{% set coords = galaxy_configuration.getSectorCentroid(sector, rate) %}
+
+							<g data-sector-id="{{ sector.id }}"
+							   data-action="click->map--sector-choice#select">
+								<polygon class="
+											{%- if faction_identifier == chosenFaction.identifier -%}
+												stroke-light{{ faction_identifier }}
+												fill-medium{{ faction_identifier }}
+												hover:fill-light{{ faction_identifier }} transition-colors ease-in delay-50 cursor-pointer
+											{%- elseif faction_identifier != 0 -%}
+												opacity-50
+												stroke-dark{{ faction_identifier }}
+												fill-dark{{ faction_identifier }}
+											{%- else -%}
+											fill-zinc-900
+											{% endif %}
+											{{ faction_identifier == app.session.get('inscription').get('ally') ? 'enabled' : 'disabled' -}}
+										"
+										 points="{{ galaxy_configuration.getSectorCoord(sector.identifier, rate, 0) }}"
+								/>
+								<text class="
+										{%- if faction_identifier == chosenFaction.identifier -%}
+											fill-zinc-400
+										{%- elseif faction_identifier != 0 -%}
+											fill-dark{{ faction_identifier }}
+										{%- else -%}
+											fill-zinc-700
+										{% endif %}
+										text-3xl font-bold font-sans stroke-none"
+									  text-anchor="middle"
+									  x="{{ coords.x }}"
+									  y="{{ coords.y }}">
+									{{- sector.identifier -}}
+								</text>
+							</g>
+
+						{% endfor %}
+					</svg>
+				</div>
+			</div>
+		</section>
+	</form>
+{% endblock content %}

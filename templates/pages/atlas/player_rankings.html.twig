@@ -1,0 +1,17 @@
+{% extends 'layouts/atlas/ranking.html.twig' %}
+
+{% block page_title 'Classement joueur' %}
+
+{% block content %}
+	{% if has_ranking %}
+		{{ include('components/rankings/player/best_player.html.twig', { best_player }) }}
+		{{ include('components/rankings/player/general.html.twig', { general_rankings }) }}
+		{{ include('components/rankings/player/experience.html.twig', { experience_rankings }) }}
+		{{ include('components/rankings/player/fight.html.twig', { fight_rankings }) }}
+		{{ include('components/rankings/player/resources.html.twig', { resources_rankings }) }}
+		{{ include('components/rankings/player/armies.html.twig', { armies_rankings }) }}
+		{{ include('components/rankings/player/butcher.html.twig', { butcher_rankings }) }}
+		{{ include('components/rankings/player/trader.html.twig', { trader_rankings }) }}
+		{{ include('components/rankings/player/stats.html.twig', { all_players_count, active_players_count }) }}
+	{% endif %}
+{% endblock content %}

@@ -1,0 +1,109 @@
+{% set playerFactionIdentifier = place.player.faction.identifier ?? 0 %}
+
+<div class="column info divide-y divide-stone-900 py-4 min-w-48 h-full">
+	{% set reports = spyReports|filter(r => r.place.id.equals(place.id)) %}
+	{% if reports|length > 0 %}
+		{% set report = reports|first %}
+		<a href="{{ path('spy_reports', {'report': report.id}) }}"
+		   class="last-spy-link hb"
+		   title="voir le rapport d'espionnage le plus récent"
+		>
+			<img src="{{ asset('images/map/spy.svg') }}" alt="Voir le dernier rapport d'espionnage" class="w-4 h-4" />
+		</a>
+	{% endif %}
+
+	<div class="px-2">
+		<twig:PlaceName :place="place" />
+	</div>
+
+	{% if place.typeOfPlace == 1 %}
+		{% if place.base is not null %}
+			<div class="flex items-center justify-between px-2">
+				<span class="font-medium text-sm">Propriété du</span>
+				<span>
+					{% if playerFactionIdentifier != 0 %}
+						{% set player_status = get_faction_info(playerFactionIdentifier, 'status')[place.player.status - 1] %}
+						{{ player_status }}
+						<span class="player-name">
+							<a href="{{ path('embassy', {'player': place.player.id }) }}" class="color{{ playerFactionIdentifier }}">
+								{{ place.player.name }}
+							</a>
+						</span>
+					{% else %}
+						rebelle <span class="player-name">{{ place.player.name }}</span>
+					{% endif %}
+				</span>
+			</div>
+		{% else %}
+			<div class="px-2">
+				<twig:CoeffIndicator label="Défense"
+					:values="[
+						0,
+						constant('App\\Modules\\Gaia\\Model\\Place::DNG_CASUAL'),
+						constant('App\\Modules\\Gaia\\Model\\Place::DNG_EASY'),
+						constant('App\\Modules\\Gaia\\Model\\Place::DNG_MEDIUM'),
+						constant('App\\Modules\\Gaia\\Model\\Place::DNG_HARD'),
+					]"
+					:coeff="place.maxDanger"
+					mediaPath="build/media/resources/defense.png" />
+			</div>
+		{% endif %}
+
+		<div class="px-2">
+			<twig:CoeffIndicator label="Population"
+								 :coeff="place.population"
+								 :values="[0, 50, 100, 150, 200]"
+								 mediaPath="build/media/resources/population.png" />
+
+			<twig:CoeffIndicator label="Ressource"
+								 :coeff="place.coefResources"
+								 :values="[0, 20, 40, 60, 80]"
+								 mediaPath="build/media/resources/resource.png" />
+
+			<twig:CoeffIndicator label="Science"
+								 :coeff="get_place_technosphere_improvement_coeff(place)"
+								 :values="[0, 8, 16, 24, 32]"
+								 mediaPath="build/media/resources/science.png" />
+		</div>
+	{% else %}
+		<div class="px-2">
+			<p class="flex items-center justify-between py-1">
+				<span class="text-sm font-medium">Ressources</span>
+				<span class="value">
+					{{ ((place.resources * place.coefResources)/100)|number }}
+				</span>
+			</p>
+			<p class="flex items-center justify-between py-1">
+				<span class="text-sm font-medium">Débris</span>
+				<span class="value">
+					{{ ((place.resources * place.coefHistory)/100)|number }}
+				</span>
+			</p>
+			<p class="flex items-center justify-between py-1">
+				<span class="text-sm font-medium">Gaz noble</span>
+				<span class="value">
+					{{ ((place.resources * place.population)/100)|number }}
+				</span>
+			</p>
+		</div>
+	{% endif %}
+
+	<div class="flex items-center justify-between px-2">
+		<span class="font-medium text-sm">Distance</span>
+		<span class="value">
+			{{ get_place_distance(current_base, place)|number }} Al.
+		</span>
+	</div>
+
+	{% if place.typeOfPlace == 1 %}
+		{% set reports = combatReports|filter(r => r.place.id.equals(place.id)) %}
+		{% if reports|length > 0 %}
+			{% set report = reports|first %}
+			<div>
+				<em class="text-xs">
+					Dernier pillage {{ report.foughtAt|game_date|raw }}.
+				</em>
+			</div>
+		{% endif %}
+	{% endif %}
+</div>

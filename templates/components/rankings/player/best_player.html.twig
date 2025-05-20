@@ -1,0 +1,18 @@
+<twig:LayoutBox class="min-w-64">
+	<header>
+		<twig:H2>Meilleur joueur</twig:H2>
+	</header>
+
+	<section>
+		<div class="center-box">
+			<span class="label">
+				{{ get_faction_info(best_player.faction.identifier, 'status')[best_player.status - 1] }} de {{ get_faction_info(best_player.faction.identifier, 'popularName') }}
+			</span>
+			<span class="value">{{ best_player.name }}</span>
+		</div>
+
+		<div class="mt-4">
+			<twig:Avatar :player="best_player" class="w-24 h-24" />
+		</div>
+	</section>
+</twig:LayoutBox>

@@ -1,0 +1,33 @@
+<div {{ attributes.defaults({
+	class: "relative p-2 bg-gray-900/50 text-white w-10 h-10 md:w-auto md:h-20 flex flex-col justify-between rounded-full md:rounded-sm ring-1 md:ring-0 ring-white/15",
+}) }}>
+	{% if queue is not null %}
+		<header class="flex">
+<!--			<img src="{{ asset(this.picto) }}" class="w-6 md:mr-2" alt="" />-->
+
+			<strong class="hidden md:block grow">{{ this.name }}</strong><br>
+
+			<span class="hidden md:block text-xs">{{ this.subTitle }}</span>
+
+			<a href="{{ path(this.cancelRoute, this.cancelParameters) }}"
+			   class="absolute md:static -top-2 right-0 md:px-2"
+			   title="annuler la construction (attention, vous ne récupérerez que {{ refund * 100 }}% du montant investi)">×</a>
+		</header>
+
+		<section class="hidden md:block py-1">
+			<em><span class="">{{ queue|queue_duration|lite_seconds }}</span></em>
+		</section>
+
+		<footer class="hidden md:block">
+			<twig:ProgressBar
+				:start="queue.startDate.timestamp"
+				:current="this.currentTime"
+				:end="queue.endDate.timestamp"
+				:faction="current_player.faction" />
+		</footer>
+	{% else %}
+		<p class="hidden md:block">
+			Emplacement libre
+		</p>
+	{% endif %}
+</div>

@@ -1,0 +1,24 @@
+<twig:LayoutBox class="component player rank">
+	<header>
+		<twig:H2>
+			Derniers reçus
+		</twig:H2>
+	</header>
+	<section>
+		{% for transaction in receivings %}
+			<div class="player color{{ transaction.senderColor }}">
+				<a href="{{ transaction.senderLink }}">
+					<img src="{{ asset('build/media/avatar/small/' ~ transaction.senderAvatar ~ '.png') }}" alt="{{ transaction.senderName }}" class="picto" />
+				</a>
+
+				<span class="title">{{ transaction.senderStatus }}</span>
+				<strong class="name">{{ transaction.senderName }}</strong>
+				<span class="experience">{{ transaction.amount|number }} crédit{{ transaction.amount|plural }}</span>
+			</div>
+		{% endfor %}
+
+		{% if receivings|length == 0 %}
+			<p>Vous n'avez encore reçu aucun crédit.</p>
+		{% endif %}
+	</section>
+</twig:LayoutBox>

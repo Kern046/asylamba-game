@@ -1,0 +1,15 @@
+<div class="">
+	<div class="head skin-1">
+		<h2 class="mt-2 max-w-lg text-pretty text-xl md:text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+			{{ title }}
+		</h2>
+		{% if subTitle is not null %}
+			<em class="text-sm md:text-base font-semibold">
+				{{ subTitle }}
+			</em>
+		{% endif %}
+	</div>
+	<p class="hidden md:block">
+		{% block content %}{% endblock content %}
+	</p>
+</div>

@@ -1,0 +1,29 @@
+<div class="component profil">
+	<div class="head skin-1">
+		<h1>Coup d'état</h1>
+	</div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="center-box">
+				<span class="label">La tentative de coup d'état se termine dans</span>
+				<span class="value">{{ remaining_putsch_time|lite_seconds }}</span>
+			</div>
+
+			<div class="number-box">
+				<span class="label">Nombre de soutiens pour réussir</span>
+				<span class="value">{{ putsch_supporters_count }}</span>
+				<span class="progress-bar">
+					<span style="width: {{ putsch_supporters_count|percent(faction_members_count) }}%;" class="content"></span>
+					<span class="step" style="left: {{ constant('App\\Modules\\Demeter\\Model\\Color::PUTSCHPERCENTAGE') + 2 }}%;">
+						<span class="label bottom">soutiens nécessaires</span>
+					</span>
+				</span>
+				<br />
+			</div>
+
+			<hr style="margin-top: 25px;"/>
+
+			<p class="info">{{ get_faction_info(current_player.faction.identifier, 'campaignDesc')|raw }}</p>
+		</div>
+	</div>
+</div>

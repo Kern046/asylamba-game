@@ -1,0 +1,25 @@
+<twig:LayoutBox class="w-56">
+	<header>
+		<twig:H2>A propos</twig:H2>
+	</header>
+	<section>
+		<twig:NumberBox label="Joueurs actifs">
+			{{ active_players_count|number }}
+			{# <span class="group-link"><a href="#" title="compte tous les joueurs qui se sont connectés depuis 15 jours" class="hb lt">?</a></span> #}
+		</twig:NumberBox>
+
+		<twig:NumberBox label="Joueurs inscrits">
+			{{ all_players_count|number }}
+		</twig:NumberBox>
+
+		<p class="text-xs">Le classement est mis à jour tous les jours à 3h (UTC+1) du matin.</p>
+
+		<hr class="my-4">
+
+		<a class="more-button" href="#rank/mode-top">
+			<twig:Button :faction="current_player.faction" class="md:text-sm">
+				Voir le haut du classement
+			</twig:Button>
+		</a>
+	</section>
+</twig:LayoutBox>

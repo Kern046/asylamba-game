@@ -1,0 +1,37 @@
+---
+parameters:
+    promethee.research.coeff: 1
+    promethee.research.max_diff: 3
+    promethee.research.quantity: 10
+
+    promethee.technology_queue.resource_refund: 0.5
+    promethee.technology_queue.credit_refund: 0.5    
+    
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    _instanceof:
+        App\Shared\Application\SchedulerInterface:
+            tags: ['app.scheduler']
+
+    App\Modules\Promethee\:
+        resource: '%kernel.project_dir%/src/Modules/Promethee/'
+        exclude:
+            - '../../Message'
+            - '../../Model'
+            - '../../Resource'
+
+    App\Modules\Promethee\Helper\ResearchHelper:
+        arguments:
+            $researchCoeff: "%promethee.research.coeff%"
+            $researchMaxDiff: "%promethee.research.max_diff%"
+
+    App\Modules\Promethee\Helper\TechnologyHelper:
+        arguments:
+            $researchQuantity: "%promethee.research.quantity%"
+    
+    App\Modules\Promethee\Manager\ResearchManager:
+        arguments:
+            $researchQuantity: "%promethee.research.quantity%"

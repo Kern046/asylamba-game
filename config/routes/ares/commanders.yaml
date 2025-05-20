@@ -1,0 +1,22 @@
+create_commander:
+    path: /
+    controller: App\Modules\Ares\Infrastructure\Controller\CreateCommander
+    methods: 'POST'
+
+put_commander_in_school:
+    path: /{id}/put-in-school
+    controller: App\Modules\Ares\Infrastructure\Controller\PutCommanderInSchool
+    methods: 'GET'
+
+update_commander_name:
+    path: /{id}/update-name
+    controller: App\Modules\Ares\Infrastructure\Controller\Commander\UpdateName
+
+disband_commander:
+    path: /{id}/disband
+    controller: App\Modules\Ares\Infrastructure\Controller\Commander\Disband
+
+fire_commander:
+    path: /{id}/fire
+    controller: App\Modules\Ares\Infrastructure\Controller\Commander\Fire
+

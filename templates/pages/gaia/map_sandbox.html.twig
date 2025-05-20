@@ -1,0 +1,101 @@
+{% extends 'layouts/map.html.twig' %}
+
+{% block body %}
+	<twig:MapLoader />
+
+	{% set scale = 10 %}
+	{% set map_size = 100 * scale %}
+
+	<div class="absolute top-[50%] left-[50%] w-2 h-2 rounded-full bg-green-400 z-[2000]"></div>
+
+	{# map systems #}
+	<div id="map-container"
+		class="w-full h-screen origin-[50%_50%] transition-transform ease-out duration-500"
+		data-controller="map--zoom"
+		data-action="wheel@window->map--zoom#onWheel:prevent:stop"
+	>
+		<div id="map"
+			 class="relative bg-gray-800 w-full h-full transition-transform ease-out duration-500 active:cursor-grabbing group/map "
+			 data-controller="map--movements"
+			 data-action="mousedown@window->map--movements#onMouseDown mouseup@window->map--movements#onMouseUp mousemove@window->map--movements#onMouseMove:prevent"
+			 data-map--movements-begin-x-position-value="50"
+			 data-map--movements-begin-y-position-value="50"
+			 data-map--movements-scale-value="{{ scale }}"
+			 data-map--movements-map--loader-outlet="#loader-overlay"
+			 data-map--zoom-target="map"
+			 style="width: {{ map_size }}px; height: {{ map_size }}px;"
+		>
+
+			<div id="systems" class="absolute z-[900] w-full">
+				<div
+					id="current-base"
+					class="cursor-pointer absolute w-[16px] h-[16px] border border-4 rounded-full border-light1 cursor-pointer group-[.sector-only]/map:hidden"
+					data-x-position="10"
+					data-y-position="10"
+					data-controller="map--system"
+					data-action="click->map--system#select"
+					data-map--system-map--action-box-outlet="#action-box"
+					data-map--system-id-value="a"
+					style="top: {{ 10 * scale - 12 }}px; left: {{ 10 * scale - 12 }}px"
+				>
+				</div>
+				<div
+					id="current-base"
+					class="cursor-pointer absolute w-[16px] h-[16px] border border-4 rounded-full border-light1 cursor-pointer group-[.sector-only]/map:hidden"
+					data-x-position="50"
+					data-y-position="10"
+					data-controller="map--system"
+					data-action="click->map--system#select"
+					data-map--system-map--action-box-outlet="#action-box"
+					data-map--system-id-value="a"
+					style="top: {{ 10 * scale - 12 }}px; left: {{ 50 * scale - 12 }}px"
+				>
+				</div>
+				<div
+					id="current-base"
+					class="cursor-pointer absolute w-[16px] h-[16px] border border-4 rounded-full border-light1 cursor-pointer group-[.sector-only]/map:hidden"
+					data-x-position="75"
+					data-y-position="10"
+					data-controller="map--system"
+					data-action="click->map--system#select"
+					data-map--system-map--action-box-outlet="#action-box"
+					data-map--system-id-value="a"
+					style="top: {{ 10 * scale - 12 }}px; left: {{ 75 * scale - 12 }}px"
+				>
+				</div>
+				<div
+					class="cursor-pointer absolute w-[16px] h-[16px] border border-4 border-light1 outline-light1 rounded-full cursor-pointer group-[.sector-only]/map:hidden"
+					data-x-position="50"
+					data-y-position="50"
+					data-controller="map--system"
+					data-action="click->map--system#select"
+					data-map--system-map--action-box-outlet="#action-box"
+					data-map--system-id-value="b"
+					style="top: {{ 50 * scale }}px; left: {{ 50 * scale }}px"
+				>
+				</div>
+				<div
+					class="cursor-pointer absolute w-[16px] h-[16px] border border-4 border-light1 outline-light1 rounded-full cursor-pointer group-[.sector-only]/map:hidden"
+					data-x-position="75"
+					data-y-position="25"
+					data-controller="map--system"
+					data-action="click->map--system#select"
+					data-map--system-map--action-box-outlet="#action-box"
+					data-map--system-id-value="b"
+					style="top: {{ 25 * scale }}px; left: {{ 75 * scale }}px"
+				>
+				</div>
+				<div
+					class="cursor-pointer absolute w-[16px] h-[16px] border border-4 border-light1 rounded-full cursor-pointer group-[.sector-only]/map:hidden"
+					data-x-position="50"
+					data-y-position="95"
+					data-controller="map--system"
+					data-action="click->map--system#select"
+					data-map--system-map--action-box-outlet="#action-box"
+					data-map--system-id-value="c"
+					style="top: {{ 95 * scale }}px; left: {{ 50 * scale }}px"
+				>
+				</div>
+			</div>
+	</div>
+{% endblock body %}

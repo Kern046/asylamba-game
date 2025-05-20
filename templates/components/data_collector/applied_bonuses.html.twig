@@ -1,0 +1,191 @@
+{# templates/data_collector/template.html.twig #}
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+	{% apply spaceless %}
+		{% set icon %}
+			{# this is the content displayed as a panel in the toolbar #}
+			{{ include('components/data_collector/modifiers.svg') }}
+			<span class="sf-toolbar-value">{{ collector.appliedBonuses|length }}</span>
+		{% endset %}
+
+		{% set text %}
+			{# this is the content displayed when hovering the mouse over
+			   the toolbar panel #}
+			{% for modifier in collector.appliedBonuses %}
+				{% set is_positive = modifier.modified_value > 0 %}
+				<div class="sf-toolbar-info-piece">
+					<b>{{ ('app.modifier.' ~ modifier.modifier_id)|trans }}</b>
+					<span>
+						<span class="sf-toolbar-status sf-toolbar-gray">
+							{{ modifier.initial_value }}
+						</span>
+						<span class="sf-toolbar-status sf-toolbar-status-{{ is_positive ? 'green' : 'red' }}">
+							{{ is_positive ? '+' : '-' }} {{ modifier.modified_value|abs }}
+						</span>
+					</span>
+				</div>
+			{% endfor %}
+
+			{% if collector.appliedBonuses == [] %}
+				<div class="sf-toolbar-info-piece">
+					<b>No modifier applied</b>
+				</div>
+			{% endif %}
+		{% endset %}
+
+		{# the 'link' value set to 'false' means that this panel doesn't
+		   show a section in the web profiler #}
+		{{ include('@WebProfiler/Profiler/toolbar_item.html.twig') }}
+	{% endapply %}
+{% endblock %}
+
+{% block menu %}
+	{# This left-hand menu appears when using the full-screen profiler. #}
+	<span class="label {% if collector.appliedBonuses == [] %}disabled{% endif %}">
+        <span class="icon">{{ include('components/data_collector/modifiers.svg') }}</span>
+        <strong>Modifiers</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+	<div class="sf-tabs">
+		<div class="tab">
+			<h3 class="tab-title">Applied Modifiers</h3>
+
+			<div class="tab-content">
+				<h2>Modifier Metrics</h2>
+
+				<div class="metrics">
+					<div class="metric">
+						<span class="value">
+							{{ collector.appliedBonuses|length }}
+						</span>
+						<span class="label">
+							Total Applied Modifiers
+						</span>
+					</div>
+					<div class="metric">
+						<span class="value">
+							{{ collector.appliedBonuses|filter(m => m.modified_value != 0)|length }}
+						</span>
+						<span class="label">
+							Effective Modifiers
+						</span>
+					</div>
+				</div>
+
+				<h2>Applied Modifiers</h2>
+				{% if collector.appliedBonuses == [] %}
+					<div class="empty">
+						<p>No modifier applied</p>
+					</div>
+				{% else %}
+					<table>
+						<thead>
+							<th>
+								ID
+							</th>
+							<th>
+								Label
+							</th>
+							<th class="num-col">
+								Coeff
+							</th>
+							<th class="num-col">
+								Initial Value
+							</th>
+							<th class="num-col">
+								Bonus/Malus
+							</th>
+						</thead>
+						<tbody>
+							{% for modifier in collector.appliedBonuses %}
+								{% set is_positive = modifier.modified_value > 0 %}
+								<tr>
+									<td>{{ modifier.modifier_id }}</td>
+									<td>{{ ('app.modifier.' ~ modifier.modifier_id)|trans }}</td>
+									<td class="num-col">
+										{% if modifier.modified_value > 0 %}
+											<span class="label status-success">
+												+{{ modifier.modifier_value|abs }}%
+											</span>
+										{% elseif modifier.modifier_value == 0 %}
+											<span class="label">0%</span>
+										{% else %}
+											<span class="label status-error">
+												-{{ modifier.modifier_value|abs }}%
+											</span>
+										{% endif %}
+									</td>
+									<td class="num-col">{{ modifier.initial_value }}</td>
+									<td class="num-col">
+										{% if modifier.modified_value > 0 %}
+											<span class="label status-success">
+												+{{ modifier.modified_value|abs }}
+											</span>
+										{% elseif modifier.modified_value == 0 %}
+											<span class="label">0</span>
+										{% else %}
+											<span class="label status-error">
+												-{{ modifier.modified_value|abs }}
+											</span>
+										{% endif %}
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				{% endif %}
+			</div>
+		</div>
+
+		<div class="tab">
+			<h3 class="tab-title">Player Bonuses</h3>
+
+			<div class="tab-content">
+				<h2>Player Bonuses</h2>
+
+				<table>
+					<thead>
+						<th class="key" scope="col">
+							Bonus
+						</th>
+						<th class="col">
+							Value
+						</th>
+					</thead>
+					<tbody>
+						{% for bonus_id in collector.playerBonuses|keys %}
+							{% set value = collector.playerBonuses[bonus_id] %}
+							{% set status_class -%}
+								{%- if value > 0 -%}
+									status-success
+								{%- elseif value < 0 -%}
+									status-error
+								{%- endif -%}
+							{%- endset %}
+
+							<tr class="{{ status_class }}">
+								<td>
+									{{ ('app.modifier.' ~ bonus_id)|trans }}
+								</td>
+								<td>
+									<span class="label {{ status_class }}">
+										{{ value }}%
+									</span>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	{% if collector.appliedBonuses == [] %}
+		<div class="empty">
+			<p>No modifier has been applied</p>
+		</div>
+	{% endif %}
+{% endblock %}

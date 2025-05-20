@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- http://phpunit.de/manual/4.1/en/appendixes.configuration.html -->
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
-         backupGlobals="false"
-         colors="true"
-         bootstrap="vendor/autoload.php"
->
-    <php>
-        <ini name="error_reporting" value="-1" />
-        <const name="ID_GAIA" value="1" />
-        <const name="ASM_UMODE" value="true" />
-        <const name="APP_ROOT" value="/" />
-        <const name="SERVER_START_TIME" value="2017-07-02 14:00:00" />
-        <const name="HOURS_BEFORE_START_OF_RANKING" value="3" />
-        <const name="POINTS_TO_WIN" value="2000" />
-    </php>
-
-    <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
-        </testsuite>
-    </testsuites>
+<!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" backupGlobals="false" colors="true" bootstrap="tests/bootstrap.php" cacheDirectory=".phpunit.cache">
+  <php>
+    <ini name="display_errors" value="1"/>
+    <ini name="error_reporting" value="-1"/>
+    <server name="APP_ENV" value="test" force="true"/>
+    <server name="SHELL_VERBOSITY" value="-1"/>
+    <server name="SYMFONY_PHPUNIT_REMOVE" value=""/>
+    <server name="SYMFONY_PHPUNIT_VERSION" value="9.5"/>
+  </php>
+  <testsuites>
+    <testsuite name="Project Test Suite">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+  <coverage/>
+  <!-- Run `composer require symfony/panther` before enabling this extension -->
+  <!--
+	<extensions>
+		<extension class="Symfony\Component\Panther\ServerExtension" />
+	</extensions>
+	-->
+  <source>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+  </source>
 </phpunit>

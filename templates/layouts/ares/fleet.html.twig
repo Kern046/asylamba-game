@@ -1,0 +1,17 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block left_sidebar %}
+	<twig:Sidebar>
+		<twig:SidebarItem route="fleet_headquarters" picto="build/media/fleet/general-quarter.png" label="Centre des Opérations" />
+		<twig:SidebarItem route="fleet_overview" picto="build/media/fleet/armies.png" label="Aperçu des armées" />
+		<twig:SidebarItem route="spy_reports" picto="build/media/fleet/spy.png" label="Rapports d'espionnage" />
+		<twig:SidebarItem route="fleet_archives" picto="build/media/fleet/archive.png" label="Archives Militaires" />
+		<twig:SidebarItem route="memorial" picto="build/media/fleet/memorial.png" label="Mémorial" />
+	</twig:Sidebar>
+{% endblock left_sidebar %}
+
+{% block body %}
+	<main class="mx-4 md:mx-56 mt-2 md:mt-6">
+		{% block content %}{% endblock content %}
+	</main>
+{% endblock body %}

@@ -1,0 +1,11 @@
+<twig:LayoutBox>
+	<header>
+		<twig:H2 class="label">Lois en cours de votation</twig:H2>
+	</header>
+	<section>
+		<twig:NumberBox label="">
+			{{ voting_laws|length|number }}
+		</twig:NumberBox>
+		{# <p class="info">Infos sur les lois</p> #}
+	</section>
+</twig:LayoutBox>

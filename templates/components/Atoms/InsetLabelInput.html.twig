@@ -1,0 +1,5 @@
+<div class="rounded-md bg-white px-3 pb-1.5 pt-2.5 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-medium{{ faction.identifier }}">
+	<label for="{{ attributes.only('for') }}" class="block text-xs font-medium text-gray-900">{{ label }}</label>
+	<input class="block w-full text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+			{{ attributes.nested('input') }} />
+</div>

@@ -1,0 +1,24 @@
+profile:
+    path: /profile
+    controller: App\Modules\Zeus\Infrastructure\Controller\ProfileController
+
+tutorial_validatestep:
+    path: /tutorial/validate-step
+    controller: App\Modules\Zeus\Infrastructure\Controller\Tutorial\ValidateStep
+
+sponsorship:
+    path: /sponsorship
+    controller: App\Modules\Zeus\Infrastracture\Controller\SponsorController
+
+autocomplete_player:
+    path: /api/players/search
+    controller: App\Modules\Zeus\Infrastructure\Controller\AutocompletePlayers
+
+switch_param:
+    path: /switch_param
+    controller: App\Modules\Zeus\Infrastructure\Controller\AutocompletePlayers
+
+search_player:
+    path: /players/search
+    controller: App\Modules\Zeus\Infrastructure\Controller\SearchPlayer
+

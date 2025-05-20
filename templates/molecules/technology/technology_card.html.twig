@@ -1,0 +1,87 @@
+<div class="p-2 bg-gray-700 rounded-md{% if not data.technosphere_requirements or not data.research_requirements %}disable{% endif %} {% if data.is_over %}closed{% endif %}">
+	<header>
+		<a href="#" class="addInfoPanel hb lt info" title="plus d'informations" data-techno-id="{{ data.identifier }}" data-info-type="techno">+</a>
+		{#<img src="{{ asset('build/media/technology/picto/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" alt="" />#}
+		<strong>
+			{{ get_technology_info(data.identifier, 'name') }}
+			{% if not data.is_unblocking_technology and data.technology_level != 0 %}
+				[{{ data.technology_level }}]
+			{% endif %}
+		</strong>
+		{% if data.is_over %}
+			<br><em>développement terminé</em>
+		{% endif %}
+	</header>
+	<div class="ship-illu">
+		{#<img class="illu" src="{{ asset('build/media/technology/img/' ~ get_technology_info(data.identifier, 'imageLink') ~ '.png') }}" />#}
+	</div>
+
+	<footer class="mt-2">
+		{% if not data.technosphere_requirements %}
+			<twig:Button disabled :faction="current_player.faction">
+				il vous faut augmenter votre technosphère au niveau {{ get_technology_info(data.identifier, 'requiredTechnosphere') }}
+			</twig:Button>
+		{% elseif not data.research_requirements is same as (true) %}
+			<twig:Button disabled :faction="current_player.faction">
+				nécessite
+				{% for requirement in data.research_requirements.all %}
+					{{ requirement.get('techno') }} {{ requirement.get('level') }}
+					{% if not loop.last %},{% endif %}
+				{% endfor %}
+			</twig:Button>
+		{% else %}
+			{% if data.in_queue %}
+				<twig:Button disabled :faction="current_player.faction">
+					technologie en cours<br />de recherche
+					{% if data.is_unblocking_technology %}
+						vers le niveau {{ data.next_level }}
+					{% endif %}
+					{% if not data.in_local_queue %}
+						sur une autre de vos bases
+					{% endif %}
+				</twig:Button>
+			{% elseif data.is_over %}
+			{% elseif not data.is_unblocking_technology and not data.max_level_requirements %}
+				<twig:Button disabled :faction="current_player.faction">
+					niveau maximum atteint<br />
+				</twig:Button>
+			{% else %}
+				{% set card_content %}
+					<span class="final-cost">{{ get_technology_info(data.identifier, 'resource', data.next_level)|number }}</span>
+					<img alt="ressources" src="{{ asset('images/legacy/picto/trade/Lot.svg') }}" class="inline w-4 h-4">,
+					<span class="final-cost">{{ get_technology_info(data.identifier, 'credit', data.next_level)|number }}</span>
+					<img alt="crédits" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" class="inline w-4 h-4"> et
+					<span class="final-time">{{ data.time_to_build|lite_seconds }}</span>
+					{#<img class="icon-color" alt="relèves" src="{{ asset('build/media/resources/time.png') }}">#}
+				{% endset %}
+				{% if not data.queue_requirements %}
+					<twig:Button disabled :faction="current_player.faction">
+						file de recherche pleine<br />
+						{{ card_content }}
+					</twig:Button>
+				{% elseif not data.credit_requirements %}
+					<twig:Button disabled :faction="current_player.faction">
+						pas assez de crédits<br />
+						{{ card_content }}
+					</twig:Button>
+				{% elseif not data.resource_requirements %}
+					<twig:Button disabled :faction="current_player.faction">
+						pas assez de ressources<br />
+						{{ card_content }}
+					</twig:Button>
+				{% else %}
+					<a href="{{ path('search_technology', { 'identifier': data.identifier }) }}">
+						<twig:Button :faction="current_player.faction">
+							{% if data.is_unblocking_technology %}
+								rechercher la technologie<br />
+							{% else %}
+								rechercher le niveau {{ data.next_level }}<br />
+							{% endif %}
+							{{ card_content }}
+						</twig:Button>
+					</a>
+				{% endif %}
+			{% endif %}
+		{% endif %}
+	</footer>
+</div>

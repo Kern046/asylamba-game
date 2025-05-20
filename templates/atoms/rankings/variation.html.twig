@@ -1,0 +1,6 @@
+{% if variation != 0 %}
+	<div class="absolute w-10 -right-6 flex items-center gap-x-1 {{ variation > 0 ? '-top-2 bg-green-800' : '-bottom-2 bg-red-800' }} px-2 rounded-full text-xs">
+		<img src="{{ asset('images/legacy/picto/arrow_up.svg') }}" alt="{{ variation > 0 ? '+' : '-' }}" class="{% if variation < 0 %}rotate-180{% endif %} w-2" />
+		{{ variation|abs }}
+	</div>
+{% endif %}

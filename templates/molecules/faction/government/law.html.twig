@@ -1,0 +1,133 @@
+<div class="component profil player">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<div class="build-item base-type">
+				<div class="name">
+					<img src="{{ asset('build/media/faction/law/common.png') }}" alt="">
+					<strong>{{ get_law_info(law_id, 'name') }}</strong>
+				</div>
+
+				<p class="desc">{{ get_law_info(law_id, 'shortDescription')|raw }}</p>
+
+				<form action="{{ path('create_law', {'type': law_id}) }}" method="post">
+					{% if get_law_info(law_id, 'bonusLaw') %}
+						<input type="text" placeholder="Nombre de relèves d'activité" name="duration" />
+
+						<button class="button">
+							<span class="text">
+								Soumettre au vote<br />
+								Coûte {{ (get_law_info(law_id, 'price') * members_count)|number }}
+								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">
+								par relève à la faction
+							</span>
+						</button>
+					{% else %}
+						{% if law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::SECTORTAX') %}
+							<input type="text" placeholder="Nouvel impôt en pourcent" name="taxes" />
+
+							<select name="rsector">
+								<option value="-1">Choisissez un secteur</option>
+								{% for sector in faction_sectors %}
+									<option value="{{ sector.id }}">{{ sector.name }} (taxe {{ sector.tax }}%)</option>
+								{% endfor %}
+							</select>
+
+						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::SECTORNAME') %}
+							<input type="text" placeholder="Nouveau nom du secteur" name="name" />
+
+							<select name="rsector">
+								<option value="-1">Choisissez un secteur</option>
+								{% for sector in faction_sectors %}
+									<option value="{{ sector.id }}">{{ sector.name }} (#{{ sector.identifier }})</option>
+								{% endfor %}
+							</select>
+
+						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::NEUTRALPACT') %}
+							<select name="rcolor">
+								<option value="-1">Choisissez une faction</option>
+								{% for faction_id in faction.relations|keys %}
+									{% if faction_id != 0 %}
+										{% set other_faction = faction.relations[faction_id] %}
+
+										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::PEACEPACT') %}
+							<select name="rcolor">
+								<option value="-1">Choisissez une faction</option>
+								{% for faction_id in faction.relations|keys %}
+									{% if faction_id != 0 %}
+										{% set other_faction = faction.relations[faction_id] %}
+
+										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::WARDECLARATION') %}
+							<select name="rcolor">
+								<option value="-1">Choisissez une faction</option>
+								{% for faction_id in faction.relations|keys %}
+									{% if faction_id != 0 %}
+										{% set other_faction = faction.relations[faction_id] %}
+
+										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::TOTALALLIANCE') %}
+							<select name="rcolor">
+								<option value="-1">Choisissez une faction</option>
+								{% for faction_id in faction.relations|keys %}
+									{% if faction_id != 0 %}
+										{% set other_faction = faction.relations[faction_id] %}
+
+										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'officialName') }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						{% elseif law_id in [constant('App\\Modules\\Demeter\\Model\\Law\\Law::COMTAXEXPORT'), constant('App\\Modules\\Demeter\\Model\\Law\\Law::COMTAXIMPORT')] %}
+							<input type="text" placeholder="Nouvelle taxe en pourcent" name="taxes" />
+							<select name="rcolor">
+								<option value="-1">Choisissez une faction</option>
+								{% for faction_id in faction.relations|keys %}
+									{% if faction_id != 0 %}
+										{% set other_faction = faction.relations[faction_id] %}
+
+										<option value="{{ faction_id }}">{{ get_faction_info(faction_id, 'popularName') }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						{% elseif law_id == constant('App\\Modules\\Demeter\\Model\\Law\\Law::PUNITION') %}
+							<input type="text" placeholder="Montant de l'amende" name="credits" />
+
+							<select name="rplayer">
+								<option value="-1">Choisissez un joueur</option>
+								{% for member in faction_members %}
+									<option value="{{ member.id }}">{{ member.name }}</option>
+								{% endfor %}
+							</select>
+						{% endif %}
+
+						<button class="button ' . ($faction->credits >= LawResources::getInfo($governmentLaw_id, 'price') ? NULL : 'disable') . '">
+							<span class="text">
+								{# @TODO Replace this hardcoded value #}
+								{% if get_law_info(law_id, 'department') == 6 %}
+									Appliquer<br />
+								{% else %}
+									Soumettre au vote<br />
+								{% endif %}
+								Coûte {{ get_law_info(law_id, 'price') }}
+								<img class="icon-color" src="{{ asset('build/media/resources/credit.png') }}" alt="crédits">
+								à la faction
+							</span>
+						</button>
+					{% endif %}
+				</form>
+			</div>
+
+			<p class="info">{{ get_law_info(law_id, 'longDescription')|raw }}</p>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,26 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Promethee\Model\Research" table="research">
+		<id name="id" type="uuid" />
+		
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player" />
+
+		<field name="naturalToPay" type="integer" />
+		<field name="lifeToPay" type="integer" />
+		<field name="socialToPay" type="integer" />
+		<field name="informaticToPay" type="integer" />
+		<field name="mathLevel" type="integer" />
+		<field name="physLevel" type="integer" />
+		<field name="chemLevel" type="integer" />
+		<field name="bioLevel" type="integer" />
+		<field name="mediLevel" type="integer" />
+		<field name="econoLevel" type="integer" />
+		<field name="psychoLevel" type="integer" />
+		<field name="networkLevel" type="integer" />
+		<field name="algoLevel" type="integer" />
+		<field name="statLevel" type="integer" />
+		<field name="naturalTech" type="integer" />
+		<field name="lifeTech" type="integer" />
+		<field name="socialTech" type="integer" />
+		<field name="informaticTech" type="integer" />
+	</entity>
+</doctrine-mapping>

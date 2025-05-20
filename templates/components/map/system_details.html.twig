@@ -1,0 +1,92 @@
+{% apply spaceless %}
+	{% set systemFactionIdentifier = system.faction.identifier ?? 0 %}
+
+	<header
+		class="flex justify-between bg-stone-900 border-t-4 {% if systemFactionIdentifier != 0 %}border-medium{{ systemFactionIdentifier }}{% else %}border-white{% endif %}"
+		 data-sector-color="{{ places[0].system.sector.faction.identifier ?? 0 }}"
+		 data-distance="{{ get_place_distance(current_base, places[0])|number }}">
+		<ul class="flex items-center justify-between basis-2/3">
+			<li>Système #{{ system.id }}</li>
+			<li>Cordonnées {{ system|coords }}</li>
+			<li>
+				{% if systemFactionIdentifier == 0 %}
+					<span>Non revendiqué</span>
+				{% else %}
+					<span>Revendiqué par {{ get_faction_info(systemFactionIdentifier, 'popularName') }}</span>
+				{% endif %}
+			</li>
+			<li>
+				<span>{{ get_system_info(system.typeOfSystem, 'frenchName') }}</span>
+			</li>
+		</ul>
+
+		<div class="button cursor-pointer p-2 bg-stone-800" data-action="click->map--action-box#close">×</div>
+	</header>
+
+	<section>
+		<a class="actbox-movers" id="actboxToLeft" href="#"></a>
+		<a class="actbox-movers" id="actboxToRight" href="#"></a>
+		<div id="system" class="flex">
+			<div class="flex justify-center items-center w-64 border-r-2 border-stone-900">
+				<img src="{{ asset('images/map/system-star.svg') }}" class="w-24 h-24" alt="star" />
+			</div>
+
+			{% for place in places %}
+				{% set playerFactionIdentifier = place.player.faction.identifier ?? 0 %}
+				{% set position = place.position - 1 %}
+
+				<div
+					data-map--action-box-target="place"
+					data-action="click->map--action-box#deployPlacePanel"
+					{% if no_ajax is defined and no_ajax == true and app.request.query.get('place') == place.id %}data-active{% endif %}
+					class="group/place-panel flex border-t-4 border-r-2 border-x-stone-900 min-h-64 cursor-pointer {% if playerFactionIdentifier != 0 %}border-medium{{ playerFactionIdentifier }}{% else %}border-white{% endif %}">
+					<div class="grid grid-rows-3 px-6 py-4"
+						 data-target="{{ position }}">
+						<div class="flex justify-center">
+							{% if place.player is not null %}
+								<twig:Avatar :player="place.player" class="!w-12 !h-12 rounded-full border-2 border-medium{{ place.player.faction.identifier }}" />
+							{% endif %}
+						</div>
+
+						<div class="flex justify-center items-center">
+							{% if place.typeOfPlace == 1 %}
+								<img class="w-16 h-16" src="{{ asset('images/legacy/planet/Tempered.png') }}" alt="planet" />
+							{% else %}
+								{% if place.resources > 10000000 %}
+									{% set size = 3 %}
+								{% elseif place.resources > 5000000 %}
+									{% set size = 2 %}
+								{% else %}
+									{% set size = 1 %}
+								{% endif %}
+								<img class="w-16 h-16" src="{{ asset('images/legacy/planet/Lava.png') }}" alt="recycling site" />
+							{% endif %}
+						</div>
+
+						<div class="flex items-end">
+							<strong>{{ position }}</strong>
+						</div>
+					</div>
+
+					{# noAjax #}
+					{# This is the place panel deployed when the place is selected #}
+					<div class="action color{{ playerFactionIdentifier }} overflow-hidden transition-[max-width] duration-300 ease-in max-w-0 group-data-[active]/place-panel:max-w-[800px]">
+						<div class="content flex h-full">
+							<twig:PlaceSummary :place="place"
+											   :spyReports="spy_reports"
+											   :combatReports="combat_reports" />
+
+							{{ include('molecules/map/place_actions.html.twig', {
+								technologies,
+								moving_commanders,
+								colonization_cost,
+								conquest_cost,
+								recycling_missions,
+							}) }}
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</section>
+{% endapply %}

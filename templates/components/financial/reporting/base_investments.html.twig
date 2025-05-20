@@ -1,0 +1,79 @@
+{% apply spaceless %}
+	<twig:LayoutBox>
+		<header class="flex items-start justify-between">
+			<div>
+				<twig:H2>Investissements</twig:H2>
+				<twig:H5>Investissements par planète</twig:H5>
+			</div>
+
+			<twig:Tooltip>
+				Dans la rubrique « Investissements » sont répertoriés tous les investissements relatifs à l’école
+				de commandement et au contre-espionnage. Chacun de ces investissements peuvent être gérés dans leur bâtiment respectif. Faites attention
+				à ne pas avoir plus d’investissements que de recettes.
+			</twig:Tooltip>
+		</header>
+
+		<section class="mt-4">
+			<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
+				{% for base in player_bases %}
+					{% set base_invest = base.iSchool + base.iAntiSpy %}
+
+					<li class="">
+						<details class="marker:content-['']" name="base-investments">
+							<summary class="cursor-pointer flex items-center justify-between py-2">
+								<span>
+									<span class="px-2">↓</span>
+									<span style="font-variant: all-small-caps" class="label">{{ base.name }}</span><br>
+								</span>
+
+								<span class="text-sm">{{- base_invest|number -}}</span>
+							</summary>
+
+							<div>
+								<ul class="sub-list-type-1" id="invest-base-{{ base.id }}">
+									<li>
+										<label for="school-form-base-{{ base.id }}" class="flex justify-between items-center">
+											<span>école de cmd.</span>
+											<span class="value">
+												{{- base.iSchool|number -}}
+											</span>
+										</label>
+
+										<form action="{{ path('update_base_investments', {'baseId': base.id, 'category': 'school'}) }}" method="POST" id="school-form-base-{{ base.id }}" class="flex py-2">
+											<twig:Input type="text" name="credit" value="{{ base.iSchool }}" class="w-48" />
+											<twig:Button type="submit" :faction="current_player.faction">
+												ok
+											</twig:Button>
+										</form>
+									</li>
+									<li>
+										<label for="spying-form-base-{{ base.id }}" class="flex items-center justify-between">
+											<span class="label">contre-espionnage</span>
+											<span class="value">
+												{{- base.iAntiSpy|number -}}
+											</span>
+										</label>
+
+										<form action="{{ path('update_base_investments', {'baseId': base.id, 'category': 'antispy'}) }}" method="POST" id="spying-form-base-{{ base.id }}" class="flex py-2">
+											<twig:Input type="text" name="credit" value="{{ base.iAntiSpy }}" class="w-48" />
+											<twig:Button type="submit" :faction="current_player.faction">
+												ok
+											</twig:Button>
+										</form>
+									</li>
+								</ul>
+							</div>
+						</details>
+					</li>
+				{% endfor %}
+
+				<li class="flex justify-between items-center py-2">
+					<strong>total des investissements</strong>
+					<span>
+						{{- investments_data.totalInvest|number -}}
+					</span>
+				</li>
+			</ul>
+		</section>
+	</twig:LayoutBox>
+{% endapply %}

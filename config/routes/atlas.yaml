@@ -1,0 +1,15 @@
+map:
+    path: /map
+    controller: App\Modules\Atlas\Infrastructure\Controller\MapController
+
+player_rankings:
+    path: /rankings/player
+    controller: App\Modules\Atlas\Infrastructure\Controller\ViewPlayerRankings
+
+faction_rankings:
+    path: /rankings/faction
+    controller: App\Modules\Atlas\Infrastructure\Controller\ViewFactionRankings
+
+view_more_rankings:
+    path: /rankings/more
+    controller: App\Modules\Atlas\Infrastructure\Controller\ViewMore

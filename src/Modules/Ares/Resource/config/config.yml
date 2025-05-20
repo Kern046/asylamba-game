@@ -1,0 +1,35 @@
+---
+parameters:
+    ares.commander.base_level: 100
+    ares.commander.income_level: 200
+
+    ares.coeff.move_in_system: 584
+    ares.coeff.move_out_of_system: 600
+    ares.coeff.move_intersystem: 1000
+
+    ares.coeff.colonization_cost: 80000
+    ares.coeff.conquest_cost: 150000
+
+    ares.loot_limit: 5000
+    ares.coeff.loot: 275
+    
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    _instanceof:
+        App\Shared\Application\SchedulerInterface:
+            tags: ['app.scheduler']
+
+    App\Modules\Ares\:
+        resource: '%kernel.project_dir%/src/Modules/Ares/'
+        exclude:
+            - '../../Message'
+            - '../../Model'
+            - '../../Resource'
+
+    App\Modules\Ares\Manager\ConquestManager:
+        arguments:
+            $colonizationCost: '%ares.coeff.colonization_cost%'
+            $conquestCost: '%ares.coeff.conquest_cost%'

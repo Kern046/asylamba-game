@@ -1,0 +1,30 @@
+<twig:LayoutBox>
+	<header>
+<!--		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">-->
+		<twig:H2>Général</twig:H2>
+		<twig:H5>Total de vos possessions</twig:H5>
+	</header>
+
+	<section>
+		{% for player_ranking in general_rankings %}
+			{{ include('atoms/rankings/top_mover.html.twig', {
+				'type': 'general',
+				'current_position': player_ranking.generalPosition,
+				loop,
+			}) }}
+
+			{{ include('molecules/rankings/player_ranking_card.html.twig', {
+				player_ranking,
+				'position': player_ranking.generalPosition,
+				'variation': player_ranking.generalVariation,
+				'value': player_ranking.general|number ~ ' point' ~ player_ranking.general|plural,
+			})}}
+
+			{{ include('atoms/rankings/bottom_mover.html.twig', {
+				'type': 'general',
+				'current_position': player_ranking.generalPosition,
+				loop,
+			}) }}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

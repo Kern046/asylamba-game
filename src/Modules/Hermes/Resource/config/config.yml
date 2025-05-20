@@ -1,0 +1,28 @@
+---
+parameters:
+    hermes.notifications.list_limit: 25
+    hermes.notifications.archive_limit: 5
+    hermes.notifications.premium_archive_limit: 50
+
+    hermes.notifications.display_tool: 5
+
+    hermes.notifications.timeout.read: 3       # days
+    hermes.notifications.timeout.unread: 10    # days
+
+    hermes.notifications.mrm.message_display: 50
+
+    hermes.notifications.msm.step_thread: 6
+    hermes.notifications.msm.step_next_thread: 3
+    hermes.notifications.msm.step_message: 10
+    
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Modules\Hermes\:
+        resource: '%kernel.project_dir%/src/Modules/Hermes/'
+        exclude:
+            - '../../Message'
+            - '../../Model'
+            - '../../Resource'

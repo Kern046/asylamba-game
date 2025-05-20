@@ -1,0 +1,23 @@
+---
+parameters:
+    politics_campaign_duration: 345600
+    politics_election_duration: 172800
+    politics_putsch_duration: 25200
+
+    politics_law_max_duration: 2400 # 100 days in standard mode, 16 and a half in fast mode
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    _instanceof:
+        App\Shared\Application\SchedulerInterface:
+            tags: ['app.scheduler']
+
+    App\Modules\Demeter\:
+        resource: '%kernel.project_dir%/src/Modules/Demeter/'
+        exclude:
+            - '../../Message'
+            - '../../Model'
+            - '../../Resource'

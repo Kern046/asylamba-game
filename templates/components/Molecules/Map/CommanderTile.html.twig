@@ -1,0 +1,32 @@
+<div class="commander-tile">
+	<section class="h-20">
+		{% block alerts %}
+			<twig:CommanderAlert identifier="no-commander" :factionIdentifier="current_player.faction.identifier">
+				Aucun commandant selectionné.
+				{#
+				<twig:Tooltip>
+					Sélectionnez-en un sur la barre latérale gauche.<br/>
+					Si aucun commandant n'est visible, vous pouvez en affecter un depuis l'école de commandement.
+				</twig:Tooltip>
+				#}
+			</twig:CommanderAlert>
+
+			<twig:CommanderAlert identifier="commander-too-far" :factionIdentifier="current_player.faction.identifier">
+				Ce commandant est trop éloigné pour piller cette planète.
+			</twig:CommanderAlert>
+		{% endblock alerts %}
+
+		<div class="commander-details flex bg-stone-800 border border-stone-600 rounded-md hidden px-1">
+			{% block travel_details %}
+				<twig:TravelDetail valueId="rank" labelId="name" />
+				<twig:TravelDetail valueId="travel-time" label="Durée" :value="travelTime" />
+			{% endblock %}
+		</div>
+	</section>
+
+	<footer>
+		<twig:Button class="confirm-button" :data-url="actionUrl" :faction="current_player.faction" :disabled="true" data-action="click->map--action-box#launchAction">
+			Lancer l'attaque
+		</twig:Button>
+	</footer>
+</div>

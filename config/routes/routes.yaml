@@ -1,0 +1,29 @@
+ares:
+    resource:
+        path: ../../src/Modules/Ares/Infrastructure/Controller/
+        namespace: App\Modules\Ares\Infrastructure\Controller
+    type: attribute
+
+zeus:
+    resource: '../../src/Modules/Zeus/Infrastructure/Controller/'
+    type: attribute
+
+portal:
+    resource: '../../src/Modules/Portal/Infrastructure/Controller/'
+    type: attribute
+
+connect:
+    path: /connect/{playerId}
+    controller: App\Shared\Infrastructure\Controller\ConnectController
+
+logout:
+    path: /logout
+    controller: App\Shared\Infrastructure\Controller\LogoutController
+
+params:
+    path: /params
+    controller: App\Shared\Infrastructure\Controller\ParamsController
+
+switch_param:
+    path: /param
+    controller: App\Shared\Infrastructure\Controller\SwitchParam

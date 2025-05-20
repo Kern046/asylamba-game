@@ -1,0 +1,18 @@
+<twig:LayoutBox>
+	<header>
+<!--		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">-->
+		<twig:H2>Général</twig:H2>
+		<twig:H5>Somme des points des joueurs de la faction</twig:H5>
+	</header>
+
+	<section>
+		{% for faction_ranking in general_rankings %}
+			{{ include('molecules/rankings/faction_ranking_card.html.twig', {
+				faction_ranking,
+				'value': faction_ranking.general|number(-1) ~ ' points',
+				'position': faction_ranking.generalPosition,
+				'variation': faction_ranking.generalVariation,
+			}) }}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

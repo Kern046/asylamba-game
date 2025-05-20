@@ -1,0 +1,53 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block bodyClasses 'overflow-y-auto relative pt-[7rem]' %}
+
+{% block body %}
+	<header class="mx-auto h-[104px] text-center fixed top-0 left-0 w-full z-10 bg-black flex items-center justify-center">
+		<h1 class="font-sans text-4xl text-white uppercase">Kalaxia</h1>
+	</header>
+
+	<!-- This example requires Tailwind CSS v2.0+ -->
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<!-- We've used 3xl here, but feel free to try other max-widths based on your needs -->
+		<div class="max-w-3xl mx-auto">
+			<!-- This example requires Tailwind CSS v2.0+ -->
+			<ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+				<li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow-sm divide-y divide-gray-200">
+					<a href="{{ path('registration_choose_faction', { 'highMode': false }) }}">
+						<div class="flex-1 flex flex-col p-8">
+							<img class="w-32 h-32 shrink-0 mx-auto rounded-full" src="{{ asset('build/media/avatar/big/empty.png') }}" alt="">
+							<h3 class="mt-6 text-gray-900 text-sm font-medium">Créer un personnage niveau 1</h3>
+						</div>
+					</a>
+				</li>
+				{% if high_mode %}
+					<li class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow-sm divide-y divide-gray-200">
+						<a href="{{ path('registration_choose_faction', { 'highMode': true }) }}">
+							<div class="flex-1 flex flex-col p-8">
+								<img class="w-32 h-32 shrink-0 mx-auto rounded-full" src="{{ asset('build/media/avatar/big/empty.png') }}" alt="">
+								<h3 class="mt-6 text-gray-900 text-sm font-medium">Créer un personnage niveau 5</h3>
+							</div>
+						</a>
+					</li>
+				{% endif %}
+
+				{% for player in active_players %}
+					<li class="col-span-1 flex flex-col text-center bg-medium{{ player.faction.identifier}} rounded-lg shadow-sm divide-y divide-gray-200">
+						<a class="color{{ player.faction.identifier }}" href="{{ path('connect', { 'playerId': player.id }) }}">
+							<div class="flex-1 flex flex-col p-8">
+								<span class="inline-block relative mx-auto">
+									<span class="absolute top-0 right-0 block h-6 w-6 transform -translate-y-1/2 translate-x-1/2 rounded-full ring-2 ring-white bg-gray-800 text-white inline-block text-center align-middle text-base">{{ player.level }}</span>
+									<twig:Avatar :player="player" />
+								</span>
+								<span class="mt-6 text-white font-mono text-lg">{{ player.name }}</span>
+							</div>
+						</a>
+					</li>
+
+				{% endfor %}
+				<!-- More people... -->
+			</ul>
+		</div>
+	</div>
+{% endblock %}

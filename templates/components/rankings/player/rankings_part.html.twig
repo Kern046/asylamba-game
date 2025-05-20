@@ -1,0 +1,26 @@
+{% for player_ranking in player_rankings %}
+	{% set data = get_player_ranking_data_by_type(player_ranking, type) %}
+
+	{% if 'next' == direction and bot > 1 %}
+		{{ include('atoms/rankings/top_mover.html.twig', {
+			type,
+			'current_position': data.position,
+			loop,
+		}) }}
+	{% endif %}
+
+	{{ include('molecules/rankings/player_ranking_card.html.twig', {
+		player_ranking,
+		'position': data.position,
+		'variation': data.variation,
+		'value': data.value|number ~ ' point' ~ data.value|plural,
+	})}}
+
+	{% if 'prev' == direction and constant('App\\Modules\\Atlas\\Model\\PlayerRanking::PAGE') == player_rankings|length %}
+		{{ include('atoms/rankings/bottom_mover.html.twig', {
+			type,
+			'current_position': data.position,
+			loop,
+		}) }}
+	{% endif %}
+{% endfor %}

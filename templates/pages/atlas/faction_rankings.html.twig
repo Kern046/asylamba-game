@@ -1,0 +1,14 @@
+{% extends 'layouts/atlas/ranking.html.twig' %}
+
+{% block page_title 'Classement faction' %}
+
+{% block content %}
+	{% if has_ranking %}
+		{{ include('components/rankings/faction/best_faction.html.twig', { best_faction }) }}
+		{{ include('components/rankings/faction/points_rankings.html.twig', { points_rankings, points_to_win }) }}
+		{{ include('components/rankings/faction/general_rankings.html.twig', { general_rankings }) }}
+		{{ include('components/rankings/faction/wealth_rankings.html.twig', { wealth_rankings }) }}
+		{{ include('components/rankings/faction/territorial_rankings.html.twig', { territorial_rankings }) }}
+		{{ include('components/rankings/faction/victory_info.html.twig') }}
+	{% endif %}
+{% endblock content %}

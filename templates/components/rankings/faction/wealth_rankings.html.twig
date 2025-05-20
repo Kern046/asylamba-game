@@ -1,0 +1,18 @@
+<twig:LayoutBox>
+	<header>
+<!--		<img class="main" alt="ressource" src="{{ asset('build/media/rank/cup.png') }}">-->
+		<twig:H2>Richesse</twig:H2>
+		<twig:H5>Revenu des routes commerciales de la faction</twig:H5>
+	</header>
+
+	<section>
+		{% for faction_ranking in wealth_rankings %}
+			{{ include('molecules/rankings/faction_ranking_card.html.twig', {
+				faction_ranking,
+				'value': faction_ranking.wealth|number(-1) ~ ' crédits',
+				'position': faction_ranking.wealthPosition,
+				'variation': faction_ranking.wealthVariation,
+			}) }}
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

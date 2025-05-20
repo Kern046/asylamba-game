@@ -1,0 +1,13 @@
+---
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Modules\Artemis\:
+        resource: '%kernel.project_dir%/src/Modules/Artemis/'
+        exclude:
+            - '../../Message'
+            - '../../Model'
+            - '../../Repository'
+            - '../../Resource'

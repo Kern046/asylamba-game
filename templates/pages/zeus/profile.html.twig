@@ -1,0 +1,24 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block body %}
+	{% if has_splash_mode %}
+		<div class="splash-screen">
+			<div class="modal">
+				<img src="{{ asset('avatar/big/jm-' ~ current_player_faction_id ~ '.png') }} . " alt="" />
+				<h1>Bienvenue sur Asylamba</h1>
+				<h2>Afin de bien commencer le jeu, cliquez sur l\'icône du tutoriel. Celui-ci vous guidera dans les premières étapes du jeu.</h2>
+			</div>
+		</div>
+	{% endif %}
+
+	{{ include('molecules/common/movers.html.twig') }}
+
+	<twig:ContentContainer class="flex gap-x-4">
+		<twig:Character :player="current_player" />
+
+		{# obFastView component #}
+		{% for orbital_base in player_bases %}
+			<twig:FastView :orbitalBase="orbital_base" :index="loop.index" :isProfileView="true" />
+		{% endfor %}
+	</twig:ContentContainer>
+{% endblock body %}

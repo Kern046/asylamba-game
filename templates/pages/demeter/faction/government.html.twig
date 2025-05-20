@@ -1,0 +1,46 @@
+{% extends 'layouts/demeter/faction.html.twig' %}
+
+{% block page_title 'Gouvernement' %}
+
+{% block content %}
+	<div class="flex gap-x-4">
+		{{ include('components/Faction/government/nav.html.twig') }}
+
+		{% set mode = app.request.query.get('mode', 'law') %}
+
+		{% if 'law' == mode %}
+			{% set laws_count = 0 %}
+
+			{#  @TODO Implement more proper way to loop though the laws #}
+			{% for i in 1..total_laws_count %}
+				{% if get_law_info(i, 'department') == current_player.status and get_law_info(i, 'isImplemented') %}
+					{% set laws_count = laws_count + 1 %}
+					{{ include('molecules/faction/government/law.html.twig', {'law_id': i}) }}
+				{% endif %}
+			{% endfor %}
+
+			{% if laws_count < 2 %}
+				{% for i in laws_count..1 %}
+					{{ include('molecules/common/default.html.twig') }}
+				{% endfor %}
+			{% endif %}
+		{% elseif 'news' == mode %}
+			{{ include('components/Faction/news/list.html.twig') }}
+
+			{% if faction_news_to_edit is not null %}
+				{{ include('components/Faction/news/edit.html.twig', { news: faction_news_to_edit }) }}
+			{% else %}
+				{{ include('components/Faction/news/create.html.twig') }}
+			{% endif %}
+		{% elseif 'message' == mode %}
+			{{ include('components/Faction/government/message.html.twig') }}
+		{% elseif 'description' == mode %}
+			{{ include('components/Faction/government/description.html.twig') }}
+		{% elseif 'credit' == mode %}
+			{{ include('components/Faction/government/credit.html.twig') }}
+		{% elseif 'manage' == mode %}
+			{{ include('components/Faction/government/manage/main.html.twig') }}
+			{{ include('molecules/common/default.html.twig') }}
+		{% endif %}
+	</div>
+{% endblock content %}

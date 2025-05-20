@@ -1,0 +1,15 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Athena\Model\CommercialTax" table="commercialTax">
+		<id name="id" type="uuid" />
+
+		<many-to-one field="faction" target-entity="App\Modules\Demeter\Model\Color">
+			<join-column nullable="false" />
+		</many-to-one>
+		<many-to-one field="relatedFaction" target-entity="App\Modules\Demeter\Model\Color">
+			<join-column nullable="false" />
+		</many-to-one>
+
+		<field name="importTax" type="smallint" />
+		<field name="exportTax" type="smallint" />
+	</entity>
+</doctrine-mapping>

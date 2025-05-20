@@ -1,0 +1,17 @@
+{% extends 'layouts/ares/fleet.html.twig' %}
+
+{% block content %}
+	<twig:PageTitle>
+		Centre des opérations
+	</twig:PageTitle>
+
+	<div class="grid grid-cols-3">
+		{{ include('components/fleet/list.html.twig') }}
+
+		{% if commander is defined and commander is not null %}
+			{{ include('components/fleet/commander_details.html.twig') }}
+			{{ include('components/fleet/commander_fleet.html.twig') }}
+		{% endif %}
+	</div>
+
+{% endblock content %}

@@ -1,29 +1,22 @@
 {
-  "name": "asylamba-game",
-  "version": "1.0.0",
-  "description": "ASYLAMBA : Expansion Stellaire",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rtfmcorp/asylamba-game.git"
-  },
-  "author": "RTFM Corp.",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/rtfmcorp/asylamba-game/issues"
-  },
-  "homepage": "https://github.com/rtfmcorp/asylamba-game#readme",
-  "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-imagemin": "^3.1.1",
-    "gulp-jshint": "^2.0.4",
-    "gulp-less": "^3.1.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.5.4",
-    "gulp-util": "^3.0.7",
-    "jshint": "^2.9.4"
-  }
+    "devDependencies": {
+        "@hotwired/stimulus": "^3.0.0",
+        "@symfony/stimulus-bridge": "^3.2.0",
+        "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
+        "autoprefixer": "^10.4",
+        "core-js": "^3.37",
+        "file-loader": "^6.2.0",
+        "postcss": "^8.4",
+        "postcss-loader": "^8.1",
+        "raw-loader": "^4.0",
+        "regenerator-runtime": "^0.14",
+        "tailwindcss": "^4.0.0"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "dependencies": {
+        "@hotwired/turbo": "^8.0.13",
+        "@tailwindcss/forms": "^0.5",
+        "chart.js": "^4.4.3"
+    }
 }

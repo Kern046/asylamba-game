@@ -1,0 +1,23 @@
+<twig:LayoutBox class="component new-message">
+	<header>
+		<twig:H2>
+			Envoyer à votre faction
+		</twig:H2>
+	</header>
+
+	<section>
+		<form action="{{ path('send_credits_to_faction') }}" method="post" >
+			<div>
+				<label for="send-credit-faction">Nombre de crédits</label>
+			</div>
+
+			<div>
+				<twig:Input type="number" id="send-credit-faction" name="quantity" />
+			</div>
+
+			<twig:Button type="submit" :faction="current_player.faction" class="mt-2">
+				Envoyer
+			</twig:Button>
+		</form>
+	</section>
+</twig:LayoutBox>

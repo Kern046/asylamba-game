@@ -1,0 +1,13 @@
+services:
+    ###> symfony/mercure-bundle ###
+    mercure:
+        environment:
+            # Uncomment the following line to disable HTTPS,
+            SERVER_NAME: ':80'
+            #SERVER_NAME: 'mercure.kalaxia.local'
+            MERCURE_PUBLISHER_JWT_KEY: '2eeDS20V0ySXnFwZFZMTp2B0aoCLqVdDzadiazjdaizd'
+            MERCURE_SUBSCRIBER_JWT_KEY: '2eeDS20V0ySXnFwZFZMTp2B0aoCLqVdDzadiazjdaizd'
+            MERCURE_EXTRA_DIRECTIVES: |
+                cors_origins https://kalaxia.local
+        # command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
+    ###< symfony/mercure-bundle ###

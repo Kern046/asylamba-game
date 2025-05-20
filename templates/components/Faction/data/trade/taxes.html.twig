@@ -1,0 +1,20 @@
+<div class="w-96">
+	<header>
+		<twig:H2>{{ label }}</twig:H2>
+	</header>
+	<section class="mt-4">
+		{% for tax in taxes %}
+			{% set faction_id = tax.relatedFaction.identifier %}
+			<div class="flex items-center gap-x-4 border-t border-gray-700 p-2">
+				<a href="{{ path('embassy', {'faction': faction_id}) }}" class="w-14 flex justify-center">
+					<twig:FactionBanner :faction="tax.relatedFaction" class="h-14"/>
+				</a>
+
+				<div>
+					<span class="text-sm">produits {{ get_faction_info(faction_id, 'demonym') }}</span><br>
+					<strong class="text-lg">{{ tax.importTax }} %</strong>
+				</div>
+			</div>
+		{% endfor %}
+	</section>
+</div>

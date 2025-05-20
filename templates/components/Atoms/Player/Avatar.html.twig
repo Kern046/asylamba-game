@@ -1,0 +1,5 @@
+<img {{ attributes.defaults({
+	src: asset('images/avatars/' ~ this.getAvatar()),
+	alt: 'Avatar de ' ~ player.name ?? 'joueur',
+	class: 'w-32 h-32 shrink-0 mx-auto rounded-full bg-dark' ~ player.faction.identifier ?? current_player.faction.identifier,
+ }) }} />

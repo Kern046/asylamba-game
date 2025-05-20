@@ -1,0 +1,43 @@
+---
+parameters:
+    zeus.player.base_level: 1250
+    zeus.player.base_commander_level: 100
+    zeus.player.base_ap: 10
+    zeus.player.coeff_ap: 5
+
+    zeus.player.tax_coeff: 1
+
+    zeus.player.ally_inactive_time: 168     # 7 days
+    zeus.player.global_inactive_time: 360   # 15 days
+    zeus.player.inactive_time_limit: 600    # 25 days
+
+    zeus.player_financial_reports.timeout: 60 #days
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        bind:
+            $gaiaId: '%id_gaia%'
+
+    App\Modules\Zeus\:
+        resource: '%kernel.project_dir%/src/Modules/Zeus/'
+        exclude:
+            - '../../Message'
+            - '../../Model'
+            - '../../Resource'
+
+    App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface: '@App\Modules\Zeus\Application\Handler\Bonus\BonusApplier'
+
+    App\Modules\Zeus\Infrastructure\ArgumentResolver\CurrentPlayerValueResolver:
+        tags:
+            - { name: 'controller.argument_value_resolver', priority: 150 }
+
+    App\Modules\Zeus\Infrastructure\Twig\PlayerExtension:
+        arguments:
+            $timeEventUpdate: '%time_event_update%'
+            $allyInactiveTime: '%zeus.player.ally_inactive_time%'
+
+when@dev:
+    services:
+        App\Modules\Zeus\Application\Handler\Bonus\BonusApplierInterface: '@App\Modules\Zeus\Application\Handler\Bonus\TraceableBonusApplier'

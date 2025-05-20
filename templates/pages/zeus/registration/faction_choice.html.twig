@@ -1,0 +1,11 @@
+{% extends 'layouts/zeus/registration.html.twig' %}
+
+{% block content %}
+	<div id="content" class="mt-4">
+		<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-8 py-2 px-2 md:px-8">
+			{% for faction_data in sorted_factions|filter(data => data.faction.identifier != 0) %}
+				<twig:Molecules:FactionChoice :index="loop.index" :faction="faction_data.faction" />
+			{% endfor %}
+		</div>
+	</div>
+{% endblock content %}

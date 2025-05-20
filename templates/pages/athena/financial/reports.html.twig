@@ -1,0 +1,83 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block body %}
+	<div id="background-paralax" class="financial"></div>
+
+	{{ include('molecules/financial/subnav.html.twig') }}
+	{{ include('molecules/common/movers.html.twig') }}
+
+	<div id="content">
+		{{ include ('molecules/common/advertising.html.twig') }}
+
+		<div class="component size2">
+			<div class="head skin-1">
+				<h1>Rapports généraux</h1>
+			</div>
+			<div class="fix-body">
+				<div class="body">
+					<canvas id="financial-report-chart">
+
+					</canvas>
+				</div>
+			</div>
+		</div>
+
+		<div class="component size1">
+			<div class="head skin-1">
+				<img src="{{ asset('build/media/financial/commercial-route.png') }}" alt="commerce" />
+				<h2>Commerce</h2>
+				<em>Routes et échanges commerciaux</em>
+			</div>
+			<div class="fix-body">
+				<div class="body h-full">
+					<canvas id="commercial-report-chart" class="h-full">
+
+					</canvas>
+				</div>
+			</div>
+		</div>
+
+		<div class="component size1">
+			<div class="head skin-1">
+				<img src="{{ asset('build/media/financial/invest.png') }}" alt="gestions planétaires" />
+				<h2>Gestion</h2>
+				<em>Investissements et revenus des planètes sous votre contrôle</em>
+			</div>
+			<div class="fix-body">
+				<div class="body h-full">
+					<canvas id="investments-report-chart" class="h-full">
+
+					</canvas>
+				</div>
+			</div>
+		</div>
+
+		<div class="component size1">
+			<div class="head skin-1">
+				<img src="{{ asset('build/media/financial/taxout.png') }}" alt="transferts" />
+				<h2>Transferts</h2>
+				<em>Transferts de fond entre dirigeant-es et factions</em>
+			</div>
+			<div class="fix-body">
+				<div class="body h-full">
+					<canvas id="transfer-report-chart" class="h-full">
+
+					</canvas>
+				</div>
+			</div>
+		</div>
+
+	</div>
+{% endblock body %}
+
+
+{% block javascripts %}
+	{{ parent() }}
+
+	<script type="application/javascript">
+		window.reports_labels = {{ reports_labels|json_encode()|raw }};
+		window.reports_data = {{ reports_data|json_encode()|raw }};
+	</script>
+
+	{{ encore_entry_script_tags('financial_reports') }}
+{% endblock javascripts %}

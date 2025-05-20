@@ -1,0 +1,24 @@
+{% extends 'components/Molecules/Ranking/RankingCard.html.twig' %}
+
+{% set statuses = get_faction_info(player_ranking.player.faction.identifier, 'status') %}
+
+{% block picture %}
+	<a href="{{ path('embassy', {'player': player_ranking.player.id}) }}">
+		<twig:Avatar :player="player_ranking.player" class="min-w-12 max-w-12 min-h-12 max-h-12" />
+	</a>
+{% endblock picture %}
+
+{% block name %}
+	<span class="title text-sm">{{ statuses[player_ranking.player.status - 1] }}</span>
+	<strong class="name">{{ player_ranking.player.name }}</strong>
+{% endblock name %}
+
+{% block value value|raw %}
+
+{% block extra_classes 'border-l-8 my-2 border-medium' ~ player_ranking.player.faction.identifier ~ current_player.id == player_ranking.player.id  ? ' active' : '' %}
+
+{% block position_class current_player.id == player_ranking.player.id ? 'bg-gray-200 text-gray-900' : 'bg-gray-800' %}
+
+{% block variation %}
+	{{ include('atoms/rankings/faction_position.html.twig', { position, variation })}}
+{% endblock variation %}

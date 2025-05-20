@@ -1,0 +1,19 @@
+<twig:LayoutBox>
+	<section class="flex flex-col divide-gray-900 divide-y">
+		{% for f in factions %}
+			<a href="{{ path('embassy', {'faction': f.identifier}) }}" class="flex items-center gap-x-2 {% if faction.id == f.id %}bg-gray-900{% endif %} px-4 py-2 bg-gray-700 hover:bg-gray-900 transition-[background-color] duration-150 ease-in">
+				<twig:FactionBanner :faction="f" class="w-10 h-10"/>
+
+				<div>
+					<div>
+						<strong>{{ get_faction_info(f.identifier, 'officialName') }}</strong>
+					</div>
+
+					<div>
+						<em class="text-xs">Ambassade des {{ get_faction_info(f.identifier, 'demonym')|capitalize }}</em>
+					</div>
+				</div>
+			</a>
+		{% endfor %}
+	</section>
+</twig:LayoutBox>

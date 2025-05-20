@@ -1,67 +1,46 @@
-Guide du contributeur
-=====================
+Guide for the contributor
+=========================
 
-Il y a plusieurs moyens de contribuer :
+You can contribute in two different ways :
 
-- Si vous trouvez un problème dans le jeu, vous pouvez ouvrir une [*issue*](https://github.com/rtfmcorp/asylamba-game/issues) en décrivant le problème, directement dans l'interface de Github.
-- Si vous voulez directement corriger un problème, vous pouvez le faire, pour cela merci de suivre la procédure ci-dessous.
-
-
-Quel type de problème régler ?
-------------------------------
-
-Il est possible de trouver une *issue* que vous souhaitez régler. Dans ce cas, mettez un commentaire dans l'issue, ainsi on saura que vous bossez dessus. S'il n'y a pas d'issues, vous pouvez soit la créer, soit directement faire le correctif.
-
-Voici les différentes choses que vous pouvez faire :
-
-- corriger des fautes d'orthographe ou fautes de frappe
-- faire du refactoring, optimisation
-- optimiser l'interface (reponsive design par exemple)
-- créer de la documentation (dans ce cas, il serait mieux de discuter en premier lieu de la technique utilisée, ainsi d'autres personnes pourront vous aider, et vous aurez plus de chance que ça soit accepté)
-
-En ce qui concerne l'ajout ou la modification de fonctionnalités, il est fort probable que ça soit refusé. Si vous souhaitez vous lancer là-dedans, il faut en discuter au préalable avec l'équipe de développement, directement sur le forum du jeu ou sur le serveur Discord d'Asylamba. Cela permettra de ne pas sortir de la ligne directrice.
+- Open an issue : If you find something wrong or something that can be done better, just open an [*issue*](https://github.com/rtfmcorp/asylamba-game/issues) and describe as good as you can the problem.
+- Propose a PR : If you want to resolve something, you can do it, just follow the precedure down below.
 
 
-Comment contribuer ?
---------------------
+What type of problem can I solve ?
+----------------------------------
 
-En premier lieu, vous devez *forker* le dépôt sur votre compte. A partir de là, vous pouvez faire divers *commit* pour arriver à votre but. Quand tout fonctionne vous pouvez soumettre une *pull request* sur la branche *dev* du dépôt principal.
+You can search for an issue you want to solve. In this case, please comment the issue so that we know you're working on it. If there's no issues you can create it.
 
-La branche principale est *master*, la branche *dev* sert au développement. Nous n'accepterons donc des PR que sur cette dernière.
+Here are the things you can do :
 
-*Conseil : Nous vous conseillons de faire une branche sur votre fork pour faire vos modifications. Ainsi le temps que votre PR soit acceptée ou refusée, vous pouvez faire d'autres branches pour bosser sur d'autres issues. Pensez que tous les commits faits après une PR sur la même branche sont ajouté à la PR.* 
+- correct orthograph or typing errors
+- make refactoring, optimizations
+- work on the interface (make it responsive for example)
+- create documentation
+- optimize the installation process
 
-Un guide de contribution officiel est disponible [ici](https://guides.github.com/activities/contributing-to-open-source/#contributing). Nous sommes également disponible si vous avez des questions sur la façon de faire. Vous pouvez nous contacter sur Asylamba, par mail ou sur Discord.
-
-
-Les bonnes pratiques
---------------------
-
-- respecter les conventions au niveau du code (espacement, retour à la ligne, tabulations, nommage)
-- le code (nom de variables, etc.) doit être en anglais
-- les commentaires sont en anglais ou en français
-- les commits doivent avoir un nom clair (soit en français soit en anglais)
-- un commit modifie/améliore une chose, ça doit être clair et concis
-- chaque modification/ajout doit être accompagné de tests unitaires pertinents assurant le bon fonctionnement du code
+If you want to add or modify game features, it's likely that the PR will be rejected.
+If you want to do it, please start a discussion with the dev team first, we'll talk together about what you want to do (open an issue).
 
 
-Modifier l'interface
---------------------
+How to contribute ?
+-------------------
 
-Si vous souhaitez modifier le CSS, il faudra éditer les fichiers au format [LESS](http://lesscss.org) se trouvant dans `public/css/less/`. Afin de compiler ces fichiers en CSS, il faut utiliser [Gulp](http://gulpjs.com). Vous devez d'abord installer NPM puis GULP sur votre système, ensuite il faut installer les dépendances du projet en tapant :
+First you need to fork the repo. Then you can work on your version of the game and make commits. When it's done you can submit a pull request on the *dev* branch of the main repo.
 
-    npm install
+The main branch is *master*, the *dev* branch is used for development. We'll not accept PRs on the *master* branch.
 
-Les dépendances s'installeront dans le dossier `node_modules/`. Pour compiler le CSS, il suffit de taper :
+*Hint : Make a branch on your fork to do modifications so that you can work on another issue while waiting for the approval/rejection of your PR. Don't forget that all the commits you do on the same branch after the PR will be added to the PR.*
 
-    gulp less
+An official guide for the contributions is available [here](https://guides.github.com/activities/contributing-to-open-source/#contributing).
+If you have any question, don't hesitate to open an issue !
 
 
-Tester l'application
----------------------
+Good practices
+--------------
 
-Pour lancer les tests automatisés de l'application, vous pouvez lancer la commande suivante :
-
-```sh
-make test
-```
+- respect the code conventions (spacing, new lines, tabs, naming)
+- the code must be in english (variables names, comments, ...)
+- the commits names must be clear (in english), it modifies/improves one thing, it must be clear and concise
+- each modification must be unit tested to ensure the safety of the code

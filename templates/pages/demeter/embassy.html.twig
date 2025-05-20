@@ -1,0 +1,26 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block left_sidebar %}
+	<twig:Sidebar>
+		<twig:SidebarItem route="embassy" :params="{'faction': current_player.faction.identifier }" :is-active="app.request.query.has('faction')" picto="build/media/rank/faction.png" label="Ambassades" />
+		<twig:SidebarItem route="embassy" :params="{'player': current_player.id}" :is-active="app.request.query.has('player')" picto="build/media/profil/diary.png" label="Journal" />
+	</twig:Sidebar>
+{% endblock left_sidebar %}
+
+{% block body %}
+	<twig:PageTitle>
+		Ambassades
+	</twig:PageTitle>
+
+	<twig:ContentContainer class="flex gap-x-4">
+		{% if player is defined %}
+			{{ include('molecules/embassy/player_search.html.twig') }}
+			{{ include('molecules/embassy/player_bases.html.twig') }}
+		{% else %}
+			{{ include('molecules/embassy/faction_nav.html.twig') }}
+			{{ include('molecules/embassy/faction_flag.html.twig') }}
+			{{ include('molecules/embassy/faction_government.html.twig') }}
+			{{ include('components/Faction/data/diplomacy/relations.html.twig') }}
+		{% endif %}
+	</twig:ContentContainer>
+{% endblock body %}

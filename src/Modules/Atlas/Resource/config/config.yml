@@ -1,0 +1,17 @@
+---
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Modules\Atlas\:
+        resource: '%kernel.project_dir%/src/Modules/Atlas/'
+        exclude:
+            - '../../Message'
+            - '../../Model'
+            - '../../Resource'
+
+    App\Modules\Atlas\Manager\RankingManager:
+        arguments:
+            $pointsToWin: '%points_to_win%'
+            $jeanMiId: '%id_jeanmi%'

@@ -1,0 +1,22 @@
+{% set name = this.name %}
+
+<details name="base-type" class="marker:content-[''] bg-gray-700">
+	<summary>
+		<twig:H3 class="p-2 cursor-pointer">
+			{{ name }}
+		</twig:H3>
+	</summary>
+
+	<div class="py-2 px-4 border-t border-gray-900 bg-gray-900">
+		<p class="flex justify-between items-center">
+			<strong class="short">Flottes</strong>
+			{{ this.fleetQuantity }}
+		</p>
+		<p class="flex justify-between items-center">
+			<strong class="short">Impôt</strong>
+			{{ this.taxToll }}%
+		</p>
+
+		{% block content %}{% endblock content %}
+	</div>
+</details>

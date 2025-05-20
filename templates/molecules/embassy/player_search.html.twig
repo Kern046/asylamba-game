@@ -1,0 +1,32 @@
+{% set faction_statuses = get_faction_info(player.faction.identifier, 'status') %}
+
+<twig:LayoutBox>
+	<header>
+		<twig:H2>Recherchez un joueur</twig:H2>
+	</header>
+	<div class="mt-2">
+		<div class="top">
+			<form action="{{ path('search_player') }}" method="post">
+				<label>
+
+					<input type="hidden" name="playerid" class="autocomplete-hidden" />
+					<twig:Input type="text" name="name" class="autocomplete-player ac_input" autocomplete="off" />
+				</label>
+			</form>
+		</div>
+		<div class="mt-4 flex">
+			<twig:Avatar :player="player" class="w-24 h-24" />
+
+			<div class="ml-4">
+				<twig:H3>{{ player.name }}</twig:H3>
+				<p>{{ faction_statuses[player.status - 1] }} de {{ get_faction_info(player.faction.identifier, 'popularName') }}</p>
+				<p>niveau {{ player.level }}</p>
+
+				{% if player.id != current_player.id %}
+					<hr />
+					<p><a href="{{ path('communication_center', {'conversationId': 'new', 'sendto': player.id}) }}" style="text-decoration: none; color: white; border-bottom: solid 1px #4f4f4f">Envoyer un message</a></p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</twig:LayoutBox>

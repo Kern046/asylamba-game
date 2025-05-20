@@ -1,0 +1,17 @@
+<div id="subnav">
+	<button class="move-side-bar top" data-dir="up"></button>
+	<div class="flex flex-col">
+		<a href="{{ path('financial_investments') }}" class="item {% if app.request.get('_route') == 'financial_investments' %}active{% endif %}">
+			Investissement
+		</a>
+
+		<a href="{{ path('financial_transfers') }}" class="item {% if app.request.get('_route') == 'financial_transfers' %}active{% endif %}">
+			Envoi de crédit
+		</a>
+
+		<a href="{{ path('financial_reports') }}" class="item {% if app.request.get('_route') == 'financial_reports' %}active{% endif %}">
+			Rapports financiers
+		</a>
+	</div>
+	<button class="move-side-bar bottom" data-dir="down"></button>
+</div>

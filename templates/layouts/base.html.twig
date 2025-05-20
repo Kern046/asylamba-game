@@ -1,0 +1,33 @@
+{% set faction_id = (app.session.get('inscription') is not null and app.session.get('inscription').has('ally'))
+	? app.session.get('inscription').get('ally')
+	: current_player_faction_id is defined ? current_player_faction_id : 0
+%}
+
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<title>
+			{%- block title -%}
+				Kalaxia
+			{%- endblock title -%}
+		</title>
+
+		<meta charset="utf-8" />
+		<meta name="turbo-prefetch" content="false">
+		<meta name="description" content="Kalaxia, jeu de stratégie multijoueurs" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" href="{{ asset('images/logo.png') }}" />
+
+		{# <link rel="icon" type="image/png" href="{{ asset('build/media/favicon/color' ~ (faction_id != 0 ? faction_id : 1) ~ '.png') }}" /> #}
+		{% block stylesheets %}
+			<link rel="stylesheet" type="text/css" href="{{ asset('styles/faction_colors/all.css') }}" />
+		{% endblock %}
+
+		{% block javascripts %}
+			{% block importmap %}{{ importmap('app') }}{% endblock %}
+		{% endblock %}
+	</head>
+	<body class="color{{ faction_id }} {% block bodyClasses %}no-scrolling{% endblock bodyClasses %} {% if 'registration' in app.request.get('_route') %}inscription{% endif %} bg-black" data-init-sftr="2">
+		{% block body %}{% endblock body %}
+	</body>
+</html>

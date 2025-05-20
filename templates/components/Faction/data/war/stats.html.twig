@@ -1,0 +1,50 @@
+<div>
+	<header>
+		<twig:H2>Etat des armées</twig:H2>
+	</header>
+	<section>
+		<twig:H3>Statistiques générales</twig:H3>
+
+		<twig:NumberBox label="officiers actifs">
+			{{ commander_stats.nb|number }}
+
+			<twig:block name="upper_links">
+				<a href="#" title="officiers affectés en première ou deuxième ligne sur des planètes de la faction" class="text-xs">?</a>
+			</twig:block>
+		</twig:NumberBox>
+
+		<twig:NumberBox label="grade moyen des officiers actifs">
+			{{ commander_stats.avgLevel is defined and commander_stats.avgLevel is not null ? get_commander_rank(commander_stats.avgLevel|round) : 'Inconnu' }}
+		</twig:NumberBox>
+
+		<twig:NumberBox label="PEV totaux">
+			{{ total_pev|number }}
+
+			<twig:block name="upper_links">
+				<a href="#" title="PEV affectés à des commandants actifs" class="text-xs">?</a>
+			</twig:block>
+		</twig:NumberBox>
+
+		<twig:NumberBox label="PEV moyens par officier">
+			{{ commander_stats.nb is defined and commander_stats.nb != 0 ? (total_pev/commander_stats.nb)|number : 0 }}
+		</twig:NumberBox>
+
+		<twig:H3 class="mt-4">
+			Nombre d'appareils par type
+		</twig:H3>
+
+		<ul class="mt-2">
+			{# @TODO loop through ship models more properly #}
+			{% for i in 0..11 %}
+				<li class="flex items-center justify-between py-2 border-t border-gray-700">
+					<img class="fill-red-500 w-8" src="{{ asset('images/legacy/picto/ships/types/' ~ get_ship_info(i, 'picto') ~ '.svg') }}" alt="" />
+
+					<div class="text-right">
+						<span class="text-sm">{{ get_ship_info(i, 'name') }} &laquo;{{ get_ship_info(i, 'codeName') }}&raquo;</span><br>
+						<span class="text-lg font-semibold">{{ (fleet_stats['nbs' ~ i] ?? 0)|number }}</span>
+					</div>
+				</li>
+			{% endfor %}
+		</ul>
+	</section>
+</div>

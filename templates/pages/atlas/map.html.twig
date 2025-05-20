@@ -1,0 +1,67 @@
+{% extends 'layouts/map.html.twig' %}
+
+{% set map_size = galaxy_configuration.scale * galaxy_configuration.galaxy.size %}
+
+{% block left_sidebar %}
+	{{ include('molecules/map/commanders.html.twig', { local_commanders }) }}
+{% endblock left_sidebar %}
+
+{% block body %}
+	<twig:MapLoader />
+
+	{# map sytems #}
+
+	<div id="map-container"
+		 class="fixed top-0 left-0 w-full h-full origin-[50%_50%] transition-transform ease-out duration-500"
+		 data-controller="map--zoom"
+		 data-action="wheel@window->map--zoom#onWheel:prevent:stop"
+	>
+		<div id="map"
+			 class="relative w-full h-full transition-transform ease-out duration-500 active:cursor-grabbing group/map"
+			 data-controller="map--movements"
+			 data-action="mousedown@window->map--movements#onMouseDown mouseup@window->map--movements#onMouseUp mousemove@window->map--movements#onMouseMove:prevent"
+			 data-map--movements-begin-x-position-value="{{ default_position.x }}"
+			 data-map--movements-begin-y-position-value="{{ default_position.y }}"
+			 data-map--movements-scale-value="{{ galaxy_configuration.scale }}"
+			 data-map--movements-map--loader-outlet="#loader-overlay"
+			 data-map--zoom-target="map"
+			 style="width: {{ map_size }}px; height: {{ map_size }}px;"
+		>
+
+			{{ include('components/map/sectors.html.twig', { sectors, map_size, galaxy_configuration }) }}
+			{{ include('molecules/map/spying_circles.html.twig', { player_bases, map_size, galaxy_configuration }) }}
+
+			{{ include('molecules/map/current_base.html.twig', { player_bases, map_size, galaxy_configuration }) }}
+			{{ include('molecules/map/commercial_routes.html.twig', { commercial_routes, default_map_parameters, map_size, galaxy_configuration }) }}
+			{{ include('molecules/map/fleet_movements.html.twig', { moving_commanders, default_map_parameters, map_size }) }}
+			{{ include('molecules/map/attacks.html.twig', { attacking_commanders, default_map_parameters, map_size }) }}
+
+			{{ include('molecules/map/systems.html.twig', { 'current_system_id': default_position['system_id'], systems, sectors, map_size }) }}
+			{# {{ include('molecules/map/legend.html.twig') }} #}
+		</div>
+	</div>
+	
+	
+
+	<div id="coord-box"></div>
+
+	<dialog id="action-box"
+			data-controller="map--action-box"
+			data-map--action-box-map--commander-outlet="#commanders"
+			{% if default_position.system is not null %}open{% endif %}
+			class="fixed bottom-0 w-full bg-black text-white z-[1000]">
+		{% if default_position.system is not null %}
+			{% set no_ajax = true %}
+
+			{{ include('components/map/system_details.html.twig', {
+				places,
+				no_ajax,
+				moving_commanders,
+				recycling_missions,
+				technologies,
+				colonization_cost,
+				conquest_cost,
+			}) }}
+		{% endif %}
+	</dialog>
+{% endblock body %}

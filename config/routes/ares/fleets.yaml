@@ -1,0 +1,15 @@
+move_fleet:
+    path: /{id}/move
+    controller: App\Modules\Ares\Infrastructure\Controller\Fleet\Move
+
+colonize:
+    path: /{id}/colonize
+    controller: App\Modules\Ares\Infrastructure\Controller\Fleet\Colonize
+
+conquer:
+    path: /{id}/conquer
+    controller: App\Modules\Ares\Infrastructure\Controller\Fleet\Conquer
+
+cancel_fleet_movement:
+    path: /{id}/cancel
+    controller: App\Modules\Ares\Infrastructure\Controller\Fleet\Cancel

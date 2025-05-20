@@ -1,0 +1,144 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block left_sidebar %}
+	{{ include('molecules/common/subnav.html.twig') }}
+{% endblock left_sidebar %}
+
+{% block body %}
+	<twig:PageTitle>
+		Université
+<!--		<em>recherche & développement</em>-->
+	</twig:PageTitle>
+
+	<twig:ContentContainer class="flex gap-x-4" data-controller="university" data-university-investment-value="{{ current_player.iUniversity }}">
+		<twig:LayoutBox class="min-w-80">
+			<section class="flex flex-col gap-y-2">
+				<twig:NumberBox label="investissements alloués à l'université" id="uni-total-invest" data-invest="{{ current_player.iUniversity }}" data-baseid="{{ current_player.id }}">
+					{{ current_player.iUniversity|number }}
+
+					<twig:block name="upper_links">
+						<a title="modifier" href="{{ path('financial_investments') }}">→</a>
+					</twig:block>
+				</twig:NumberBox>
+
+				<twig:NumberBox label="bonus d'efficacité d'investissement">
+					{{ university_investment_bonus }} %
+				</twig:NumberBox>
+
+				<hr />
+
+				<twig:NumberBox label="sciences naturelles" id="uni-percent-natural" :percent="current_player.partNaturalSciences">
+					<span data-university-target="part" data-type="natural">{{ current_player.partNaturalSciences }}</span> %
+
+					<twig:block name="upper_links">
+						<div data-action="click->university#decrease" data-type="natural">-</div>
+						<div data-action="click->university#increase" data-type="natural">+</div>
+					</twig:block>
+				</twig:NumberBox>
+
+				<twig:NumberBox label="ingénierie informatique" id="uni-percent-informatic" :percent="current_player.partInformaticEngineering">
+					<span data-university-target="part" data-type="informatic">{{ current_player.partInformaticEngineering }}</span> %
+
+					<twig:block name="upper_links">
+						<div data-action="click->university#decrease" data-type="informatic">-</div>
+						<div data-action="click->university#increase" data-type="informatic">+</div>
+					</twig:block>
+				</twig:NumberBox>
+
+				<twig:NumberBox label="sciences politiques" :percent="current_player.partLifeSciences">
+					<span data-university-target="part" data-type="life">{{ current_player.partLifeSciences }}</span> %
+
+					<twig:block name="upper_links">
+						<div data-action="click->university#decrease" data-type="life">-</div>
+						<div data-action="click->university#increase" data-type="life">+</div>
+					</twig:block>
+				</twig:NumberBox>
+
+				<twig:NumberBox label="sciences économiques & sociales" :percent="current_player.partSocialPoliticalSciences">
+					<span data-university-target="part" data-type="social">{{ current_player.partSocialPoliticalSciences }}</span> %
+
+					<twig:block name="upper_links">
+						<div data-action="click->university#decrease" data-type="social">-</div>
+						<div data-action="click->university#increase" data-type="social">+</div>
+					</twig:block>
+				</twig:NumberBox>
+
+				{% set rest = 100 - [
+					current_player.partLifeSciences,
+					current_player.partNaturalSciences,
+					current_player.partInformaticEngineering,
+					current_player.partSocialPoliticalSciences,
+				]|reduce((sum, v) => sum + v, 0) %}
+
+				<twig:NumberBox label="non attribué" :percent="rest" :class="rest is same as(0) ? 'hidden' : ''" data-university-target="rest">
+					<span id="rest">{{ rest }}</span> %
+				</twig:NumberBox>
+
+				<p class="text-xs mt-4">Augmente ou baisse tes investissements par 10% avec "CTRL + clic" ou "CMD + clic".</p>
+			</section>
+		</twig:LayoutBox>
+
+		<div class="min-w-80">
+			<twig:NumberBox label="part pour les sciences naturelles" id="uni-invest-natural">
+				<span data-university-target="investment" data-type="natural">
+					{{ (current_player.iUniversity * current_player.partNaturalSciences / 100)|round|number }}
+				</span>
+			</twig:NumberBox>
+
+			<twig:UniversityResearchItem type="MATH" :level="research.mathLevel" />
+			<twig:UniversityResearchItem type="CHEM" :level="research.chemLevel" />
+			<twig:UniversityResearchItem type="PHYS" :level="research.physLevel" />
+
+			<hr class="my-2" />
+
+			<twig:NumberBox label="part pour les sciences politiques" id="uni-invest-life">
+				<span data-university-target="investment" data-type="life">
+					{{ (current_player.iUniversity * current_player.partLifeSciences / 100)|round|number }}
+				</span>
+			</twig:NumberBox>
+
+			<twig:UniversityResearchItem type="LAW" :level="research.bioLevel" />
+			<twig:UniversityResearchItem type="COMM" :level="research.mediLevel" />
+		</div>
+
+		<div class="min-w-80">
+			<twig:NumberBox label="part pour l'ingénierie informatique" id="uni-invest-informatic">
+				<span data-university-target="investment" data-type="informatic">
+					{{ (current_player.iUniversity * current_player.partInformaticEngineering / 100)|round|number }}
+				</span>
+			</twig:NumberBox>
+
+			<twig:UniversityResearchItem type="NETWORK" :level="research.networkLevel" />
+			<twig:UniversityResearchItem type="ALGO" :level="research.algoLevel" />
+			<twig:UniversityResearchItem type="STAT" :level="research.statLevel" />
+
+			<hr class="my-2" />
+
+			<twig:NumberBox label="part pour les sciences économiques & sociales" id="uni-invest-social">
+				<span data-university-target="investment" data-type="social">
+					{{ (current_player.iUniversity * current_player.partSocialPoliticalSciences / 100)|round|number }}
+				</span>
+			</twig:NumberBox>
+
+			<twig:UniversityResearchItem type="ECONO" :level="research.econoLevel" />
+			<twig:UniversityResearchItem type="PSYCHO" :level="research.psychoLevel" />
+		</div>
+
+		<div class="component">
+			<header>
+				<twig:H2>À propos</twig:H2>
+			</header>
+
+			<section>
+				<p class="long-info text-sm">L’Université est une résidence qui assemble en son sein la recherche, la conservation et la transmission
+					de différents domaines de la connaissance. Ce bâtiment vous permettra d’attribuer des crédits dans différents domaines de recherche.
+					Ces différents domaines de recherche évolueront en fonction du nombre de crédits investis dans ceux-ci.<br /><br />
+					Cette résidence est la plus importante de votre planète, car en investissant des crédits elle permettra de débloquer, de donner des
+					bonus non seulement aux bâtiments de votre planète, mais également à ceux de votre base orbitale et à chacun de vos vaisseaux.<br /><br />
+					Chaque fois qu’un type de technologie est découvert dans votre université, une nouvelle technologie sera alors disponible dans la Technosphère.<br /><br />
+					Pensez à toujours allouer des crédits dans votre université pour optimiser au maximum vos flottes et vos infrastructures.
+				</p>
+			</section>
+		</div>
+	</twig:ContentContainer>
+{% endblock body %}

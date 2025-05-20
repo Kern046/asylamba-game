@@ -1,0 +1,45 @@
+{% extends 'components/common/card.html.twig' %}
+
+{% block title %}
+	<div class="flex flex-col md:flex-row md:justify-between">
+		<h5 class="text-sm md:text-base">{{ this.name }}</h5>
+		<em class="text-xs md:text-sm font-normal">niv. {{ this.level }}</em>
+	</div>
+{% endblock %}
+
+{% block picto %}
+	<img src="{{ asset('images/buildings/mining.png') }}" class="object-fill w-36 md:w-auto" alt="Building"/>
+{% endblock picto %}
+
+{% block footer %}
+	{% set nextLevel = this.nextLevel %}
+	{% set cost %}
+		<em class="text-xs md:text-sm">
+			{{ this.resourceCost|number(-1) }} Res
+			|
+			{{ this.timeCost|lite_seconds }}
+		</em>
+	{% endset %}
+
+	{% if 0 < requirements|length %}
+		<span class="button disable hb lt" title="{{ requirements|map(v => v.message)|join(', ') }}">
+			<span class="text-xs md:text-base text-white">
+				construction impossible<br/>
+
+				{% if nextLevel <= this.maxLevel %}
+					{{ cost }}
+				{% endif %}
+			</span>
+		</span>
+	{% else %}
+		<a href="{{ path('build', { 'identifier': buildingIdentifier }) }}">
+			<twig:Button :faction="current_player.faction" type="button">
+				<p class="md:font-semibold">
+					augmenter vers le niveau {{ nextLevel }}
+				</p>
+				{{ cost }}
+			</twig:Button>
+		</a>
+	{% endif %}
+{% endblock footer %}
+

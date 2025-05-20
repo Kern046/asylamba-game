@@ -1,0 +1,58 @@
+<twig:LayoutBox class="w-96">
+	<header>
+		<twig:H2>Notifications</twig:H2>
+	</header>
+
+	<section>
+		<div class="flex gap-x-1 mt-2">
+			<a href="{{ path('read_all_notifications') }}" class="grow">
+				<twig:Button :faction="current_player.faction" class="w-full text-center">
+					tout marquer comme lu
+				</twig:Button>
+			</a>
+			<a href="{{ path('delete_all_notifications') }}" class="hb lt" title="tout supprimer">
+				<twig:Button :faction="current_player.faction">
+					×
+				</twig:Button>
+			</a>
+			<a href="#" class="hb lt sh" data-target="info-notif" title="plus d\'information">
+				<twig:Button :faction="current_player.faction">
+					?
+				</twig:Button>
+			</a>
+		</div>
+
+		<p class="info" id="info-notif" style="display:none;">
+			Les notifications sont les messages que vous recevez du gouvernement de votre ou vos planètes. Ces messages vous avertissent de
+			toutes les actions qui prennent fin dans le jeu, comme les attaques et les développements technologiques par exemple.
+			Elles vous permettent d’avoir un compte rendu de toutes vos activités sur Asylamba.<br/>Au bout d\'un certain temps, elles seront automatiquement supprimées, sauf si vous les archivez.
+		</p>
+
+		{% if notifications|length > 0 %}
+			<div class="flex flex-col divide-y divide-gray-500 mt-4" data-controller="notification">
+				{% for notification in notifications %}
+					<details class="notif" >
+						<summary class="cursor-pointer p-2 bg-gray-700 data-[read]:bg-gray-900 transition-[background-color] duration-200 ease-in cursor-pointer"
+								 data-action="click->notification#markAsRead"
+								 data-id="{{ notification.id }}"
+								 {% if notification.read is same as(true) %}data-read=""{% endif %}
+						>
+							{{ notification.title }}
+						</summary>
+
+						<div class="border border-gray-600 rounded-md">
+							<div class="content text-sm p-2">{{ notification.content|raw }}</div>
+							<div class="text-xs float-right p-2">
+								<a href="{{ path('archive_notification', {'id': notification.id}) }}" class="italic">archiver</a> ou
+								<a href="{{ path('delete_notification', {'id': notification.id}) }}" class="italic">supprimer</a><br />
+								— {{ notification.sentAt|game_date|raw }}
+							</div>
+						</div>
+					</details>
+				{% endfor %}
+			</div>
+		{% else %}
+			<p class="text-sm">Il n\'y a aucune notification dans votre boîte de réception.</p>
+		{% endif %}
+	</section>
+</twig:LayoutBox>

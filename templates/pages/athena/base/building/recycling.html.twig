@@ -1,0 +1,176 @@
+{% extends 'layouts/athena/current_base.html.twig' %}
+
+{% block content %}
+	{% set building_number = constant('App\\Modules\\Athena\\Resource\\OrbitalBaseResource::RECYCLING') %}
+	{% set recycler_capacity = constant('App\\Modules\\Athena\\Model\\RecyclingMission::RECYCLER_CAPACTIY') %}
+
+	<div class="flex gap-x-4">
+		<twig:LayoutBox class="min-w-80">
+			<header>
+				{#<img src="{{ asset('build/media/orbitalbase/recycling.png') }}" alt="" />#}
+				<twig:H2>{{ get_building_info(building_number, 'frenchName') }}</twig:H2>
+				<twig:H5>Niveau {{ current_base.levelRecycling }}</twig:H5>
+			</header>
+
+			<section class="mt-4">
+				<twig:NumberBox label="recycleurs utilisés / totaux">
+					{{ busy_recyclers }} / {{ total_recyclers }}
+				</twig:NumberBox>
+
+				<twig:NumberBox :label="'recycleur' ~ free_recyclers|plural ~ ' libre' ~ free_recyclers|plural">
+					{{ free_recyclers }}
+				</twig:NumberBox>
+
+				<hr class="my-2" />
+
+				<twig:H3>capacité de transport d'un recycleur</twig:H3>
+
+				<twig:NumberBox label="en ressources">
+					{{ recycler_capacity|number }}
+					{#<img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">#}
+				</twig:NumberBox>
+				<twig:NumberBox label="en crédits">
+					{{ (recycler_capacity * 10)|number }}
+					{#<img alt="crédits" src="{{ asset('build/media/resources/credit.png') }}" class="icon-color">#}
+				</twig:NumberBox>
+
+				<hr class="my-2" />
+
+				<twig:NumberBox label="missions actives">
+					{{ mission_quantity }}
+				</twig:NumberBox>
+			</section>
+		</twig:LayoutBox>
+
+		{% for mission_data in base_missions %}
+			{% set mission = mission_data.mission %}
+			<div class="component">
+				<header>
+					{% if loop.first %}
+						<twig:H2>Mission{{ mission_quantity|plural }} en cours</twig:H2>
+					{% endif %}
+				</header>
+				<section class="mt-4">
+					<div class="build-item base-type">
+						<div class="name">
+							{#<img src="{{ asset('build/media/orbitalbase/recycler.png') }}" alt="">#}
+							<strong>Mission<br /> {{ mission_data.mission_id }}</strong>
+						</div>
+
+						<p class="desc">
+							La mission recycle la
+							<strong>{{ get_place_type(mission.target.typeOfPlace) }}</strong>
+							située aux coordonnées
+							<strong>
+								<a href="{{ path('map', {'place': mission.target.id }) }}">{{ mission_data.coords }}</a>
+							</strong>.<br /><br />
+							Il reste <strong>{{ (mission.target.resources * mission.target.coefResources / 100)|number }}</strong> ressources,
+							<strong>{{ (mission.target.resources * mission.target.coefHistory / 100)|number }}</strong> débris et
+							<strong>{{ (mission.target.resources * mission.target.population / 100)|number }}</strong> gaz nobles.
+						</p>
+
+						<p>Retour {{ mission.endedAt|game_date|raw }}</p>
+						<p>
+							<twig:ProgressBar :current="mission_data.percent" :faction="current_player.faction" />
+						</p>
+					</div>
+
+					<div class="mt-2">
+						{% if mission.isBeingDeleted %}
+							<p>Cette mission a été annulée, les recycleurs terminent la mission puis deviennent disponibles.</p>
+						{% else %}
+							<a href="{{ path('cancel_recycling_mission', {'id': mission.id }) }}" class="common-link flex justify-center">
+								<twig:Button :faction="current_player.faction">
+									Annuler la mission
+								</twig:Button>
+							</a>
+						{% endif %}
+					</div>
+
+
+					<ul class="list-type-1">
+						<li>
+							<twig:NumberBox label="Recycleurs engagés dans la mission">
+								{% if mission.addToNextMission == 0 %}
+									{{ mission.recyclerQuantity|number }}
+								{% else %}
+									{{ mission.recyclerQuantity|number }} + {{ mission.addToNextMission|number }}
+								{% endif %}
+							</twig:NumberBox>
+
+							{% if mission.isActive and free_recyclers > 0 %}
+								<span class="buttons"><a href="#" class="sh" data-target="add-recycler-{{ mission.id }}">+</a></span>
+								<form action="{{ path('add_recyclers_to_mission', {'id': mission.id}) }}" method="POST" id="add-recycler-{{ mission.id }}">
+									<p>
+										<twig:Input name="quantity" value="{{ free_recyclers }}" type="number" min="1" max="{{ free_recyclers }}" />
+										<twig:Button :faction="current_player.faction" type="submit">
+											ok
+										</twig:Button>
+									</p>
+								</form>
+							{% endif %}
+						</li>
+						<li>
+							<twig:NumberBox label="Soute totale de la mission">
+								{{ (mission.recyclerQuantity * recycler_capacity)|number }}
+								{#<img alt="ressources" src="{{ asset('build/media/resources/resource.png') }}" class="icon-color">#}
+							</twig:NumberBox>
+						</li>
+						<li>
+							<twig:NumberBox label="Durée du cycle">
+								{{ mission.cycleTime|short_seconds }}
+							</twig:NumberBox>
+						</li>
+					</ul>
+
+					{% if mission_logs|length > 0 %}
+						<twig:H3>Dernières livraisons</twig:H3>
+					{% endif %}
+
+					{% for log in mission_logs|filter(log => log.mission.id == mission.id) %}
+						{% set wedge = {
+							'ressource': log.resources,
+							'crédit': log.credits,
+							'pégase': log.ship0,
+							'satyre': log.ship1,
+							'chimère': log.ship2,
+							'sirène': log.ship3,
+							'dryade': log.ship4,
+							'méduse': log.ship5,
+							'griffon': log.ship6,
+							'cyclope': log.ship7,
+							'minotaure': log.ship8,
+							'hydre': log.ship9,
+							'cerbère': log.ship10,
+							'phénix': log.ship11,
+						}|filter(v => v > 0) %}
+
+						<p class="info">
+							La mission a ramené
+							{% for type in wedge|keys %}
+								{% set number = wedge[type] %}
+								<strong>{{ number|number }}</strong>
+								{{ type ~ number|plural }}
+								{% if not loop.last %}
+									et
+								{% else -%}
+									,
+								{%- endif %}
+							{% endfor %}
+							<em>{{ log.createdAt|game_date|raw }}</em>
+						</p>
+					{% endfor %}
+				</section>
+			</div>
+		{% endfor %}
+
+		<div class="component">
+			<header>
+				<twig:H2>À propos</twig:H2>
+			</header>
+			<section class="mt-4">
+				<p class="text-xs">{{ get_building_info(building_number, 'description')|raw }}</p>
+			</section>
+		</div>
+	</div>
+{% endblock content %}

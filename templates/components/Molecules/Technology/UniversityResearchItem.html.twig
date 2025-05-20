@@ -1,0 +1,8 @@
+<div class="flex items-center gap-x-4 py-1 px-2 ">
+	<img src="{{ asset('images/legacy/picto/G_P_Science_Outline_64px.png') }}" alt="" class="w-6 h-6" />
+
+	<div class="name">
+		<strong>{{ get_research_info(constant('App\\Modules\\Promethee\\Model\\Research::' ~ type), 'name') }}</strong><br>
+		<em>niveau {{ level }}</em>
+	</div>
+</div>

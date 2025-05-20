@@ -1,0 +1,3 @@
+hermes:
+    resource: ../src/Modules/Hermes/Infrastructure/Controller
+    type: attribute

@@ -1,0 +1,29 @@
+<div id="systems" class="absolute z-[900] w-full group-[.sector-only]/map:z-0 transition-[z-index] ease-in duration-500">
+	{% set current_player_bases_sector_ids = player_bases|map(b => b.place.system) %}
+
+	{% for system in systems %}
+		{% set has_bases_in = system.id in current_player_bases_sector_ids %}
+		<div
+			class="{% if system.id == current_system_id %}
+				active
+			{% endif %}
+				cursor-pointer absolute border border-4
+			{% if system.faction is not null %}
+				border-light{{ system.faction.identifier }}
+			{% endif %}
+			rounded-full w-4 h-4 cursor-pointer group-[.sector-only]/map:opacity-0 transition-opacity ease-in duration-500"
+			data-x-position="{{ system.xPosition }}"
+			data-y-position="{{ system.yPosition }}"
+		   	data-controller="map--system"
+		   	data-action="click->map--system#select"
+			data-map--system-map--action-box-outlet="#action-box"
+			data-map--system-id-value="{{ system.id.toRfc4122() }}"
+			style="top: {{ system.yPosition * galaxy_configuration.scale - 8 }}px; left: {{ system.xPosition * galaxy_configuration.scale - 8 }}px"
+		>
+			{# <img src="{{ asset('build/media/map/systems/t' ~ system.typeOfSystem ~ 'c' ~ (system.faction.identifier ?? 0) ~ '.png') }}"
+				 {% if has_bases_in %}class="own"{% endif%}
+				alt="" /> #}
+
+		</div>
+	{% endfor %}
+</div>

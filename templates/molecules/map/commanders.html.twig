@@ -1,0 +1,56 @@
+{% set break = false %}
+
+<div id="commanders" data-controller="map--commander">
+	{% for commander in local_commanders %}
+		<div
+		   class="relative {% if commander.isMoving %}striped{% endif %} group/commander"
+		   data-map--commander-target="commander"
+		   data-action="click->map--commander#selectCommander:stop"
+		   data-id="{{ commander.id }}"
+		   data-faction-identifier="{{ current_player.faction.identifier }}"
+		   data-max-jump="{{ get_max_travel_distance() }}"
+		   data-available="{{ commander.isMoving ? 'false' : 'true' }}"
+		   data-name="{{ commander.name }}"
+		   data-rank="{{ commander|commander_rank }}"
+		   {# @TODO move this logic in a dedicated service #}
+		   data-capacity="{{ (constant('App\\Modules\\Ares\\Model\\Commander::COEFFLOOT') * commander|pev)|number }}"
+		>
+			<div class="relative bg-gray-700 border border-white rounded-full p-2 cursor-pointer transition-[background-color] ease-in duration-200 hover:bg-gray-800 group-data-[selected]/commander:bg-gray-800">
+				<twig:CommanderAvatar :commander="commander" class="group-data-[selected]/commander:animate-pulse" />
+				<span class="absolute flex justify-center items-center w-6 h-6 top-0 -right-4 border border-white bg-medium{{ current_player.faction.identifier }} rounded-full bg-gray-900 text-white">{{ commander.level }}</span>
+			</div>
+			<div class="absolute top-0 left-20 hidden group-hover/commander:block bg-gray-800 border border-gray-600 rounded-md w-64 py-2 px-4">
+				<span class="sub-content">
+					{{ commander|commander_rank }} {{ commander.name }}<br/>
+					{{ commander|pev|number }} pev
+					<hr />
+					{% if commander.isMoving %}
+						{# @TODO Implement translator to replace the switch #}
+						{% if commander.isTransferring %}
+							Déplacement
+						{% elseif commander.isLooting %}
+							Pillage
+						{% elseif commander.isInvading %}
+							Colonisation
+						{% elseif commander.isComingBack %}
+							Retour
+						{% endif %}
+					{% else %}
+						A quai
+					{% endif %}
+					<hr />
+
+					<div class="flex flex-wrap">
+						{% set ships_by_type = commander.nbrShipByType %}
+						{% for type in ships_by_type|keys %}
+							{% set quantity = ships_by_type[type] %}
+							<div class="ship m-0.5">
+								<span class="number">{{ quantity }}</span>
+							</div>
+						{% endfor %}
+					</div>
+				</span>
+			</div>
+		</div>
+	{% endfor %}
+</div>

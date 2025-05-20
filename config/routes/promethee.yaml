@@ -1,0 +1,21 @@
+university:
+    path: /university
+    controller: App\Modules\Promethee\Infrastructure\Controller\ViewUniversity
+
+update_university_category_investments:
+    path: /api/university/{category<natural|life|social|informatic>}/{operation<increase|decrease>}
+    methods: 'PATCH'
+    controller: App\Modules\Promethee\Infrastructure\Controller\UpdateUniversityInvestments
+
+search_technology:
+    path: /technologies/{identifier}/search
+    controller: App\Modules\Promethee\Infrastructure\Controller\SearchTechnology
+
+cancel_technology_queue:
+    path: /technology-queues/{identifier}/cancel
+    controller: App\Modules\Promethee\Infrastructure\Controller\CancelTechnologyQueue
+
+view_technology_panel:
+    path: /technologies/{identifier}/panel
+    controller: App\Modules\Promethee\Infrastructure\Controller\ViewTechnologyPanel
+

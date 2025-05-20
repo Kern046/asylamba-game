@@ -1,0 +1,70 @@
+{% extends 'layouts/zeus/registration.html.twig' %}
+
+{% block content %}
+	<form action="{{ path('registration_create_character') }}" method="post" class="mt-2" >
+		<section class="">
+			<h4 class="text-lg font-bold">
+				Choisissez votre nom dans le jeu
+			</h4>
+
+			{% if app.session.get('inscription').has('pseudo') %}
+				{% set value = app.session.get('inscription').get('pseudo') %}
+			{% elseif app.session.get('inscription').get('portalPseudo') %}
+				{% set value = app.session.get('inscription').get('portalPseudo') %}
+			{% else %}
+				{% set value = '' %}
+			{% endif %}
+
+			<div class="rounded-md bg-white px-3 pb-1.5 pt-2.5 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-light{{ chosenFaction.identifier }}">
+				<label for="name" class="block text-xs font-medium text-gray-900">
+					Comment vous ferez-vous appeler ?
+				</label>
+				<input type="text"
+					   name="pseudo"
+					   id="pseudo"
+					   class="block w-full text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
+					   placeholder="pseudo"
+					   maxlength="15"
+					   value="{{ value }}"
+					   required>
+			</div>
+
+			{% for label, messages in app.flashes %}
+				{% if label == 'error' %}
+					<div class="text-red-700">
+						{% for message in messages %}
+							{{ message }}
+						{% endfor %}
+					</div>
+				{% endif %}
+			{% endfor %}
+
+			<p>Nous déconseillons les noms moins roleplay, essayez de coller avec l'histoire et les moeurs de votre faction.</p>
+			<p>Ce nom ne pourra pas être changé plus tard.</p>
+
+		</section>
+		<section class="mt-4">
+			<h2 class="text-lg font-bold">Choisissez un avatar</h2>
+
+			<div class="flex items-center gap-4 flex-wrap">
+				{% for avatar in avatars %}
+					<div class="">
+						<input type="radio" name="avatar" value="{{ avatar }}" id="{{ avatar }}" required class="hidden peer"/>
+						<label for="{{ avatar }}"
+							   class="block cursor-pointer rounded-full border-2 border-transparent peer-checked:border-medium{{ chosenFaction.identifier }} transition-colors ease-in delay-50 hover:border-light{{ chosenFaction.identifier }}">
+							<img src="{{ asset('images/avatars/' ~ avatar) }}"
+								 class="h-24 w-24 rounded-full"
+								 alt="" />
+						</label>
+					</div>
+				{% endfor %}
+			</div>
+		</section>
+		<footer class="mt-4">
+			<twig:Button type="submit" :faction="chosenFaction">
+				<strong>Définir son profil</strong><br>
+				<em>et passer à l'étape suivante</em>
+			</twig:Button>
+		</footer>
+	</form>
+{% endblock content %}

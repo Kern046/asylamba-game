@@ -1,0 +1,29 @@
+(game) {
+	log {
+		output file /var/log/caddy/access.log
+	}
+
+	handle /.well-known/mercure* {
+		reverse_proxy * http://kalaxia_mercure {
+			header_up -Authorization
+		}
+	}
+
+	handle {
+		root * /srv/app/public
+		php_fastcgi /* kalaxia_app:9000
+		file_server
+	}
+}
+
+kalaxia.local {
+	import game
+}
+
+kalaxia.com, api.kalaxia.com {
+	import game
+
+	basicauth /* {
+		kalaxia JDJhJDE0JDlWOXN6OEF1Q1NIbmdVU29ySEJTL3V1U2suY1JSb2xLL3lCRnlaVkNZOU9uanlKMTVmZnNt
+	}
+}

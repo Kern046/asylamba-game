@@ -1,0 +1,13 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Hermes\Model\Notification" table="notification">
+		<id name="id" type="uuid" />
+
+		<many-to-one field="player" target-entity="App\Modules\Zeus\Model\Player" />
+
+		<field name="title" />
+		<field name="content" type="text" />
+		<field name="sentAt" type="datetime_immutable" />
+		<field name="read" column="is_read" type="boolean" />
+		<field name="archived" type="boolean" />
+	</entity>
+</doctrine-mapping>

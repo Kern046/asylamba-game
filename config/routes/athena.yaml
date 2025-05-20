@@ -1,0 +1,115 @@
+financial:
+    resource: './athena/financial.yaml'
+    prefix: /financial
+
+trade:
+    resource: './athena/trade.yaml'
+    prefix: /trade
+
+switchbase:
+    path: /switchbase/{baseId}/{page}
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\SwitchBase
+    methods: 'GET'
+    defaults:
+        page: 'current'
+
+base_overview:
+    path: /overview
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\ViewOverview
+
+generator:
+    path: /generator
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewGenerator
+
+build:
+    path: /buildings/{identifier}/build
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\Build
+
+cancel_building_queue:
+    path: /building-queues/{identifier}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\Cancel
+
+refinery:
+    path: /refinery
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\RefineryController
+
+recycling:
+    path: /recycling
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewRecycling
+
+storage:
+    path: /storage
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\StorageController
+
+docks:
+    path: /docks/{dockType}
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewDocks
+
+change_base_type:
+    path: /change-base-type
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\ChangeBaseType
+
+leave_base:
+    path: /leave-base
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\LeaveBase
+
+rename_base:
+    path: /rename-base
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\RenameBase
+    methods: 'POST'
+
+technosphere:
+    path: /technosphere
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewTechnosphere
+
+trade_market:
+    path: /trade-market/{mode<market|sell|resource>}
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\TradeMarketController
+    defaults:
+        mode: market
+
+spatioport:
+    path: /spatioport
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSpatioport
+
+school:
+    path: /school
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewSchool
+
+view_building_panel:
+    path: /buildings/{identifier}/panel
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\Building\ViewBuildingPanel
+
+create_recycling_mission:
+    path: /recycling-missions/create/{targetId}
+    controller: App\Modules\Athena\Infrastructure\Controller\Recycling\CreateMission
+    methods: 'POST'
+
+add_recyclers_to_mission:
+    path: /recycling-missions/{id}/add-recyclers
+    controller: App\Modules\Athena\Infrastructure\Controller\Recycling\AddToMission
+    methods: 'POST'
+
+cancel_recycling_mission:
+    path: /recycling-missions/{id}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Recycling\CancelMission
+
+recycle_ships:
+    path: /ships/recycle
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\Recycle
+
+build_ships:
+    path: /ships/build
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\BuildShips
+
+load_ship_panel:
+    path: /ships/{shipNumber}/panel
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\ViewShipPanel
+
+cancel_ship_queue:
+    path: /ship-queues/{id}/cancel
+    controller: App\Modules\Athena\Infrastructure\Controller\Ship\CancelQueue
+
+autocomplete_base:
+    path: /api/bases/{search}
+    controller: App\Modules\Athena\Infrastructure\Controller\Base\AutocompleteBase

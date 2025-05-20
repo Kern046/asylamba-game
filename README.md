@@ -1,107 +1,83 @@
-ASYLAMBA : Expansion Stellaire
-==============================
+# Kalaxia
 
-[![Build Status](https://travis-ci.org/rtfmcorp/asylamba-game.svg?branch=master)](https://travis-ci.org/rtfmcorp/asylamba-game)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/rtfmcorp/asylamba-game/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/rtfmcorp/asylamba-game/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/rtfmcorp/asylamba-game/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/rtfmcorp/asylamba-game/?branch=master)
+## Setup
 
-Jeu de stragégie en ligne multi-joueur. Visitez [asylamba.com](http://asylamba.com) pour tester le jeu.
+### Dependencies
+- [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
+- We recommend using [Symfony CLI](https://symfony.com/download) on your local environment.
+  Otherwise you can adapt the given commands to be executed inside your PHP-FPM container.
+- If you want to do this, you will need to have PHP 8.4 installed in your host system with the following extensions :
+  - curl
+  - redis
+  - amqp
+  - xml
+  - dom
+  - simplexml
+  - zip
+  - intl
+  - pdo-mysql
 
-![logo Asylamba](http://asylamba.com/public/media/files/sources/asylambacom.png)
+### Procedure
 
-For the english version, follow this link : [English version](README.en.md)
-
-Dépendances
------------
-
-- Apache 2.4.7
-- PHP 5.5.9
-- MySQL 5.5.49
-- Composer
-
-Installation
-------------
-
-Si vous le souhaitez, vous pouvez utiliser le [dépôt Docker](https://github.com/rtfmcorp/asylamba-docker) du projet pour installer votre environnement.
-
-Cette section traite uniquement de l'installation du jeu et suppose que votre environnement est prêt.
-
-Tout d'abord, vous devez cloner le dépôt du jeu. Pour ce faire, ouvrez une invite de commandes, et entrez la commande suivante :
+First, clone the repository on your local environment :
 
 ```sh
-git clone git@github.com:rtfmcorp/asylamba-game.git
+git clone git@github.com:Kern046/asylamba-game.git kalaxia
 ```
 
-Ensuite, rendez-vous dans le dossier nouvellement créé et installez les dépendances du projet à l'aide de [Composer](https://getcomposer.org/) :
+Move to the cloned repository and then move to the adequate branch (don't hesitate to ask which one it is currently since we are not using `master` for now)
 
-```sh
-cd asylamba-game
-composer install
+```shell
+cd kalaxia
+git checkout {branch} # Insert the current main branch, which is currently changing regularly
 ```
 
-Vous pouvez ensuite suivre la procédure suivante :
+Launch the Docker containers :
 
-- copier `config/parameters.dist.yml` et le renommer en `parameters.yml`
-- copier `system/config/app.config.local.default.php` et le renommer `app.config.local.php`, y modifier la constante `APP_ROOT` et d'autres infos (connexion à la base de données, etc.) ainsi que la constante `PUBLICR` avec votre chemin
-- créer une base de données (nom correspondant à la constante `DEFAULT_SQL_DTB` du fichier du point précédent)
+```shell
+docker compose up -d
+```
 
-A partir de là, vous pouvez accéder à une interface qui permet de créer toutes les tables de la base de données : `http://localhost/[votre chemin]/script`. Pour faire l'installation, cliquez sur le premier bouton "deploy.dbinstall". 
+Then, install the project dependencies and setup the database :
 
-Si aucune erreur s'affiche, vous pouvez ensuite créer des personnages en allant sur `http://localhost/[votre chemin]/buffer`. Cette interface permet de se connecter à tous les personnages créés.
+```shell
+# Install the PHP dependencies
+symfony composer install
+# Install the frontend dependencies
+symfony console importmap:install
+# Setup the database schema using Doctrine ORM
+symfony console doctrine:schema:update --force --complete
+# Initialize a new game data in Kalaxia (players, map systems, planets...)
+# If you launch this on
+symfony console app:hephaistos:populate-database
+```
 
-Trois scripts permettent de mettre à jour le jeu quotidiennement, il s'agit des trois boutons sous le titre "Tâches Cron". Vous pouvez soit les lancer à la main, soit appeler leurs URLs avec des crons.
+> If you prefer to launch the commands inside your Docker container, just type `docker exec -it kalaxia_app sh` and then replace `symfony console` with `php bin/console` in the given commands.
 
+> Currently investigating a connection issue between Symfony CLI running on the host and the database.
 
-Structure du projet
--------------------
+If you are working on the UI, launch Tailwind watcher :
+```shell
+symfony console tailwind:build --watch
+```
 
-Le jeu a été développé sans framework aucun, cela pour des raisons de performances et de besoins spécifiques pour un jeu de ce type. Il y a donc vraiment peu de dépendances à des librairies externes. Les dépendances sont citées plus haut, nous ajoutons à cela jQuery ainsi que LESS pour la compilation CSS. Tout le reste est en pur HTML/CSS/JavaScript/PHP.
+# Troubleshooting
 
-Le projet contient deux dossiers principaux :
+### Failing ```symfony composer install``` :
+![img.png](assets/readme-docs/img.png)
+#### Solution :
+```shell
+mkdir config/doctrine/hephaistos
+```
+---
 
-- `public/` : pour les images, le CSS, le JavaScript et les logs
-- `system/` : pour les vues, le cœur du jeu et tout ce qui est "mécanique"
+### If the command `populate-database` fails, you try again and obtain this issue : ![img_1.png](assets/readme-docs/img_1.png)
+#### Solution :
+Increase your MEMORY_LIMIT inside php.ini if it is currently 256M and then reboot your Symfony server and Docker. Then launch :
+```shell
+symfony console doctrine:schema:drop --force
+symfony console doctrine:schema:update --force --complete
+symfony console app:hephaistos:populate-database
+```
 
-Le dossier system est plutôt fourni mais les noms des dossiers qu'il contient sont assez explicites. Le sous-dossier `system/modules` mérite toutefois quelques précisions. Il contient toutes les classes principales du jeu qui sont regroupées en modules. Chacun de ces modules possède un nom de dieu grec. La liste se trouve ci-dessous.
-
-
-| Module    | Fonction |
-|-----------|----------|
-| Arès      | la guerre (commandants, combats, flottes) |
-| Artémis   | l'espionnage |
-| Athéna    | la base ortibale (base orbitale, bâtiments, envois commerciaux, recyclage, constructions, transactions) |
-| Atlas     | les classements (faction, joueur) |
-| Déméter   | les factions (élections, lois, forums) |
-| Gaïa      | la galaxie (secteurs, systèmes solaires, planètes) |
-| Hermès    | la communication (messagerie, notification) |
-| Prométhée | la technologie (recherches, technologies) |
-| Zeus      | le joueur (tutoriel, gestion des bonus, envois de crédit) |
-
-
-Contribuer
-----------
-
-Si vous souhaitez contribuer au projet, c'est possible ! Merci de prendre connaissance des [instructions](CONTRIBUTING.md) avant de commencer.
-
-
-Team
-----
-
-Créateurs du jeu :
-
-* [abdelaz3r](https://github.com/abdelaz3r)
-* [acknowledge](https://github.com/acknowledge)
-* [N03](https://github.com/N03)
-
-Contributeurs :
-
-* [Kern046](https://github.com/Kern046)
-* [PapyRusky](https://github.com/PapyRuski)
-* [Liador](https://github.com/Liador)
-* Toi ? :)
-
-
-Licence
--------
-
-[WIP]
+> The commmand `populate-database` may take time.

@@ -1,0 +1,18 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping">
+	<entity name="App\Modules\Athena\Model\RecyclingMission" table="recyclingMission">
+		<id name="id" type="uuid" />
+
+		<many-to-one field="base" target-entity="App\Modules\Athena\Model\OrbitalBase">
+			<join-column nullable="false" />
+		</many-to-one>
+		<many-to-one field="target" target-entity="App\Modules\Gaia\Model\Place">
+			<join-column nullable="false" />
+		</many-to-one>
+
+		<field name="cycleTime" type="integer" />
+		<field name="recyclerQuantity" type="smallint" />
+		<field name="addToNextMission" type="smallint" />
+		<field name="statement" type="smallint" />
+		<field name="endedAt" type="datetime_immutable" />
+	</entity>
+</doctrine-mapping>

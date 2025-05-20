@@ -1,0 +1,42 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block body %}
+	<nav aria-label="Progress" class="bg-stone-800">
+		<ol role="list" class="divide-y divide-gray-300 border-b border-gray-300 md:flex md:divide-y-0">
+			{% if app.request.get('_route') == 'registration_choose_faction' %}
+				{% set factionChoiceStatus = 'current' %}
+				{% set profileStatus = 'next' %}
+				{% set placeChoiceStatus = 'next' %}
+			{% elseif app.request.get('_route') == 'registration_create_character' %}
+				{% set factionChoiceStatus = 'done' %}
+				{% set profileStatus = 'current' %}
+				{% set placeChoiceStatus = 'next' %}
+			{% elseif app.request.get('_route') == 'registration_choose_place' %}
+				{% set factionChoiceStatus = 'done' %}
+				{% set profileStatus = 'done' %}
+				{% set placeChoiceStatus = 'current' %}
+			{% endif %}
+
+			{{ component('FormStep', {
+				status: factionChoiceStatus,
+				label: 'Choisissez votre faction',
+				number: 1,
+			}) }}
+			{{ component('FormStep', {
+				status: profileStatus,
+				label: 'Créez votre personnage',
+				number: 2,
+			}) }}
+			{{ component('FormStep', {
+				status: placeChoiceStatus,
+				label: 'Choisissez votre secteur de départ',
+				number: 3,
+				isLast: true,
+			}) }}
+		</ol>
+	</nav>
+
+	<div id="container">
+		{% block content %}{% endblock content %}
+	</div>
+{% endblock body %}

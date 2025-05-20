@@ -1,0 +1,18 @@
+{% extends 'layouts/game.html.twig' %}
+
+{% block left_sidebar %}
+	{{ include('molecules/financial/subnav.html.twig') }}
+{% endblock left_sidebar %}
+
+{% block body %}
+	<twig:PageTitle>
+		Transferts de crédits
+	</twig:PageTitle>
+
+	<twig:ContentContainer class="grid grid-cols-2 gap-4">
+		{{ include('components/financial/transfers/player_sending.html.twig') }}
+		{{ include('components/financial/transfers/faction_sending.html.twig') }}
+		{{ include('components/financial/transfers/sendings_history.html.twig') }}
+		{{ include('components/financial/transfers/receivings_history.html.twig') }}
+	</twig:ContentContainer>
+{% endblock body %}

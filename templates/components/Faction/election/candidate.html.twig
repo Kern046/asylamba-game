@@ -1,0 +1,72 @@
+{% set statuses = get_faction_info(current_player.faction.identifier, 'status') %}
+
+<div class="component player profil size1">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			{% if faction.isInElection %}
+				{% if faction.isDemocratic %}
+					<div class="build-item">
+						{% if player_vote is not null %}
+							{% if player_vote.candidate.player.id == candidate.player.id %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">Vous avez voté pour lui</span>
+								</span>
+							{% else %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">---</span>
+								</span>
+							{% endif %}
+						{% else %}
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id }) }}" style="text-align: center;">
+								<span class="text" style="line-height: 35px;">Voter</span>
+							</a>
+						{% endif %}
+					</div>
+				{% else %}
+					<div class="build-item">
+						{% if player_vote is not null %}
+							{% if player_vote.hasApproved %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">Vous avez soutenu le coup d'état</span>
+								</span>
+							{% else %}
+								<span class="button disable" style="text-align: center;">
+									<span class="text" style="line-height: 35px;">Vous n'avez pas soutenu le coup d'état</span>
+								</span>
+							{% endif %}
+						{% else %}
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id, 'hasApproved': true}) }}" style="text-align: center;">
+								<span class="text" style="line-height: 35px;">Soutenir le coup d'état</span>
+							</a>
+							<a class="button" href="{{ path('vote_for_candidate', {'electionId': election.id, 'candidateId': candidate.id, 'hasApproved': false}) }}" style="text-align: center;">
+								<span class="text" style="line-height: 35px;">Rejeter le coup d'état</span>
+							</a>
+						{% endif %}
+					</div>
+				{% endif %}
+			{% endif %}
+
+			<div class="center-box">
+				<span class="label">
+					{{ statuses[candidate.player.status - 1] }}
+				</span>
+				<span class="value">{{ candidate.player.name }}</span>
+			</div>
+
+			<div class="profil-flag">
+				<img src="{{ asset('build/media/avatar/big/' ~ candidate.player.avatar ~ '.png') }}" alt="{{ candidate.player.name }}">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="component">
+	<div class="head"></div>
+	<div class="fix-body">
+		<div class="body">
+			<h4>Son programme</h4>
+			<p>{{ candidate.program|parse }}</p>
+		</div>
+	</div>
+</div>
