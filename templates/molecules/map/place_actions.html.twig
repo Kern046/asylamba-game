@@ -1,6 +1,5 @@
 {% set travel_time = get_travel_time(current_base, place)|lite_seconds %}
 
-{% apply spaceless %}
 <div class="w-full border-l-2 border-stone-900 min-w-80">
 	<div class="flex items-center justify-around p-4 border-b-2 border-stone-900">
 		{% if place.typeOfPlace == 1 %}
@@ -290,4 +289,3 @@
 		{% endif %}
 	</div>
 </div>
-{% endapply %}

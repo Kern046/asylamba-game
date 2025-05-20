@@ -2,42 +2,40 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% block toolbar %}
-	{% apply spaceless %}
-		{% set icon %}
-			{# this is the content displayed as a panel in the toolbar #}
-			{{ include('components/data_collector/modifiers.svg') }}
-			<span class="sf-toolbar-value">{{ collector.appliedBonuses|length }}</span>
-		{% endset %}
+	{% set icon %}
+		{# this is the content displayed as a panel in the toolbar #}
+		{{ include('components/data_collector/modifiers.svg') }}
+		<span class="sf-toolbar-value">{{ collector.appliedBonuses|length }}</span>
+	{% endset %}
 
-		{% set text %}
-			{# this is the content displayed when hovering the mouse over
-			   the toolbar panel #}
-			{% for modifier in collector.appliedBonuses %}
-				{% set is_positive = modifier.modified_value > 0 %}
-				<div class="sf-toolbar-info-piece">
-					<b>{{ ('app.modifier.' ~ modifier.modifier_id)|trans }}</b>
-					<span>
-						<span class="sf-toolbar-status sf-toolbar-gray">
-							{{ modifier.initial_value }}
-						</span>
-						<span class="sf-toolbar-status sf-toolbar-status-{{ is_positive ? 'green' : 'red' }}">
-							{{ is_positive ? '+' : '-' }} {{ modifier.modified_value|abs }}
-						</span>
+	{% set text %}
+		{# this is the content displayed when hovering the mouse over
+		   the toolbar panel #}
+		{% for modifier in collector.appliedBonuses %}
+			{% set is_positive = modifier.modified_value > 0 %}
+			<div class="sf-toolbar-info-piece">
+				<b>{{ ('app.modifier.' ~ modifier.modifier_id)|trans }}</b>
+				<span>
+					<span class="sf-toolbar-status sf-toolbar-gray">
+						{{ modifier.initial_value }}
 					</span>
-				</div>
-			{% endfor %}
+					<span class="sf-toolbar-status sf-toolbar-status-{{ is_positive ? 'green' : 'red' }}">
+						{{ is_positive ? '+' : '-' }} {{ modifier.modified_value|abs }}
+					</span>
+				</span>
+			</div>
+		{% endfor %}
 
-			{% if collector.appliedBonuses == [] %}
-				<div class="sf-toolbar-info-piece">
-					<b>No modifier applied</b>
-				</div>
-			{% endif %}
-		{% endset %}
+		{% if collector.appliedBonuses == [] %}
+			<div class="sf-toolbar-info-piece">
+				<b>No modifier applied</b>
+			</div>
+		{% endif %}
+	{% endset %}
 
-		{# the 'link' value set to 'false' means that this panel doesn't
-		   show a section in the web profiler #}
-		{{ include('@WebProfiler/Profiler/toolbar_item.html.twig') }}
-	{% endapply %}
+	{# the 'link' value set to 'false' means that this panel doesn't
+	   show a section in the web profiler #}
+	{{ include('@WebProfiler/Profiler/toolbar_item.html.twig') }}
 {% endblock %}
 
 {% block menu %}

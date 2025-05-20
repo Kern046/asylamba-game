@@ -1,76 +1,74 @@
-{% apply spaceless %}
-	<twig:LayoutBox>
-		<header class="flex items-start justify-between">
-			<div>
-				<twig:H2>Entretien</twig:H2>
-				<twig:H5>Entretien des vaisseaux</twig:H5>
-			</div>
+<twig:LayoutBox>
+	<header class="flex items-start justify-between">
+		<div>
+			<twig:H2>Entretien</twig:H2>
+			<twig:H5>Entretien des vaisseaux</twig:H5>
+		</div>
 
-			<twig:Tooltip>
-				Les frais d'entretien des vaisseaux sont nécessaires pour que les différents appareils continuent à voler sans risque.
-				Ils représentent une part importante de vos finances et sont par nature très volatiles, pensez donc à garder un oeil dessus.
-			</twig:Tooltip>
-		</header>
+		<twig:Tooltip>
+			Les frais d'entretien des vaisseaux sont nécessaires pour que les différents appareils continuent à voler sans risque.
+			Ils représentent une part importante de vos finances et sont par nature très volatiles, pensez donc à garder un oeil dessus.
+		</twig:Tooltip>
+	</header>
 
-		<section class="mt-4">
-			<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
-				{% for base in player_bases %}
-					{% set base_fleet_cost = get_base_fleet_cost(base) %}
-					{% set base_commanders = commanders_by_base[base.id.toRfc4122()] is defined ? commanders_by_base[base.id.toRfc4122()] : [] %}
-					{% set base_transaction = transactions|filter(t => t.base.id == base.id)|reduce((carry, t) => carry + get_ship_transaction_cost(t))|default(0) %}
+	<section class="mt-4">
+		<ul class="flex flex-col divide-y divide-gray-500 border-y border-gray-500">
+			{% for base in player_bases %}
+				{% set base_fleet_cost = get_base_fleet_cost(base) %}
+				{% set base_commanders = commanders_by_base[base.id.toRfc4122()] is defined ? commanders_by_base[base.id.toRfc4122()] : [] %}
+				{% set base_transaction = transactions|filter(t => t.base.id == base.id)|reduce((carry, t) => carry + get_ship_transaction_cost(t))|default(0) %}
 
-					{% set total_base = base_fleet_cost + base_transaction + base_commanders|reduce(
-						(carry, commander) => carry + get_fleet_cost(commander)
-					) %}
-					<li class="py-2">
-						<details class="marker:content-['']" name="ship-fees">
-							<summary class="cursor-pointer flex justify-between items-center">
-								<span class="flex gap-x-2">
-									<span>↓</span>
-									<span style="font-variant: all-small-caps">{{ base.name }}</span>
+				{% set total_base = base_fleet_cost + base_transaction + base_commanders|reduce(
+					(carry, commander) => carry + get_fleet_cost(commander)
+				) %}
+				<li class="py-2">
+					<details class="marker:content-['']" name="ship-fees">
+						<summary class="cursor-pointer flex justify-between items-center">
+							<span class="flex gap-x-2">
+								<span>↓</span>
+								<span style="font-variant: all-small-caps">{{ base.name }}</span>
+							</span>
+							<span class="flex gap-x-2 text-sm">
+								{{- total_base|number -}}
+								<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
+							</span>
+						</summary>
+
+						<ul class="[&>li]:flex [&>li]:justify-between [&>li]:items-center">
+							<li>
+								<strong class="label">Dans le hangar</strong>
+								<span class="text-sm">
+									{{- base_fleet_cost|number -}}
 								</span>
-								<span class="flex gap-x-2 text-sm">
-									{{- total_base|number -}}
-									<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
-								</span>
-							</summary>
+							</li>
 
-							<ul class="[&>li]:flex [&>li]:justify-between [&>li]:items-center">
+							<li>
+								<strong class="label">En vente</strong>
+								<span class="text-sm">
+									{{- base_transaction|number -}}
+								</span>
+							</li>
+
+							{% for commander in base_commanders %}
 								<li>
-									<strong class="label">Dans le hangar</strong>
+									<strong class="label">{{ commander|commander_rank }} {{ commander.name }}</strong>
 									<span class="text-sm">
-										{{- base_fleet_cost|number -}}
+										{{- get_fleet_cost(commander)|number -}}
 									</span>
 								</li>
-
-								<li>
-									<strong class="label">En vente</strong>
-									<span class="text-sm">
-										{{- base_transaction|number -}}
-									</span>
-								</li>
-
-								{% for commander in base_commanders %}
-									<li>
-										<strong class="label">{{ commander|commander_rank }} {{ commander.name }}</strong>
-										<span class="text-sm">
-											{{- get_fleet_cost(commander)|number -}}
-										</span>
-									</li>
-								{% endfor %}
-							</ul>
-						</details>
-					</li>
-				{% endfor %}
-
-				<li class="flex justify-between items-center py-2">
-					<strong class="label">total des coûts</strong>
-					<span class="flex items-center gap-x-2">
-						{{- investments_data.totalShipsFees|number -}}
-						<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
-					</span>
+							{% endfor %}
+						</ul>
+					</details>
 				</li>
-			</ul>
-		</section>
-	</twig:LayoutBox>
-{% endapply %}
+			{% endfor %}
+
+			<li class="flex justify-between items-center py-2">
+				<strong class="label">total des coûts</strong>
+				<span class="flex items-center gap-x-2">
+					{{- investments_data.totalShipsFees|number -}}
+					<img class="inline w-4 h-4" src="{{ asset('images/legacy/picto/G_P_Mon_64px.png') }}" alt="crédits" />
+				</span>
+			</li>
+		</ul>
+	</section>
+</twig:LayoutBox>

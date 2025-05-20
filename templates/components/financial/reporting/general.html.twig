@@ -1,93 +1,92 @@
-{% apply spaceless %}
-	<twig:LayoutBox class="md:col-span-2 row-span-2">
-		<section class="mt-2 flex justify-between">
-			<div class="grow">
-				<twig:H2>recettes</twig:H2>
 
-				<div>
-					<twig:NumberBox label="impôts" :bonus="investments_data.totalTaxInBonus" size="small">
-						{{- investments_data.totalTaxIn|number -}}
-					</twig:NumberBox>
+<twig:LayoutBox class="md:col-span-2 row-span-2">
+	<section class="mt-2 flex justify-between">
+		<div class="grow">
+			<twig:H2>recettes</twig:H2>
 
-					<twig:NumberBox label="taxes commerciales" :bonus="investments_data.totalRouteIncomeBonus" size="small">
-						{{- investments_data.totalRouteIncome|number -}}
-					</twig:NumberBox>
-
-					<twig:NumberBox label="total des recettes" size="small">
-						{{- investments_data.total_income|number -}}
-					</twig:NumberBox>
-
-					{% if investments_data.gains < 0 %}
-						<twig:NumberBox label="perte" size="small">
-							{{- investments_data.gains|abs|number -}}
-						</twig:NumberBox>
-					{% endif %}
-				</div>
-			</div>
-
-			<div class="basis-1/2">
-				<twig:H2>dépenses</twig:H2>
-				<div>
-					<twig:NumberBox label="investissements planétaires" size="small">
-						{{- investments_data.totalInvest|number -}}
-					</twig:NumberBox>
-
-					<twig:NumberBox label="investissements universitaires" size="small">
-						<details class="marker:content-['']">
-							<summary class="cursor-pointer">
-								↓ {{ investments_data.totalInvestUni|number }}
-							</summary>
-
-							<form action="{{ path('update_university_investments') }}" method="POST" id="invest-uni" class="flex">
-								<twig:Input type="text" name="credit" value="{{ investments_data.totalInvestUni }}" class="w-48" />
-								<twig:Button type="submit" :faction="current_player.faction">
-									ok
-								</twig:Button>
-							</form>
-						</details>
-					</twig:NumberBox>
-
-					<twig:NumberBox label="salaire des commandants" size="small">
-						{{- investments_data.totalFleetFees|number -}}
-					</twig:NumberBox>
-					<twig:NumberBox label="entretien des vaisseaux" size="small">
-						{{- investments_data.totalShipsFees|number -}}
-					</twig:NumberBox>
-					<twig:NumberBox label="redevances aux factions" size="small">
-						{{- investments_data.totalTaxOut|number -}}
-					</twig:NumberBox>
-					<twig:NumberBox label="total des charges" size="small">
-						{{- investments_data.total_expenses|number -}}
-					</twig:NumberBox>
-					{% if investments_data.gains >= 0 %}
-						<twig:NumberBox label="bénéfice" size="small">
-							{{- investments_data.gains|number -}}
-						</twig:NumberBox>
-					{% endif %}
-				</div>
-			</div>
-
-			<twig:Tooltip>
-				Ces deux colonnes sont un résumé de vos recettes et de vos dépenses pendant la durée d’une relève. Dans la
-				colonne des recettes vous pouvez voir tous les éléments qui vous rapportent des crédits dans Asylamba. Dans la colonne des dépenses,
-				c’est l’inverse, vous voyez les éléments qui vous coûtent sur vos bases. La différence entre ces deux colonnes vous donne soit une
-				perte (sous la colonne des recettes) soit un bénéfice (sous la colonne des dépenses).
-			</twig:Tooltip>
-		</section>
-
-		<section class="mt-4">
-			<twig:H2>évolution des finances</twig:H2>
-			<div class="flex">
-				<twig:NumberBox label="crédits en possession" size="small">
-					{{- current_player.credit|number -}}
+			<div>
+				<twig:NumberBox label="impôts" :bonus="investments_data.totalTaxInBonus" size="small">
+					{{- investments_data.totalTaxIn|number -}}
 				</twig:NumberBox>
-				<twig:NumberBox label="bénéfice" size="small">
-					{{- investments_data.gains|number -}}
+
+				<twig:NumberBox label="taxes commerciales" :bonus="investments_data.totalRouteIncomeBonus" size="small">
+					{{- investments_data.totalRouteIncome|number -}}
 				</twig:NumberBox>
-				<twig:NumberBox label="prévision à la prochaine relève" size="small">
-					{{- investments_data.remains|number -}}
+
+				<twig:NumberBox label="total des recettes" size="small">
+					{{- investments_data.total_income|number -}}
 				</twig:NumberBox>
+
+				{% if investments_data.gains < 0 %}
+					<twig:NumberBox label="perte" size="small">
+						{{- investments_data.gains|abs|number -}}
+					</twig:NumberBox>
+				{% endif %}
 			</div>
-		</section>
-	</twig:LayoutBox>
-{% endapply %}
+		</div>
+
+		<div class="basis-1/2">
+			<twig:H2>dépenses</twig:H2>
+			<div>
+				<twig:NumberBox label="investissements planétaires" size="small">
+					{{- investments_data.totalInvest|number -}}
+				</twig:NumberBox>
+
+				<twig:NumberBox label="investissements universitaires" size="small">
+					<details class="marker:content-['']">
+						<summary class="cursor-pointer">
+							↓ {{ investments_data.totalInvestUni|number }}
+						</summary>
+
+						<form action="{{ path('update_university_investments') }}" method="POST" id="invest-uni" class="flex">
+							<twig:Input type="text" name="credit" value="{{ investments_data.totalInvestUni }}" class="w-48" />
+							<twig:Button type="submit" :faction="current_player.faction">
+								ok
+							</twig:Button>
+						</form>
+					</details>
+				</twig:NumberBox>
+
+				<twig:NumberBox label="salaire des commandants" size="small">
+					{{- investments_data.totalFleetFees|number -}}
+				</twig:NumberBox>
+				<twig:NumberBox label="entretien des vaisseaux" size="small">
+					{{- investments_data.totalShipsFees|number -}}
+				</twig:NumberBox>
+				<twig:NumberBox label="redevances aux factions" size="small">
+					{{- investments_data.totalTaxOut|number -}}
+				</twig:NumberBox>
+				<twig:NumberBox label="total des charges" size="small">
+					{{- investments_data.total_expenses|number -}}
+				</twig:NumberBox>
+				{% if investments_data.gains >= 0 %}
+					<twig:NumberBox label="bénéfice" size="small">
+						{{- investments_data.gains|number -}}
+					</twig:NumberBox>
+				{% endif %}
+			</div>
+		</div>
+
+		<twig:Tooltip>
+			Ces deux colonnes sont un résumé de vos recettes et de vos dépenses pendant la durée d’une relève. Dans la
+			colonne des recettes vous pouvez voir tous les éléments qui vous rapportent des crédits dans Asylamba. Dans la colonne des dépenses,
+			c’est l’inverse, vous voyez les éléments qui vous coûtent sur vos bases. La différence entre ces deux colonnes vous donne soit une
+			perte (sous la colonne des recettes) soit un bénéfice (sous la colonne des dépenses).
+		</twig:Tooltip>
+	</section>
+
+	<section class="mt-4">
+		<twig:H2>évolution des finances</twig:H2>
+		<div class="flex">
+			<twig:NumberBox label="crédits en possession" size="small">
+				{{- current_player.credit|number -}}
+			</twig:NumberBox>
+			<twig:NumberBox label="bénéfice" size="small">
+				{{- investments_data.gains|number -}}
+			</twig:NumberBox>
+			<twig:NumberBox label="prévision à la prochaine relève" size="small">
+				{{- investments_data.remains|number -}}
+			</twig:NumberBox>
+		</div>
+	</section>
+</twig:LayoutBox>
