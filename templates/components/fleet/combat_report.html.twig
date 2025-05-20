@@ -87,14 +87,14 @@
 	</div>
 	<div class="fix-body">
 		<div class="body">
-			{% if defender_report.defender.id ?? null == report.winner.id ?? null %}
+			{% if (defender_report.defender.id ?? null) == (report.winner.id ?? null) %}
 				<div class="number-box">
 					<span class="value">Victoire</span>
 				</div>
 				<hr />
-				{% if report.defender.id ?? null == current_player.id %}
+				{% if (report.defender.id ?? null) == current_player.id %}
 				<div class="commander">
-					<a href="{{ path('fleet_headquarters') }}"><img src="{{ asset('build/media/commander/medium/' ~ report.defenderCommander.avatar ?? 't3-c4' ~ '.png') }}" alt="{{ report.defenderCommander.name ?? 'Rebelle' }}" /></a>
+					<a href="{{ path('fleet_headquarters') }}"><img src="{{ asset('build/media/commander/medium/' ~ (report.defenderCommander.avatar ?? 't3-c4') ~ '.png') }}" alt="{{ report.defenderCommander.name ?? 'Rebelle' }}" /></a>
 					{% set level = get_commander_level_up_from_report(report.defenderLevel, report.defenderCommanderExperience + report.earnedExperience) %}
 					<em>{{ get_commander_rank(report.defenderLevel) }}
 						{% if level > 0 %}
@@ -129,7 +129,7 @@
 					<span class="value">Défaite</span>
 					</div>
 				<hr />
-				{% if report.defender.id ?? null == current_player.id %}
+				{% if (report.defender.id ?? null) == current_player.id %}
 					<div class="commander">
 						<img src="{{ asset('build/media/fleet/memorial.png') }}" alt="{{ report.defenderCommander.name }}" />
 						<em>{{ get_commander_rank(report.defenderLevel) }}</em>

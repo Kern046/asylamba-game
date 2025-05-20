@@ -62,7 +62,7 @@
 						<span class="cover">
 							<img src="{{ asset('build/media/avatar/small/' ~ conversation_avatar ~ '.png') }}" alt="" class="picture color{{ conversation_faction_identifier }}'" />
 							<span class="number">{{ conv.messagesCount }}</span>
-							{% if own_last_view.timestamp ?? null < conv.lastMessageAt.timestamp %}
+							{% if (own_last_view.timestamp ?? null) < conv.lastMessageAt.timestamp %}
 								<span class="new-message"><img src="{{ asset('build/media/common/nav-message.png') }}" alt="" /></span>
 							{% endif %}
 						</span>

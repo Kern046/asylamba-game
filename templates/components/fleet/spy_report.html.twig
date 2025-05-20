@@ -2,7 +2,7 @@
 	<header class="flex justify-between items-start">
 		<div class="">
 			{# @TODO move the default NPC avatar to a constant #}
-			<!--		<img src="{{ asset('build/media/' ~ (spy_report.targetPlayer is null ? 'commander/big/t1-c0' : ('avatar/medium/' ~ spy_report.targetPlayer.avatar ?? 't3-c4')) ~ '.png') }}" alt="'{{ spy_report.targetPlayer.name ?? 'Rebelle' }}" />-->
+			<!--		<img src="{{ asset('build/media/' ~ (spy_report.targetPlayer is null ? 'commander/big/t1-c0' : ('avatar/medium/' ~ (spy_report.targetPlayer.avatar ?? 't3-c4'))) ~ '.png') }}" alt="'{{ spy_report.targetPlayer.name ?? 'Rebelle' }}" />-->
 			<h2 class="text-lg" style="font-variant: all-small-caps">
 				{{ spy_report.placeName }}
 			</h2>
