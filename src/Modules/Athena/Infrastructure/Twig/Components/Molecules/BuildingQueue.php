@@ -24,7 +24,7 @@ final class BuildingQueue extends Queue
 		private readonly DurationHandler $durationHandler,
 		private readonly OrbitalBaseHelper $orbitalBaseHelper,
 		#[Autowire('%athena.building.building_queue_resource_refund%')]
-		public readonly int $buildingResourceRefund,
+		public readonly float $buildingResourceRefund,
 	) {
 
 	}

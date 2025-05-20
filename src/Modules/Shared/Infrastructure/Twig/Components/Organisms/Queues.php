@@ -22,7 +22,7 @@ final class Queues
 	/** @var list<QueueableInterface>  */
 	public array $queues;
 	public int $availableQueuesCount;
-	public int $refund;
+	public float $refund;
 
 	public function __construct(
 		private readonly CurrentPlayerBasesRegistry $currentPlayerBasesRegistry,
