@@ -36,21 +36,16 @@
 
 				<!-- Logo cloud -->
 				<div class="mx-auto max-w-lg flex justify-center items-center gap-x-8 gap-y-10 sm:max-w-xl lg:mx-0 lg:max-w-none">
-					<a href="https://discord.gg/7D3Uvw2k" target="_blank" class="flex items-center gap-x-4">
-						<img class="w-12 object-contain" src="{{ asset('images/portal/discord-white-icon.svg') }}" alt="Discord">
-						<span class="text-white text-lg">
-							Rejoignez-nous sur Discord !
-						</span>
-					</a>
-					<a href="https://github.com/Kalaxia/game" target="_blank" class="flex items-center gap-x-4">
-						<img class="w-12 object-contain" src="{{ asset('images/portal/github-mark-white.svg') }}" alt="Discord">
-						<span class="text-white text-lg">
-							Voir le code source
-						</span>
-					</a>
-					{#<a href="https://discord.gg/7D3Uvw2k">
-						<img class="w-12 object-contain" src="https://tailwindcss.com/plus-assets/img/logos/158x48/reform-logo-white.svg" alt="Reform">
-					</a>#}
+					<twig:HeroLink
+						href="https://discord.gg/7D3Uvw2k"
+						label="Rejoignez-nous sur Discord !"
+						iconPath="images/portal/discord-white-icon.svg"
+						iconAlt="Discord" />
+					<twig:HeroLink
+						href="https://github.com/Kalaxia/game"
+						label="Voir le code source"
+						iconPath="images/portal/github-mark-white.svg"
+						iconAlt="Github" />
 				</div>
 			</div>
 			<div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]" aria-hidden="true">
